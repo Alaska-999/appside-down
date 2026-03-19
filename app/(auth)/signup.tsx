@@ -1,0 +1,121 @@
+import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { UserProfile } from "@/src/types";
+import { Eye, EyeOff } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Button, Input, Text, XStack, YStack } from "tamagui";
+
+export default function Signup() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  const handleSignup = () => {
+    if (!email || !password || !username) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    console.log(email, password, username);
+    setIsLoading(true);
+
+    setTimeout(() => {
+      const mockUser: UserProfile = {
+        id: "user-123",
+        username: username,
+        email: email,
+        createdAt: new Date().toISOString(),
+        settings: {
+          userId: "user-123",
+          theme: "system",
+          defaultCardOrientation: "term_first",
+          isTtsEnabled: false,
+          dailyStreakGoal: 10,
+        },
+        streak: {
+          userId: "user-123",
+          currentStreak: 5,
+          lastActiveDate: new Date().toISOString(),
+        },
+      };
+
+      const mockToken = "fake-jwt-token-from-backend";
+
+      setAuth(mockUser, mockToken);
+
+      setIsLoading(false);
+      router.replace("/");
+    }, 1500);
+  };
+
+  return (
+    <YStack f={1} bg="$background">
+      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
+        <ScreenHeader />
+      </YStack>
+
+      <YStack f={1} jc="center" ai="center" p="$4" bg="$background" gap="$4">
+        <YStack ai="center">
+          <Text fontSize="$8" fontWeight="bold">
+            Sign Up!
+          </Text>
+        </YStack>
+
+        <YStack width="100%" gap="$2">
+          <Input
+            placeholder="Email"
+            size="$4"
+            value={email}
+            onChangeText={setEmail}
+            textContentType="emailAddress"
+          />
+          <Input
+            placeholder="Username"
+            size="$4"
+            value={username}
+            onChangeText={setUsername}
+            textContentType="username"
+          />
+
+          <XStack width="100%" ai="center" pos="relative">
+            <Input
+              placeholder="Password"
+              size="$4"
+              f={1}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              textContentType="password"
+              bg="$backgroundSoft"
+              borderColor="$borderColor"
+            />
+            <Button
+              pos="absolute"
+              right="$2"
+              size="$3"
+              chromeless
+              circular
+              onPress={() => setShowPassword(!showPassword)}
+              icon={
+                showPassword ? (
+                  <EyeOff size="$1" color="$colorSecondary" />
+                ) : (
+                  <Eye size="$1" color="$colorSecondary" />
+                )
+              }
+            />
+          </XStack>
+
+          <Button size="$4" bg="$buttonBg" onPress={handleSignup} mt="$2">
+            <Text color="$buttonText">Sign Up</Text>
+          </Button>
+        </YStack>
+      </YStack>
+    </YStack>
+  );
+}
