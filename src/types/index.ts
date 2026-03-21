@@ -59,7 +59,7 @@ export interface Folder {
 export interface Module {
     id: string;
     userId: string;
-    title: string;
+    name: string;
     description?: string | null;
     isFavorite: boolean;
     itemsCount: number;

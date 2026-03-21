@@ -1,6 +1,7 @@
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { Folder } from "@/src/types";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Input, Text, XStack, YStack } from "tamagui";
 
@@ -19,6 +20,10 @@ export default function FolderCreate() {
     };
 
     console.log(folder);
+    router.push({
+      pathname: "/folder/[id]",
+      params: { id: folder.id },
+    });
   };
 
   return (

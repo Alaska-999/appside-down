@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { UserProfile } from "@/src/types";
+import { CardOrientation, ThemeMode, UserProfile } from "@/src/types";
 import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
@@ -13,7 +13,7 @@ export default function Login() {
 
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       alert("Будь ласка, заповніть всі поля");
       return;
@@ -21,33 +21,58 @@ export default function Login() {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const mockUser: UserProfile = {
-        id: "user-123",
-        username: email.split("@")[0],
-        email: email,
-        createdAt: new Date().toISOString(),
-        settings: {
-          userId: "user-123",
-          theme: "system",
-          defaultCardOrientation: "term_first",
-          isTtsEnabled: false,
-          dailyStreakGoal: 10,
-        },
-        streak: {
-          userId: "user-123",
-          currentStreak: 5,
-          lastActiveDate: new Date().toISOString(),
-        },
-      };
+    const mockUser: UserProfile = {
+      id: "user-123",
+      username: email.split("@")[0],
+      email: email,
+      createdAt: new Date().toISOString(),
+      settings: {
+        userId: "user-123",
+        theme: "system",
+        defaultCardOrientation: "term_first",
+        isTtsEnabled: false,
+        dailyStreakGoal: 10,
+      },
+      streak: {
+        userId: "user-123",
+        currentStreak: 5,
+        lastActiveDate: new Date().toISOString(),
+      },
+    };
 
-      const mockToken = "fake-jwt-token-from-backend";
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      },
+    );
+    console.log(response);
 
-      setAuth(mockUser, mockToken);
+    const data = await response.json();
+    const user = {
+      id: data.user.id,
+      username: data.user.username,
+      email: data.user.email,
+      createdAt: new Date().toISOString(),
+      settings: {
+        userId: data.user.id,
+        theme: "light" as ThemeMode,
+        defaultCardOrientation: "term_first" as CardOrientation,
+        isTtsEnabled: false,
+        dailyStreakGoal: 10,
+      },
+      streak: {
+        userId: data.user.id,
+        currentStreak: 0,
+        lastActiveDate: new Date().toISOString(),
+      },
+    };
+    setAuth(user, data.access_token);
 
-      setIsLoading(false);
-      router.replace("/");
-    }, 1500);
+    setIsLoading(false);
+    router.replace("/");
   };
 
   return (
