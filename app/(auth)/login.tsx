@@ -1,7 +1,8 @@
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { CardOrientation, ThemeMode, UserProfile } from "@/src/types";
+import { CardOrientation, ThemeMode } from "@/src/types";
 import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { Link, router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
@@ -14,6 +15,7 @@ export default function Login() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleLogin = async () => {
+    console.log(email, password, "email, password");
     if (!email || !password) {
       alert("Будь ласка, заповніть всі поля");
       return;
@@ -21,24 +23,24 @@ export default function Login() {
 
     setIsLoading(true);
 
-    const mockUser: UserProfile = {
-      id: "user-123",
-      username: email.split("@")[0],
-      email: email,
-      createdAt: new Date().toISOString(),
-      settings: {
-        userId: "user-123",
-        theme: "system",
-        defaultCardOrientation: "term_first",
-        isTtsEnabled: false,
-        dailyStreakGoal: 10,
-      },
-      streak: {
-        userId: "user-123",
-        currentStreak: 5,
-        lastActiveDate: new Date().toISOString(),
-      },
-    };
+    // const mockUser: UserProfile = {
+    //   id: "user-123",
+    //   username: email.split("@")[0],
+    //   email: email,
+    //   createdAt: new Date().toISOString(),
+    //   settings: {
+    //     userId: "user-123",
+    //     theme: "system",
+    //     defaultCardOrientation: "term_first",
+    //     isTtsEnabled: false,
+    //     dailyStreakGoal: 10,
+    //   },
+    //   streak: {
+    //     userId: "user-123",
+    //     currentStreak: 5,
+    //     lastActiveDate: new Date().toISOString(),
+    //   },
+    // };
 
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
@@ -48,9 +50,12 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       },
     );
-    console.log(response);
+
+    console.log(response, "response");
 
     const data = await response.json();
+    console.log(data, "data");
+
     const user = {
       id: data.user.id,
       username: data.user.username,
@@ -69,6 +74,10 @@ export default function Login() {
         lastActiveDate: new Date().toISOString(),
       },
     };
+
+    const refreshToken = data.refresh_token;
+    console.log(data);
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
     setAuth(user, data.access_token);
 
     setIsLoading(false);

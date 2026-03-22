@@ -3,6 +3,7 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode, UserProfile } from "@/src/types";
 import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
@@ -74,6 +75,9 @@ export default function Signup() {
         lastActiveDate: new Date().toISOString(),
       },
     };
+    const refreshToken = data.refresh_token;
+
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
     setAuth(user, data.access_token);
 
     setIsLoading(false);
