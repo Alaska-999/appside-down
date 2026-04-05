@@ -66,7 +66,7 @@ export interface Module {
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
-    items?: Flashcard[]; // Завантажується окремо для гри або перегляду
+    flashcards?: Flashcard[]; // Завантажується окремо для гри або перегляду
 }
 
 export interface Flashcard {

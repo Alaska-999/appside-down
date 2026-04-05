@@ -1,6 +1,7 @@
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
-import { Folder } from "@/src/types";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Input, Text, XStack, YStack } from "tamagui";
@@ -9,21 +10,49 @@ export default function FolderCreate() {
   const [name, setName] = useState("");
   const [customImageUri, setCustomImageUri] = useState<string | null>(null);
 
-  const handleCreateFolder = () => {
-    const folder: Folder = {
-      id: crypto.randomUUID(),
-      name: name || "Untitled Folder",
-      icon: customImageUri || "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: "user-123",
-    };
+  const handleCreateFolder = async () => {
+    const token = useAuthStore.getState().token;
+    const user = useAuthStore.getState().user;
 
-    console.log(folder);
-    router.push({
-      pathname: "/folder/[id]",
-      params: { id: folder.id },
-    });
+    if (!token || !user) {
+      alert("Login to create a folder");
+      return;
+    }
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/folders`);
+    try {
+      const response = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/folders`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: name || "Untitled Folder",
+            icon: customImageUri || "",
+            tags: [],
+          }),
+        },
+      );
+      console.log("Мій токен:", token);
+      console.log(response);
+      if (!response.ok) {
+        console.log(response);
+
+        throw new Error("Failed to create folder");
+      }
+
+      const newFolder = await response.json();
+
+      router.push({
+        pathname: "/folder/[id]",
+        params: { id: newFolder.id },
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Error creating folder");
+    }
   };
 
   return (
