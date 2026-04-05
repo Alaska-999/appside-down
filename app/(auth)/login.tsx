@@ -15,7 +15,6 @@ export default function Login() {
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleLogin = async () => {
-    console.log(email, password, "email, password");
     if (!email || !password) {
       alert("Будь ласка, заповніть всі поля");
       return;
@@ -23,65 +22,53 @@ export default function Login() {
 
     setIsLoading(true);
 
-    // const mockUser: UserProfile = {
-    //   id: "user-123",
-    //   username: email.split("@")[0],
-    //   email: email,
-    //   createdAt: new Date().toISOString(),
-    //   settings: {
-    //     userId: "user-123",
-    //     theme: "system",
-    //     defaultCardOrientation: "term_first",
-    //     isTtsEnabled: false,
-    //     dailyStreakGoal: 10,
-    //   },
-    //   streak: {
-    //     userId: "user-123",
-    //     currentStreak: 5,
-    //     lastActiveDate: new Date().toISOString(),
-    //   },
-    // };
+    try {
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
 
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      },
-    );
+      const data = await response.json();
 
-    console.log(response, "response");
+      if (!response.ok) {
+        alert(data.message || "Помилка входу");
+        return;
+      }
 
-    const data = await response.json();
-    console.log(data, "data");
+      const user = {
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        createdAt: data.user.createdAt || new Date().toISOString(),
+        settings: {
+          userId: data.user.id,
+          theme: "light" as ThemeMode,
+          defaultCardOrientation: "term_first" as CardOrientation,
+          isTtsEnabled: false,
+          dailyStreakGoal: 10,
+        },
+        streak: {
+          userId: data.user.id,
+          currentStreak: 0,
+          lastActiveDate: new Date().toISOString(),
+        },
+      };
 
-    const user = {
-      id: data.user.id,
-      username: data.user.username,
-      email: data.user.email,
-      createdAt: new Date().toISOString(),
-      settings: {
-        userId: data.user.id,
-        theme: "light" as ThemeMode,
-        defaultCardOrientation: "term_first" as CardOrientation,
-        isTtsEnabled: false,
-        dailyStreakGoal: 10,
-      },
-      streak: {
-        userId: data.user.id,
-        currentStreak: 0,
-        lastActiveDate: new Date().toISOString(),
-      },
-    };
+      const refreshToken = data.refresh_token;
+      await SecureStore.setItemAsync("refreshToken", refreshToken);
 
-    const refreshToken = data.refresh_token;
-    console.log(data);
-    await SecureStore.setItemAsync("refreshToken", refreshToken);
-    setAuth(user, data.access_token);
-
-    setIsLoading(false);
-    router.replace("/");
+      setAuth(user, data.access_token);
+      router.replace("/");
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("Проблема зі з'єднанням");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
