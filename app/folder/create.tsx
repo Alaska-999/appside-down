@@ -18,7 +18,6 @@ export default function FolderCreate() {
       alert("Login to create a folder");
       return;
     }
-    console.log(`${process.env.EXPO_PUBLIC_API_URL}/folders`);
     try {
       const response = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/folders`,
@@ -35,11 +34,8 @@ export default function FolderCreate() {
           }),
         },
       );
-      console.log("Мій токен:", token);
-      console.log(response);
-      if (!response.ok) {
-        console.log(response);
 
+      if (!response.ok) {
         throw new Error("Failed to create folder");
       }
 
