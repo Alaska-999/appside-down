@@ -1,4 +1,5 @@
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { Flashcard, Module } from "@/src/types";
 import { Plus, X } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
@@ -19,7 +20,11 @@ export default function ModuleCreate() {
       return;
     }
     const moduleId = crypto.randomUUID();
-
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) {
+      alert("Please login to create a module");
+      return;
+    }
     const items: Flashcard[] = flashcards.map((i) => ({
       id: crypto.randomUUID(),
       moduleId: moduleId,
@@ -33,9 +38,9 @@ export default function ModuleCreate() {
 
     const module: Module = {
       id: moduleId,
-      userId: "user-123",
+      userId: userId,
       isFavorite: false,
-      items: items,
+      flashcards: items,
       itemsCount: items.length,
       name: name || "Untitled Module",
       description: description || "",
