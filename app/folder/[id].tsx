@@ -1,6 +1,5 @@
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
-import { Tag } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -14,7 +13,7 @@ type FolderDetail = {
   id: string;
   name: string;
   icon: string;
-  tags: Tag[];
+  tags: string[];
   modules: FolderModule[];
 };
 
@@ -29,7 +28,7 @@ function mapModule(raw: any): FolderModule {
 export default function FolderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [folder, setFolder] = useState<FolderDetail | null>(null);
-  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -136,21 +135,22 @@ export default function FolderScreen() {
     );
   };
 
+  const patchTags = async (newTags: string[]) => {
+    const res = await protectedFetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+      { method: "PATCH", body: JSON.stringify({ tags: newTags }) },
+    );
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+    return newTags;
+  };
+
   const handleAddTag = async () => {
-    if (!newTagName.trim() || !id) return;
+    if (!newTagName.trim() || !folder) return;
+    const trimmed = newTagName.trim();
+    if (folder.tags.includes(trimmed)) return;
     try {
-      const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}/tags`,
-        {
-          method: "POST",
-          body: JSON.stringify({ name: newTagName.trim() }),
-        },
-      );
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-      const tag: Tag = await res.json();
-      setFolder((prev) =>
-        prev ? { ...prev, tags: [...prev.tags, tag] } : prev,
-      );
+      const newTags = await patchTags([...folder.tags, trimmed]);
+      setFolder((prev) => prev ? { ...prev, tags: newTags } : prev);
       setNewTagName("");
       setShowTagInput(false);
     } catch (err) {
@@ -159,25 +159,18 @@ export default function FolderScreen() {
     }
   };
 
-  const handleDeleteTag = (tagId: string) => {
+  const handleDeleteTag = (tag: string) => {
     Alert.alert("Delete tag", "Remove this tag?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
+          if (!folder) return;
           try {
-            const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}/tags/${tagId}`,
-              { method: "DELETE" },
-            );
-            if (!res.ok) throw new Error(`Error: ${res.status}`);
-            setFolder((prev) =>
-              prev
-                ? { ...prev, tags: prev.tags.filter((t) => t.id !== tagId) }
-                : prev,
-            );
-            if (selectedTagId === tagId) setSelectedTagId(null);
+            const newTags = await patchTags(folder.tags.filter((t) => t !== tag));
+            setFolder((prev) => prev ? { ...prev, tags: newTags } : prev);
+            if (selectedTag === tag) setSelectedTag(null);
           } catch (err) {
             console.error("[FolderScreen] delete tag error:", err);
             Alert.alert("Error", "Failed to delete tag");
@@ -295,31 +288,23 @@ export default function FolderScreen() {
               <XStack gap="$2" ai="center">
                 {folder.tags.map((tag) => (
                   <Pressable
-                    key={tag.id}
-                    onLongPress={() => handleDeleteTag(tag.id)}
+                    key={tag}
+                    onLongPress={() => handleDeleteTag(tag)}
                   >
                     <XStack
-                      bg={
-                        selectedTagId === tag.id
-                          ? "$buttonBg"
-                          : "$backgroundCard"
-                      }
+                      bg={selectedTag === tag ? "$buttonBg" : "$backgroundCard"}
                       br="$10"
                       px="$3"
                       py="$2"
                       onPress={() =>
-                        setSelectedTagId(
-                          selectedTagId === tag.id ? null : tag.id,
-                        )
+                        setSelectedTag(selectedTag === tag ? null : tag)
                       }
                     >
                       <Text
                         fontSize="$3"
-                        color={
-                          selectedTagId === tag.id ? "$buttonText" : "$color"
-                        }
+                        color={selectedTag === tag ? "$buttonText" : "$color"}
                       >
-                        {tag.name}
+                        {tag}
                       </Text>
                     </XStack>
                   </Pressable>
