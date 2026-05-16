@@ -60,7 +60,7 @@ const appConfig = createTamagui({
             statusWarning: tokens.color.amber,
             statusInfo: tokens.color.blue,
 
-            backgroundCard: tokens.color.slate2,
+            backgroundCard: tokens.color.slate3,
         },
         dark: {
             background: tokens.color.pureBlack,

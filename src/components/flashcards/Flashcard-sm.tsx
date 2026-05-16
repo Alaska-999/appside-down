@@ -10,11 +10,12 @@ import { Card, Text } from "tamagui";
 interface FlashcardSmProps {
   term: string;
   definition: string;
+  width?: number;
 }
 
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
-export function FlashcardSm({ term, definition }: FlashcardSmProps) {
+export function FlashcardSm({ term, definition, width }: FlashcardSmProps) {
   const [isFront, setIsFront] = useState(true);
 
   const flipRotation = useSharedValue(0);
@@ -39,18 +40,17 @@ export function FlashcardSm({ term, definition }: FlashcardSmProps) {
       backfaceVisibility: "hidden",
     };
   });
-  console.log("adwdawdawd");
+
   return (
     <Card
-      //   w="90%"
-      maxWidth="$25"
       h="$13"
       bg="transparent"
       onPress={handlePress}
       pos="relative"
+      {...(width ? { width } : { w: "90%" })}
     >
       <AnimatedCard
-        style={[frontAnimatedStyle]}
+        style={frontAnimatedStyle}
         pos="absolute"
         top={0}
         left={0}
@@ -65,7 +65,7 @@ export function FlashcardSm({ term, definition }: FlashcardSmProps) {
       >
         <Text
           fontSize="$6"
-          color="$colorPrimary"
+          color="$color"
           textAlign="center"
           numberOfLines={4}
           ellipsizeMode="tail"
@@ -74,7 +74,7 @@ export function FlashcardSm({ term, definition }: FlashcardSmProps) {
         </Text>
       </AnimatedCard>
       <AnimatedCard
-        style={[backAnimatedStyle]}
+        style={backAnimatedStyle}
         pos="absolute"
         top={0}
         left={0}
@@ -89,7 +89,7 @@ export function FlashcardSm({ term, definition }: FlashcardSmProps) {
       >
         <Text
           fontSize="$6"
-          color="$colorPrimary"
+          color="$color"
           textAlign="center"
           numberOfLines={4}
           ellipsizeMode="tail"

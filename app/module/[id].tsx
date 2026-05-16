@@ -3,8 +3,12 @@ import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
 import { Flashcard, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { Text, YStack } from "tamagui";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FlatList, View, ViewToken, useWindowDimensions } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
+
+const GAP = 12;
+const PEEK = 28;
 
 export default function ModuleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,6 +16,11 @@ export default function ModuleScreen() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { width: screenWidth } = useWindowDimensions();
+
+  const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
+  const SIDE_PADDING = PEEK;
 
   useEffect(() => {
     if (!id) return;
@@ -48,9 +57,6 @@ export default function ModuleScreen() {
         folderIds: rawModule.folderId ? [rawModule.folderId] : [],
       };
 
-      console.log("[ModuleScreen] module:", moduleData);
-      console.log("[ModuleScreen] flashcards:", flashcardsData);
-
       setModuleData(moduleData);
       setFlashcards(flashcardsData);
     } catch (err) {
@@ -61,19 +67,71 @@ export default function ModuleScreen() {
     }
   };
 
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+        setCurrentIndex(viewableItems[0].index);
+      }
+    },
+    [],
+  );
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 });
+
   return (
     <YStack f={1} bg="$background">
-      <YStack pos="absolute" top={0} left={0} right={0} zi={100} p="$4">
-        <ScreenHeader title={moduleData?.name ?? "Module"} />
-        {loading && <Text color="$colorMuted">Loading...</Text>}
-        {error && <Text color="$statusDanger">{error}</Text>}
-        {flashcards.map((card) => (
-          <FlashcardSm
-            key={card.id}
-            term={card.term}
-            definition={card.definition}
-          />
-        ))}
+      <ScreenHeader title={moduleData?.name ?? "Module"} />
+
+      <YStack f={1} gap="$4" pt="$4">
+        {loading && (
+          <Text color="$colorMuted" textAlign="center">
+            Loading...
+          </Text>
+        )}
+        {error && (
+          <Text color="$statusDanger" textAlign="center">
+            {error}
+          </Text>
+        )}
+
+        {flashcards.length > 0 && (
+          <>
+            <FlatList
+              data={flashcards}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ flexGrow: 0 }}
+              snapToInterval={CARD_WIDTH + GAP}
+              decelerationRate="fast"
+              contentContainerStyle={{ paddingHorizontal: SIDE_PADDING }}
+              ItemSeparatorComponent={() => <View style={{ width: GAP }} />}
+              keyExtractor={(item) => item.id}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig.current}
+              renderItem={({ item }) => (
+                <FlashcardSm
+                  term={item.term}
+                  definition={item.definition}
+                  width={CARD_WIDTH}
+                />
+              )}
+            />
+
+            <XStack gap="$2" jc="center">
+              {flashcards.map((_, i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 8,
+                    borderRadius: 4,
+                    width: i === currentIndex ? 12 : 8,
+                    backgroundColor: i === currentIndex ? "#9696ab" : "#E2E8F0",
+                  }}
+                />
+              ))}
+            </XStack>
+          </>
+        )}
       </YStack>
     </YStack>
   );
