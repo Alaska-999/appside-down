@@ -3,18 +3,10 @@ import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Tag } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView } from "react-native";
-import {
-  Avatar,
-  Button,
-  Input,
-  Sheet,
-  Text,
-  XStack,
-  YStack,
-} from "tamagui";
+import { Avatar, Button, Input, Sheet, Text, XStack, YStack } from "tamagui";
 
 type FolderModule = { id: string; name: string; itemsCount: number };
 
@@ -41,20 +33,20 @@ export default function FolderScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Edit sheet state
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editIconUri, setEditIconUri] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
 
-  // New tag state
   const [showTagInput, setShowTagInput] = useState(false);
   const [newTagName, setNewTagName] = useState("");
 
-  useEffect(() => {
-    if (!id) return;
-    fetchFolder();
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) return;
+      fetchFolder();
+    }, [id]),
+  );
 
   const fetchFolder = async () => {
     setLoading(true);
@@ -96,12 +88,17 @@ export default function FolderScreen() {
         `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
         {
           method: "PUT",
-          body: JSON.stringify({ name: editName.trim(), icon: editIconUri ?? "" }),
+          body: JSON.stringify({
+            name: editName.trim(),
+            icon: editIconUri ?? "",
+          }),
         },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       setFolder((prev) =>
-        prev ? { ...prev, name: editName.trim(), icon: editIconUri ?? "" } : prev,
+        prev
+          ? { ...prev, name: editName.trim(), icon: editIconUri ?? "" }
+          : prev,
       );
       setEditOpen(false);
     } catch (err) {
@@ -113,26 +110,30 @@ export default function FolderScreen() {
   };
 
   const handleDelete = () => {
-    Alert.alert("Delete folder", "This will delete the folder. Modules won't be deleted.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
-              { method: "DELETE" },
-            );
-            if (!res.ok) throw new Error(`Error: ${res.status}`);
-            router.back();
-          } catch (err) {
-            console.error("[FolderScreen] delete error:", err);
-            Alert.alert("Error", "Failed to delete folder");
-          }
+    Alert.alert(
+      "Delete folder",
+      "This will delete the folder. Modules won't be deleted.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await protectedFetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+                { method: "DELETE" },
+              );
+              if (!res.ok) throw new Error(`Error: ${res.status}`);
+              router.back();
+            } catch (err) {
+              console.error("[FolderScreen] delete error:", err);
+              Alert.alert("Error", "Failed to delete folder");
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleAddTag = async () => {
@@ -172,7 +173,9 @@ export default function FolderScreen() {
             );
             if (!res.ok) throw new Error(`Error: ${res.status}`);
             setFolder((prev) =>
-              prev ? { ...prev, tags: prev.tags.filter((t) => t.id !== tagId) } : prev,
+              prev
+                ? { ...prev, tags: prev.tags.filter((t) => t.id !== tagId) }
+                : prev,
             );
             if (selectedTagId === tagId) setSelectedTagId(null);
           } catch (err) {
@@ -199,7 +202,10 @@ export default function FolderScreen() {
             if (!res.ok) throw new Error(`Error: ${res.status}`);
             setFolder((prev) =>
               prev
-                ? { ...prev, modules: prev.modules.filter((m) => m.id !== moduleId) }
+                ? {
+                    ...prev,
+                    modules: prev.modules.filter((m) => m.id !== moduleId),
+                  }
                 : prev,
             );
           } catch (err) {
@@ -217,7 +223,9 @@ export default function FolderScreen() {
     return (
       <YStack f={1} bg="$background">
         <ScreenHeader />
-        <Text color="$colorMuted" m="$4">Loading...</Text>
+        <Text color="$colorMuted" m="$4">
+          Loading...
+        </Text>
       </YStack>
     );
   }
@@ -226,7 +234,9 @@ export default function FolderScreen() {
     return (
       <YStack f={1} bg="$background">
         <ScreenHeader />
-        <Text color="$statusDanger" m="$4">{error ?? "Folder not found"}</Text>
+        <Text color="$statusDanger" m="$4">
+          {error ?? "Folder not found"}
+        </Text>
       </YStack>
     );
   }
@@ -237,12 +247,14 @@ export default function FolderScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack px="$4" gap="$5" pb="$8">
-
           {/* Folder header: icon + name + actions */}
           <XStack ai="center" gap="$3" pt="$2">
             <Avatar circular size="$6" bg="$backgroundCard">
               {folder.icon ? (
-                <Avatar.Image src={folder.icon} accessibilityLabel={folder.name} />
+                <Avatar.Image
+                  src={folder.icon}
+                  accessibilityLabel={folder.name}
+                />
               ) : null}
               <Avatar.Fallback jc="center" ai="center">
                 <Text fontSize="$7">📁</Text>
@@ -271,25 +283,41 @@ export default function FolderScreen() {
 
           {/* Tags */}
           <YStack gap="$2">
-            <Text fontSize="$3" color="$colorMuted" fontWeight="600" tt="uppercase">
+            <Text
+              fontSize="$3"
+              color="$colorMuted"
+              fontWeight="600"
+              tt="uppercase"
+            >
               Tags
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack gap="$2" ai="center">
                 {folder.tags.map((tag) => (
-                  <Pressable key={tag.id} onLongPress={() => handleDeleteTag(tag.id)}>
+                  <Pressable
+                    key={tag.id}
+                    onLongPress={() => handleDeleteTag(tag.id)}
+                  >
                     <XStack
-                      bg={selectedTagId === tag.id ? "$buttonBg" : "$backgroundCard"}
+                      bg={
+                        selectedTagId === tag.id
+                          ? "$buttonBg"
+                          : "$backgroundCard"
+                      }
                       br="$10"
                       px="$3"
                       py="$2"
                       onPress={() =>
-                        setSelectedTagId(selectedTagId === tag.id ? null : tag.id)
+                        setSelectedTagId(
+                          selectedTagId === tag.id ? null : tag.id,
+                        )
                       }
                     >
                       <Text
                         fontSize="$3"
-                        color={selectedTagId === tag.id ? "$buttonText" : "$color"}
+                        color={
+                          selectedTagId === tag.id ? "$buttonText" : "$color"
+                        }
                       >
                         {tag.name}
                       </Text>
@@ -316,7 +344,10 @@ export default function FolderScreen() {
                       circular
                       icon={<X size="$1" />}
                       bg="$backgroundCard"
-                      onPress={() => { setShowTagInput(false); setNewTagName(""); }}
+                      onPress={() => {
+                        setShowTagInput(false);
+                        setNewTagName("");
+                      }}
                     />
                   </XStack>
                 ) : (
@@ -335,7 +366,12 @@ export default function FolderScreen() {
           {/* Modules section */}
           <YStack gap="$3">
             <XStack jc="space-between" ai="center">
-              <Text fontSize="$3" color="$colorMuted" fontWeight="600" tt="uppercase">
+              <Text
+                fontSize="$3"
+                color="$colorMuted"
+                fontWeight="600"
+                tt="uppercase"
+              >
                 Modules ({visibleModules.length})
               </Text>
               {visibleModules.length > 0 && (
@@ -345,22 +381,21 @@ export default function FolderScreen() {
                   bg="$buttonSecondaryBg"
                   br="$10"
                   onPress={() =>
-                    router.push({ pathname: "/folder/add-modules" as any, params: { folderId: id } })
+                    router.push({
+                      pathname: "/folder/add-modules" as any,
+                      params: { folderId: id },
+                    })
                   }
                 >
-                  <Text color="$buttonSecondaryText" fontSize="$3">Add</Text>
+                  <Text color="$buttonSecondaryText" fontSize="$3">
+                    Add
+                  </Text>
                 </Button>
               )}
             </XStack>
 
             {visibleModules.length === 0 ? (
-              <YStack
-                bg="$backgroundCard"
-                br="$4"
-                p="$6"
-                ai="center"
-                gap="$3"
-              >
+              <YStack bg="$backgroundCard" br="$4" p="$6" ai="center" gap="$3">
                 <Text fontSize="$5" color="$colorMuted" textAlign="center">
                   No study materials yet
                 </Text>
@@ -368,7 +403,10 @@ export default function FolderScreen() {
                   bg="$buttonBg"
                   br="$10"
                   onPress={() =>
-                    router.push({ pathname: "/folder/add-modules" as any, params: { folderId: id } })
+                    router.push({
+                      pathname: "/folder/add-modules" as any,
+                      params: { folderId: id },
+                    })
                   }
                 >
                   <Text color="$buttonText">Add study materials</Text>
@@ -388,7 +426,10 @@ export default function FolderScreen() {
                     <Pressable
                       style={{ flex: 1 }}
                       onPress={() =>
-                        router.push({ pathname: "/module/[id]", params: { id: mod.id } })
+                        router.push({
+                          pathname: "/module/[id]",
+                          params: { id: mod.id },
+                        })
                       }
                     >
                       <YStack gap="$1">
@@ -425,7 +466,9 @@ export default function FolderScreen() {
         <Sheet.Overlay />
         <Sheet.Handle />
         <Sheet.Frame p="$4" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">Edit Folder</Text>
+          <Text fontSize="$6" fontWeight="bold">
+            Edit Folder
+          </Text>
 
           <ImagePickerAvatar
             imageUri={editIconUri}
@@ -440,11 +483,7 @@ export default function FolderScreen() {
             size="$5"
           />
 
-          <Button
-            bg="$buttonBg"
-            onPress={handleEdit}
-            disabled={editLoading}
-          >
+          <Button bg="$buttonBg" onPress={handleEdit} disabled={editLoading}>
             <Text color="$buttonText">
               {editLoading ? "Saving..." : "Save"}
             </Text>
