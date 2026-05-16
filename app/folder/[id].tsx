@@ -1,6 +1,6 @@
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
-import { Folder, Module, Tag } from "@/src/types";
+import { Tag } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -211,10 +211,7 @@ export default function FolderScreen() {
     ]);
   };
 
-  const visibleModules =
-    selectedTagId && folder
-      ? folder.modules
-      : folder?.modules ?? [];
+  const visibleModules = folder?.modules ?? [];
 
   if (loading) {
     return (
