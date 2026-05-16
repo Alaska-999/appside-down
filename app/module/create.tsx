@@ -2,7 +2,7 @@ import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Plus } from "@tamagui/lucide-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Button, Input, ScrollView, Text, YStack } from "tamagui";
 
@@ -13,6 +13,7 @@ export default function ModuleCreate() {
     { term: "", definition: "" },
     { term: "", definition: "" },
   ]);
+  const { returnFolderId } = useLocalSearchParams<{ returnFolderId?: string }>();
 
   const handleCreateModule = async () => {
     if (!name) {
@@ -34,7 +35,6 @@ export default function ModuleCreate() {
       name: name || "Untitled Module",
       description: description || "",
     };
-    console.log("Module Data:", module);
     try {
       const response = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/modules`,
@@ -47,10 +47,21 @@ export default function ModuleCreate() {
         throw new Error("Failed to create module");
       }
       const newModule = await response.json();
-      router.push({
-        pathname: "/module/[id]",
-        params: { id: newModule.id },
-      });
+      if (returnFolderId) {
+        await protectedFetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/folders/${returnFolderId}/modules`,
+          {
+            method: "POST",
+            body: JSON.stringify({ moduleId: newModule.id }),
+          },
+        );
+        router.back();
+      } else {
+        router.push({
+          pathname: "/module/[id]",
+          params: { id: newModule.id },
+        });
+      }
     } catch (error) {
       console.error(error);
       alert("Failed to create module");
