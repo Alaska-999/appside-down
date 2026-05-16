@@ -1,6 +1,5 @@
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Plus } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
@@ -20,13 +19,6 @@ export default function ModuleCreate() {
       alert("Please enter a name for the module");
       return;
     }
-    const token = useAuthStore.getState().token;
-    const user = useAuthStore.getState().user;
-    if (!token || !user) {
-      alert("Please login to create a module");
-      return;
-    }
-
     const items = flashcards.map((i) => ({
       term: i.term,
       definition: i.definition,
@@ -48,10 +40,6 @@ export default function ModuleCreate() {
         `${process.env.EXPO_PUBLIC_API_URL}/modules`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify(module),
         },
       );

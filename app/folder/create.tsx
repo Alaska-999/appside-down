@@ -1,6 +1,5 @@
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
-import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -11,22 +10,11 @@ export default function FolderCreate() {
   const [customImageUri, setCustomImageUri] = useState<string | null>(null);
 
   const handleCreateFolder = async () => {
-    const token = useAuthStore.getState().token;
-    const user = useAuthStore.getState().user;
-
-    if (!token || !user) {
-      alert("Login to create a folder");
-      return;
-    }
     try {
       const response = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/folders`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             name: name || "Untitled Folder",
             icon: customImageUri || "",
