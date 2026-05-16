@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
-type ModuleItem = { id: string; name: string; itemsCount: number; selected: boolean };
+type ModuleItem = {
+  id: string;
+  name: string;
+  itemsCount: number;
+  selected: boolean;
+};
 
 function mapModule(raw: any): ModuleItem {
   return {
@@ -62,21 +67,20 @@ export default function AddModules() {
     if (selectedIds.length === 0 || !folderId) return;
     setSaving(true);
     try {
-      const responses = await Promise.all(
-        selectedIds.map((moduleId) =>
-          protectedFetch(
-            `${process.env.EXPO_PUBLIC_API_URL}/folders/${folderId}/modules`,
-            {
-              method: "POST",
-              body: JSON.stringify({ moduleId }),
-            },
-          ),
-        ),
+      const response = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/folders/${folderId}/modules`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ moduleIds: selectedIds }),
+        },
       );
-      if (responses.some((r) => !r.ok)) {
+
+      if (!response.ok) {
+        console.log(response);
         setError("Failed to add some modules");
         return;
       }
+
       router.back();
     } catch (err) {
       console.error("[AddModules] add error:", err);
@@ -94,7 +98,9 @@ export default function AddModules() {
     <YStack f={1} bg="$background">
       <YStack px="$4" pt="$12" gap="$4" f={1}>
         <XStack jc="space-between" ai="center">
-          <Text fontSize="$7" fontWeight="bold">Add Materials</Text>
+          <Text fontSize="$7" fontWeight="bold">
+            Add Materials
+          </Text>
           <Button
             size="$3"
             bg="$buttonSecondaryBg"
@@ -106,17 +112,13 @@ export default function AddModules() {
               })
             }
           >
-            <Text color="$buttonSecondaryText" fontSize="$3">Create new</Text>
+            <Text color="$buttonSecondaryText" fontSize="$3">
+              Create new
+            </Text>
           </Button>
         </XStack>
 
-        <XStack
-          bg="$backgroundCard"
-          br="$4"
-          px="$3"
-          ai="center"
-          gap="$2"
-        >
+        <XStack bg="$backgroundCard" br="$4" px="$3" ai="center" gap="$2">
           <Search size="$1" color="$colorMuted" />
           <Input
             f={1}
@@ -164,7 +166,9 @@ export default function AddModules() {
                   ai="center"
                 >
                   {item.selected && (
-                    <Text fontSize="$2" color="$buttonBg">✓</Text>
+                    <Text fontSize="$2" color="$buttonBg">
+                      ✓
+                    </Text>
                   )}
                 </XStack>
                 <YStack f={1}>
@@ -201,7 +205,9 @@ export default function AddModules() {
         >
           <Button bg="$buttonBg" br="$10" onPress={handleAdd} disabled={saving}>
             <Text color="$buttonText">
-              {saving ? "Adding..." : `Add ${selectedIds.length} module${selectedIds.length !== 1 ? "s" : ""}`}
+              {saving
+                ? "Adding..."
+                : `Add ${selectedIds.length} module${selectedIds.length !== 1 ? "s" : ""}`}
             </Text>
           </Button>
         </YStack>

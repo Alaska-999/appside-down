@@ -150,7 +150,7 @@ export default function FolderScreen() {
     if (folder.tags.includes(trimmed)) return;
     try {
       const newTags = await patchTags([...folder.tags, trimmed]);
-      setFolder((prev) => prev ? { ...prev, tags: newTags } : prev);
+      setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
       setNewTagName("");
       setShowTagInput(false);
     } catch (err) {
@@ -168,8 +168,10 @@ export default function FolderScreen() {
         onPress: async () => {
           if (!folder) return;
           try {
-            const newTags = await patchTags(folder.tags.filter((t) => t !== tag));
-            setFolder((prev) => prev ? { ...prev, tags: newTags } : prev);
+            const newTags = await patchTags(
+              folder.tags.filter((t) => t !== tag),
+            );
+            setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
             if (selectedTag === tag) setSelectedTag(null);
           } catch (err) {
             console.error("[FolderScreen] delete tag error:", err);
@@ -189,8 +191,11 @@ export default function FolderScreen() {
         onPress: async () => {
           try {
             const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}/modules/${moduleId}`,
-              { method: "DELETE" },
+              `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}/modules/remove`,
+              {
+                method: "PATCH",
+                body: JSON.stringify({ moduleIds: [moduleId] }),
+              },
             );
             if (!res.ok) throw new Error(`Error: ${res.status}`);
             setFolder((prev) =>
@@ -287,10 +292,7 @@ export default function FolderScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack gap="$2" ai="center">
                 {folder.tags.map((tag) => (
-                  <Pressable
-                    key={tag}
-                    onLongPress={() => handleDeleteTag(tag)}
-                  >
+                  <Pressable key={tag} onLongPress={() => handleDeleteTag(tag)}>
                     <XStack
                       bg={selectedTag === tag ? "$buttonBg" : "$backgroundCard"}
                       br="$10"
