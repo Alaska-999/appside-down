@@ -62,7 +62,7 @@ export default function AddModules() {
     if (selectedIds.length === 0 || !folderId) return;
     setSaving(true);
     try {
-      await Promise.all(
+      const responses = await Promise.all(
         selectedIds.map((moduleId) =>
           protectedFetch(
             `${process.env.EXPO_PUBLIC_API_URL}/folders/${folderId}/modules`,
@@ -73,9 +73,14 @@ export default function AddModules() {
           ),
         ),
       );
+      if (responses.some((r) => !r.ok)) {
+        setError("Failed to add some modules");
+        return;
+      }
       router.back();
     } catch (err) {
       console.error("[AddModules] add error:", err);
+      setError("Failed to add modules");
     } finally {
       setSaving(false);
     }
