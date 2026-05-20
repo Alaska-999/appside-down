@@ -29,7 +29,7 @@ export default function FolderCreate() {
 
       const newFolder = await response.json();
 
-      router.push({
+      router.replace({
         pathname: "/folder/[id]",
         params: { id: newFolder.id },
       });

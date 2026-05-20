@@ -1,3 +1,4 @@
+import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Search } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -43,8 +44,15 @@ export default function AddModules() {
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const raw: any[] = await res.json();
+      console.log(JSON.stringify(raw));
+      console.log(folderId);
       const available = raw
-        .filter((m) => m.folderId !== folderId)
+        .filter((m) => {
+          const isAlreadyInThisFolder = m.folders?.some(
+            (f: any) => f.id === folderId,
+          );
+          return !isAlreadyInThisFolder;
+        })
         .map(mapModule);
       setModules(available);
     } catch (err) {
@@ -96,7 +104,11 @@ export default function AddModules() {
 
   return (
     <YStack f={1} bg="$background">
-      <YStack px="$4" pt="$12" gap="$4" f={1}>
+      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
+        <ScreenHeader />
+      </YStack>
+
+      <YStack px="$4" pt="$12" gap="$4" f={1} mt="$5">
         <XStack jc="space-between" ai="center">
           <Text fontSize="$7" fontWeight="bold">
             Add Materials

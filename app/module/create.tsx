@@ -57,7 +57,7 @@ export default function ModuleCreate() {
         );
         router.back();
       } else {
-        router.push({
+        router.replace({
           pathname: "/module/[id]",
           params: { id: newModule.id },
         });
