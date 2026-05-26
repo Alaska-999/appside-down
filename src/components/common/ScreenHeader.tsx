@@ -1,9 +1,10 @@
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
+import { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, XStack } from "tamagui";
 
-export function ScreenHeader({ title }: { title?: string }) {
+export function ScreenHeader({ title, right }: { title?: string; right?: ReactNode }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -21,6 +22,8 @@ export function ScreenHeader({ title }: { title?: string }) {
           {title}
         </Text>
       )}
+
+      {right && <XStack f={1} jc="flex-end">{right}</XStack>}
     </XStack>
   );
 }

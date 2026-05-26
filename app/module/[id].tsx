@@ -1,4 +1,5 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
 import { Flashcard, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -13,12 +14,15 @@ import {
   Layers,
   LayoutGrid,
   Lock,
+  MoreHorizontal,
+  Pencil,
   Star,
+  Trash2,
   Volume2,
   X,
   Zap,
 } from "@tamagui/lucide-icons";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -29,7 +33,7 @@ import {
   ViewToken,
   useWindowDimensions,
 } from "react-native";
-import { Avatar, Sheet, Text, XStack, YStack } from "tamagui";
+import { Avatar, Button, Sheet, Text, XStack, YStack } from "tamagui";
 
 const GAP = 12;
 const PEEK = 28;
@@ -54,6 +58,8 @@ export default function ModuleScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const [menuSheetOpen, setMenuSheetOpen] = useState(false);
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
 
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
@@ -121,6 +127,42 @@ export default function ModuleScreen() {
     }
   };
 
+  const openEditSheet = () => {
+    setMenuSheetOpen(false);
+    setTimeout(() => setEditSheetOpen(true), 300);
+  };
+
+  const handleSaved = (updatedCards: Flashcard[]) => {
+    setFlashcards(updatedCards);
+    setModuleData((prev) => prev ? { ...prev, itemsCount: updatedCards.length } : prev);
+  };
+
+  const handleDeleteModule = () => {
+    setMenuSheetOpen(false);
+    setTimeout(() => {
+      Alert.alert("Delete module", "This will permanently delete the module and all its cards.", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await protectedFetch(
+                `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+                { method: "DELETE" },
+              );
+              if (!res.ok) throw new Error(`Error: ${res.status}`);
+              router.back();
+            } catch (err) {
+              console.error("[ModuleScreen] delete error:", err);
+              Alert.alert("Error", "Failed to delete module");
+            }
+          },
+        },
+      ]);
+    }, 300);
+  };
+
   const handleDeleteTag = (tag: string) => {
     Alert.alert("Delete tag", "Remove this tag?", [
       { text: "Cancel", style: "cancel" },
@@ -159,7 +201,13 @@ export default function ModuleScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <ScreenHeader />
+      <ScreenHeader
+        right={
+          <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
+            <MoreHorizontal size={22} color="$color" />
+          </Pressable>
+        }
+      />
 
       {loading && (
         <Text color="$colorMuted" textAlign="center" mt="$4">Loading...</Text>
@@ -351,6 +399,45 @@ export default function ModuleScreen() {
         </ScrollView>
       )}
 
+      {/* Menu sheet */}
+      <Sheet
+        modal
+        open={menuSheetOpen}
+        onOpenChange={setMenuSheetOpen}
+        snapPoints={[25]}
+        dismissOnSnapToBottom
+      >
+        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
+        <Sheet.Handle />
+        <Sheet.Frame p="$4" bg="$background" gap="$3">
+          <Button
+            size="$5"
+            icon={<Pencil size="$1" />}
+            bg="$buttonSecondaryBg"
+            onPress={openEditSheet}
+          >
+            <Text f={1} fontSize="$5">Edit cards</Text>
+          </Button>
+          <Button
+            size="$5"
+            icon={<Trash2 size="$1" color="$statusDanger" />}
+            bg="$buttonSecondaryBg"
+            onPress={handleDeleteModule}
+          >
+            <Text f={1} fontSize="$5" color="$statusDanger">Delete module</Text>
+          </Button>
+        </Sheet.Frame>
+      </Sheet>
+
+      <EditCardsSheet
+        open={editSheetOpen}
+        onOpenChange={setEditSheetOpen}
+        moduleId={id}
+        cards={flashcards.map((c) => ({ id: c.id, term: c.term, definition: c.definition }))}
+        onSaved={handleSaved}
+      />
+
+      {/* Sort sheet */}
       <Sheet
         modal
         open={sortSheetOpen}
@@ -371,13 +458,7 @@ export default function ModuleScreen() {
                   setSortSheetOpen(false);
                 }}
               >
-                <XStack
-                  bg="$buttonSecondaryBg"
-                  br="$4"
-                  px="$4"
-                  py="$3"
-                  ai="center"
-                >
+                <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
                   <Text f={1} fontSize="$5" color="$color">
                     {option === "original" ? "Original" : "Alphabetical"}
                   </Text>
