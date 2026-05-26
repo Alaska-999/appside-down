@@ -2,13 +2,48 @@ import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
 import { Flashcard, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import {
+  AlignJustify,
+  ArrowLeftRight,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  FileText,
+  GraduationCap,
+  Layers,
+  LayoutGrid,
+  Lock,
+  Star,
+  Volume2,
+  X,
+  Zap,
+} from "@tamagui/lucide-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, View, ViewToken, useWindowDimensions } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  View,
+  ViewToken,
+  useWindowDimensions,
+} from "react-native";
+import { Avatar, Sheet, Text, XStack, YStack } from "tamagui";
 
 const GAP = 12;
 const PEEK = 28;
+
+type SortOrder = "original" | "alphabetical";
+
+const ACTION_BUTTONS = [
+  { key: "flashcards", label: "Flashcards", Icon: Layers, locked: false },
+  { key: "learn", label: "Learn", Icon: GraduationCap, locked: true },
+  { key: "test", label: "Test", Icon: FileText, locked: false },
+  { key: "match", label: "Match", Icon: ArrowLeftRight, locked: false },
+  { key: "blast", label: "Blast", Icon: Zap, locked: false },
+  { key: "blocks", label: "Blocks", Icon: LayoutGrid, locked: false },
+];
 
 export default function ModuleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,10 +52,11 @@ export default function ModuleScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("original");
+  const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
 
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
-  const SIDE_PADDING = PEEK;
 
   useEffect(() => {
     if (!id) return;
@@ -30,34 +66,26 @@ export default function ModuleScreen() {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const [moduleRes, flashcardsRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, {
-          method: "GET",
-        }),
-        protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/flashcards/module/${id}`,
-          { method: "GET" },
-        ),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, { method: "GET" }),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/flashcards/module/${id}`, { method: "GET" }),
       ]);
-
       if (!moduleRes.ok) throw new Error(`Module error: ${moduleRes.status}`);
-      if (!flashcardsRes.ok)
-        throw new Error(`Flashcards error: ${flashcardsRes.status}`);
+      if (!flashcardsRes.ok) throw new Error(`Flashcards error: ${flashcardsRes.status}`);
 
       const [rawModule, flashcardsData] = await Promise.all([
         moduleRes.json() as Promise<any>,
         flashcardsRes.json() as Promise<Flashcard[]>,
       ]);
 
-      const moduleData: Module = {
+      setModuleData({
         ...rawModule,
         itemsCount: rawModule._count?.flashcards ?? 0,
         folderIds: rawModule.folderId ? [rawModule.folderId] : [],
-      };
-
-      setModuleData(moduleData);
+        tags: rawModule.tags ?? [],
+        user: rawModule.user ?? null,
+      });
       setFlashcards(flashcardsData);
     } catch (err) {
       console.error("[ModuleScreen] fetch error:", err);
@@ -65,6 +93,57 @@ export default function ModuleScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const sortedFlashcards = useMemo(() => {
+    if (sortOrder === "alphabetical") {
+      return [...flashcards].sort((a, b) => a.term.localeCompare(b.term));
+    }
+    return flashcards;
+  }, [flashcards, sortOrder]);
+
+  const handleToggleStar = async (card: Flashcard) => {
+    const newValue = !card.isStarred;
+    setFlashcards((prev) =>
+      prev.map((c) => (c.id === card.id ? { ...c, isStarred: newValue } : c)),
+    );
+    try {
+      const res = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${card.id}`,
+        { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+    } catch (err) {
+      console.error("[ModuleScreen] star error:", err);
+      setFlashcards((prev) =>
+        prev.map((c) => (c.id === card.id ? { ...c, isStarred: card.isStarred } : c)),
+      );
+    }
+  };
+
+  const handleDeleteTag = (tag: string) => {
+    Alert.alert("Delete tag", "Remove this tag?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          if (!moduleData) return;
+          const newTags = (moduleData.tags ?? []).filter((t) => t !== tag);
+          try {
+            const res = await protectedFetch(
+              `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+              { method: "PATCH", body: JSON.stringify({ tags: newTags }) },
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            setModuleData((prev) => (prev ? { ...prev, tags: newTags } : prev));
+          } catch (err) {
+            console.error("[ModuleScreen] delete tag error:", err);
+            Alert.alert("Error", "Failed to delete tag");
+          }
+        },
+      },
+    ]);
   };
 
   const onViewableItemsChanged = useCallback(
@@ -80,59 +159,236 @@ export default function ModuleScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <ScreenHeader title={moduleData?.name ?? "Module"} />
+      <ScreenHeader />
 
-      <YStack f={1} gap="$4" pt="$4">
-        {loading && (
-          <Text color="$colorMuted" textAlign="center">
-            Loading...
-          </Text>
-        )}
-        {error && (
-          <Text color="$statusDanger" textAlign="center">
-            {error}
-          </Text>
-        )}
+      {loading && (
+        <Text color="$colorMuted" textAlign="center" mt="$4">Loading...</Text>
+      )}
+      {error && (
+        <Text color="$statusDanger" textAlign="center" mt="$4">{error}</Text>
+      )}
 
-        {flashcards.length > 0 && (
-          <>
-            <FlatList
-              data={flashcards}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ flexGrow: 0 }}
-              snapToInterval={CARD_WIDTH + GAP}
-              decelerationRate="fast"
-              contentContainerStyle={{ paddingHorizontal: SIDE_PADDING }}
-              ItemSeparatorComponent={() => <View style={{ width: GAP }} />}
-              keyExtractor={(item) => item.id}
-              onViewableItemsChanged={onViewableItemsChanged}
-              viewabilityConfig={viewabilityConfig.current}
-              renderItem={({ item }) => (
-                <FlashcardSm
-                  term={item.term}
-                  definition={item.definition}
-                  width={CARD_WIDTH}
+      {moduleData && (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <YStack pb="$10" gap="$6">
+
+            {/* Flashcard carousel */}
+            {flashcards.length > 0 && (
+              <YStack gap="$3" pt="$4">
+                <FlatList
+                  data={flashcards}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ flexGrow: 0 }}
+                  snapToInterval={CARD_WIDTH + GAP}
+                  decelerationRate="fast"
+                  contentContainerStyle={{ paddingHorizontal: PEEK }}
+                  ItemSeparatorComponent={() => <View style={{ width: GAP }} />}
+                  keyExtractor={(item) => item.id}
+                  onViewableItemsChanged={onViewableItemsChanged}
+                  viewabilityConfig={viewabilityConfig.current}
+                  renderItem={({ item }) => (
+                    <FlashcardSm
+                      term={item.term}
+                      definition={item.definition}
+                      width={CARD_WIDTH}
+                    />
+                  )}
                 />
+                <XStack gap="$2" jc="center">
+                  {flashcards.map((_, i) => (
+                    <View
+                      key={i}
+                      style={{
+                        height: 6,
+                        borderRadius: 3,
+                        width: i === currentIndex ? 16 : 6,
+                        backgroundColor: i === currentIndex ? "#9696ab" : "#E2E8F0",
+                      }}
+                    />
+                  ))}
+                </XStack>
+              </YStack>
+            )}
+
+            <YStack px="$4" gap="$5">
+
+              {/* Title + author */}
+              <YStack gap="$2">
+                <XStack ai="flex-start" jc="space-between" gap="$3">
+                  <Text f={1} fontSize="$8" fontWeight="bold" color="$color" lh={36}>
+                    {moduleData.name}
+                  </Text>
+                  <Pressable hitSlop={8}>
+                    <CheckCircle2 size={24} color="$colorMuted" />
+                  </Pressable>
+                </XStack>
+
+                <XStack ai="center" gap="$2">
+                  <Avatar circular size="$3">
+                    {moduleData.user?.avatarUrl ? (
+                      <Avatar.Image src={moduleData.user.avatarUrl} />
+                    ) : null}
+                    <Avatar.Fallback bg="$backgroundHover" jc="center" ai="center">
+                      <Text fontSize="$2" color="$colorSecondary">
+                        {moduleData.user?.username?.[0]?.toUpperCase() ?? "?"}
+                      </Text>
+                    </Avatar.Fallback>
+                  </Avatar>
+                  <Text fontSize="$3" fontWeight="600" color="$color">
+                    {moduleData.user?.username ?? "Unknown"}
+                  </Text>
+                  <Text color="$borderColor">·</Text>
+                  <Text fontSize="$3" color="$colorMuted">
+                    {moduleData.itemsCount} term{moduleData.itemsCount !== 1 ? "s" : ""}
+                  </Text>
+                </XStack>
+              </YStack>
+
+              {/* Tags */}
+              {moduleData.tags && moduleData.tags.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <XStack gap="$2">
+                    {moduleData.tags.map((tag) => (
+                      <XStack
+                        key={tag}
+                        bg="$backgroundHover"
+                        br="$10"
+                        px="$3"
+                        py="$1"
+                        ai="center"
+                        gap="$1"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                      >
+                        <Text fontSize="$3" color="$colorSecondary">{tag}</Text>
+                        <Pressable hitSlop={8} onPress={() => handleDeleteTag(tag)}>
+                          <X size={12} color="$colorMuted" />
+                        </Pressable>
+                      </XStack>
+                    ))}
+                  </XStack>
+                </ScrollView>
               )}
-            />
 
-            <XStack gap="$2" jc="center">
-              {flashcards.map((_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    height: 8,
-                    borderRadius: 4,
-                    width: i === currentIndex ? 12 : 8,
-                    backgroundColor: i === currentIndex ? "#9696ab" : "#E2E8F0",
-                  }}
-                />
-              ))}
-            </XStack>
-          </>
-        )}
-      </YStack>
+              {/* Action buttons */}
+              <YStack gap="$2">
+                {ACTION_BUTTONS.map(({ key, label, Icon, locked }) => (
+                  <Pressable key={key}>
+                    <XStack
+                      bg="$backgroundHover"
+                      br="$4"
+                      px="$4"
+                      py="$3"
+                      ai="center"
+                      gap="$3"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                    >
+                      <Icon size={20} color="$colorSecondary" />
+                      <Text f={1} fontSize="$5" fontWeight="500" color="$color">
+                        {label}
+                      </Text>
+                      {locked && <Lock size={14} color="$colorMuted" />}
+                      <ChevronRight size={16} color="$colorMuted" />
+                    </XStack>
+                  </Pressable>
+                ))}
+              </YStack>
+
+              {/* Terms section */}
+              {sortedFlashcards.length > 0 && (
+                <YStack gap="$3">
+                  <XStack ai="center" jc="space-between">
+                    <Text fontSize="$6" fontWeight="bold" color="$color">Terms</Text>
+                    <Pressable onPress={() => setSortSheetOpen(true)}>
+                      <XStack ai="center" gap="$1" py="$1" px="$2">
+                        <Text fontSize="$3" color="$colorMuted">
+                          {sortOrder === "original" ? "Original" : "A–Z"}
+                        </Text>
+                        <AlignJustify size={14} color="$colorMuted" />
+                      </XStack>
+                    </Pressable>
+                  </XStack>
+
+                  {sortedFlashcards.map((card) => (
+                    <YStack
+                      key={card.id}
+                      bg="$backgroundHover"
+                      br="$4"
+                      p="$4"
+                      gap="$2"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                    >
+                      <XStack ai="flex-start" jc="space-between" gap="$2">
+                        <Text f={1} fontSize="$4" fontWeight="600" color="$color">
+                          {card.term}
+                        </Text>
+                        <XStack gap="$3" ai="center">
+                          <Pressable hitSlop={8}>
+                            <Volume2 size={16} color="$colorMuted" />
+                          </Pressable>
+                          <Pressable hitSlop={8} onPress={() => handleToggleStar(card)}>
+                            <Star
+                              size={16}
+                              color={card.isStarred ? "$statusWarning" : "$colorMuted"}
+                              fill={card.isStarred ? "$statusWarning" : "transparent"}
+                            />
+                          </Pressable>
+                        </XStack>
+                      </XStack>
+                      <Text fontSize="$4" color="$colorSecondary">
+                        {card.definition}
+                      </Text>
+                    </YStack>
+                  ))}
+                </YStack>
+              )}
+
+            </YStack>
+          </YStack>
+        </ScrollView>
+      )}
+
+      <Sheet
+        modal
+        open={sortSheetOpen}
+        onOpenChange={setSortSheetOpen}
+        snapPoints={[25]}
+        dismissOnSnapToBottom
+      >
+        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
+        <Sheet.Handle />
+        <Sheet.Frame p="$4" bg="$background" gap="$4">
+          <Text fontSize="$6" fontWeight="bold">Sort by</Text>
+          <YStack gap="$2">
+            {(["original", "alphabetical"] as SortOrder[]).map((option) => (
+              <Pressable
+                key={option}
+                onPress={() => {
+                  setSortOrder(option);
+                  setSortSheetOpen(false);
+                }}
+              >
+                <XStack
+                  bg="$buttonSecondaryBg"
+                  br="$4"
+                  px="$4"
+                  py="$3"
+                  ai="center"
+                >
+                  <Text f={1} fontSize="$5" color="$color">
+                    {option === "original" ? "Original" : "Alphabetical"}
+                  </Text>
+                  {sortOrder === option && <Check size={18} color="$color" />}
+                </XStack>
+              </Pressable>
+            ))}
+          </YStack>
+        </Sheet.Frame>
+      </Sheet>
+
     </YStack>
   );
 }
