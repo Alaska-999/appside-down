@@ -1,8 +1,8 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import { Avatar, Text, XStack, YStack } from "tamagui";
 
@@ -13,9 +13,11 @@ export default function Library() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, []),
+  );
 
   const fetchData = async () => {
     setLoading(true);

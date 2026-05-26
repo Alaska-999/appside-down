@@ -281,33 +281,38 @@ export default function FolderScreen() {
 
           {/* Tags */}
           <YStack gap="$2">
-            <Text
-              fontSize="$3"
-              color="$colorMuted"
-              fontWeight="600"
-              tt="uppercase"
-            >
+            <Text fontSize="$3" color="$colorMuted" fontWeight="600" tt="uppercase" ls={0.8}>
               Tags
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <XStack gap="$2" ai="center">
                 {folder.tags.map((tag) => (
-                  <Pressable key={tag} onLongPress={() => handleDeleteTag(tag)}>
+                  <Pressable
+                    key={tag}
+                    onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  >
                     <XStack
-                      bg={selectedTag === tag ? "$buttonBg" : "$backgroundCard"}
+                      bg={selectedTag === tag ? "$buttonBg" : "$backgroundHover"}
                       br="$10"
                       px="$3"
-                      py="$2"
-                      onPress={() =>
-                        setSelectedTag(selectedTag === tag ? null : tag)
-                      }
+                      py="$1"
+                      ai="center"
+                      gap="$1"
+                      borderWidth={1}
+                      borderColor={selectedTag === tag ? "transparent" : "$borderColor"}
                     >
                       <Text
                         fontSize="$3"
-                        color={selectedTag === tag ? "$buttonText" : "$color"}
+                        color={selectedTag === tag ? "$buttonText" : "$colorSecondary"}
                       >
                         {tag}
                       </Text>
+                      <Pressable hitSlop={8} onPress={() => handleDeleteTag(tag)}>
+                        <X
+                          size={12}
+                          color={selectedTag === tag ? "$buttonText" : "$colorMuted"}
+                        />
+                      </Pressable>
                     </XStack>
                   </Pressable>
                 ))}
@@ -323,28 +328,39 @@ export default function FolderScreen() {
                       autoFocus
                       minWidth={100}
                     />
-                    <Button size="$3" onPress={handleAddTag} bg="$buttonBg">
+                    <Button size="$3" onPress={handleAddTag} bg="$buttonBg" br="$10">
                       <Text color="$buttonText">Add</Text>
                     </Button>
-                    <Button
-                      size="$3"
-                      circular
-                      icon={<X size="$1" />}
-                      bg="$backgroundCard"
-                      onPress={() => {
-                        setShowTagInput(false);
-                        setNewTagName("");
-                      }}
-                    />
+                    <Pressable onPress={() => { setShowTagInput(false); setNewTagName(""); }}>
+                      <XStack
+                        bg="$backgroundHover"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                        br="$10"
+                        w={32}
+                        h={32}
+                        ai="center"
+                        jc="center"
+                      >
+                        <X size={14} color="$colorMuted" />
+                      </XStack>
+                    </Pressable>
                   </XStack>
                 ) : (
-                  <Button
-                    size="$3"
-                    circular
-                    icon={<Plus size="$1" color="$color" />}
-                    bg="$backgroundCard"
-                    onPress={() => setShowTagInput(true)}
-                  />
+                  <Pressable onPress={() => setShowTagInput(true)}>
+                    <XStack
+                      bg="$backgroundHover"
+                      borderWidth={1}
+                      borderColor="$borderColor"
+                      br="$10"
+                      w={32}
+                      h={32}
+                      ai="center"
+                      jc="center"
+                    >
+                      <Plus size={14} color="$colorMuted" />
+                    </XStack>
+                  </Pressable>
                 )}
               </XStack>
             </ScrollView>

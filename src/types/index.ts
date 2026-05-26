@@ -59,10 +59,16 @@ export interface Folder {
 export interface Module {
     id: string;
     userId: string;
+    user?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
+    };
     name: string;
     description?: string | null;
     isFavorite: boolean;
     itemsCount: number;
+    tags?: string[];
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
