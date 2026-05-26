@@ -41,12 +41,43 @@ const PEEK = 28;
 type SortOrder = "original" | "alphabetical";
 
 const getActionButtons = (id: string) => [
-  { key: "flashcards", label: "Flashcards", Icon: Layers, locked: false, onPress: () => router.push({ pathname: "/module/[id]/flashcards", params: { id } }) },
-  { key: "learn", label: "Learn", Icon: GraduationCap, locked: true, onPress: () => {} },
-  { key: "test", label: "Test", Icon: FileText, locked: false, onPress: () => {} },
-  { key: "match", label: "Match", Icon: ArrowLeftRight, locked: false, onPress: () => {} },
+  {
+    key: "flashcards",
+    label: "Flashcards",
+    Icon: Layers,
+    locked: false,
+    onPress: () =>
+      router.push({ pathname: "/module/[id]/flashcards", params: { id } }),
+  },
+  {
+    key: "learn",
+    label: "Learn",
+    Icon: GraduationCap,
+    locked: true,
+    onPress: () => {},
+  },
+  {
+    key: "test",
+    label: "Test",
+    Icon: FileText,
+    locked: false,
+    onPress: () => {},
+  },
+  {
+    key: "match",
+    label: "Match",
+    Icon: ArrowLeftRight,
+    locked: false,
+    onPress: () => {},
+  },
   { key: "blast", label: "Blast", Icon: Zap, locked: false, onPress: () => {} },
-  { key: "blocks", label: "Blocks", Icon: LayoutGrid, locked: false, onPress: () => {} },
+  {
+    key: "blocks",
+    label: "Blocks",
+    Icon: LayoutGrid,
+    locked: false,
+    onPress: () => {},
+  },
 ];
 
 export default function ModuleScreen() {
@@ -65,20 +96,27 @@ export default function ModuleScreen() {
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
 
   useEffect(() => {
-    if (!id) return;
+    console.log(id);
     fetchData();
   }, [id]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+    console.log("fetch data");
     try {
       const [moduleRes, flashcardsRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, { method: "GET" }),
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/flashcards/module/${id}`, { method: "GET" }),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, {
+          method: "GET",
+        }),
+        protectedFetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/flashcards/module/${id}`,
+          { method: "GET" },
+        ),
       ]);
       if (!moduleRes.ok) throw new Error(`Module error: ${moduleRes.status}`);
-      if (!flashcardsRes.ok) throw new Error(`Flashcards error: ${flashcardsRes.status}`);
+      if (!flashcardsRes.ok)
+        throw new Error(`Flashcards error: ${flashcardsRes.status}`);
 
       const [rawModule, flashcardsData] = await Promise.all([
         moduleRes.json() as Promise<any>,
@@ -122,8 +160,26 @@ export default function ModuleScreen() {
     } catch (err) {
       console.error("[ModuleScreen] star error:", err);
       setFlashcards((prev) =>
-        prev.map((c) => (c.id === card.id ? { ...c, isStarred: card.isStarred } : c)),
+        prev.map((c) =>
+          c.id === card.id ? { ...c, isStarred: card.isStarred } : c,
+        ),
       );
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!moduleData) return;
+    const newValue = !moduleData.isFavorite;
+    setModuleData((prev) => prev ? { ...prev, isFavorite: newValue } : prev);
+    try {
+      const res = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+        { method: "PATCH", body: JSON.stringify({ isFavorite: newValue }) },
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+    } catch (err) {
+      console.error("[ModuleScreen] favorite error:", err);
+      setModuleData((prev) => prev ? { ...prev, isFavorite: !newValue } : prev);
     }
   };
 
@@ -134,32 +190,38 @@ export default function ModuleScreen() {
 
   const handleSaved = (updatedCards: Flashcard[]) => {
     setFlashcards(updatedCards);
-    setModuleData((prev) => prev ? { ...prev, itemsCount: updatedCards.length } : prev);
+    setModuleData((prev) =>
+      prev ? { ...prev, itemsCount: updatedCards.length } : prev,
+    );
   };
 
   const handleDeleteModule = () => {
     setMenuSheetOpen(false);
     setTimeout(() => {
-      Alert.alert("Delete module", "This will permanently delete the module and all its cards.", [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await protectedFetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
-                { method: "DELETE" },
-              );
-              if (!res.ok) throw new Error(`Error: ${res.status}`);
-              router.back();
-            } catch (err) {
-              console.error("[ModuleScreen] delete error:", err);
-              Alert.alert("Error", "Failed to delete module");
-            }
+      Alert.alert(
+        "Delete module",
+        "This will permanently delete the module and all its cards.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                const res = await protectedFetch(
+                  `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+                  { method: "DELETE" },
+                );
+                if (!res.ok) throw new Error(`Error: ${res.status}`);
+                router.back();
+              } catch (err) {
+                console.error("[ModuleScreen] delete error:", err);
+                Alert.alert("Error", "Failed to delete module");
+              }
+            },
           },
-        },
-      ]);
+        ],
+      );
     }, 300);
   };
 
@@ -203,23 +265,35 @@ export default function ModuleScreen() {
     <YStack f={1} bg="$background">
       <ScreenHeader
         right={
-          <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
-            <MoreHorizontal size={22} color="$color" />
-          </Pressable>
+          <XStack gap="$3" ai="center">
+            <Pressable hitSlop={8} onPress={handleToggleFavorite}>
+              <Star
+                size={22}
+                color={moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"}
+                fill={moduleData?.isFavorite ? "$statusWarning" : "transparent"}
+              />
+            </Pressable>
+            <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
+              <MoreHorizontal size={22} color="$color" />
+            </Pressable>
+          </XStack>
         }
       />
 
       {loading && (
-        <Text color="$colorMuted" textAlign="center" mt="$4">Loading...</Text>
+        <Text color="$colorMuted" textAlign="center" mt="$4">
+          Loading...
+        </Text>
       )}
       {error && (
-        <Text color="$statusDanger" textAlign="center" mt="$4">{error}</Text>
+        <Text color="$statusDanger" textAlign="center" mt="$4">
+          {error}
+        </Text>
       )}
 
       {moduleData && (
         <ScrollView showsVerticalScrollIndicator={false}>
           <YStack pb="$10" gap="$6">
-
             {/* Flashcard carousel */}
             {flashcards.length > 0 && (
               <YStack gap="$3" pt="$4">
@@ -251,7 +325,8 @@ export default function ModuleScreen() {
                         height: 6,
                         borderRadius: 3,
                         width: i === currentIndex ? 16 : 6,
-                        backgroundColor: i === currentIndex ? "#9696ab" : "#E2E8F0",
+                        backgroundColor:
+                          i === currentIndex ? "#9696ab" : "#E2E8F0",
                       }}
                     />
                   ))}
@@ -260,11 +335,16 @@ export default function ModuleScreen() {
             )}
 
             <YStack px="$4" gap="$5">
-
               {/* Title + author */}
               <YStack gap="$2">
                 <XStack ai="flex-start" jc="space-between" gap="$3">
-                  <Text f={1} fontSize="$8" fontWeight="bold" color="$color" lh={36}>
+                  <Text
+                    f={1}
+                    fontSize="$8"
+                    fontWeight="bold"
+                    color="$color"
+                    lh={36}
+                  >
                     {moduleData.name}
                   </Text>
                   <Pressable hitSlop={8}>
@@ -277,7 +357,11 @@ export default function ModuleScreen() {
                     {moduleData.user?.avatarUrl ? (
                       <Avatar.Image src={moduleData.user.avatarUrl} />
                     ) : null}
-                    <Avatar.Fallback bg="$backgroundHover" jc="center" ai="center">
+                    <Avatar.Fallback
+                      bg="$backgroundHover"
+                      jc="center"
+                      ai="center"
+                    >
                       <Text fontSize="$2" color="$colorSecondary">
                         {moduleData.user?.username?.[0]?.toUpperCase() ?? "?"}
                       </Text>
@@ -288,7 +372,8 @@ export default function ModuleScreen() {
                   </Text>
                   <Text color="$borderColor">·</Text>
                   <Text fontSize="$3" color="$colorMuted">
-                    {moduleData.itemsCount} term{moduleData.itemsCount !== 1 ? "s" : ""}
+                    {moduleData.itemsCount} term
+                    {moduleData.itemsCount !== 1 ? "s" : ""}
                   </Text>
                 </XStack>
               </YStack>
@@ -309,8 +394,13 @@ export default function ModuleScreen() {
                         borderWidth={1}
                         borderColor="$borderColor"
                       >
-                        <Text fontSize="$3" color="$colorSecondary">{tag}</Text>
-                        <Pressable hitSlop={8} onPress={() => handleDeleteTag(tag)}>
+                        <Text fontSize="$3" color="$colorSecondary">
+                          {tag}
+                        </Text>
+                        <Pressable
+                          hitSlop={8}
+                          onPress={() => handleDeleteTag(tag)}
+                        >
                           <X size={12} color="$colorMuted" />
                         </Pressable>
                       </XStack>
@@ -321,34 +411,43 @@ export default function ModuleScreen() {
 
               {/* Action buttons */}
               <YStack gap="$2">
-                {getActionButtons(id).map(({ key, label, Icon, locked, onPress }) => (
-                  <Pressable key={key} onPress={onPress}>
-                    <XStack
-                      bg="$backgroundHover"
-                      br="$4"
-                      px="$4"
-                      py="$3"
-                      ai="center"
-                      gap="$3"
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                    >
-                      <Icon size={20} color="$colorSecondary" />
-                      <Text f={1} fontSize="$5" fontWeight="500" color="$color">
-                        {label}
-                      </Text>
-                      {locked && <Lock size={14} color="$colorMuted" />}
-                      <ChevronRight size={16} color="$colorMuted" />
-                    </XStack>
-                  </Pressable>
-                ))}
+                {getActionButtons(id).map(
+                  ({ key, label, Icon, locked, onPress }) => (
+                    <Pressable key={key} onPress={onPress}>
+                      <XStack
+                        bg="$backgroundHover"
+                        br="$4"
+                        px="$4"
+                        py="$3"
+                        ai="center"
+                        gap="$3"
+                        borderWidth={1}
+                        borderColor="$borderColor"
+                      >
+                        <Icon size={20} color="$colorSecondary" />
+                        <Text
+                          f={1}
+                          fontSize="$5"
+                          fontWeight="500"
+                          color="$color"
+                        >
+                          {label}
+                        </Text>
+                        {locked && <Lock size={14} color="$colorMuted" />}
+                        <ChevronRight size={16} color="$colorMuted" />
+                      </XStack>
+                    </Pressable>
+                  ),
+                )}
               </YStack>
 
               {/* Terms section */}
               {sortedFlashcards.length > 0 && (
                 <YStack gap="$3">
                   <XStack ai="center" jc="space-between">
-                    <Text fontSize="$6" fontWeight="bold" color="$color">Terms</Text>
+                    <Text fontSize="$6" fontWeight="bold" color="$color">
+                      Terms
+                    </Text>
                     <Pressable onPress={() => setSortSheetOpen(true)}>
                       <XStack ai="center" gap="$1" py="$1" px="$2">
                         <Text fontSize="$3" color="$colorMuted">
@@ -370,18 +469,34 @@ export default function ModuleScreen() {
                       borderColor="$borderColor"
                     >
                       <XStack ai="flex-start" jc="space-between" gap="$2">
-                        <Text f={1} fontSize="$4" fontWeight="600" color="$color">
+                        <Text
+                          f={1}
+                          fontSize="$4"
+                          fontWeight="600"
+                          color="$color"
+                        >
                           {card.term}
                         </Text>
                         <XStack gap="$3" ai="center">
                           <Pressable hitSlop={8}>
                             <Volume2 size={16} color="$colorMuted" />
                           </Pressable>
-                          <Pressable hitSlop={8} onPress={() => handleToggleStar(card)}>
+                          <Pressable
+                            hitSlop={8}
+                            onPress={() => handleToggleStar(card)}
+                          >
                             <Star
                               size={16}
-                              color={card.isStarred ? "$statusWarning" : "$colorMuted"}
-                              fill={card.isStarred ? "$statusWarning" : "transparent"}
+                              color={
+                                card.isStarred
+                                  ? "$statusWarning"
+                                  : "$colorMuted"
+                              }
+                              fill={
+                                card.isStarred
+                                  ? "$statusWarning"
+                                  : "transparent"
+                              }
                             />
                           </Pressable>
                         </XStack>
@@ -393,7 +508,6 @@ export default function ModuleScreen() {
                   ))}
                 </YStack>
               )}
-
             </YStack>
           </YStack>
         </ScrollView>
@@ -416,7 +530,9 @@ export default function ModuleScreen() {
             bg="$buttonSecondaryBg"
             onPress={openEditSheet}
           >
-            <Text f={1} fontSize="$5">Edit cards</Text>
+            <Text f={1} fontSize="$5">
+              Edit cards
+            </Text>
           </Button>
           <Button
             size="$5"
@@ -424,7 +540,9 @@ export default function ModuleScreen() {
             bg="$buttonSecondaryBg"
             onPress={handleDeleteModule}
           >
-            <Text f={1} fontSize="$5" color="$statusDanger">Delete module</Text>
+            <Text f={1} fontSize="$5" color="$statusDanger">
+              Delete module
+            </Text>
           </Button>
         </Sheet.Frame>
       </Sheet>
@@ -433,7 +551,11 @@ export default function ModuleScreen() {
         open={editSheetOpen}
         onOpenChange={setEditSheetOpen}
         moduleId={id}
-        cards={flashcards.map((c) => ({ id: c.id, term: c.term, definition: c.definition }))}
+        cards={flashcards.map((c) => ({
+          id: c.id,
+          term: c.term,
+          definition: c.definition,
+        }))}
         onSaved={handleSaved}
       />
 
@@ -448,7 +570,9 @@ export default function ModuleScreen() {
         <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
         <Sheet.Handle />
         <Sheet.Frame p="$4" bg="$background" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">Sort by</Text>
+          <Text fontSize="$6" fontWeight="bold">
+            Sort by
+          </Text>
           <YStack gap="$2">
             {(["original", "alphabetical"] as SortOrder[]).map((option) => (
               <Pressable
@@ -458,7 +582,13 @@ export default function ModuleScreen() {
                   setSortSheetOpen(false);
                 }}
               >
-                <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
+                <XStack
+                  bg="$buttonSecondaryBg"
+                  br="$4"
+                  px="$4"
+                  py="$3"
+                  ai="center"
+                >
                   <Text f={1} fontSize="$5" color="$color">
                     {option === "original" ? "Original" : "Alphabetical"}
                   </Text>
@@ -469,7 +599,6 @@ export default function ModuleScreen() {
           </YStack>
         </Sheet.Frame>
       </Sheet>
-
     </YStack>
   );
 }

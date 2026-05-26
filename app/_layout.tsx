@@ -46,13 +46,6 @@ export default function RootLayout() {
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
-              <Stack.Screen
-                name="module/[id]/flashcards"
-                options={{
-                  gestureEnabled: false,
-                  presentation: "fullScreenModal",
-                }}
-              />
             </Stack>
           </QueryClientProvider>
         </Theme>
