@@ -40,13 +40,13 @@ const PEEK = 28;
 
 type SortOrder = "original" | "alphabetical";
 
-const ACTION_BUTTONS = [
-  { key: "flashcards", label: "Flashcards", Icon: Layers, locked: false },
-  { key: "learn", label: "Learn", Icon: GraduationCap, locked: true },
-  { key: "test", label: "Test", Icon: FileText, locked: false },
-  { key: "match", label: "Match", Icon: ArrowLeftRight, locked: false },
-  { key: "blast", label: "Blast", Icon: Zap, locked: false },
-  { key: "blocks", label: "Blocks", Icon: LayoutGrid, locked: false },
+const getActionButtons = (id: string) => [
+  { key: "flashcards", label: "Flashcards", Icon: Layers, locked: false, onPress: () => router.push({ pathname: "/module/[id]/flashcards", params: { id } }) },
+  { key: "learn", label: "Learn", Icon: GraduationCap, locked: true, onPress: () => {} },
+  { key: "test", label: "Test", Icon: FileText, locked: false, onPress: () => {} },
+  { key: "match", label: "Match", Icon: ArrowLeftRight, locked: false, onPress: () => {} },
+  { key: "blast", label: "Blast", Icon: Zap, locked: false, onPress: () => {} },
+  { key: "blocks", label: "Blocks", Icon: LayoutGrid, locked: false, onPress: () => {} },
 ];
 
 export default function ModuleScreen() {
@@ -321,8 +321,8 @@ export default function ModuleScreen() {
 
               {/* Action buttons */}
               <YStack gap="$2">
-                {ACTION_BUTTONS.map(({ key, label, Icon, locked }) => (
-                  <Pressable key={key}>
+                {getActionButtons(id).map(({ key, label, Icon, locked, onPress }) => (
+                  <Pressable key={key} onPress={onPress}>
                     <XStack
                       bg="$backgroundHover"
                       br="$4"

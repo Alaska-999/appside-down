@@ -47,9 +47,9 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
               <Stack.Screen
-                name="module/game"
+                name="module/[id]/flashcards"
                 options={{
-                  gestureEnabled: false, // Забороняємо свайп "назад" під час гри
+                  gestureEnabled: false,
                   presentation: "fullScreenModal",
                 }}
               />
