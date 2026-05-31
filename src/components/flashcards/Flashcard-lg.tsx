@@ -25,13 +25,7 @@ export function FlashcardLg({
   });
 
   return (
-    <Card
-      bg="transparent"
-      m={20}
-      f={1}
-      pos="relative"
-      onPress={flip}
-    >
+    <Card bg="transparent" m={20} f={1} pos="relative" onPress={flip}>
       <AnimatedCard
         style={frontAnimatedStyle}
         pos="absolute"
@@ -88,18 +82,42 @@ export function FlashcardLg({
         bg="$gameCard"
         p="$5"
         backfaceVisibility="hidden"
-        alignItems="center"
-        justifyContent="center"
+        // alignItems="center"
+        // justifyContent="center"
       >
-        <Text
-          fontSize="$6"
-          color="$statusSuccess"
-          textAlign="center"
-          numberOfLines={6}
-          ellipsizeMode="tail"
-        >
-          {card?.definition}
-        </Text>
+        <XStack justifyContent="space-between" alignItems="center" pb="$3">
+          <Button
+            icon={<Volume2 size="$1" color="$colorMuted" />}
+            circular
+            size="$3"
+            bg="$backgroundSoft"
+            onPress={(e) => {
+              e.stopPropagation();
+              onTts?.();
+            }}
+          />
+          <Button
+            icon={<Star size="$1" color="$colorMuted" />}
+            circular
+            size="$3"
+            bg="$backgroundSoft"
+            onPress={(e) => {
+              e.stopPropagation();
+              onStar?.();
+            }}
+          />
+        </XStack>
+        <XStack f={1} alignItems="center" justifyContent="center">
+          <Text
+            fontSize="$6"
+            color="$statusSuccess"
+            textAlign="center"
+            numberOfLines={6}
+            ellipsizeMode="tail"
+          >
+            {card?.definition}
+          </Text>
+        </XStack>
       </AnimatedCard>
     </Card>
   );
