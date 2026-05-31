@@ -67,29 +67,13 @@ export default function FlashcardsGame() {
           card={activeCards[currentIndex]}
           onTts={() => {}}
           onStar={() => {}}
+          onSwipeLeft={swipeLeft}
+          onSwipeRight={swipeRight}
         />
 
-        <XStack
-          justifyContent="space-between"
-          px="$4"
-          alignItems="center"
-          mb="$5"
-        >
+        <XStack justifyContent="center" alignItems="center" mb="$5">
           <Button
-            icon={<X size="$1" color="$statusDanger" />}
-            size="$4"
-            bg="transparent"
-            borderWidth={1.5}
-            borderColor="$statusDanger"
-            br="$10"
-            px="$4"
-            onPress={swipeLeft}
-          >
-            <Text color="$statusDanger">Still learning</Text>
-          </Button>
-
-          <Button
-            icon={<RotateCcw size="$1" color="$color" />}
+            icon={<RotateCcw size="$1.5" color="$color" />}
             circular
             size="$3"
             bg="transparent"
@@ -97,17 +81,6 @@ export default function FlashcardsGame() {
             opacity={currentIndex === 0 ? 0.3 : 1}
             onPress={revertSwipe}
           />
-
-          <Button
-            icon={<Check size="$1" color="white" />}
-            size="$4"
-            bg="$statusSuccess"
-            br="$10"
-            px="$4"
-            onPress={swipeRight}
-          >
-            <Text color="white">Know</Text>
-          </Button>
         </XStack>
       </YStack>
     </YStack>

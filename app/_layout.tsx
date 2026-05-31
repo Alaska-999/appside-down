@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PortalProvider, TamaguiProvider, Theme } from "tamagui";
 
 const queryClient = new QueryClient();
@@ -39,17 +40,19 @@ export default function RootLayout() {
   }
 
   return (
-    <TamaguiProvider config={config} defaultTheme="light">
-      <PortalProvider>
-        <Theme name="light">
-          <QueryClientProvider client={queryClient}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
-            </Stack>
-          </QueryClientProvider>
-        </Theme>
-      </PortalProvider>
-    </TamaguiProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TamaguiProvider config={config} defaultTheme="light">
+        <PortalProvider>
+          <Theme name="light">
+            <QueryClientProvider client={queryClient}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
+              </Stack>
+            </QueryClientProvider>
+          </Theme>
+        </PortalProvider>
+      </TamaguiProvider>
+    </GestureHandlerRootView>
   );
 }
