@@ -18,6 +18,10 @@ const tokens = createTokens({
         slate7: '#A9A9A9',
         slate8: '#9DADC4',
 
+        // Game card surfaces
+        cardSurface: '#FFFFFF',
+        cardBack: '#F5F3FF',
+
         // Semantic (Смислові - для гри та статусів)
         green: '#059669',  // Known
         red: '#DC2626',    // Still Learning
@@ -64,7 +68,9 @@ const appConfig = createTamagui({
 
             backgroundCard: tokens.color.slate3,
             darkGrey: tokens.color.slate7,
-            gameCard: tokens.color.slate8
+            gameCard: tokens.color.slate8,
+            cardSurface: tokens.color.cardSurface,
+            cardBack: tokens.color.cardBack,
         },
         dark: {
             background: tokens.color.pureBlack,
@@ -92,7 +98,9 @@ const appConfig = createTamagui({
 
             backgroundCard: tokens.color.blue,
             darkGrey: tokens.color.slate7,
-            gameCard: tokens.color.slate8
+            gameCard: tokens.color.slate8,
+            cardSurface: '#1E293B',
+            cardBack: '#1A1A2E',
 
         },
     },
