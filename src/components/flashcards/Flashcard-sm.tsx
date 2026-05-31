@@ -1,51 +1,32 @@
-import { useState } from "react";
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import { useFlipCard } from "@/src/hooks/useFlipCard";
+import Animated from "react-native-reanimated";
 import { Card, Text } from "tamagui";
 
 interface FlashcardSmProps {
   term: string;
   definition: string;
+  direction?: "horizontal" | "vertical";
   width?: number;
 }
 
 const AnimatedCard = Animated.createAnimatedComponent(Card);
 
-export function FlashcardSm({ term, definition, width }: FlashcardSmProps) {
-  const [isFront, setIsFront] = useState(true);
-
-  const flipRotation = useSharedValue(0);
-
-  const handlePress = () => {
-    flipRotation.value = withTiming(isFront ? 180 : 0, { duration: 400 });
-    setIsFront(!isFront);
-  };
-
-  const frontAnimatedStyle = useAnimatedStyle(() => {
-    const spin = interpolate(flipRotation.value, [0, 180], [0, 180]);
-    return {
-      transform: [{ rotateX: `${spin}deg` }],
-      backfaceVisibility: "hidden",
-    };
-  });
-
-  const backAnimatedStyle = useAnimatedStyle(() => {
-    const spin = interpolate(flipRotation.value, [0, 180], [180, 360]);
-    return {
-      transform: [{ rotateX: `${spin}deg` }],
-      backfaceVisibility: "hidden",
-    };
+export function FlashcardSm({
+  term,
+  definition,
+  direction = "vertical",
+  width,
+}: FlashcardSmProps) {
+  const { flip, frontAnimatedStyle, backAnimatedStyle } = useFlipCard({
+    direction,
+    duration: 400,
   });
 
   return (
     <Card
       h="$13"
       bg="transparent"
-      onPress={handlePress}
+      onPress={flip}
       pos="relative"
       {...(width ? { width } : { w: "90%" })}
     >
