@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   interpolate,
   useAnimatedStyle,
@@ -29,11 +29,11 @@ export function useFlipCard({
   const isFrontRef = useRef(true);
   const [isFront, setIsFront] = useState(true);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     isFrontRef.current = true;
-    flipRotation.value = withTiming(0, { duration: 0 });
+    flipRotation.value = 0;
     setIsFront(true);
-  };
+  }, []);
 
   const flip = () => {
     const next = !isFrontRef.current;
@@ -44,7 +44,7 @@ export function useFlipCard({
 
   useEffect(() => {
     reset();
-  }, [resetKey]);
+  }, [resetKey, reset]);
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const spin = interpolate(flipRotation.value, [0, 180], [0, 180]);
@@ -53,7 +53,7 @@ export function useFlipCard({
         ? [{ rotateX: `${spin}deg` }]
         : [{ rotateY: `${spin}deg` }];
     return { transform, backfaceVisibility: "hidden" };
-  });
+  }, [direction]);
 
   const backAnimatedStyle = useAnimatedStyle(() => {
     const spin = interpolate(flipRotation.value, [0, 180], [180, 360]);
@@ -62,7 +62,7 @@ export function useFlipCard({
         ? [{ rotateX: `${spin}deg` }]
         : [{ rotateY: `${spin}deg` }];
     return { transform, backfaceVisibility: "hidden" };
-  });
+  }, [direction]);
 
   return { isFront, flip, reset, frontAnimatedStyle, backAnimatedStyle };
 }
