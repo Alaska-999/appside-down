@@ -13,8 +13,7 @@ export default function FlashcardsGame() {
 
   const swipeRight = useGameStore((state) => state.swipeRight);
   const swipeLeft = useGameStore((state) => state.swipeLeft);
-  const flipCard = useGameStore((state) => state.flipCard);
-  const revertSwipe = useGameStore((state) => state.revertSwipe);
+const revertSwipe = useGameStore((state) => state.revertSwipe);
 
   return (
     <YStack f={1} bg="$background">
