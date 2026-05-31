@@ -23,7 +23,7 @@ const revertSwipe = useGameStore((state) => state.revertSwipe);
         progress={currentIndex.toString()}
       />
 
-      <YStack f={1} mt={20}>
+      <YStack f={1} mt={20} overflow="hidden">
         <XStack justifyContent="space-between" px="$5" alignItems="center">
           <XStack
             w={40}

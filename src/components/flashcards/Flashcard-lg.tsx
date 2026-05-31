@@ -30,7 +30,6 @@ export function FlashcardLg({
       m={20}
       f={1}
       pos="relative"
-      overflow="hidden"
       onPress={flip}
     >
       <AnimatedCard
