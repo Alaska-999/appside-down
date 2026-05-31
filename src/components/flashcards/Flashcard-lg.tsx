@@ -30,7 +30,6 @@ export function FlashcardLg({
       m={20}
       f={1}
       pos="relative"
-      onPress={flip}
     >
       <AnimatedCard
         style={frontAnimatedStyle}
@@ -41,25 +40,24 @@ export function FlashcardLg({
         bottom={0}
         bg="$gameCard"
         p="$5"
+        onPress={flip}
       >
-        <Card.Header pb="$3">
-          <XStack justifyContent="space-between" alignItems="center">
-            <Button
-              icon={<Volume2 size="$1" color="$colorMuted" />}
-              circular
-              size="$3"
-              bg="$backgroundSoft"
-              onPress={onTts}
-            />
-            <Button
-              icon={<Star size="$1" color="$colorMuted" />}
-              circular
-              size="$3"
-              bg="$backgroundSoft"
-              onPress={onStar}
-            />
-          </XStack>
-        </Card.Header>
+        <XStack justifyContent="space-between" alignItems="center" pb="$3">
+          <Button
+            icon={<Volume2 size="$1" color="$colorMuted" />}
+            circular
+            size="$3"
+            bg="$backgroundSoft"
+            onPress={onTts}
+          />
+          <Button
+            icon={<Star size="$1" color="$colorMuted" />}
+            circular
+            size="$3"
+            bg="$backgroundSoft"
+            onPress={onStar}
+          />
+        </XStack>
         <XStack f={1} alignItems="center" justifyContent="center">
           <Text
             fontSize="$6"
@@ -84,6 +82,7 @@ export function FlashcardLg({
         p="$5"
         alignItems="center"
         justifyContent="center"
+        onPress={flip}
       >
         <Text
           fontSize="$6"
