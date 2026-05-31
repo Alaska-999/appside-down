@@ -48,14 +48,14 @@ export function FlashcardLg({
             circular
             size="$3"
             bg="$backgroundSoft"
-            onPress={onTts}
+            onPress={(e) => { e.stopPropagation(); onTts?.(); }}
           />
           <Button
             icon={<Star size="$1" color="$colorMuted" />}
             circular
             size="$3"
             bg="$backgroundSoft"
-            onPress={onStar}
+            onPress={(e) => { e.stopPropagation(); onStar?.(); }}
           />
         </XStack>
         <XStack f={1} alignItems="center" justifyContent="center">
