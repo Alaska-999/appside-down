@@ -1,5 +1,12 @@
 import { Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { useWindowDimensions } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, XStack, YStack } from "tamagui";
 
@@ -16,6 +23,16 @@ export function ScreenHeaderFlashcards({
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+
+  const progressPct = Number(total) > 0 ? Number(progress) / Number(total) : 0;
+  const barWidth = useSharedValue(progressPct * screenWidth);
+
+  useEffect(() => {
+    barWidth.value = withTiming(progressPct * screenWidth, { duration: 300 });
+  }, [progressPct, screenWidth]);
+
+  const barStyle = useAnimatedStyle(() => ({ width: barWidth.value }));
 
   return (
     <YStack>
@@ -50,12 +67,16 @@ export function ScreenHeaderFlashcards({
         width="100%"
         height={3}
       />
-      <XStack
-        position="absolute"
-        bg="$darkGrey"
-        width={`${(Number(progress) / Number(total)) * 100}%`}
-        bottom={0}
-        height={3}
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            bottom: 0,
+            height: 3,
+            backgroundColor: "#94A3B8",
+          },
+          barStyle,
+        ]}
       />
     </YStack>
   );

@@ -1,5 +1,7 @@
+import { createAnimations } from '@tamagui/animations-react-native'
 import { config } from '@tamagui/config/v3'
 import { createTamagui, createTokens } from 'tamagui'
+
 
 // 1. ТОКЕНИ (Палітра)
 // Тут ми визначаємо фізичні кольори. Змінюючи колір тут, він зміниться всюди.
@@ -35,6 +37,22 @@ const tokens = createTokens({
 const appConfig = createTamagui({
     ...config,
     tokens,
+    animations: createAnimations({
+        bouncy: {
+            damping: 10,
+            mass: 0.9,
+            stiffness: 100,
+        },
+        lazy: {
+            damping: 18,
+            stiffness: 50,
+        },
+        quick: {
+            damping: 20,
+            mass: 1.2,
+            stiffness: 250,
+        },
+    }),
     themes: {
         light: {
             // Backgrounds

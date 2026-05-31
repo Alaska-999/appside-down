@@ -2,6 +2,7 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Check, RotateCcw, X } from "@tamagui/lucide-icons";
+import { useCallback, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
@@ -14,6 +15,29 @@ export default function FlashcardsGame() {
   const swipeLeft = useGameStore((state) => state.swipeLeft);
   const revertSwipe = useGameStore((state) => state.revertSwipe);
 
+  const [revertCount, setRevertCount] = useState(0);
+  // track which side the last card was swiped to
+  const [lastSwipeDirection, setLastSwipeDirection] = useState<
+    "left" | "right"
+  >("right");
+
+  const handleSwipeRight = useCallback(() => {
+    setLastSwipeDirection("right");
+    swipeRight();
+  }, [swipeRight]);
+
+  const handleSwipeLeft = useCallback(() => {
+    setLastSwipeDirection("left");
+    swipeLeft();
+  }, [swipeLeft]);
+
+  const handleRevert = useCallback(() => {
+    if (currentIndex <= 0) return;
+    setRevertCount((c) => c + 1);
+  }, [currentIndex]);
+
+  const prevCard = currentIndex > 0 ? activeCards[currentIndex - 1] : undefined;
+
   return (
     <YStack f={1} bg="$background">
       <ScreenHeaderFlashcards
@@ -24,25 +48,6 @@ export default function FlashcardsGame() {
 
       <YStack f={1} mt={20} overflow="hidden">
         <XStack justifyContent="space-between" px="$5" alignItems="flex-start">
-          <YStack alignItems="center" gap={4}>
-            <XStack
-              bg="$statusSuccess"
-              br={20}
-              px="$3"
-              py="$2"
-              alignItems="center"
-              gap="$1"
-            >
-              <Check size="$1" color="white" />
-              <Text color="white" fontWeight="700" fontSize="$4">
-                {knownPiles.length}
-              </Text>
-            </XStack>
-            <Text fontSize="$1" color="$colorMuted">
-              Known
-            </Text>
-          </YStack>
-
           <YStack alignItems="center" gap={4}>
             <XStack
               bg="$statusDanger"
@@ -61,14 +66,36 @@ export default function FlashcardsGame() {
               Learning
             </Text>
           </YStack>
+          <YStack alignItems="center" gap={4}>
+            <XStack
+              bg="$statusSuccess"
+              br={20}
+              px="$3"
+              py="$2"
+              alignItems="center"
+              gap="$1"
+            >
+              <Check size="$1" color="white" />
+              <Text color="white" fontWeight="700" fontSize="$4">
+                {knownPiles.length}
+              </Text>
+            </XStack>
+            <Text fontSize="$1" color="$colorMuted">
+              Known
+            </Text>
+          </YStack>
         </XStack>
 
         <FlashcardLg
           card={activeCards[currentIndex]}
+          prevCard={prevCard}
+          revertDirection={lastSwipeDirection}
           onTts={() => {}}
           onStar={() => {}}
-          onSwipeLeft={swipeLeft}
-          onSwipeRight={swipeRight}
+          onSwipeLeft={handleSwipeLeft}
+          onSwipeRight={handleSwipeRight}
+          onRevert={revertSwipe}
+          revertKey={revertCount}
         />
 
         <XStack justifyContent="center" alignItems="center" mb="$5">
@@ -79,7 +106,7 @@ export default function FlashcardsGame() {
             bg="transparent"
             disabled={currentIndex === 0}
             opacity={currentIndex === 0 ? 0.3 : 1}
-            onPress={revertSwipe}
+            onPress={handleRevert}
           />
         </XStack>
       </YStack>
