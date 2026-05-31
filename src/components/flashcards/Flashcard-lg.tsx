@@ -2,7 +2,7 @@ import { useFlipCard } from "@/src/hooks/useFlipCard";
 import { Flashcard } from "@/src/types";
 import { Star, Volume2 } from "@tamagui/lucide-icons";
 import Animated from "react-native-reanimated";
-import { Button, Card, Text, XStack } from "tamagui";
+import { Button, Card, Text, XStack, YStack } from "tamagui";
 
 interface FlashcardLgProps {
   card: Flashcard | undefined;
@@ -33,11 +33,16 @@ export function FlashcardLg({
         left={0}
         right={0}
         bottom={0}
-        bg="$gameCard"
-        p="$5"
+        bg="$cardSurface"
+        br="$6"
         backfaceVisibility="hidden"
+        shadowColor="#000"
+        shadowOffset={{ width: 0, height: 4 }}
+        shadowOpacity={0.08}
+        shadowRadius={12}
+        elevation={4}
       >
-        <XStack justifyContent="space-between" alignItems="center" pb="$3">
+        <XStack justifyContent="space-between" alignItems="center" p="$5" pb="$3">
           <Button
             icon={<Volume2 size="$1" color="$colorMuted" />}
             circular
@@ -59,15 +64,28 @@ export function FlashcardLg({
             }}
           />
         </XStack>
-        <XStack f={1} alignItems="center" justifyContent="center">
+        <YStack f={1} alignItems="center" justifyContent="center" px="$5" gap="$3">
           <Text
-            fontSize="$6"
-            color="$statusSuccess"
+            fontSize="$1"
+            color="$colorMuted"
+            letterSpacing={1.5}
+            textTransform="uppercase"
+          >
+            Term
+          </Text>
+          <Text
+            fontSize="$7"
+            color="$color"
             textAlign="center"
             numberOfLines={6}
             ellipsizeMode="tail"
           >
             {card?.term}
+          </Text>
+        </YStack>
+        <XStack justifyContent="center" pb="$5">
+          <Text fontSize="$2" color="$colorMuted">
+            Tap to reveal
           </Text>
         </XStack>
       </AnimatedCard>
@@ -79,45 +97,36 @@ export function FlashcardLg({
         left={0}
         right={0}
         bottom={0}
-        bg="$gameCard"
-        p="$5"
+        bg="$cardBack"
+        br="$6"
         backfaceVisibility="hidden"
-        // alignItems="center"
-        // justifyContent="center"
+        shadowColor="#000"
+        shadowOffset={{ width: 0, height: 4 }}
+        shadowOpacity={0.08}
+        shadowRadius={12}
+        elevation={4}
+        alignItems="center"
+        justifyContent="center"
+        px="$5"
+        gap="$3"
       >
-        <XStack justifyContent="space-between" alignItems="center" pb="$3">
-          <Button
-            icon={<Volume2 size="$1" color="$colorMuted" />}
-            circular
-            size="$3"
-            bg="$backgroundSoft"
-            onPress={(e) => {
-              e.stopPropagation();
-              onTts?.();
-            }}
-          />
-          <Button
-            icon={<Star size="$1" color="$colorMuted" />}
-            circular
-            size="$3"
-            bg="$backgroundSoft"
-            onPress={(e) => {
-              e.stopPropagation();
-              onStar?.();
-            }}
-          />
-        </XStack>
-        <XStack f={1} alignItems="center" justifyContent="center">
-          <Text
-            fontSize="$6"
-            color="$statusSuccess"
-            textAlign="center"
-            numberOfLines={6}
-            ellipsizeMode="tail"
-          >
-            {card?.definition}
-          </Text>
-        </XStack>
+        <Text
+          fontSize="$1"
+          color="$colorMuted"
+          letterSpacing={1.5}
+          textTransform="uppercase"
+        >
+          Definition
+        </Text>
+        <Text
+          fontSize="$7"
+          color="$color"
+          textAlign="center"
+          numberOfLines={6}
+          ellipsizeMode="tail"
+        >
+          {card?.definition}
+        </Text>
       </AnimatedCard>
     </Card>
   );
