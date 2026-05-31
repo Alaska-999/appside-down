@@ -50,8 +50,8 @@ export function useFlipCard({
     const spin = interpolate(flipRotation.value, [0, 180], [0, 180]);
     const transform =
       direction === "vertical"
-        ? [{ rotateX: `${spin}deg` }]
-        : [{ rotateY: `${spin}deg` }];
+        ? [{ perspective: 1000 }, { rotateX: `${spin}deg` }]
+        : [{ perspective: 1000 }, { rotateY: `${spin}deg` }];
     return { transform, backfaceVisibility: "hidden" };
   }, [direction]);
 
@@ -59,8 +59,8 @@ export function useFlipCard({
     const spin = interpolate(flipRotation.value, [0, 180], [180, 360]);
     const transform =
       direction === "vertical"
-        ? [{ rotateX: `${spin}deg` }]
-        : [{ rotateY: `${spin}deg` }];
+        ? [{ perspective: 1000 }, { rotateX: `${spin}deg` }]
+        : [{ perspective: 1000 }, { rotateY: `${spin}deg` }];
     return { transform, backfaceVisibility: "hidden" };
   }, [direction]);
 

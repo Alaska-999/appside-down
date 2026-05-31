@@ -25,12 +25,7 @@ export function FlashcardLg({
   });
 
   return (
-    <Card
-      bg="transparent"
-      m={20}
-      f={1}
-      pos="relative"
-    >
+    <Card bg="transparent" m={20} f={1} pos="relative">
       <AnimatedCard
         style={frontAnimatedStyle}
         pos="absolute"
@@ -40,6 +35,7 @@ export function FlashcardLg({
         bottom={0}
         bg="$gameCard"
         p="$5"
+        backfaceVisibility="hidden"
         onPress={flip}
       >
         <XStack justifyContent="space-between" alignItems="center" pb="$3">
@@ -48,20 +44,26 @@ export function FlashcardLg({
             circular
             size="$3"
             bg="$backgroundSoft"
-            onPress={(e) => { e.stopPropagation(); onTts?.(); }}
+            onPress={(e) => {
+              e.stopPropagation();
+              onTts?.();
+            }}
           />
           <Button
             icon={<Star size="$1" color="$colorMuted" />}
             circular
             size="$3"
             bg="$backgroundSoft"
-            onPress={(e) => { e.stopPropagation(); onStar?.(); }}
+            onPress={(e) => {
+              e.stopPropagation();
+              onStar?.();
+            }}
           />
         </XStack>
         <XStack f={1} alignItems="center" justifyContent="center">
           <Text
             fontSize="$6"
-            color="$color"
+            color="$statusSuccess"
             textAlign="center"
             numberOfLines={6}
             ellipsizeMode="tail"
@@ -80,13 +82,14 @@ export function FlashcardLg({
         bottom={0}
         bg="$gameCard"
         p="$5"
+        backfaceVisibility="hidden"
         alignItems="center"
         justifyContent="center"
         onPress={flip}
       >
         <Text
           fontSize="$6"
-          color="$color"
+          color="$statusSuccess"
           textAlign="center"
           numberOfLines={6}
           ellipsizeMode="tail"
