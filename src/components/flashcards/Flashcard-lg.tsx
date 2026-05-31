@@ -105,28 +105,26 @@ export function FlashcardLg({
         shadowOpacity={0.08}
         shadowRadius={12}
         elevation={4}
-        alignItems="center"
-        justifyContent="center"
-        px="$5"
-        gap="$3"
       >
-        <Text
-          fontSize="$1"
-          color="$colorMuted"
-          letterSpacing={1.5}
-          textTransform="uppercase"
-        >
-          Definition
-        </Text>
-        <Text
-          fontSize="$7"
-          color="$color"
-          textAlign="center"
-          numberOfLines={6}
-          ellipsizeMode="tail"
-        >
-          {card?.definition}
-        </Text>
+        <YStack f={1} alignItems="center" justifyContent="center" px="$5" gap="$3">
+          <Text
+            fontSize="$1"
+            color="$colorMuted"
+            letterSpacing={1.5}
+            textTransform="uppercase"
+          >
+            Definition
+          </Text>
+          <Text
+            fontSize="$7"
+            color="$color"
+            textAlign="center"
+            numberOfLines={6}
+            ellipsizeMode="tail"
+          >
+            {card?.definition}
+          </Text>
+        </YStack>
       </AnimatedCard>
     </Card>
   );
