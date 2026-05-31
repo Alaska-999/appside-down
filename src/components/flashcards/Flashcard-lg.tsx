@@ -25,7 +25,7 @@ export function FlashcardLg({
   });
 
   return (
-    <Card bg="transparent" m={20} f={1} pos="relative">
+    <Card bg="transparent" m={20} f={1} pos="relative" overflow="hidden" onPress={flip}>
       <AnimatedCard
         style={frontAnimatedStyle}
         pos="absolute"
@@ -36,7 +36,6 @@ export function FlashcardLg({
         bg="$gameCard"
         p="$5"
         backfaceVisibility="hidden"
-        onPress={flip}
       >
         <XStack justifyContent="space-between" alignItems="center" pb="$3">
           <Button
@@ -85,7 +84,6 @@ export function FlashcardLg({
         backfaceVisibility="hidden"
         alignItems="center"
         justifyContent="center"
-        onPress={flip}
       >
         <Text
           fontSize="$6"
