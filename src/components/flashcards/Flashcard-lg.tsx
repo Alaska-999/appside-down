@@ -25,7 +25,14 @@ export function FlashcardLg({
   });
 
   return (
-    <Card bg="transparent" m={20} f={1} pos="relative" overflow="hidden" onPress={flip}>
+    <Card
+      bg="transparent"
+      m={20}
+      f={1}
+      pos="relative"
+      overflow="hidden"
+      onPress={flip}
+    >
       <AnimatedCard
         style={frontAnimatedStyle}
         pos="absolute"

@@ -17,15 +17,9 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
     // Підготовка масиву карток перед грою
     initGame: (module: Module, cards: Flashcard[]) => {
-        let preparedCards = [...cards];
-
-        if (get().settings.shuffle) {
-            preparedCards = preparedCards.sort(() => Math.random() - 0.5);
-        }
-
         set({
             currentModule: module,
-            activeCards: preparedCards,
+            activeCards: cards,
             currentIndex: 0,
             knownPiles: [],
             stillLearningPiles: [],
@@ -51,6 +45,20 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
         set({
             stillLearningPiles: [...stillLearningPiles, { ...currentCard, status: 'still_learning' }],
             currentIndex: currentIndex + 1,
+        });
+    },
+
+    revertSwipe: () => {
+        const { currentIndex, activeCards, knownPiles, stillLearningPiles } = get();
+        if (currentIndex <= 0) return;
+
+        const prevCard = activeCards[currentIndex - 1];
+        const wasKnown = knownPiles.length > 0 && knownPiles[knownPiles.length - 1].id === prevCard.id;
+
+        set({
+            currentIndex: currentIndex - 1,
+            knownPiles: wasKnown ? knownPiles.slice(0, -1) : knownPiles,
+            stillLearningPiles: wasKnown ? stillLearningPiles : stillLearningPiles.slice(0, -1),
         });
     },
 

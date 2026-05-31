@@ -15,6 +15,8 @@ const tokens = createTokens({
         slate4: '#94A3B8', // Текст підказок (muted)
         slate5: '#475569', // Другорядний текст
         slate6: '#1A1A1B', // Основний текст / Чорні елементи
+        slate7: '#A9A9A9',
+        slate8: '#9DADC4',
 
         // Semantic (Смислові - для гри та статусів)
         green: '#059669',  // Known
@@ -61,6 +63,8 @@ const appConfig = createTamagui({
             statusInfo: tokens.color.blue,
 
             backgroundCard: tokens.color.slate3,
+            darkGrey: tokens.color.slate7,
+            gameCard: tokens.color.slate8
         },
         dark: {
             background: tokens.color.pureBlack,
@@ -87,6 +91,8 @@ const appConfig = createTamagui({
             statusInfo: tokens.color.blue,
 
             backgroundCard: tokens.color.blue,
+            darkGrey: tokens.color.slate7,
+            gameCard: tokens.color.slate8
 
         },
     },

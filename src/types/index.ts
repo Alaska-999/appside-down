@@ -116,6 +116,7 @@ export interface FlashcardsGameState {
     swipeLeft: () => void;
     swipeRight: () => void;
     flipCard: () => void;
+    revertSwipe: () => void;
     restart: (onlyStillLearning?: boolean) => void;
     updateSettings: (newSettings: Partial<FlashcardsGameState['settings']>) => void;
 }

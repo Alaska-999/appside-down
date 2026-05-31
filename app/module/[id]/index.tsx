@@ -1,6 +1,7 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
+import { useGameStore } from "@/src/store/useGameStore";
 import { Flashcard, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
@@ -40,46 +41,6 @@ const PEEK = 28;
 
 type SortOrder = "original" | "alphabetical";
 
-const getActionButtons = (id: string) => [
-  {
-    key: "flashcards",
-    label: "Flashcards",
-    Icon: Layers,
-    locked: false,
-    onPress: () =>
-      router.push({ pathname: "/module/[id]/flashcards", params: { id } }),
-  },
-  {
-    key: "learn",
-    label: "Learn",
-    Icon: GraduationCap,
-    locked: true,
-    onPress: () => {},
-  },
-  {
-    key: "test",
-    label: "Test",
-    Icon: FileText,
-    locked: false,
-    onPress: () => {},
-  },
-  {
-    key: "match",
-    label: "Match",
-    Icon: ArrowLeftRight,
-    locked: false,
-    onPress: () => {},
-  },
-  { key: "blast", label: "Blast", Icon: Zap, locked: false, onPress: () => {} },
-  {
-    key: "blocks",
-    label: "Blocks",
-    Icon: LayoutGrid,
-    locked: false,
-    onPress: () => {},
-  },
-];
-
 export default function ModuleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [moduleData, setModuleData] = useState<Module | null>(null);
@@ -94,11 +55,62 @@ export default function ModuleScreen() {
   const { width: screenWidth } = useWindowDimensions();
 
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
+  const initGame = useGameStore((state) => state.initGame);
 
   useEffect(() => {
     console.log(id);
     fetchData();
   }, [id]);
+  const getActionButtons = (id: string) => [
+    {
+      key: "flashcards",
+      label: "Flashcards",
+      Icon: Layers,
+      locked: false,
+      onPress: (module: Module, flashcards: Flashcard[]) => {
+        console.log(module);
+        if (module && flashcards && flashcards?.length > 0) {
+          initGame(module, flashcards);
+          router.push({ pathname: "/module/[id]/flashcards", params: { id } });
+        }
+      },
+    },
+    {
+      key: "learn",
+      label: "Learn",
+      Icon: GraduationCap,
+      locked: true,
+      onPress: () => {},
+    },
+    {
+      key: "test",
+      label: "Test",
+      Icon: FileText,
+      locked: false,
+      onPress: () => {},
+    },
+    {
+      key: "match",
+      label: "Match",
+      Icon: ArrowLeftRight,
+      locked: false,
+      onPress: () => {},
+    },
+    {
+      key: "blast",
+      label: "Blast",
+      Icon: Zap,
+      locked: false,
+      onPress: () => {},
+    },
+    {
+      key: "blocks",
+      label: "Blocks",
+      Icon: LayoutGrid,
+      locked: false,
+      onPress: () => {},
+    },
+  ];
 
   const fetchData = async () => {
     setLoading(true);
@@ -170,7 +182,7 @@ export default function ModuleScreen() {
   const handleToggleFavorite = async () => {
     if (!moduleData) return;
     const newValue = !moduleData.isFavorite;
-    setModuleData((prev) => prev ? { ...prev, isFavorite: newValue } : prev);
+    setModuleData((prev) => (prev ? { ...prev, isFavorite: newValue } : prev));
     try {
       const res = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
@@ -179,7 +191,9 @@ export default function ModuleScreen() {
       if (!res.ok) throw new Error(`Error: ${res.status}`);
     } catch (err) {
       console.error("[ModuleScreen] favorite error:", err);
-      setModuleData((prev) => prev ? { ...prev, isFavorite: !newValue } : prev);
+      setModuleData((prev) =>
+        prev ? { ...prev, isFavorite: !newValue } : prev,
+      );
     }
   };
 
@@ -269,7 +283,9 @@ export default function ModuleScreen() {
             <Pressable hitSlop={8} onPress={handleToggleFavorite}>
               <Star
                 size={22}
-                color={moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"}
+                color={
+                  moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"
+                }
                 fill={moduleData?.isFavorite ? "$statusWarning" : "transparent"}
               />
             </Pressable>
@@ -413,7 +429,10 @@ export default function ModuleScreen() {
               <YStack gap="$2">
                 {getActionButtons(id).map(
                   ({ key, label, Icon, locked, onPress }) => (
-                    <Pressable key={key} onPress={onPress}>
+                    <Pressable
+                      key={key}
+                      onPress={() => onPress(moduleData, flashcards)}
+                    >
                       <XStack
                         bg="$backgroundHover"
                         br="$4"
