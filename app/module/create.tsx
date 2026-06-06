@@ -13,7 +13,9 @@ export default function ModuleCreate() {
     { term: "", definition: "" },
     { term: "", definition: "" },
   ]);
-  const { returnFolderId } = useLocalSearchParams<{ returnFolderId?: string }>();
+  const { returnFolderId } = useLocalSearchParams<{
+    returnFolderId?: string;
+  }>();
 
   const handleCreateModule = async () => {
     if (!name) {
@@ -31,7 +33,7 @@ export default function ModuleCreate() {
     }
 
     const module = {
-      flashcards: items,
+      flashcards: items.filter((i) => i.term.trim() || i.definition.trim()),
       name: name || "Untitled Module",
       description: description || "",
     };

@@ -1,8 +1,8 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Search } from "@tamagui/lucide-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
@@ -30,9 +30,11 @@ export default function AddModules() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchAvailableModules();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAvailableModules();
+    }, [folderId]),
+  );
 
   const fetchAvailableModules = async () => {
     setLoading(true);
