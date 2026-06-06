@@ -202,10 +202,10 @@ export default function ModuleScreen() {
     setTimeout(() => setEditSheetOpen(true), 300);
   };
 
-  const handleSaved = (updatedCards: Flashcard[]) => {
+  const handleSaved = (updatedCards: Flashcard[], name: string, description: string) => {
     setFlashcards(updatedCards);
     setModuleData((prev) =>
-      prev ? { ...prev, itemsCount: updatedCards.length } : prev,
+      prev ? { ...prev, name, description, itemsCount: updatedCards.length } : prev,
     );
   };
 
@@ -550,7 +550,7 @@ export default function ModuleScreen() {
             onPress={openEditSheet}
           >
             <Text f={1} fontSize="$5">
-              Edit cards
+              Edit module
             </Text>
           </Button>
           <Button
@@ -576,6 +576,8 @@ export default function ModuleScreen() {
           definition: c.definition,
         }))}
         onSaved={handleSaved}
+        moduleName={moduleData?.name ?? ""}
+        moduleDescription={moduleData?.description ?? ""}
       />
 
       {/* Sort sheet */}
