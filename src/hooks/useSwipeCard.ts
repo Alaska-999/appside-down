@@ -42,12 +42,8 @@ export function useSwipeCard({
 
     const startX = revertDirection === "left" ? -screenWidth * 1.3 : screenWidth * 1.3;
 
-    // КРИТИЧНО: Ставимо картку за екран МИТТЄВО (без згладжування),
-    // щоб користувач не бачив, як вона туди переміщується
     translateX.value = startX;
 
-    // Даємо 50-100мс на те, щоб React встиг змінити текст у Zustand під капотом,
-    // і тільки потім плавно повертаємо картку в центр екрана
     translateX.value = withTiming(0, { duration: 320 });
 
   }, [revertKey]);

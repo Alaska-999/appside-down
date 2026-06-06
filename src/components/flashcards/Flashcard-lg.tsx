@@ -223,6 +223,5 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   mainCard: { flex: 1, position: "relative" },
-  // Matches the height of the TTS + Star buttons row on the front card
   overlayButtonSpacer: { height: 60 },
 });
