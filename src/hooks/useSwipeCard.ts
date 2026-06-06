@@ -42,10 +42,8 @@ export function useSwipeCard({
     if (!revertKey) return;
 
     const startX = revertDirection === "left" ? -screenWidth * 1.3 : screenWidth * 1.3;
-
     translateX.value = startX;
-
-    translateX.value = withTiming(0, { duration: 320 });
+    translateX.value = withTiming(0, { duration: 250 });
 
   }, [revertKey]);
 
