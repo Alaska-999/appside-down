@@ -1,6 +1,7 @@
 import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlashcards";
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { useGameStore } from "@/src/store/useGameStore";
+import { Flashcard } from "@/src/types";
 import { Check, RotateCcw, X } from "@tamagui/lucide-icons";
 import { useCallback, useState } from "react";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -16,7 +17,9 @@ export default function FlashcardsGame() {
   const revertSwipe = useGameStore((state) => state.revertSwipe);
 
   const [revertCount, setRevertCount] = useState(0);
-  // track which side the last card was swiped to
+  const [revertCard, setRevertCard] = useState<Flashcard | undefined>(
+    undefined,
+  );
   const [lastSwipeDirection, setLastSwipeDirection] = useState<
     "left" | "right"
   >("right");
@@ -33,10 +36,10 @@ export default function FlashcardsGame() {
 
   const handleRevert = useCallback(() => {
     if (currentIndex <= 0) return;
-    setRevertCount((c) => c + 1);
-  }, [currentIndex]);
 
-  const prevCard = currentIndex > 0 ? activeCards[currentIndex - 1] : undefined;
+    setRevertCard(activeCards[currentIndex - 1]);
+    setRevertCount((c) => c + 1);
+  }, [currentIndex, activeCards]);
 
   return (
     <YStack f={1} bg="$background">
@@ -88,7 +91,7 @@ export default function FlashcardsGame() {
 
         <FlashcardLg
           card={activeCards[currentIndex]}
-          prevCard={prevCard}
+          revertCard={revertCard}
           revertDirection={lastSwipeDirection}
           onTts={() => {}}
           onStar={() => {}}

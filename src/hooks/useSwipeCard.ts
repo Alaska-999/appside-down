@@ -18,6 +18,9 @@ interface UseSwipeCardOptions {
   onSwipeRight?: () => void;
   onTap: () => void;
   resetKey?: string | number;
+  revertKey?: number;
+  revertDirection?: "left" | "right";
+
 }
 
 export function useSwipeCard({
@@ -25,6 +28,8 @@ export function useSwipeCard({
   onSwipeRight,
   onTap,
   resetKey,
+  revertKey,
+  revertDirection = "right",
 }: UseSwipeCardOptions) {
   const { width: screenWidth } = useWindowDimensions();
   const translateX = useSharedValue(0);
@@ -32,6 +37,20 @@ export function useSwipeCard({
   useEffect(() => {
     translateX.value = 0;
   }, [resetKey]);
+  useEffect(() => {
+    if (!revertKey) return;
+
+    const startX = revertDirection === "left" ? -screenWidth * 1.3 : screenWidth * 1.3;
+
+    // КРИТИЧНО: Ставимо картку за екран МИТТЄВО (без згладжування),
+    // щоб користувач не бачив, як вона туди переміщується
+    translateX.value = startX;
+
+    // Даємо 50-100мс на те, щоб React встиг змінити текст у Zustand під капотом,
+    // і тільки потім плавно повертаємо картку в центр екрана
+    translateX.value = withTiming(0, { duration: 320 });
+
+  }, [revertKey]);
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -40,17 +59,20 @@ export function useSwipeCard({
     })
     .onEnd((e) => {
       if (e.translationX > SWIPE_THRESHOLD) {
-        translateX.value = withTiming(screenWidth * 1.5, { duration: 300 }, () => {
-          if (onSwipeRight) runOnJS(onSwipeRight)();
-          translateX.value = 0;
+        translateX.value = withTiming(screenWidth * 1.3, { duration: 250 }, (finished) => {
+          if (finished && onSwipeRight) {
+            runOnJS(onSwipeRight)();
+
+          }
         });
       } else if (e.translationX < -SWIPE_THRESHOLD) {
-        translateX.value = withTiming(-screenWidth * 1.5, { duration: 300 }, () => {
-          if (onSwipeLeft) runOnJS(onSwipeLeft)();
-          translateX.value = 0;
+        translateX.value = withTiming(-screenWidth * 1.3, { duration: 250 }, (finished) => {
+          if (finished && onSwipeLeft) {
+            runOnJS(onSwipeLeft)();
+          }
         });
       } else {
-        translateX.value = withSpring(0);
+        translateX.value = withSpring(0, { damping: 15 });
       }
     });
 

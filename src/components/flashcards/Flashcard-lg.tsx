@@ -2,7 +2,7 @@ import { useFlipCard } from "@/src/hooks/useFlipCard";
 import { useSwipeCard } from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
 import { Star, Volume2 } from "@tamagui/lucide-icons";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -16,7 +16,7 @@ import { Button, Card, Text, XStack, YStack } from "tamagui";
 
 interface FlashcardLgProps {
   card: Flashcard | undefined;
-  prevCard?: Flashcard;
+  revertCard?: Flashcard;
   revertDirection?: "left" | "right";
   direction?: "horizontal" | "vertical";
   onTts?: () => void;
@@ -31,7 +31,7 @@ const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export function FlashcardLg({
   card,
-  prevCard,
+  revertCard,
   revertDirection = "right",
   direction = "horizontal",
   onTts,
@@ -53,32 +53,36 @@ export function FlashcardLg({
     onSwipeRight,
     onTap: flip,
     resetKey: card?.id,
+    revertKey,
+    revertDirection,
   });
 
-  const overlayX = useSharedValue(screenWidth * 1.5);
-  const overlayVisible = useSharedValue(0);
+  const revertDirectionRef = useRef(revertDirection);
+  revertDirectionRef.current = revertDirection;
+
+  const overlayX = useSharedValue(screenWidth * 2);
+
+  const overlayAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: overlayX.value }],
+  }));
 
   useEffect(() => {
     if (!revertKey) return;
     const startX =
-      revertDirection === "left" ? -screenWidth * 1.5 : screenWidth * 1.5;
+      revertDirectionRef.current === "left"
+        ? -screenWidth * 1.5
+        : screenWidth * 1.5;
     overlayX.value = startX;
-    overlayVisible.value = 1;
     overlayX.value = withTiming(
       0,
       { duration: 320, easing: Easing.out(Easing.cubic) },
       (finished) => {
         if (!finished) return;
         if (onRevert) runOnJS(onRevert)();
-        overlayVisible.value = 0;
+        overlayX.value = screenWidth * 2;
       },
     );
   }, [revertKey]);
-
-  const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: overlayX.value }],
-    opacity: overlayVisible.value,
-  }));
 
   return (
     <GestureDetector gesture={gesture}>
@@ -203,57 +207,6 @@ export function FlashcardLg({
             </YStack>
           </AnimatedCard>
         </Animated.View>
-
-        {/* Overlay: previous card slides in on top of current card */}
-        <Animated.View
-          style={[StyleSheet.absoluteFillObject, overlayAnimatedStyle]}
-          pointerEvents="none"
-        >
-          {prevCard && (
-            <Card
-              pos="absolute"
-              top={0}
-              left={0}
-              right={0}
-              bottom={0}
-              bg="$backgroundCard"
-              br="$6"
-              border={"2px solid"}
-              borderColor="$colorMuted"
-            >
-              <YStack
-                f={1}
-                alignItems="center"
-                justifyContent="center"
-                px="$5"
-                gap="$3"
-              >
-                <Text
-                  fontSize="$1"
-                  color="$colorMuted"
-                  letterSpacing={1.5}
-                  textTransform="uppercase"
-                >
-                  Term
-                </Text>
-                <Text
-                  fontSize="$7"
-                  color="$color"
-                  textAlign="center"
-                  numberOfLines={6}
-                  ellipsizeMode="tail"
-                >
-                  {prevCard.term}
-                </Text>
-              </YStack>
-              <XStack justifyContent="center" pb="$5">
-                <Text fontSize="$2" color="$colorMuted">
-                  Tap to reveal
-                </Text>
-              </XStack>
-            </Card>
-          )}
-        </Animated.View>
       </View>
     </GestureDetector>
   );
@@ -270,4 +223,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   mainCard: { flex: 1, position: "relative" },
+  // Matches the height of the TTS + Star buttons row on the front card
+  overlayButtonSpacer: { height: 60 },
 });
