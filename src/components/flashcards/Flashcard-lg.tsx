@@ -2,28 +2,19 @@ import { useFlipCard } from "@/src/hooks/useFlipCard";
 import { useSwipeCard } from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
 import { Star, Volume2 } from "@tamagui/lucide-icons";
-import { useEffect, useRef } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  Easing,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 
 interface FlashcardLgProps {
   card: Flashcard | undefined;
-  revertCard?: Flashcard;
   revertDirection?: "left" | "right";
   direction?: "horizontal" | "vertical";
   onTts?: () => void;
   onStar?: () => void;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
-  onRevert?: () => void;
   revertKey?: number;
 }
 
@@ -31,18 +22,14 @@ const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export function FlashcardLg({
   card,
-  revertCard,
   revertDirection = "right",
   direction = "horizontal",
   onTts,
   onStar,
   onSwipeLeft,
   onSwipeRight,
-  onRevert,
   revertKey,
 }: FlashcardLgProps) {
-  const { width: screenWidth } = useWindowDimensions();
-
   const { flip, frontAnimatedStyle, backAnimatedStyle } = useFlipCard({
     direction,
     resetKey: card?.id,
@@ -56,33 +43,6 @@ export function FlashcardLg({
     revertKey,
     revertDirection,
   });
-
-  const revertDirectionRef = useRef(revertDirection);
-  revertDirectionRef.current = revertDirection;
-
-  const overlayX = useSharedValue(screenWidth * 2);
-
-  const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: overlayX.value }],
-  }));
-
-  useEffect(() => {
-    if (!revertKey) return;
-    const startX =
-      revertDirectionRef.current === "left"
-        ? -screenWidth * 1.5
-        : screenWidth * 1.5;
-    overlayX.value = startX;
-    overlayX.value = withTiming(
-      0,
-      { duration: 320, easing: Easing.out(Easing.cubic) },
-      (finished) => {
-        if (!finished) return;
-        if (onRevert) runOnJS(onRevert)();
-        overlayX.value = screenWidth * 2;
-      },
-    );
-  }, [revertKey]);
 
   return (
     <GestureDetector gesture={gesture}>

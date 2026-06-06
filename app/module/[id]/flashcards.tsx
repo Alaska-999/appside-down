@@ -17,9 +17,6 @@ export default function FlashcardsGame() {
   const revertSwipe = useGameStore((state) => state.revertSwipe);
 
   const [revertCount, setRevertCount] = useState(0);
-  const [revertCard, setRevertCard] = useState<Flashcard | undefined>(
-    undefined,
-  );
   const [lastSwipeDirection, setLastSwipeDirection] = useState<
     "left" | "right"
   >("right");
@@ -37,9 +34,9 @@ export default function FlashcardsGame() {
   const handleRevert = useCallback(() => {
     if (currentIndex <= 0) return;
 
-    setRevertCard(activeCards[currentIndex - 1]);
+    revertSwipe();
     setRevertCount((c) => c + 1);
-  }, [currentIndex, activeCards]);
+  }, [currentIndex, revertSwipe]);
 
   return (
     <YStack f={1} bg="$background">
@@ -91,13 +88,11 @@ export default function FlashcardsGame() {
 
         <FlashcardLg
           card={activeCards[currentIndex]}
-          revertCard={revertCard}
           revertDirection={lastSwipeDirection}
           onTts={() => {}}
           onStar={() => {}}
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
-          onRevert={revertSwipe}
           revertKey={revertCount}
         />
 

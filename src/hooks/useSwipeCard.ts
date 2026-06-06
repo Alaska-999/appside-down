@@ -37,6 +37,7 @@ export function useSwipeCard({
   useEffect(() => {
     translateX.value = 0;
   }, [resetKey]);
+
   useEffect(() => {
     if (!revertKey) return;
 
