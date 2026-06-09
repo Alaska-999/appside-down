@@ -11,6 +11,7 @@ interface FlashcardLgProps {
   card: Flashcard | undefined;
   revertDirection?: "left" | "right";
   direction?: "horizontal" | "vertical";
+  showDefinitionFirst?: boolean;
   onTts?: () => void;
   onStar?: () => void;
   onSwipeLeft?: () => void;
@@ -24,12 +25,19 @@ export function FlashcardLg({
   card,
   revertDirection = "right",
   direction = "horizontal",
+  showDefinitionFirst = false,
   onTts,
   onStar,
   onSwipeLeft,
   onSwipeRight,
   revertKey,
 }: FlashcardLgProps) {
+  const front = showDefinitionFirst
+    ? { label: "Definition", text: card?.definition }
+    : { label: "Term", text: card?.term };
+  const back = showDefinitionFirst
+    ? { label: "Term", text: card?.term }
+    : { label: "Definition", text: card?.definition };
   const { flip, frontAnimatedStyle, backAnimatedStyle } = useFlipCard({
     direction,
     resetKey: card?.id,
@@ -108,7 +116,7 @@ export function FlashcardLg({
                 letterSpacing={1.5}
                 textTransform="uppercase"
               >
-                Term
+                {front.label}
               </Text>
               <Text
                 fontSize="$7"
@@ -117,7 +125,7 @@ export function FlashcardLg({
                 numberOfLines={6}
                 ellipsizeMode="tail"
               >
-                {card?.term}
+                {front.text}
               </Text>
             </YStack>
             <XStack justifyContent="center" pb="$5">
@@ -153,7 +161,7 @@ export function FlashcardLg({
                 letterSpacing={1.5}
                 textTransform="uppercase"
               >
-                Definition
+                {back.label}
               </Text>
               <Text
                 fontSize="$7"
@@ -162,7 +170,7 @@ export function FlashcardLg({
                 numberOfLines={6}
                 ellipsizeMode="tail"
               >
-                {card?.definition}
+                {back.text}
               </Text>
             </YStack>
           </AnimatedCard>

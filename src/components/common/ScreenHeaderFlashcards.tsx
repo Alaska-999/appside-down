@@ -1,4 +1,4 @@
-import { Settings2, X } from "@tamagui/lucide-icons";
+import { X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useWindowDimensions } from "react-native";
@@ -12,12 +12,12 @@ import { Button, Text, XStack, YStack } from "tamagui";
 
 export function ScreenHeaderFlashcards({
   title,
-  onRight,
+  rightAction,
   progress,
   total,
 }: {
   title?: string;
-  onRight: () => void;
+  rightAction?: React.ReactNode;
   progress: string;
   total: string;
 }) {
@@ -53,12 +53,7 @@ export function ScreenHeaderFlashcards({
         <Text>
           {progress}/{total}
         </Text>
-        <Button
-          icon={<Settings2 size="$1.5" color="$color" />}
-          circular
-          onPress={onRight}
-          ml="$-3"
-        />
+        {rightAction}
       </XStack>
       <XStack
         position="absolute"

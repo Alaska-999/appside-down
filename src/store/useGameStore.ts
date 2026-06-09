@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { Flashcard, FlashcardsGameState, Module } from '../types';
 
+function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 export const useGameStore = create<FlashcardsGameState>((set, get) => ({
     currentModule: null,
     activeCards: [],
@@ -15,11 +24,14 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
         cardOrientation: 'term_first',
     },
 
-    // Підготовка масиву карток перед грою
     initGame: (module: Module, cards: Flashcard[]) => {
+        const { settings } = get();
+        const stillLearning = cards.filter(c => c.status === 'still_learning');
+        const base = stillLearning.length > 0 && settings.sortByPiles ? stillLearning : cards;
+        const activeCards = settings.shuffle ? shuffle(base) : base;
         set({
             currentModule: module,
-            activeCards: cards,
+            activeCards,
             currentIndex: 0,
             knownPiles: [],
             stillLearningPiles: [],
@@ -73,7 +85,7 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
         // Скидаємо прогрес і встановлюємо нову чергу
         set({
-            activeCards: get().settings.shuffle ? nextCards.sort(() => Math.random() - 0.5) : nextCards,
+            activeCards: get().settings.shuffle ? shuffle(nextCards) : nextCards,
             currentIndex: 0,
             knownPiles: [],
             stillLearningPiles: [],
