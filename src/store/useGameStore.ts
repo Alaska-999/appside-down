@@ -93,8 +93,14 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
     },
 
     updateSettings: (newSettings) => {
-        set((state) => ({
-            settings: { ...state.settings, ...newSettings }
-        }));
+        set((state) => {
+            const updated = { ...state.settings, ...newSettings };
+            if ('shuffle' in newSettings && newSettings.shuffle) {
+                const played = state.activeCards.slice(0, state.currentIndex);
+                const remaining = state.activeCards.slice(state.currentIndex);
+                return { settings: updated, activeCards: [...played, ...shuffle(remaining)] };
+            }
+            return { settings: updated };
+        });
     },
 }));
