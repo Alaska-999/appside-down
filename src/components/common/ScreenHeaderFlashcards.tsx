@@ -15,11 +15,13 @@ export function ScreenHeaderFlashcards({
   rightAction,
   progress,
   total,
+  onClose,
 }: {
   title?: string;
   rightAction?: React.ReactNode;
   progress: string;
   total: string;
+  onClose?: () => void;
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -47,7 +49,7 @@ export function ScreenHeaderFlashcards({
         <Button
           icon={<X size="$2" color="$color" />}
           circular
-          onPress={() => router.back()}
+          onPress={() => onClose ? onClose() : router.back()}
           ml="$-3"
         />
         <Text>

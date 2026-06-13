@@ -56,6 +56,7 @@ export default function ModuleScreen() {
 
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
   const initGame = useGameStore((state) => state.initGame);
+  const currentModule = useGameStore((state) => state.currentModule);
 
   useEffect(() => {
     console.log(id);
@@ -68,9 +69,10 @@ export default function ModuleScreen() {
       Icon: Layers,
       locked: false,
       onPress: (module: Module, flashcards: Flashcard[]) => {
-        console.log(module);
         if (module && flashcards && flashcards?.length > 0) {
-          initGame(module, flashcards);
+          if (currentModule?.id !== module.id) {
+            initGame(module, flashcards);
+          }
           router.push({ pathname: "/module/[id]/flashcards", params: { id } });
         }
       },
@@ -202,10 +204,16 @@ export default function ModuleScreen() {
     setTimeout(() => setEditSheetOpen(true), 300);
   };
 
-  const handleSaved = (updatedCards: Flashcard[], name: string, description: string) => {
+  const handleSaved = (
+    updatedCards: Flashcard[],
+    name: string,
+    description: string,
+  ) => {
     setFlashcards(updatedCards);
     setModuleData((prev) =>
-      prev ? { ...prev, name, description, itemsCount: updatedCards.length } : prev,
+      prev
+        ? { ...prev, name, description, itemsCount: updatedCards.length }
+        : prev,
     );
   };
 

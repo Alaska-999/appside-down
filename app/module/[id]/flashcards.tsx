@@ -4,6 +4,7 @@ import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComple
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
+import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Button, PortalProvider, Text, XStack, YStack } from "tamagui";
 
@@ -18,6 +19,8 @@ export default function FlashcardsGame() {
   const swipeRight = useGameStore((state) => state.swipeRight);
   const swipeLeft = useGameStore((state) => state.swipeLeft);
   const revertSwipe = useGameStore((state) => state.revertSwipe);
+  const restart = useGameStore((state) => state.restart);
+  const router = useRouter();
 
   const [revertCount, setRevertCount] = useState(0);
   const [lastSwipeDirection, setLastSwipeDirection] = useState<
@@ -51,12 +54,22 @@ export default function FlashcardsGame() {
             <Button
               icon={<Settings2 size="$1.5" color="$color" />}
               circular
-              onPress={() => setSettingsSheetOpen(true)}
+              onPress={() => {
+                setSettingsSheetOpen(true);
+              }}
               ml="$-3"
             />
           }
           total={activeCards.length.toString()}
           progress={currentIndex.toString()}
+          onClose={
+            isComplete
+              ? () => {
+                  restart(true);
+                  router.back();
+                }
+              : undefined
+          }
         />
 
         <FlashcardsSettingsSheet

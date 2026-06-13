@@ -26,7 +26,7 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
     initGame: (module: Module, cards: Flashcard[]) => {
         const { settings } = get();
-        const stillLearning = cards.filter(c => c.status === 'still_learning');
+        const stillLearning = cards.filter(c => c.status === 'STILL_LEARNING');
         const base = stillLearning.length > 0 && settings.sortByPiles ? stillLearning : cards;
         const activeCards = settings.shuffle ? shuffle(base) : base;
         set({
@@ -44,7 +44,7 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
         const currentCard = activeCards[currentIndex];
         set({
-            knownPiles: [...knownPiles, { ...currentCard, status: 'known' }],
+            knownPiles: [...knownPiles, { ...currentCard, status: 'KNOWN' }],
             currentIndex: currentIndex + 1,
         });
     },
@@ -55,7 +55,7 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
         const currentCard = activeCards[currentIndex];
         set({
-            stillLearningPiles: [...stillLearningPiles, { ...currentCard, status: 'still_learning' }],
+            stillLearningPiles: [...stillLearningPiles, { ...currentCard, status: 'STILL_LEARNING' }],
             currentIndex: currentIndex + 1,
         });
     },

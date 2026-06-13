@@ -1,7 +1,7 @@
 /**
  * 1. ENUMS & LITERAL TYPES
  */
-export type LearningStatus = 'unstudied' | 'known' | 'still_learning';
+export type LearningStatus = 'UNSTUDIED' | 'KNOWN' | 'STILL_LEARNING';
 export type CardOrientation = 'term_first' | 'definition_first';
 export type SortOption = 'date' | 'alphabetical' | 'favorites';
 export type ThemeMode = 'light' | 'dark' | 'system';
