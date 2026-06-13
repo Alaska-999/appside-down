@@ -1,6 +1,5 @@
 import { useGameStore } from "@/src/store/useGameStore";
-import { RotateCcw } from "@tamagui/lucide-icons";
-import { useRouter } from "expo-router";
+import { Check, RotateCcw, X } from "@tamagui/lucide-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
 import { Button, Text, XStack, YStack } from "tamagui";
@@ -12,8 +11,8 @@ interface FlashcardsCompleteProps {
 }
 
 function CircularProgress({ pct }: { pct: number }) {
-  const size = 120;
-  const strokeWidth = 10;
+  const size = 180;
+  const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const filled = circumference * pct;
@@ -30,7 +29,7 @@ function CircularProgress({ pct }: { pct: number }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#2D3748"
+          stroke="#E2E8F0"
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -38,7 +37,7 @@ function CircularProgress({ pct }: { pct: number }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#F6AD55"
+          stroke="#1A1A1B"
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={`${filled} ${circumference - filled}`}
@@ -46,7 +45,7 @@ function CircularProgress({ pct }: { pct: number }) {
           strokeLinecap="round"
         />
       </Svg>
-      <Text fontSize="$7" fontWeight="700" color="$color">
+      <Text fontSize="$9" fontWeight="800" color="$color">
         {Math.round(pct * 100)}%
       </Text>
     </YStack>
@@ -59,64 +58,64 @@ export function FlashcardsComplete({
   stillLearning,
 }: FlashcardsCompleteProps) {
   const restart = useGameStore((state) => state.restart);
-
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const pct = total > 0 ? known / total : 0;
 
   return (
     <YStack f={1} bg="$background" pt={insets.top} pb={insets.bottom + 16}>
-      <YStack px="$5" pt="$5" pb="$4" gap="$2">
+      {/* Header */}
+      <YStack px="$5" pt="$5" pb="$4" gap="$1">
         <Text fontSize="$9" fontWeight="700" color="$color" lineHeight={40}>
-          Round complete!{"\n"}See how many{"\n"}you've got down.
+          Round{"\n"}complete!
+        </Text>
+        <Text fontSize="$4" color="$colorMuted" pt="$1">
+          {known} of {total} cards known
         </Text>
       </YStack>
 
-      <XStack height={1} bg="$backgroundCard" mx="$5" />
+      {/* Progress ring */}
+      <YStack alignItems="center" pt="$4" pb="$5">
+        <CircularProgress pct={pct} />
+      </YStack>
 
-      <YStack px="$5" pt="$5" gap="$4">
-        <Text fontSize="$5" fontWeight="600" color="$color">
-          Session results
-        </Text>
-
-        <XStack alignItems="center" gap="$6">
-          <CircularProgress pct={pct} />
-
-          <YStack gap="$3" f={1}>
-            <XStack
-              bg="$statusSuccess"
-              br={20}
-              px="$4"
-              py="$2.5"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Text color="white" fontWeight="600" fontSize="$4">
-                Got it
-              </Text>
-              <Text color="white" fontWeight="700" fontSize="$5">
-                {known}
-              </Text>
-            </XStack>
-
-            <XStack
-              bg="$statusWarning"
-              br={20}
-              px="$4"
-              py="$2.5"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Text color="white" fontWeight="600" fontSize="$4">
-                In progress
-              </Text>
-              <Text color="white" fontWeight="700" fontSize="$5">
-                {stillLearning}
-              </Text>
-            </XStack>
-          </YStack>
+      {/* Stat pills */}
+      <XStack px="$5" gap="$3" justifyContent="center">
+        <XStack
+          bg="$statusSuccess"
+          br={100}
+          px="$4"
+          py="$2.5"
+          alignItems="center"
+          gap="$2"
+        >
+          <Check size="$1" color="white" />
+          <Text color="white" fontWeight="700" fontSize="$5">
+            {known}
+          </Text>
+          <Text color="white" fontSize="$3" opacity={0.85}>
+            Got it
+          </Text>
         </XStack>
-      </YStack>
+
+        <XStack
+          bg="$backgroundHover"
+          br={100}
+          px="$4"
+          py="$2.5"
+          alignItems="center"
+          gap="$2"
+          borderWidth={1}
+          borderColor="$borderColor"
+        >
+          <X size="$1" color="$colorMuted" />
+          <Text color="$color" fontWeight="700" fontSize="$5">
+            {stillLearning}
+          </Text>
+          <Text color="$colorMuted" fontSize="$3">
+            In progress
+          </Text>
+        </XStack>
+      </XStack>
 
       <YStack f={1} />
 
@@ -125,11 +124,12 @@ export function FlashcardsComplete({
           <Button
             size="$5"
             br={100}
-            bg="$accentColor"
+            bg="$colorSecondary"
             pressStyle={{ opacity: 0.85 }}
+            // onPress={() => restart(true)}
           >
             <Text color="white" fontWeight="700" fontSize="$5">
-              Repeat missed cards ({stillLearning})
+              Practice with questions
             </Text>
           </Button>
         )}
@@ -137,14 +137,14 @@ export function FlashcardsComplete({
         <Button
           size="$5"
           br={100}
-          bg="$backgroundCard"
+          bg="$backgroundHover"
           pressStyle={{ opacity: 0.85 }}
-          onPress={() => {
-            restart(true);
-          }}
+          onPress={() => restart(true)}
+          borderWidth={1}
+          borderColor="$borderColor"
         >
           <Text color="$color" fontWeight="600" fontSize="$5">
-            Review all {total - known} cards
+            Repeat missed cards {stillLearning}
           </Text>
         </Button>
 
@@ -154,9 +154,7 @@ export function FlashcardsComplete({
           bg="transparent"
           icon={<RotateCcw size="$1" color="$colorMuted" />}
           pressStyle={{ opacity: 0.7 }}
-          onPress={() => {
-            restart();
-          }}
+          onPress={() => restart()}
         >
           <Text color="$colorMuted" fontWeight="500" fontSize="$4">
             Start over
