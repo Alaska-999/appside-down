@@ -5,6 +5,7 @@ import { AlignJustify, Check, Search, Star } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Avatar, Input, Sheet, Text, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
@@ -16,6 +17,7 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
 ];
 
 export default function Library() {
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState(0);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
@@ -86,7 +88,7 @@ export default function Library() {
   const currentSortLabel = SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
 
   return (
-    <YStack f={1} bg="$background" pt="$4">
+    <YStack f={1} bg="$background" pt={insets.top}>
       <YStack px="$4" gap="$3" f={1}>
         <SegmentedControl
           options={["Folders", "Modules"]}

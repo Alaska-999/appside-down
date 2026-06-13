@@ -1,3 +1,4 @@
+import { useGameStore } from "@/src/store/useGameStore";
 import { RotateCcw } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -57,6 +58,8 @@ export function FlashcardsComplete({
   known,
   stillLearning,
 }: FlashcardsCompleteProps) {
+  const restart = useGameStore((state) => state.restart);
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const pct = total > 0 ? known / total : 0;
@@ -115,10 +118,8 @@ export function FlashcardsComplete({
         </XStack>
       </YStack>
 
-      {/* Spacer */}
       <YStack f={1} />
 
-      {/* Actions */}
       <YStack px="$5" gap="$3">
         {stillLearning > 0 && (
           <Button
@@ -138,9 +139,12 @@ export function FlashcardsComplete({
           br={100}
           bg="$backgroundCard"
           pressStyle={{ opacity: 0.85 }}
+          onPress={() => {
+            restart(true);
+          }}
         >
           <Text color="$color" fontWeight="600" fontSize="$5">
-            Review all {total} cards
+            Review all {total - known} cards
           </Text>
         </Button>
 
@@ -150,6 +154,9 @@ export function FlashcardsComplete({
           bg="transparent"
           icon={<RotateCcw size="$1" color="$colorMuted" />}
           pressStyle={{ opacity: 0.7 }}
+          onPress={() => {
+            restart();
+          }}
         >
           <Text color="$colorMuted" fontWeight="500" fontSize="$4">
             Start over

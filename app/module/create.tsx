@@ -4,9 +4,11 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Plus } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Input, ScrollView, Text, YStack } from "tamagui";
 
 export default function ModuleCreate() {
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [flashcards, setFlashcards] = useState([
@@ -95,7 +97,7 @@ export default function ModuleCreate() {
       <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
         <ScreenHeaderCreate onCreate={handleCreateModule} />
       </YStack>
-      <ScrollView f={1} contentContainerStyle={{ pt: 100, pb: 40, px: "$4" }}>
+      <ScrollView f={1} contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + 40, paddingHorizontal: 16 }}>
         <YStack gap="$4" width="100%">
           <Text
             fontSize="$8"

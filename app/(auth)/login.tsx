@@ -4,9 +4,11 @@ import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { Link, router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
 export default function Login() {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +74,7 @@ export default function Login() {
   };
 
   return (
-    <YStack f={1} jc="center" ai="center" p="$4" bg="$background" gap="$4">
+    <YStack f={1} jc="center" ai="center" p="$4" pt={insets.top + 16} pb={insets.bottom + 16} bg="$background" gap="$4">
       <YStack ai="center">
         <Text fontSize="$8" fontWeight="bold">
           Welcome!

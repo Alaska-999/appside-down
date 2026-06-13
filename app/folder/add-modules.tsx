@@ -4,6 +4,7 @@ import { Search } from "@tamagui/lucide-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { FlatList, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Input, Text, XStack, YStack } from "tamagui";
 
 type ModuleItem = {
@@ -23,6 +24,7 @@ function mapModule(raw: any): ModuleItem {
 }
 
 export default function AddModules() {
+  const insets = useSafeAreaInsets();
   const { folderId } = useLocalSearchParams<{ folderId: string }>();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [search, setSearch] = useState("");
@@ -213,6 +215,7 @@ export default function AddModules() {
           left={0}
           right={0}
           p="$4"
+          pb={insets.bottom + 16}
           bg="$background"
           btw={1}
           borderColor="$borderColor"
