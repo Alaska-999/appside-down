@@ -1,7 +1,14 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { AlignJustify, Check, Search, Star } from "@tamagui/lucide-icons";
+import {
+  AlignJustify,
+  Check,
+  Globe,
+  Lock,
+  Search,
+  Star,
+} from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable } from "react-native";
@@ -258,9 +265,28 @@ export default function Library() {
                     <Text fontSize="$5" fontWeight="600" color="$color">
                       {item.name}
                     </Text>
-                    <Text fontSize="$3" color="$colorMuted">
-                      {item.itemsCount} card{item.itemsCount !== 1 ? "s" : ""}
-                    </Text>
+                    <XStack ai="center" gap="$1.5">
+                      <Text fontSize="$3" color="$colorMuted">
+                        {item.itemsCount} card{item.itemsCount !== 1 ? "s" : ""}
+                      </Text>
+                      <Text color="$borderColor">·</Text>
+                      {item.isPublic ? (
+                        <Globe size={12} color="$colorMuted" />
+                      ) : (
+                        <Lock size={12} color="$colorMuted" />
+                      )}
+                      <Text fontSize="$3" color="$colorMuted">
+                        {item.isPublic ? "Public" : "Private"}
+                      </Text>
+                      {item.user?.username && (
+                        <>
+                          <Text color="$borderColor">·</Text>
+                          <Text fontSize="$3" color="$colorMuted">
+                            by {item.user.username}
+                          </Text>
+                        </>
+                      )}
+                    </XStack>
                   </YStack>
                   {item.isFavorite && (
                     <Star

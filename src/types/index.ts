@@ -59,20 +59,21 @@ export interface Folder {
 export interface Module {
     id: string;
     userId: string;
-    user?: {
-        id: string;
-        username: string;
-        avatarUrl?: string | null;
-    };
     name: string;
-    description?: string | null;
     isFavorite: boolean;
+    isPublic: boolean
     itemsCount: number;
+    description?: string | null;
     tags?: string[];
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
     flashcards?: Flashcard[];
+    user?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
+    };
 }
 
 export interface Flashcard {

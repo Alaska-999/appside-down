@@ -1,12 +1,14 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Flashcard, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
   AlignJustify,
   ArrowLeftRight,
+  BookmarkPlus,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -52,16 +54,20 @@ export default function ModuleScreen() {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { width: screenWidth } = useWindowDimensions();
 
   const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
   const initGame = useGameStore((state) => state.initGame);
   const currentModule = useGameStore((state) => state.currentModule);
 
+  const { user } = useAuthStore();
+  const isOwner = moduleData?.user?.id === user?.id;
+
   useEffect(() => {
-    console.log(id);
     fetchData();
   }, [id]);
+
   const getActionButtons = (id: string) => [
     {
       key: "flashcards",
@@ -199,6 +205,28 @@ export default function ModuleScreen() {
     }
   };
 
+  const handleSaveToLibrary = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const res = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}/save`,
+        { method: "POST" },
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      const newModule = await res.json();
+      router.replace({
+        pathname: "/module/[id]",
+        params: { id: newModule.id },
+      });
+    } catch (err) {
+      console.error("[ModuleScreen] save error:", err);
+      Alert.alert("Error", "Failed to save module");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const openEditSheet = () => {
     setMenuSheetOpen(false);
     setTimeout(() => setEditSheetOpen(true), 300);
@@ -208,11 +236,18 @@ export default function ModuleScreen() {
     updatedCards: Flashcard[],
     name: string,
     description: string,
+    isPublic: boolean,
   ) => {
     setFlashcards(updatedCards);
     setModuleData((prev) =>
       prev
-        ? { ...prev, name, description, itemsCount: updatedCards.length }
+        ? {
+            ...prev,
+            name,
+            description,
+            isPublic,
+            itemsCount: updatedCards.length,
+          }
         : prev,
     );
   };
@@ -287,20 +322,24 @@ export default function ModuleScreen() {
     <YStack f={1} bg="$background">
       <ScreenHeader
         right={
-          <XStack gap="$3" ai="center">
-            <Pressable hitSlop={8} onPress={handleToggleFavorite}>
-              <Star
-                size={22}
-                color={
-                  moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"
-                }
-                fill={moduleData?.isFavorite ? "$statusWarning" : "transparent"}
-              />
-            </Pressable>
-            <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
-              <MoreHorizontal size={22} color="$color" />
-            </Pressable>
-          </XStack>
+          isOwner ? (
+            <XStack gap="$3" ai="center">
+              <Pressable hitSlop={8} onPress={handleToggleFavorite}>
+                <Star
+                  size={22}
+                  color={
+                    moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"
+                  }
+                  fill={
+                    moduleData?.isFavorite ? "$statusWarning" : "transparent"
+                  }
+                />
+              </Pressable>
+              <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
+                <MoreHorizontal size={22} color="$color" />
+              </Pressable>
+            </XStack>
+          ) : undefined
         }
       />
 
@@ -421,12 +460,14 @@ export default function ModuleScreen() {
                         <Text fontSize="$3" color="$colorSecondary">
                           {tag}
                         </Text>
-                        <Pressable
-                          hitSlop={8}
-                          onPress={() => handleDeleteTag(tag)}
-                        >
-                          <X size={12} color="$colorMuted" />
-                        </Pressable>
+                        {isOwner && (
+                          <Pressable
+                            hitSlop={8}
+                            onPress={() => handleDeleteTag(tag)}
+                          >
+                            <X size={12} color="$colorMuted" />
+                          </Pressable>
+                        )}
                       </XStack>
                     ))}
                   </XStack>
@@ -434,39 +475,55 @@ export default function ModuleScreen() {
               )}
 
               {/* Action buttons */}
-              <YStack gap="$2">
-                {getActionButtons(id).map(
-                  ({ key, label, Icon, locked, onPress }) => (
-                    <Pressable
-                      key={key}
-                      onPress={() => onPress(moduleData, flashcards)}
-                    >
-                      <XStack
-                        bg="$backgroundHover"
-                        br="$4"
-                        px="$4"
-                        py="$3"
-                        ai="center"
-                        gap="$3"
-                        borderWidth={1}
-                        borderColor="$borderColor"
+              {isOwner ? (
+                <YStack gap="$2">
+                  {getActionButtons(id).map(
+                    ({ key, label, Icon, locked, onPress }) => (
+                      <Pressable
+                        key={key}
+                        onPress={() => onPress(moduleData, flashcards)}
                       >
-                        <Icon size={20} color="$colorSecondary" />
-                        <Text
-                          f={1}
-                          fontSize="$5"
-                          fontWeight="500"
-                          color="$color"
+                        <XStack
+                          bg="$backgroundHover"
+                          br="$4"
+                          px="$4"
+                          py="$3"
+                          ai="center"
+                          gap="$3"
+                          borderWidth={1}
+                          borderColor="$borderColor"
                         >
-                          {label}
-                        </Text>
-                        {locked && <Lock size={14} color="$colorMuted" />}
-                        <ChevronRight size={16} color="$colorMuted" />
-                      </XStack>
-                    </Pressable>
-                  ),
-                )}
-              </YStack>
+                          <Icon size={20} color="$colorSecondary" />
+                          <Text
+                            f={1}
+                            fontSize="$5"
+                            fontWeight="500"
+                            color="$color"
+                          >
+                            {label}
+                          </Text>
+                          {locked && <Lock size={14} color="$colorMuted" />}
+                          <ChevronRight size={16} color="$colorMuted" />
+                        </XStack>
+                      </Pressable>
+                    ),
+                  )}
+                </YStack>
+              ) : (
+                <Button
+                  size="$5"
+                  bg="$buttonBg"
+                  br="$10"
+                  icon={<BookmarkPlus size="$1" color="$buttonText" />}
+                  disabled={saving}
+                  opacity={saving ? 0.6 : 1}
+                  onPress={handleSaveToLibrary}
+                >
+                  <Text fontSize="$5" fontWeight="600" color="$buttonText">
+                    {saving ? "Saving..." : "Save to library"}
+                  </Text>
+                </Button>
+              )}
 
               {/* Terms section */}
               {sortedFlashcards.length > 0 && (
@@ -508,24 +565,26 @@ export default function ModuleScreen() {
                           <Pressable hitSlop={8}>
                             <Volume2 size={16} color="$colorMuted" />
                           </Pressable>
-                          <Pressable
-                            hitSlop={8}
-                            onPress={() => handleToggleStar(card)}
-                          >
-                            <Star
-                              size={16}
-                              color={
-                                card.isStarred
-                                  ? "$statusWarning"
-                                  : "$colorMuted"
-                              }
-                              fill={
-                                card.isStarred
-                                  ? "$statusWarning"
-                                  : "transparent"
-                              }
-                            />
-                          </Pressable>
+                          {isOwner && (
+                            <Pressable
+                              hitSlop={8}
+                              onPress={() => handleToggleStar(card)}
+                            >
+                              <Star
+                                size={16}
+                                color={
+                                  card.isStarred
+                                    ? "$statusWarning"
+                                    : "$colorMuted"
+                                }
+                                fill={
+                                  card.isStarred
+                                    ? "$statusWarning"
+                                    : "transparent"
+                                }
+                              />
+                            </Pressable>
+                          )}
                         </XStack>
                       </XStack>
                       <Text fontSize="$4" color="$colorSecondary">
@@ -586,6 +645,7 @@ export default function ModuleScreen() {
         onSaved={handleSaved}
         moduleName={moduleData?.name ?? ""}
         moduleDescription={moduleData?.description ?? ""}
+        moduleIsPublic={moduleData?.isPublic ?? false}
       />
 
       {/* Sort sheet */}
