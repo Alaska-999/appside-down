@@ -3,9 +3,11 @@ import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
 import { useGameStore } from "@/src/store/useGameStore";
+import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
+import { soundComplete } from "@/src/utils/sounds";
 import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, PortalProvider, Text, XStack, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
@@ -29,11 +31,13 @@ export default function FlashcardsGame() {
 
   const handleSwipeRight = useCallback(() => {
     setLastSwipeDirection("right");
+    hapticSwipe();
     swipeRight();
   }, [swipeRight]);
 
   const handleSwipeLeft = useCallback(() => {
     setLastSwipeDirection("left");
+    hapticSwipe();
     swipeLeft();
   }, [swipeLeft]);
 
@@ -45,6 +49,13 @@ export default function FlashcardsGame() {
   }, [currentIndex, revertSwipe]);
 
   const isComplete = currentIndex >= activeCards.length;
+
+  useEffect(() => {
+    if (isComplete && activeCards.length > 0) {
+      hapticComplete();
+      soundComplete();
+    }
+  }, [isComplete, activeCards.length]);
 
   return (
     <PortalProvider>
