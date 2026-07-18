@@ -9,7 +9,6 @@ export function CreateActionSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  console.log("CreateActionSheet");
   const router = useRouter();
 
   const handleNavigate = (path: Href) => {

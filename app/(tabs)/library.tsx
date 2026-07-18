@@ -38,12 +38,18 @@ export default function Library() {
     setError(null);
     try {
       const [foldersRes, modulesRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/folders`, { method: "GET" }),
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules`, { method: "GET" }),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/folders`, {
+          method: "GET",
+        }),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules`, {
+          method: "GET",
+        }),
       ]);
 
-      if (!foldersRes.ok) throw new Error(`Folders error: ${foldersRes.status}`);
-      if (!modulesRes.ok) throw new Error(`Modules error: ${modulesRes.status}`);
+      if (!foldersRes.ok)
+        throw new Error(`Folders error: ${foldersRes.status}`);
+      if (!modulesRes.ok)
+        throw new Error(`Modules error: ${modulesRes.status}`);
 
       const [foldersData, modulesData] = await Promise.all([
         foldersRes.json() as Promise<Folder[]>,
@@ -58,6 +64,7 @@ export default function Library() {
           folderIds: m.folderId ? [m.folderId] : [],
         })),
       );
+      setError(null);
     } catch (err) {
       console.error("[Library] fetch error:", err);
       setError("Failed to load library");
@@ -70,8 +77,13 @@ export default function Library() {
     let result = folders.filter((f) =>
       f.name.toLowerCase().includes(search.toLowerCase()),
     );
-    if (sortOrder === "az") result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOrder === "date") result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (sortOrder === "az")
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortOrder === "date")
+      result = [...result].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     return result;
   }, [folders, search, sortOrder]);
 
@@ -79,13 +91,19 @@ export default function Library() {
     let result = modules.filter((m) =>
       m.name.toLowerCase().includes(search.toLowerCase()),
     );
-    if (sortOrder === "az") result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOrder === "date") result = [...result].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (sortOrder === "az")
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortOrder === "date")
+      result = [...result].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     if (sortOrder === "favs") result = result.filter((m) => m.isFavorite);
     return result;
   }, [modules, search, sortOrder]);
 
-  const currentSortLabel = SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
+  const currentSortLabel =
+    SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
 
   return (
     <YStack f={1} bg="$background" pt={insets.top}>
@@ -134,7 +152,9 @@ export default function Library() {
               gap="$1"
             >
               <AlignJustify size={14} color="$colorMuted" />
-              <Text fontSize="$3" color="$colorMuted">{currentSortLabel}</Text>
+              <Text fontSize="$3" color="$colorMuted">
+                {currentSortLabel}
+              </Text>
             </XStack>
           </Pressable>
         </XStack>
@@ -157,22 +177,41 @@ export default function Library() {
             }
             renderItem={({ item }) => (
               <Pressable
-                onPress={() => router.push({ pathname: "/folder/[id]", params: { id: item.id } })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/folder/[id]",
+                    params: { id: item.id },
+                  })
+                }
               >
-                <XStack bg="$backgroundHover" br="$4" p="$4" ai="center" gap="$3" borderWidth={1} borderColor="$borderColor">
+                <XStack
+                  bg="$backgroundHover"
+                  br="$4"
+                  p="$4"
+                  ai="center"
+                  gap="$3"
+                  borderWidth={1}
+                  borderColor="$borderColor"
+                >
                   <Avatar circular size="$4" bg="$backgroundCard">
                     {item.icon ? (
-                      <Avatar.Image src={item.icon} accessibilityLabel={item.name} />
+                      <Avatar.Image
+                        src={item.icon}
+                        accessibilityLabel={item.name}
+                      />
                     ) : null}
                     <Avatar.Fallback jc="center" ai="center">
                       <Text fontSize="$5">📂</Text>
                     </Avatar.Fallback>
                   </Avatar>
                   <YStack f={1}>
-                    <Text fontSize="$5" fontWeight="600" color="$color">{item.name}</Text>
+                    <Text fontSize="$5" fontWeight="600" color="$color">
+                      {item.name}
+                    </Text>
                     {item.moduleIds && item.moduleIds.length > 0 && (
                       <Text fontSize="$3" color="$colorMuted">
-                        {item.moduleIds.length} module{item.moduleIds.length !== 1 ? "s" : ""}
+                        {item.moduleIds.length} module
+                        {item.moduleIds.length !== 1 ? "s" : ""}
                       </Text>
                     )}
                   </YStack>
@@ -199,16 +238,37 @@ export default function Library() {
             }
             renderItem={({ item }) => (
               <Pressable
-                onPress={() => router.push({ pathname: "/module/[id]", params: { id: item.id } })}
+                onPress={() =>
+                  router.push({
+                    pathname: "/module/[id]",
+                    params: { id: item.id },
+                  })
+                }
               >
-                <XStack bg="$backgroundHover" br="$4" p="$4" ai="center" gap="$3" borderWidth={1} borderColor="$borderColor">
+                <XStack
+                  bg="$backgroundHover"
+                  br="$4"
+                  p="$4"
+                  ai="center"
+                  gap="$3"
+                  borderWidth={1}
+                  borderColor="$borderColor"
+                >
                   <YStack f={1} gap="$1">
-                    <Text fontSize="$5" fontWeight="600" color="$color">{item.name}</Text>
+                    <Text fontSize="$5" fontWeight="600" color="$color">
+                      {item.name}
+                    </Text>
                     <Text fontSize="$3" color="$colorMuted">
                       {item.itemsCount} card{item.itemsCount !== 1 ? "s" : ""}
                     </Text>
                   </YStack>
-                  {item.isFavorite && <Star size={16} color="$statusWarning" fill="$statusWarning" />}
+                  {item.isFavorite && (
+                    <Star
+                      size={16}
+                      color="$statusWarning"
+                      fill="$statusWarning"
+                    />
+                  )}
                 </XStack>
               </Pressable>
             )}
@@ -226,9 +286,11 @@ export default function Library() {
         <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
         <Sheet.Handle />
         <Sheet.Frame p="$4" bg="$background" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">Sort by</Text>
+          <Text fontSize="$6" fontWeight="bold">
+            Sort by
+          </Text>
           <YStack gap="$2">
-            {SORT_OPTIONS.map((option) => (
+            {SORT_OPTIONS.map((option) =>
               tab === 0 && option.key === "favs" ? null : (
                 <Pressable
                   key={option.key}
@@ -237,13 +299,23 @@ export default function Library() {
                     setSortSheetOpen(false);
                   }}
                 >
-                  <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
-                    <Text f={1} fontSize="$5" color="$color">{option.label}</Text>
-                    {sortOrder === option.key && <Check size={18} color="$color" />}
+                  <XStack
+                    bg="$buttonSecondaryBg"
+                    br="$4"
+                    px="$4"
+                    py="$3"
+                    ai="center"
+                  >
+                    <Text f={1} fontSize="$5" color="$color">
+                      {option.label}
+                    </Text>
+                    {sortOrder === option.key && (
+                      <Check size={18} color="$color" />
+                    )}
                   </XStack>
                 </Pressable>
-              )
-            ))}
+              ),
+            )}
           </YStack>
         </Sheet.Frame>
       </Sheet>
