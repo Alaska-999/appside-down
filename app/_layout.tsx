@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config from "@/tamagui.config";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
@@ -31,6 +32,14 @@ export default function RootLayout() {
     const timeout = setTimeout(performRedirect, 1);
     return () => clearTimeout(timeout);
   }, [token, isHydrated, segments]);
+
+  useEffect(() => {
+    if (isHydrated && token) {
+      //for events that were not sent on prev session
+      useStudyQueueStore.getState().flush();
+    }
+  }, [isHydrated, token]);
+
   if (!isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -47,7 +56,10 @@ export default function RootLayout() {
             <QueryClientProvider client={queryClient}>
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="(auth)" options={{ presentation: "modal" }} />
+                <Stack.Screen
+                  name="(auth)"
+                  options={{ presentation: "modal" }}
+                />
               </Stack>
             </QueryClientProvider>
           </Theme>

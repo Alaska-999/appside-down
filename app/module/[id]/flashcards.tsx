@@ -3,11 +3,13 @@ import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
 import { useGameStore } from "@/src/store/useGameStore";
+import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
 import { soundComplete } from "@/src/utils/sounds";
 import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { AppState } from "react-native";
 import { Button, PortalProvider, Text, XStack, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
@@ -22,6 +24,8 @@ export default function FlashcardsGame() {
   const swipeLeft = useGameStore((state) => state.swipeLeft);
   const revertSwipe = useGameStore((state) => state.revertSwipe);
   const restart = useGameStore((state) => state.restart);
+  const addEvent = useStudyQueueStore((state) => state.addEvent);
+  const flush = useStudyQueueStore((state) => state.flush);
   const router = useRouter();
 
   const [revertCount, setRevertCount] = useState(0);
@@ -32,14 +36,32 @@ export default function FlashcardsGame() {
   const handleSwipeRight = useCallback(() => {
     setLastSwipeDirection("right");
     hapticSwipe();
+    const card = activeCards[currentIndex];
+    if (card) {
+      addEvent({
+        flashcardId: card.id,
+        moduleId: card.moduleId,
+        status: "KNOWN",
+        answeredAt: new Date().toISOString(),
+      });
+    }
     swipeRight();
-  }, [swipeRight]);
+  }, [swipeRight, activeCards, currentIndex, addEvent]);
 
   const handleSwipeLeft = useCallback(() => {
     setLastSwipeDirection("left");
     hapticSwipe();
+    const card = activeCards[currentIndex];
+    if (card) {
+      addEvent({
+        flashcardId: card.id,
+        moduleId: card.moduleId,
+        status: "STILL_LEARNING",
+        answeredAt: new Date().toISOString(),
+      });
+    }
     swipeLeft();
-  }, [swipeLeft]);
+  }, [swipeLeft, activeCards, currentIndex, addEvent]);
 
   const handleRevert = useCallback(() => {
     if (currentIndex <= 0) return;
@@ -54,8 +76,21 @@ export default function FlashcardsGame() {
     if (isComplete && activeCards.length > 0) {
       hapticComplete();
       soundComplete();
+      flush();
     }
-  }, [isComplete, activeCards.length]);
+  }, [isComplete, activeCards.length, flush]);
+
+  useEffect(() => {
+    const timer = setInterval(() => flush(), 10000);
+    return () => clearInterval(timer);
+  }, [flush]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "background") flush();
+    });
+    return () => subscription.remove();
+  }, [flush]);
 
   return (
     <PortalProvider>

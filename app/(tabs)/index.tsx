@@ -174,10 +174,6 @@ export default function Home() {
   return (
     <YStack f={1} bg="$background" pt={insets.top}>
       <YStack px="$4" gap="$3" f={1}>
-        <Text fontSize="$7" fontWeight="bold" color="$color" mt="$2">
-          Hi, {user?.username ?? "there"} 👋
-        </Text>
-
         <XStack jc="space-between" gap="$3" ai="center">
           <XStack
             f={1}
@@ -214,6 +210,10 @@ export default function Home() {
             onPress={navigateToProfile}
           />
         </XStack>
+
+        <Text fontSize="$7" fontWeight="bold" color="$color" mt="$2">
+          Hi, {user?.username ?? "there"} 👋
+        </Text>
 
         {searching ? (
           <ScrollView
