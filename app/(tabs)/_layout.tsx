@@ -77,7 +77,7 @@ export default function TabsLayout() {
             position: "absolute",
             left: 22,
             right: 22,
-            bottom: insets.bottom + 19,
+            bottom: insets.bottom,
             height: 68,
             backgroundColor: "transparent",
             borderTopWidth: 0,
@@ -89,11 +89,13 @@ export default function TabsLayout() {
           },
           tabBarBackground: () => (
             <BlurView
-              intensity={20}
+              intensity={25}
               tint="dark"
               style={{
                 ...StyleSheet.absoluteFillObject,
                 borderRadius: 22,
+                marginLeft: 5,
+                marginRight: 5,
                 overflow: "hidden",
                 borderWidth: 2,
                 borderColor:
