@@ -115,6 +115,10 @@ export default function Library() {
   return (
     <YStack f={1} bg="$background" pt={insets.top}>
       <YStack px="$4" gap="$3" f={1}>
+        {/* нативний хедер таб-бару вимкнено (headerShown: false) — тайтл тепер малює сам екран */}
+        <Text fontSize="$7" fontWeight="bold" color="$color">
+          Library
+        </Text>
         <SegmentedControl
           options={["Folders", "Modules"]}
           selected={tab}

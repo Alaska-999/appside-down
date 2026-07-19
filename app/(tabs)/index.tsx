@@ -1,11 +1,17 @@
-import { UserAvatar } from "@/src/components/common/UserAvatar";
+import { AvatarRing } from "@/src/components/ui/AvatarRing";
+import { AppCard } from "@/src/components/ui/Card";
+import { Chip } from "@/src/components/ui/Chip";
+import { GradientText } from "@/src/components/ui/GradientText";
+import { ProgressRing } from "@/src/components/ui/ProgressRing";
+import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { StreakCard } from "@/src/components/cards/StreakCard";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Search, X } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
@@ -24,9 +30,13 @@ type HomeModule = {
   _count?: { flashcards: number };
 };
 
-const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
-
-const PROGRESS_COLOR = "#059669";
+// колірні пари для монограм Recent-чипів — просто ротація бренд-відтінків
+// для візуального розмаїття, не окремі токени
+const CHIP_GRADIENTS: [string, string][] = [
+  ["#818cf8", "#38bdf8"],
+  ["#4c46a8", "#2fa3b8"],
+  ["#7b4ae0", "#38bdf8"],
+];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   const count = module._count?.flashcards ?? 0;
@@ -36,30 +46,36 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         router.push({ pathname: "/module/[id]", params: { id: module.id } })
       }
     >
-      <YStack
-        bg="$backgroundHover"
-        br="$4"
-        px="$4"
-        py="$3"
-        gap="$1"
-        borderWidth={1}
-        borderColor="$borderColor"
-      >
-        <Text fontSize="$4" fontWeight="600" color="$color">
+      <AppCard variant="soft" px="$cardPad" py="$3.5" gap="$0.5">
+        <Text fontSize="$4" fontWeight="700" color="$color">
           {module.name}
         </Text>
         <Text fontSize="$3" color="$colorMuted">
           {module.user?.username ?? "Unknown"} · {count} term
           {count !== 1 ? "s" : ""}
         </Text>
-      </YStack>
+      </AppCard>
     </Pressable>
   );
 }
 
-function SectionTitle({ children }: { children: string }) {
+function SectionTitle({
+  children,
+  tone = "muted",
+}: {
+  children: string;
+  // "onGlass" — для лейблів усередині скляних плиток: $colorMuted там
+  // недостатньо контрастний (темно-сірий на напівпрозорому склі)
+  tone?: "muted" | "onGlass";
+}) {
   return (
-    <Text fontSize="$6" fontWeight="bold" color="$color">
+    <Text
+      fontSize="$3"
+      fontWeight="700"
+      color={tone === "onGlass" ? "$colorSecondary" : "$colorMuted"}
+      textTransform="uppercase"
+      letterSpacing={1}
+    >
       {children}
     </Text>
   );
@@ -145,6 +161,22 @@ export default function Home() {
       .slice(0, 5);
   }, [modules]);
 
+  const featuredModule = continueLearning[0];
+  const featuredStats = useMemo(() => {
+    if (!featuredModule) return null;
+    const statuses = featuredModule.flashcards?.map((f) => f.status) ?? [];
+    const total = statuses.length;
+    const known = statuses.filter((s) => s === "KNOWN").length;
+    return { total, known, progress: total ? known / total : 0 };
+  }, [featuredModule]);
+
+  const cardsLearned = useMemo(() => {
+    return modules.reduce((sum, m) => {
+      const known = m.flashcards?.filter((f) => f.status === "KNOWN").length ?? 0;
+      return sum + known;
+    }, 0);
+  }, [modules]);
+
   const recent = useMemo(() => {
     return [...modules]
       .sort(
@@ -172,48 +204,59 @@ export default function Home() {
   };
 
   return (
-    <YStack f={1} bg="$background" pt={insets.top}>
-      <YStack px="$4" gap="$3" f={1}>
-        <XStack jc="space-between" gap="$3" ai="center">
-          <XStack
-            f={1}
-            bg="$backgroundHover"
-            br="$10"
-            px="$3"
-            ai="center"
-            gap="$2"
-            borderWidth={1}
-            borderColor="$borderColor"
-            h={40}
-          >
-            <Search size={16} color="$colorMuted" />
-            <Input
-              f={1}
-              unstyled
-              placeholder="Search public modules..."
-              value={search}
-              onChangeText={setSearch}
-              fontSize="$4"
-              color="$color"
-              placeholderTextColor="$colorMuted"
-            />
-            {search.length > 0 && (
-              <Pressable hitSlop={8} onPress={() => setSearch("")}>
-                <X size={16} color="$colorMuted" />
-              </Pressable>
-            )}
-          </XStack>
-          <UserAvatar
+    <ScreenBackground>
+      <YStack f={1} px="$screenX" gap="$4" pt={insets.top}>
+        <XStack jc="space-between" gap="$3" ai="flex-start">
+          {/* MaskedView на весь рядок (з f={1}) іноді лягав у нульовий розмір
+             і зникав повністю — маскуємо градієнтом лише ім'я, це надійніше */}
+          <YStack f={1}>
+            <Text fontSize="$10" fontWeight="800" color="$color" lineHeight={36}>
+              Hi,
+            </Text>
+            <XStack ai="center" flexWrap="wrap">
+              <GradientText fontSize="$10" fontWeight="800" lineHeight={36}>
+                {user?.username ?? "there"}
+              </GradientText>
+              <Text fontSize="$10" fontWeight="800" lineHeight={36}>
+                {" "}👋
+              </Text>
+            </XStack>
+          </YStack>
+          <AvatarRing
+            size={52}
             avatarUrl={user?.avatarUrl}
             username={user?.username}
-            size="$3"
             onPress={navigateToProfile}
           />
         </XStack>
 
-        <Text fontSize="$7" fontWeight="bold" color="$color" mt="$2">
-          Hi, {user?.username ?? "there"} 👋
-        </Text>
+        <XStack
+          bg="$glassBg"
+          br={999}
+          px="$4"
+          ai="center"
+          gap="$2"
+          borderWidth={1}
+          borderColor="$glassBorder"
+          h={46}
+        >
+          <Search size={16} color="$colorMuted" opacity={0.6} />
+          <Input
+            f={1}
+            unstyled
+            placeholder="Search public modules..."
+            value={search}
+            onChangeText={setSearch}
+            fontSize="$4"
+            color="$color"
+            placeholderTextColor="$colorMuted"
+          />
+          {search.length > 0 && (
+            <Pressable hitSlop={8} onPress={() => setSearch("")}>
+              <X size={16} color="$colorMuted" />
+            </Pressable>
+          )}
+        </XStack>
 
         {searching ? (
           <ScrollView
@@ -234,152 +277,76 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <YStack gap="$5" pb="$8">
-              {/* Continue learning */}
-              {continueLearning.length > 0 && (
-                <YStack gap="$3">
-                  <SectionTitle>Continue learning</SectionTitle>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <XStack gap="$3">
-                      {continueLearning.map((m) => {
-                        const statuses =
-                          m.flashcards?.map((f) => f.status) ?? [];
-                        const total = statuses.length;
-                        const known = statuses.filter(
-                          (s) => s === "KNOWN",
-                        ).length;
-                        return (
-                          <Pressable
-                            key={m.id}
-                            onPress={() => openModule(m.id)}
-                          >
-                            <YStack
-                              w={200}
-                              bg="$backgroundHover"
-                              br="$4"
-                              p="$4"
-                              gap="$2"
-                              borderWidth={1}
-                              borderColor="$borderColor"
-                            >
-                              <Text
-                                fontSize="$4"
-                                fontWeight="600"
-                                color="$color"
-                                numberOfLines={2}
-                              >
-                                {m.name}
-                              </Text>
-                              <View
-                                style={{
-                                  height: 6,
-                                  borderRadius: 3,
-                                  backgroundColor: "#E2E8F0",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                <View
-                                  style={{
-                                    height: "100%",
-                                    borderRadius: 3,
-                                    width: `${total ? Math.round((known / total) * 100) : 0}%`,
-                                    backgroundColor: PROGRESS_COLOR,
-                                  }}
-                                />
-                              </View>
-                              <Text fontSize="$3" color="$colorMuted">
-                                {known}/{total} terms
-                              </Text>
-                            </YStack>
-                          </Pressable>
-                        );
-                      })}
-                    </XStack>
-                  </ScrollView>
-                </YStack>
-              )}
+            <YStack gap="$section" pb={110}>
+              {/* bento-група: hero + дві плитки, внутрішній крок 10 як у мокапі */}
+              <YStack gap="$2.5">
+                <StreakCard
+                  currentStreak={user?.streak?.currentStreak ?? 0}
+                  todayIndex={todayIndex}
+                />
 
-              {/* Streak placeholder */}
-              <XStack
-                bg="$backgroundHover"
-                br="$4"
-                p="$4"
-                ai="center"
-                gap="$3"
-                borderWidth={1}
-                borderColor="$borderColor"
-              >
-                <Text fontSize={32}>🔥</Text>
-                <YStack f={1} gap="$2">
-                  <YStack>
-                    <Text fontSize="$5" fontWeight="bold" color="$color">
-                      0 day streak
-                    </Text>
-                    <Text fontSize="$3" color="$colorMuted">
-                      Learn something today to start your streak
-                    </Text>
-                  </YStack>
-                  <XStack gap="$2">
-                    {DAY_LABELS.map((label, i) => (
-                      <YStack key={`${label}-${i}`} ai="center" gap="$1">
-                        <Text
-                          fontSize="$1"
-                          color={i === todayIndex ? "$color" : "$colorMuted"}
-                          fontWeight={i === todayIndex ? "700" : "400"}
-                        >
-                          {label}
-                        </Text>
-                        <View
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: 5,
-                            backgroundColor: "#E2E8F0",
-                            borderWidth: i === todayIndex ? 1.5 : 0,
-                            borderColor: PROGRESS_COLOR,
-                          }}
+                <XStack gap="$2.5">
+                  {featuredModule && featuredStats ? (
+                    <Pressable
+                      style={{ flex: 1 }}
+                      onPress={() => openModule(featuredModule.id)}
+                    >
+                      <AppCard variant="glass" f={1} gap="$2" ai="flex-start">
+                        <ProgressRing
+                          progress={featuredStats.progress}
+                          label={`${Math.round(featuredStats.progress * 100)}%`}
                         />
-                      </YStack>
-                    ))}
-                  </XStack>
-                </YStack>
-              </XStack>
+                        <Text
+                          fontSize="$4"
+                          fontWeight="700"
+                          color="$color"
+                          numberOfLines={1}
+                        >
+                          Continue: {featuredModule.name}
+                        </Text>
+                        <Text fontSize="$2" color="$colorSecondary">
+                          {featuredStats.known}/{featuredStats.total} terms
+                        </Text>
+                      </AppCard>
+                    </Pressable>
+                  ) : null}
+
+                  <AppCard variant="glass" f={1} gap="$1" ai="flex-start">
+                    <Text fontSize="$9" fontWeight="900" color="$color">
+                      {modules.length}
+                    </Text>
+                    <SectionTitle tone="onGlass">Total modules</SectionTitle>
+                    <Text
+                      fontSize="$9"
+                      fontWeight="900"
+                      color="$accentGradientEnd"
+                      mt="$2.5"
+                    >
+                      {cardsLearned}
+                    </Text>
+                    <SectionTitle tone="onGlass">Cards learned</SectionTitle>
+                  </AppCard>
+                </XStack>
+              </YStack>
 
               {/* Recent */}
               {recent.length > 0 && (
                 <YStack gap="$3">
                   <SectionTitle>Recent</SectionTitle>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <XStack gap="$3">
-                      {recent.map((m) => {
+                    <XStack gap="$2.5">
+                      {recent.map((m, i) => {
                         const count = m._count?.flashcards ?? 0;
                         return (
-                          <Pressable
+                          <Chip
                             key={m.id}
+                            size="lg"
+                            monogram={m.name.slice(0, 1).toUpperCase()}
+                            title={m.name}
+                            meta={`${count} card${count !== 1 ? "s" : ""}`}
+                            gradientColors={CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]}
                             onPress={() => openModule(m.id)}
-                          >
-                            <YStack
-                              w={140}
-                              bg="$backgroundHover"
-                              br="$4"
-                              p="$3"
-                              gap="$1"
-                              borderWidth={1}
-                              borderColor="$borderColor"
-                            >
-                              <Text
-                                fontSize="$4"
-                                fontWeight="600"
-                                color="$color"
-                                numberOfLines={2}
-                              >
-                                {m.name}
-                              </Text>
-                              <Text fontSize="$3" color="$colorMuted">
-                                {count} card{count !== 1 ? "s" : ""}
-                              </Text>
-                            </YStack>
-                          </Pressable>
+                          />
                         );
                       })}
                     </XStack>
@@ -402,6 +369,6 @@ export default function Home() {
           </ScrollView>
         )}
       </YStack>
-    </YStack>
+    </ScreenBackground>
   );
 }
