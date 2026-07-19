@@ -1,9 +1,8 @@
-import { Badge } from "@/src/components/ui/Badge";
 import { AppCard } from "@/src/components/ui/Card";
 import { TEXT } from "@/src/constants/typography";
-import { Globe, Lock, Star } from "@tamagui/lucide-icons";
+import { Star } from "@tamagui/lucide-icons";
 import { Pressable } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
 interface ModuleCardProps {
   module: {
@@ -15,6 +14,12 @@ interface ModuleCardProps {
     user?: { username: string } | null;
   };
   onPress: () => void;
+}
+
+function Dot() {
+  return (
+    <View width={3} height={3} borderRadius={2} backgroundColor="$colorMuted" />
+  );
 }
 
 export function ModuleCard({ module, onPress }: ModuleCardProps) {
@@ -29,9 +34,11 @@ export function ModuleCard({ module, onPress }: ModuleCardProps) {
         px={15}
         py={17}
         h={76}
+        borderLeftWidth={3}
+        borderLeftColor={module.isPublic ? "$accentGradientStart" : "$glassBorder"}
       >
         <YStack f={1} gap="$1">
-          <XStack ai="center" gap="$1.5">
+          <XStack ai="center" jc="space-between">
             <Text fontSize={TEXT.cardTitle} fontWeight="700" color="$color">
               {module.name}
             </Text>
@@ -43,23 +50,15 @@ export function ModuleCard({ module, onPress }: ModuleCardProps) {
             <Text fontSize={TEXT.cardMeta} color="$colorMuted">
               {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
             </Text>
-            <Badge
-              tone="neutral"
-              icon={
-                module.isPublic ? (
-                  <Globe size={13} color="$colorMuted" />
-                ) : (
-                  <Lock size={13} color="$colorMuted" />
-                )
-              }
-            >
+            <Dot />
+            <Text fontSize={TEXT.cardMeta} color="$colorMuted">
               {module.isPublic ? "Public" : "Private"}
-            </Badge>
+            </Text>
             {module.isPublic && module.user?.username && (
               <>
-                <Text color="$colorMuted">·</Text>
+                <Dot />
                 <Text fontSize={TEXT.cardMeta} color="$colorMuted">
-                  by {module.user.username}
+                  {module.user.username}
                 </Text>
               </>
             )}

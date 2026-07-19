@@ -112,70 +112,72 @@ export default function Library() {
 
   return (
     <ScreenBackground>
-      <YStack f={1} px="$screenX" gap="$3" pt={insets.top}>
-        <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
-          Library
-        </Text>
+      <YStack f={1} gap="$3" pt={insets.top}>
+        <YStack px="$screenX" gap="$3">
+          <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
+            Library
+          </Text>
 
-        <SegmentedControl
-          options={["Folders", "Modules"]}
-          selected={tab}
-          onChange={setTab}
-        />
+          <SegmentedControl
+            options={["Folders", "Modules"]}
+            selected={tab}
+            onChange={setTab}
+          />
 
-        <XStack gap="$2" ai="center">
-          <XStack
-            f={1}
-            bg="$glassBg"
-            br={999}
-            px={19}
-            py={14}
-            ai="center"
-            gap={9}
-            borderWidth={1}
-            borderColor="$glassBorder"
-          >
-            <Search size={20} color="$colorMuted" opacity={0.6} />
-            <Input
-              f={1}
-              unstyled
-              placeholder="Search..."
-              value={search}
-              onChangeText={setSearch}
-              fontSize={TEXT.pill}
-              color="$color"
-              placeholderTextColor="$colorMuted"
-            />
-          </XStack>
-
-          <Pressable onPress={() => setSortSheetOpen(true)}>
+          <XStack gap="$2" ai="center">
             <XStack
+              f={1}
               bg="$glassBg"
               br={999}
-              px={14}
+              px={19}
               py={14}
               ai="center"
-              gap={7}
+              gap={9}
               borderWidth={1}
               borderColor="$glassBorder"
             >
-              <AlignJustify size={16} color="$color" />
-              <Text fontSize={TEXT.pill} fontWeight="600" color="$color">
-                {currentSortLabel}
-              </Text>
+              <Search size={20} color="$colorMuted" opacity={0.6} />
+              <Input
+                f={1}
+                unstyled
+                placeholder="Search..."
+                value={search}
+                onChangeText={setSearch}
+                fontSize={TEXT.pill}
+                color="$color"
+                placeholderTextColor="$colorMuted"
+              />
             </XStack>
-          </Pressable>
-        </XStack>
 
-        {loading && <Text color="$colorMuted">Loading...</Text>}
-        {error && <Text color="$statusDanger">{error}</Text>}
+            <Pressable onPress={() => setSortSheetOpen(true)}>
+              <XStack
+                bg="$glassBg"
+                br={999}
+                px={14}
+                py={14}
+                ai="center"
+                gap={7}
+                borderWidth={1}
+                borderColor="$glassBorder"
+              >
+                <AlignJustify size={16} color="$color" />
+                <Text fontSize={TEXT.pill} fontWeight="600" color="$color">
+                  {currentSortLabel}
+                </Text>
+              </XStack>
+            </Pressable>
+          </XStack>
+
+          {loading && <Text color="$colorMuted">Loading...</Text>}
+          {error && <Text color="$statusDanger">{error}</Text>}
+        </YStack>
 
         {tab === 0 ? (
           <FlatList
             data={filteredFolders}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
+            contentContainerStyle={{ paddingHorizontal: 19, gap: 10, paddingBottom: 32 }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">
@@ -200,7 +202,7 @@ export default function Library() {
             data={filteredModules}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
+            contentContainerStyle={{ paddingHorizontal: 19, gap: 10, paddingBottom: 32 }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">

@@ -1,8 +1,10 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { BookOpen, House, PlusCircle } from "@tamagui/lucide-icons";
+import { BlurView } from "expo-blur"; // <-- Імпортуємо BlurView
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { ComponentType, useState } from "react";
+import { StyleSheet } from "react-native"; // <-- Імпортуємо StyleSheet для absoluteFill
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
 
@@ -22,7 +24,7 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
           width={26}
           height={26}
           br={9}
-          bg="rgba(255,255,255,0.1)"
+          bg="rgba(255,255,255,0.08)"
           ai="center"
           jc="center"
         >
@@ -77,23 +79,35 @@ export default function TabsLayout() {
             right: 22,
             bottom: insets.bottom + 19,
             height: 68,
-            borderRadius: 27,
-            backgroundColor: theme.tabBarBg.get(),
-            borderWidth: 1,
-            borderColor: theme.glassBorder.get(),
-            elevation: 8,
+            backgroundColor: "transparent",
+            elevation: 10,
             shadowColor: "#000",
-            shadowOpacity: 0.4,
-            shadowRadius: 16,
+            shadowOpacity: 0.35,
+            shadowRadius: 20,
             shadowOffset: { width: 0, height: 10 },
           },
+          tabBarBackground: () => (
+            <BlurView
+              intensity={20}
+              tint="dark"
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                borderRadius: 27,
+                overflow: "hidden",
+                borderWidth: 2,
+                borderColor:
+                  theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)",
+
+                backgroundColor: "rgba(15, 22, 36, 0.4)",
+              }}
+            />
+          ),
           tabBarItemStyle: {
             justifyContent: "center",
             alignItems: "center",
             paddingTop: 8,
           },
-
-          tabBarLabelStyle: { fontSize: 12 },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: "500" },
           tabBarActiveTintColor: theme.color.get(),
           tabBarInactiveTintColor: theme.colorMuted.get(),
         }}

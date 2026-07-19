@@ -202,63 +202,65 @@ export default function Home() {
 
   return (
     <ScreenBackground>
-      <YStack f={1} px="$screenX" gap="$section" pt={insets.top}>
-        <XStack jc="space-between" gap="$3" ai="flex-start">
-          <YStack f={1}>
-            <Text fontSize={35} fontWeight="800" color="$color" lineHeight={39}>
-              Hi,
-            </Text>
-            <XStack ai="center" flexWrap="wrap">
-              <GradientText fontSize={35} fontWeight="800" lineHeight={39}>
-                {user?.username ?? "there"}
-              </GradientText>
-              <Text fontSize={35} fontWeight="800" lineHeight={39}>
-                {" "}
-                👋
+      <YStack f={1} gap="$section" pt={insets.top}>
+        <YStack px="$screenX" gap="$section">
+          <XStack jc="space-between" gap="$3" ai="flex-start">
+            <YStack f={1}>
+              <Text fontSize={35} fontWeight="800" color="$color" lineHeight={39}>
+                Hi,
               </Text>
-            </XStack>
-          </YStack>
-          <AvatarRing
-            avatarUrl={user?.avatarUrl}
-            username={user?.username}
-            onPress={navigateToProfile}
-          />
-        </XStack>
+              <XStack ai="center" flexWrap="wrap">
+                <GradientText fontSize={35} fontWeight="800" lineHeight={39}>
+                  {user?.username ?? "there"}
+                </GradientText>
+                <Text fontSize={35} fontWeight="800" lineHeight={39}>
+                  {" "}
+                  👋
+                </Text>
+              </XStack>
+            </YStack>
+            <AvatarRing
+              avatarUrl={user?.avatarUrl}
+              username={user?.username}
+              onPress={navigateToProfile}
+            />
+          </XStack>
 
-        <XStack
-          bg="$glassBg"
-          br={999}
-          px={19}
-          py={14}
-          ai="center"
-          gap={9}
-          borderWidth={1}
-          borderColor="$glassBorder"
-        >
-          <Search size={20} color="$colorMuted" opacity={0.6} />
-          <Input
-            f={1}
-            unstyled
-            placeholder="Search public modules..."
-            value={search}
-            onChangeText={setSearch}
-            fontSize={16}
-            color="$color"
-            placeholderTextColor="$colorMuted"
-          />
-          {search.length > 0 && (
-            <Pressable hitSlop={13} onPress={() => setSearch("")}>
-              <X size={20} color="$colorMuted" />
-            </Pressable>
-          )}
-        </XStack>
+          <XStack
+            bg="$glassBg"
+            br={999}
+            px={19}
+            py={14}
+            ai="center"
+            gap={9}
+            borderWidth={1}
+            borderColor="$glassBorder"
+          >
+            <Search size={20} color="$colorMuted" opacity={0.6} />
+            <Input
+              f={1}
+              unstyled
+              placeholder="Search public modules..."
+              value={search}
+              onChangeText={setSearch}
+              fontSize={16}
+              color="$color"
+              placeholderTextColor="$colorMuted"
+            />
+            {search.length > 0 && (
+              <Pressable hitSlop={13} onPress={() => setSearch("")}>
+                <X size={20} color="$colorMuted" />
+              </Pressable>
+            )}
+          </XStack>
+        </YStack>
 
         {searching ? (
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <YStack gap="$2" pb="$4">
+            <YStack px="$screenX" gap="$2" pb="$4">
               {results.map((m) => (
                 <PublicModuleRow key={m.id} module={m} />
               ))}
@@ -272,7 +274,7 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <YStack gap="$section" pb={130}>
+            <YStack px="$screenX" gap="$section" pb={130}>
               <YStack gap={12}>
                 <StreakCard
                   currentStreak={user?.streak?.currentStreak ?? 0}
