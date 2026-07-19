@@ -44,3 +44,7 @@ app-example
 
 
 .env
+
+# AI agent scratch/working files
+.superpowers/
+.docs/superpowers/
