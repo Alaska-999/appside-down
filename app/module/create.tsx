@@ -6,10 +6,12 @@ import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import type { TextInput } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, ScrollView, Text, YStack } from "tamagui";
+import { Button, Text, YStack } from "tamagui";
 
 export default function ModuleCreate() {
   const insets = useSafeAreaInsets();
@@ -45,6 +47,22 @@ export default function ModuleCreate() {
     control,
     name: "flashcards",
   });
+
+  const termRefs = useRef<Array<TextInput | null>>([]);
+  const definitionRefs = useRef<Array<TextInput | null>>([]);
+  const prevFieldsLength = useRef(fields.length);
+
+  // фокус на нову картку тільки коли масив реально виріс (не при кожному рендері)
+  useEffect(() => {
+    if (fields.length > prevFieldsLength.current) {
+      termRefs.current[fields.length - 1]?.focus();
+    }
+    prevFieldsLength.current = fields.length;
+  }, [fields.length]);
+
+  const focusTerm = (index: number) => termRefs.current[index]?.focus();
+  const focusDefinition = (index: number) =>
+    definitionRefs.current[index]?.focus();
 
   // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
@@ -108,8 +126,9 @@ export default function ModuleCreate() {
             }}
           />
         </YStack>
-        <ScrollView
-          f={1}
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -154,6 +173,20 @@ export default function ModuleCreate() {
                   index={index}
                   onRemove={remove}
                   showRemove={fields.length > 1}
+                  termRef={(node) => {
+                    termRefs.current[index] = node;
+                  }}
+                  definitionRef={(node) => {
+                    definitionRefs.current[index] = node;
+                  }}
+                  onSubmitTerm={() => focusDefinition(index)}
+                  onSubmitDefinition={() => {
+                    if (index + 1 < fields.length) {
+                      focusTerm(index + 1);
+                    } else {
+                      append({ term: "", definition: "" });
+                    }
+                  }}
                 />
               ))}
             </YStack>
@@ -180,7 +213,7 @@ export default function ModuleCreate() {
               <Text color="$buttonSecondaryText">Add Card</Text>
             </Button>
           </YStack>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );

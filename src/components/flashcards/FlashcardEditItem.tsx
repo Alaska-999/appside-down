@@ -1,4 +1,6 @@
 import { X } from "@tamagui/lucide-icons";
+import { Ref } from "react";
+import type { TextInput } from "react-native";
 import {
   Control,
   FieldValues,
@@ -6,7 +8,7 @@ import {
   useController,
   useFormContext,
 } from "react-hook-form";
-import { Button, Input, Text, YStack } from "tamagui";
+import { Button, Input, TamaguiElement, Text, YStack } from "tamagui";
 
 interface FlashcardEditItemProps<T extends FieldValues> {
   control: Control<T>;
@@ -15,6 +17,10 @@ interface FlashcardEditItemProps<T extends FieldValues> {
   index: number;
   onRemove: (index: number) => void;
   showRemove: boolean;
+  termRef?: Ref<TextInput>;
+  definitionRef?: Ref<TextInput>;
+  onSubmitTerm?: () => void;
+  onSubmitDefinition?: () => void;
 }
 
 export function FlashcardEditItem<T extends FieldValues>({
@@ -24,6 +30,10 @@ export function FlashcardEditItem<T extends FieldValues>({
   index,
   onRemove,
   showRemove,
+  termRef,
+  definitionRef,
+  onSubmitTerm,
+  onSubmitDefinition,
 }: FlashcardEditItemProps<T>) {
   const term = useController({ control, name: termName });
   const definition = useController({ control, name: definitionName });
@@ -38,6 +48,17 @@ export function FlashcardEditItem<T extends FieldValues>({
       formContext.clearErrors(arrayName);
     }
   };
+
+  const setMergedRef =
+    (fieldRef: (node: TextInput | null) => void, forwardedRef?: Ref<TextInput>) =>
+    // Input у react-native — це насправді TextInput,
+    // хоча tamagui типізує ref як TamaguiElement
+    (node: TamaguiElement | null) => {
+      const textInputNode = node as TextInput | null;
+      fieldRef(textInputNode);
+      if (typeof forwardedRef === "function") forwardedRef(textInputNode);
+      else if (forwardedRef) (forwardedRef as { current: TextInput | null }).current = textInputNode;
+    };
 
   return (
     <YStack gap="$1">
@@ -58,6 +79,7 @@ export function FlashcardEditItem<T extends FieldValues>({
         <YStack mt="$2">
           <Input
             unstyled
+            ref={setMergedRef(term.field.ref, termRef)}
             placeholder="Enter term"
             placeholderTextColor="$colorMuted"
             value={term.field.value as string}
@@ -66,6 +88,9 @@ export function FlashcardEditItem<T extends FieldValues>({
               term.field.onChange(text);
             }}
             onBlur={term.field.onBlur}
+            returnKeyType={onSubmitTerm ? "next" : undefined}
+            blurOnSubmit={onSubmitTerm ? false : undefined}
+            onSubmitEditing={onSubmitTerm}
             fontSize="$5"
             pb="$1"
             bbw={1}
@@ -80,6 +105,7 @@ export function FlashcardEditItem<T extends FieldValues>({
         <YStack>
           <Input
             unstyled
+            ref={setMergedRef(definition.field.ref, definitionRef)}
             placeholder="Enter definition"
             placeholderTextColor="$colorMuted"
             value={definition.field.value as string}
@@ -88,6 +114,9 @@ export function FlashcardEditItem<T extends FieldValues>({
               definition.field.onChange(text);
             }}
             onBlur={definition.field.onBlur}
+            returnKeyType={onSubmitDefinition ? "next" : undefined}
+            blurOnSubmit={onSubmitDefinition ? false : undefined}
+            onSubmitEditing={onSubmitDefinition}
             fontSize="$5"
             pb="$1"
             bbw={1}

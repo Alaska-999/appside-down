@@ -6,9 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { Link, router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
+import type { TextInput } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, YStack } from "tamagui";
 
@@ -30,6 +31,7 @@ export default function Login() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
+  const passwordRef = useRef<TextInput>(null);
 
   // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
@@ -114,14 +116,20 @@ export default function Login() {
             textContentType="emailAddress"
             autoCapitalize="none"
             keyboardType="email-address"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => passwordRef.current?.focus()}
           />
           <FormInput
+            ref={passwordRef}
             control={control}
             name="password"
             placeholder="Password"
             secureTextEntry={!showPassword}
             textContentType="password"
             bg="$backgroundSoft"
+            returnKeyType="done"
+            onSubmitEditing={() => handleSubmit(onSubmit)()}
             rightElement={
               <Button
                 pos="absolute"

@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { forwardRef, ReactNode, Ref } from "react";
+import type { TextInput } from "react-native";
 import {
   Control,
   Controller,
@@ -6,7 +7,7 @@ import {
   Path,
   useFormContext,
 } from "react-hook-form";
-import { Input, InputProps, Text, XStack, YStack } from "tamagui";
+import { Input, InputProps, Text, TamaguiElement, XStack, YStack } from "tamagui";
 
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
@@ -14,12 +15,10 @@ type FormInputProps<T extends FieldValues> = {
   rightElement?: ReactNode;
 } & Omit<InputProps, "value" | "onChangeText">;
 
-export function FormInput<T extends FieldValues>({
-  control,
-  name,
-  rightElement,
-  ...inputProps
-}: FormInputProps<T>) {
+function FormInputInner<T extends FieldValues>(
+  { control, name, rightElement, ...inputProps }: FormInputProps<T>,
+  ref: Ref<TextInput>,
+) {
   // потрібен FormProvider навколо форми: звідси беремо clearErrors,
   // щоб показана помилка зникала, щойно юзер знову почав вводити
   const formContext = useFormContext();
@@ -36,6 +35,14 @@ export function FormInput<T extends FieldValues>({
               size="$4"
               placeholderTextColor="$colorMuted"
               {...inputProps}
+              ref={(node: TamaguiElement | null) => {
+                // Input у react-native — це насправді TextInput,
+                // хоча tamagui типізує ref як TamaguiElement
+                const textInputNode = node as TextInput | null;
+                field.ref(textInputNode);
+                if (typeof ref === "function") ref(textInputNode);
+                else if (ref) (ref as { current: TextInput | null }).current = textInputNode;
+              }}
               value={field.value as string}
               onChangeText={(text) => {
                 if (fieldState.error) {
@@ -58,3 +65,8 @@ export function FormInput<T extends FieldValues>({
     />
   );
 }
+
+// forwardRef + generics потребує явного каста типу, інакше TS губить дженерик T
+export const FormInput = forwardRef(FormInputInner) as <T extends FieldValues>(
+  props: FormInputProps<T> & { ref?: Ref<TextInput> },
+) => ReturnType<typeof FormInputInner>;
