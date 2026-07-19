@@ -9,17 +9,32 @@ interface CardProps extends YStackProps {
   children?: ReactNode;
 }
 
-// "glass" і "soft" використовують ту саму напівпрозору поверхню ($glassBg/$glassBorder) —
-// різниця лише в м'якому glow-світінні для акцентних поверхонь. Раніше "glass" ще й
-// реально розмивав контент через BlurView, але за затвердженим дизайном тло під
-// картками пласке (нема чого розмивати) — реальний blur лишили тільки для ScreenHeader,
-// де під ним справді прокручується контент
-export function AppCard({ variant = "solid", children, ...rest }: CardProps) {
+export function AppCard(props: CardProps) {
+  const { variant = "solid", children, ...rest } = props;
+
   if (variant === "glass") {
     return (
       <GlowSurface
         glow
+        insetHighlight
         br="$card"
+        p="$cardPad"
+        bg="$glassBg"
+        borderWidth={1}
+        borderColor="$glassBorder"
+        {...rest}
+      >
+        {children}
+      </GlowSurface>
+    );
+  }
+
+  if (variant === "soft") {
+    return (
+      <GlowSurface
+        glow
+        insetHighlight
+        br="$cardSoft"
         p="$cardPad"
         bg="$glassBg"
         borderWidth={1}
@@ -33,11 +48,11 @@ export function AppCard({ variant = "solid", children, ...rest }: CardProps) {
 
   return (
     <YStack
-      br={variant === "soft" ? "$card" : "$4"}
+      br="$4"
       p="$4"
-      bg={variant === "soft" ? "$glassBg" : "$backgroundStrong"}
+      bg="$backgroundStrong"
       borderWidth={1}
-      borderColor={variant === "soft" ? "$glassBorder" : "$borderColor"}
+      borderColor="$borderColor"
       {...rest}
     >
       {children}

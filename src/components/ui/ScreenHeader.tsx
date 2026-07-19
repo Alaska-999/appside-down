@@ -29,8 +29,6 @@ function HeaderShell({ children }: { children: ReactNode }) {
 
   return (
     <YStack pos="relative" overflow="hidden">
-      {/* tint="light" завжди — те саме обґрунтування, що й у Card.tsx: "dark" тінт
-         на dark-темі просто затемнює й так темне тло замість давати ефект скла */}
       <BlurView
         intensity={30}
         tint="light"

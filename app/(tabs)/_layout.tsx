@@ -6,9 +6,6 @@ import { ComponentType, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
 
-// активна вкладка — невеликий квадрат із акцентним градієнтом, білою іконкою
-// і неоновим ореолом (мокап home-bento-v7, .ft-item.a); квадрат компактний,
-// щоб під ним лишалось місце для підпису
 function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
   return function RenderTabIcon({
     focused,
@@ -21,7 +18,14 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
 
     if (!focused) {
       return (
-        <YStack width={30} height={30} ai="center" jc="center">
+        <YStack
+          width={26}
+          height={26}
+          br={9}
+          bg="rgba(255,255,255,0.1)"
+          ai="center"
+          jc="center"
+        >
           <Icon size={18} color={color} />
         </YStack>
       );
@@ -31,7 +35,7 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
       <YStack
         shadowColor="$glowColor"
         shadowOpacity={1}
-        shadowRadius={8}
+        shadowRadius={14}
         shadowOffset={{ width: 0, height: 0 }}
         elevation={6}
       >
@@ -43,9 +47,9 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 10,
+            width: 26,
+            height: 26,
+            borderRadius: 9,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -67,15 +71,13 @@ export default function TabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          // "плаваючий острівець" замість прибитого до країв таб-бару —
-          // звірено з затвердженим bento-мокапом Home
           tabBarStyle: {
             position: "absolute",
-            left: 20,
-            right: 20,
-            bottom: insets.bottom + 12,
-            height: 64,
-            borderRadius: 24,
+            left: 22,
+            right: 22,
+            bottom: insets.bottom + 19,
+            height: 68,
+            borderRadius: 27,
             backgroundColor: theme.tabBarBg.get(),
             borderWidth: 1,
             borderColor: theme.glassBorder.get(),
@@ -83,8 +85,9 @@ export default function TabsLayout() {
             shadowColor: "#000",
             shadowOpacity: 0.4,
             shadowRadius: 16,
-            shadowOffset: { width: 0, height: 8 },
+            shadowOffset: { width: 0, height: 10 },
           },
+          tabBarLabelStyle: { fontSize: 12 },
           tabBarActiveTintColor: theme.color.get(),
           tabBarInactiveTintColor: theme.colorMuted.get(),
         }}
@@ -105,7 +108,7 @@ export default function TabsLayout() {
           }}
           listeners={{
             tabPress: (e) => {
-              e.preventDefault(); // Зупиняємо перехід на сторінку create.tsx
+              e.preventDefault();
               setIsSheetOpen(true);
             },
           }}

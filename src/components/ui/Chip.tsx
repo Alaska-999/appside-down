@@ -14,22 +14,17 @@ interface ChipProps {
   rightElement?: ReactNode;
 }
 
-// розмірні пресети замість хардкоду на екрані: "lg" — для Recent на Home
-// (значення з мокапа home-bento-v7), "md" — компактний варіант для щільних списків
 const CHIP_SIZES = {
-  md: { avatar: 30, monogram: "$2", title: "$3", meta: "$1", pl: "$1.5", pr: "$3.5", py: "$1.5" },
-  lg: { avatar: 36, monogram: "$3", title: "$4", meta: "$2", pl: "$2.5", pr: "$4", py: "$2.5" },
+  md: { avatar: 30, monogram: "$2", title: "$3", meta: "$1", pl: "$1.5", pr: "$3.5", py: "$1.5", gap: 10 },
+  lg: { avatar: 39, monogram: 15, title: 17, meta: 14, pl: 11, pr: 20, py: 11, gap: 11 },
 } as const;
 
-// універсальний "пігулка"-елемент: кольоровий монограм-кружок + назва + підпис.
-// Використовується для Recent на Home; той самий компонент годиться для будь-якого
-// іншого короткого горизонтального списку (обране, останні папки тощо)
 export function Chip({ monogram, title, meta, gradientColors, size = "md", onPress, rightElement }: ChipProps) {
   const s = CHIP_SIZES[size];
   return (
     <XStack
       ai="center"
-      gap="$2.5"
+      gap={s.gap}
       bg="$glassBg"
       borderWidth={1}
       borderColor="$glassBorder"

@@ -1,10 +1,10 @@
+import { StreakCard } from "@/src/components/cards/StreakCard";
 import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { AppCard } from "@/src/components/ui/Card";
 import { Chip } from "@/src/components/ui/Chip";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
-import { StreakCard } from "@/src/components/cards/StreakCard";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -30,12 +30,9 @@ type HomeModule = {
   _count?: { flashcards: number };
 };
 
-// колірні пари для монограм Recent-чипів — просто ротація бренд-відтінків
-// для візуального розмаїття, не окремі токени
 const CHIP_GRADIENTS: [string, string][] = [
-  ["#818cf8", "#38bdf8"],
-  ["#4c46a8", "#2fa3b8"],
-  ["#7b4ae0", "#38bdf8"],
+  ["#2dd4bf", "#a3e635"],
+  ["#4338ca", "#65a30d"],
 ];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
@@ -46,11 +43,11 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         router.push({ pathname: "/module/[id]", params: { id: module.id } })
       }
     >
-      <AppCard variant="soft" px="$cardPad" py="$3.5" gap="$0.5">
-        <Text fontSize="$4" fontWeight="700" color="$color">
+      <AppCard variant="soft" px="$cardPad" py={16} gap="$0.5">
+        <Text fontSize={17} fontWeight="700" color="$color">
           {module.name}
         </Text>
-        <Text fontSize="$3" color="$colorMuted">
+        <Text fontSize={14} color="$colorMuted">
           {module.user?.username ?? "Unknown"} · {count} term
           {count !== 1 ? "s" : ""}
         </Text>
@@ -64,17 +61,16 @@ function SectionTitle({
   tone = "muted",
 }: {
   children: string;
-  // "onGlass" — для лейблів усередині скляних плиток: $colorMuted там
-  // недостатньо контрастний (темно-сірий на напівпрозорому склі)
   tone?: "muted" | "onGlass";
 }) {
   return (
     <Text
-      fontSize="$3"
-      fontWeight="700"
+      fontSize={tone === "onGlass" ? 13 : 15}
+      fontWeight={tone === "onGlass" ? "600" : "700"}
       color={tone === "onGlass" ? "$colorSecondary" : "$colorMuted"}
       textTransform="uppercase"
-      letterSpacing={1}
+      letterSpacing={tone === "onGlass" ? 0.77 : 1.04}
+      mt={tone === "onGlass" ? 3 : 0}
     >
       {children}
     </Text>
@@ -172,7 +168,8 @@ export default function Home() {
 
   const cardsLearned = useMemo(() => {
     return modules.reduce((sum, m) => {
-      const known = m.flashcards?.filter((f) => f.status === "KNOWN").length ?? 0;
+      const known =
+        m.flashcards?.filter((f) => f.status === "KNOWN").length ?? 0;
       return sum + known;
     }, 0);
   }, [modules]);
@@ -205,25 +202,23 @@ export default function Home() {
 
   return (
     <ScreenBackground>
-      <YStack f={1} px="$screenX" gap="$4" pt={insets.top}>
+      <YStack f={1} px="$screenX" gap="$section" pt={insets.top}>
         <XStack jc="space-between" gap="$3" ai="flex-start">
-          {/* MaskedView на весь рядок (з f={1}) іноді лягав у нульовий розмір
-             і зникав повністю — маскуємо градієнтом лише ім'я, це надійніше */}
           <YStack f={1}>
-            <Text fontSize="$10" fontWeight="800" color="$color" lineHeight={36}>
+            <Text fontSize={35} fontWeight="800" color="$color" lineHeight={39}>
               Hi,
             </Text>
             <XStack ai="center" flexWrap="wrap">
-              <GradientText fontSize="$10" fontWeight="800" lineHeight={36}>
+              <GradientText fontSize={35} fontWeight="800" lineHeight={39}>
                 {user?.username ?? "there"}
               </GradientText>
-              <Text fontSize="$10" fontWeight="800" lineHeight={36}>
-                {" "}👋
+              <Text fontSize={35} fontWeight="800" lineHeight={39}>
+                {" "}
+                👋
               </Text>
             </XStack>
           </YStack>
           <AvatarRing
-            size={52}
             avatarUrl={user?.avatarUrl}
             username={user?.username}
             onPress={navigateToProfile}
@@ -233,27 +228,27 @@ export default function Home() {
         <XStack
           bg="$glassBg"
           br={999}
-          px="$4"
+          px={19}
+          py={14}
           ai="center"
-          gap="$2"
+          gap={9}
           borderWidth={1}
           borderColor="$glassBorder"
-          h={46}
         >
-          <Search size={16} color="$colorMuted" opacity={0.6} />
+          <Search size={20} color="$colorMuted" opacity={0.6} />
           <Input
             f={1}
             unstyled
             placeholder="Search public modules..."
             value={search}
             onChangeText={setSearch}
-            fontSize="$4"
+            fontSize={16}
             color="$color"
             placeholderTextColor="$colorMuted"
           />
           {search.length > 0 && (
-            <Pressable hitSlop={8} onPress={() => setSearch("")}>
-              <X size={16} color="$colorMuted" />
+            <Pressable hitSlop={13} onPress={() => setSearch("")}>
+              <X size={20} color="$colorMuted" />
             </Pressable>
           )}
         </XStack>
@@ -277,34 +272,34 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <YStack gap="$section" pb={110}>
-              {/* bento-група: hero + дві плитки, внутрішній крок 10 як у мокапі */}
-              <YStack gap="$2.5">
+            <YStack gap="$section" pb={130}>
+              <YStack gap={12}>
                 <StreakCard
                   currentStreak={user?.streak?.currentStreak ?? 0}
                   todayIndex={todayIndex}
                 />
 
-                <XStack gap="$2.5">
+                <XStack gap={12}>
                   {featuredModule && featuredStats ? (
                     <Pressable
                       style={{ flex: 1 }}
                       onPress={() => openModule(featuredModule.id)}
                     >
-                      <AppCard variant="glass" f={1} gap="$2" ai="flex-start">
+                      <AppCard variant="glass" f={1} gap={9} ai="flex-start">
                         <ProgressRing
                           progress={featuredStats.progress}
                           label={`${Math.round(featuredStats.progress * 100)}%`}
                         />
                         <Text
-                          fontSize="$4"
+                          fontSize={16}
                           fontWeight="700"
                           color="$color"
                           numberOfLines={1}
+                          mt="$3"
                         >
                           Continue: {featuredModule.name}
                         </Text>
-                        <Text fontSize="$2" color="$colorSecondary">
+                        <Text fontSize={14} color="$colorSecondary">
                           {featuredStats.known}/{featuredStats.total} terms
                         </Text>
                       </AppCard>
@@ -312,15 +307,15 @@ export default function Home() {
                   ) : null}
 
                   <AppCard variant="glass" f={1} gap="$1" ai="flex-start">
-                    <Text fontSize="$9" fontWeight="900" color="$color">
+                    <Text fontSize={31} fontWeight="900" color="$color">
                       {modules.length}
                     </Text>
                     <SectionTitle tone="onGlass">Total modules</SectionTitle>
                     <Text
-                      fontSize="$9"
+                      fontSize={31}
                       fontWeight="900"
-                      color="$accentGradientEnd"
-                      mt="$2.5"
+                      color="$accentGradientStart"
+                      mt={12}
                     >
                       {cardsLearned}
                     </Text>
@@ -329,12 +324,11 @@ export default function Home() {
                 </XStack>
               </YStack>
 
-              {/* Recent */}
               {recent.length > 0 && (
-                <YStack gap="$3">
+                <YStack gap={14}>
                   <SectionTitle>Recent</SectionTitle>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <XStack gap="$2.5">
+                    <XStack gap={11}>
                       {recent.map((m, i) => {
                         const count = m._count?.flashcards ?? 0;
                         return (
@@ -344,7 +338,9 @@ export default function Home() {
                             monogram={m.name.slice(0, 1).toUpperCase()}
                             title={m.name}
                             meta={`${count} card${count !== 1 ? "s" : ""}`}
-                            gradientColors={CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]}
+                            gradientColors={
+                              CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]
+                            }
                             onPress={() => openModule(m.id)}
                           />
                         );
@@ -354,11 +350,10 @@ export default function Home() {
                 </YStack>
               )}
 
-              {/* Discover */}
               {discover.length > 0 && (
-                <YStack gap="$3">
+                <YStack gap={14}>
                   <SectionTitle>Discover</SectionTitle>
-                  <YStack gap="$2">
+                  <YStack gap={14}>
                     {discover.map((m) => (
                       <PublicModuleRow key={m.id} module={m} />
                     ))}

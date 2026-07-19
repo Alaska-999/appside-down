@@ -2,7 +2,7 @@ import Svg, { Circle } from "react-native-svg";
 import { Text, useTheme, View } from "tamagui";
 
 interface ProgressRingProps {
-  progress: number; // 0-1
+  progress: number;
   size?: number;
   strokeWidth?: number;
   label?: string;
@@ -11,17 +11,14 @@ interface ProgressRingProps {
 
 export function ProgressRing({
   progress,
-  size = 56,
-  strokeWidth = 7,
+  size = 64,
+  strokeWidth = 8,
   label,
   color,
 }: ProgressRingProps) {
   const theme = useTheme();
   const ringColor = color ?? theme.accentGradientEnd.get();
   const trackColor = "rgba(255,255,255,0.14)";
-  // суцільна темна "дірка" в центрі, як у мокапі (ring-hole на #221f3d) —
-  // заодно робить кільце непрозорим, тож cyan-світіння наводиться на його
-  // форму, а не на текст лейбла
   const holeColor = theme.backgroundStrong.get();
 
   const radius = (size - strokeWidth) / 2;
@@ -34,9 +31,9 @@ export function ProgressRing({
       height={size}
       ai="center"
       jc="center"
-      shadowColor={ringColor}
+      shadowColor={theme.accentGradientStart.get()}
       shadowOpacity={0.4}
-      shadowRadius={10}
+      shadowRadius={15}
       shadowOffset={{ width: 0, height: 0 }}
     >
       <Svg width={size} height={size} style={{ position: "absolute" }}>
@@ -58,14 +55,13 @@ export function ProgressRing({
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          strokeLinecap="round"
-          // круг починається з 12-ї години, а не з 3-ї, і росте за годинниковою стрілкою
+          strokeLinecap="butt"
           rotation={-90}
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
       {label && (
-        <Text fontSize="$1" fontWeight="800" color="$color">
+        <Text fontSize={13} fontWeight="800" color="$color">
           {label}
         </Text>
       )}

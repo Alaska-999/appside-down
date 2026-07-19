@@ -7,15 +7,13 @@ interface GradientTextProps extends TextProps {
   children: ReactNode;
 }
 
-// MaskedView використовує дочірній Text лише як маску форми (його colour
-// ігнорується) — фактичний колір задає LinearGradient під маскою
 export function GradientText({ children, ...textProps }: GradientTextProps) {
   const theme = useTheme();
 
   return (
     <MaskedView maskElement={<Text {...textProps}>{children}</Text>}>
       <LinearGradient
-        colors={[theme.accentGradientStart.get(), theme.accentGradientEnd.get()]}
+        colors={[theme.gradientTextStart.get(), theme.gradientTextEnd.get()]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
       >

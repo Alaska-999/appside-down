@@ -9,11 +9,9 @@ interface AvatarRingProps {
   onPress?: () => void;
 }
 
-// тонке градієнтне кільце навколо аватарки — перевикористовуваний акцент,
-// не прив'язаний до Home (годиться й для Profile/Settings)
-export function AvatarRing({ avatarUrl, username, size = 44, onPress }: AvatarRingProps) {
+export function AvatarRing({ avatarUrl, username, size = 59, onPress }: AvatarRingProps) {
   const theme = useTheme();
-  const ringWidth = 2.5;
+  const ringWidth = 3;
 
   return (
     <LinearGradient
