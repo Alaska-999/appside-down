@@ -5,7 +5,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Text, XStack } from "tamagui";
+import { Text, useThemeName, XStack } from "tamagui";
 
 interface SegmentedControlProps {
   options: string[];
@@ -14,6 +14,12 @@ interface SegmentedControlProps {
 }
 
 export function SegmentedControl({ options, selected, onChange }: SegmentedControlProps) {
+  // theme.token.get() всередині style Animated.View Reanimated не вміє розпарсити
+  // ("Invalid color value: [object Object]") — тому тут звичайні рядки-літерали,
+  // синхронізовані з tamagui.config.ts, а не useTheme()
+  const themeName = useThemeName();
+  const pillBg = themeName === "dark" ? "#221F35" : "#FFFFFF";
+  const pillGlow = themeName === "dark" ? "rgba(129,140,248,0.6)" : "rgba(99,102,241,0.35)";
   const [containerWidth, setContainerWidth] = useState(0);
   const PADDING = 4;
   const GAP = 4;
@@ -35,7 +41,9 @@ export function SegmentedControl({ options, selected, onChange }: SegmentedContr
 
   return (
     <XStack
-      bg="$backgroundCard"
+      bg="$glassBg"
+      borderWidth={1}
+      borderColor="$glassBorder"
       br="$4"
       p="$1"
       gap="$1"
@@ -52,11 +60,11 @@ export function SegmentedControl({ options, selected, onChange }: SegmentedContr
               width: tabWidth,
               bottom: PADDING,
               borderRadius: 6,
-              backgroundColor: "white",
-              shadowColor: "#000",
-              shadowOpacity: 0.08,
-              shadowRadius: 4,
-              elevation: 2,
+              backgroundColor: pillBg,
+              shadowColor: pillGlow,
+              shadowOpacity: 0.5,
+              shadowRadius: 6,
+              elevation: 3,
             },
             pillStyle,
           ]}

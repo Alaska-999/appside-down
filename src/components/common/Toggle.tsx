@@ -24,8 +24,13 @@ export function Toggle({
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      ["#E2E8F0", "#059669"],
+      ["#E2E8F0", "#6366F1"],
     ),
+    shadowColor: "#6366F1",
+    shadowOpacity: progress.value * 0.6,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: progress.value * 4,
   }));
 
   const thumbStyle = useAnimatedStyle(() => ({
