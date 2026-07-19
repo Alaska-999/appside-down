@@ -27,6 +27,7 @@ interface EditCardsSheetProps {
     name: string,
     description: string,
     isPublic: boolean,
+    updatedAt: string,
   ) => void;
   moduleName: string;
   moduleDescription: string;
@@ -124,7 +125,7 @@ export function EditCardsSheet({
     const idsToDelete = [...removedIds, ...emptiedExistingIds];
 
     try {
-      const [, patchedResults, createdResults] = await Promise.all([
+      const [, patchedResults, createdResults, moduleRes] = await Promise.all([
         Promise.all(
           idsToDelete.map((cardId) =>
             protectedFetch(
@@ -178,11 +179,14 @@ export function EditCardsSheet({
         ),
       ]);
 
+      const updatedModule = await moduleRes.json();
+
       onSaved(
         [...patchedResults, ...createdResults],
         data.name,
         data.description,
         isPublic,
+        updatedModule.updatedAt,
       );
       onOpenChange(false);
     } catch (err) {

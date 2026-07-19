@@ -77,7 +77,10 @@ export default function ModuleScreen() {
       locked: false,
       onPress: (module: Module, flashcards: Flashcard[]) => {
         if (module && flashcards && flashcards?.length > 0) {
-          if (currentModule?.id !== module.id) {
+          const isStale =
+            currentModule?.id !== module.id ||
+            currentModule?.updatedAt !== module.updatedAt;
+          if (isStale) {
             initGame(module, flashcards);
           }
           router.push({ pathname: "/module/[id]/flashcards", params: { id } });
@@ -238,6 +241,7 @@ export default function ModuleScreen() {
     name: string,
     description: string,
     isPublic: boolean,
+    updatedAt: string,
   ) => {
     setFlashcards(updatedCards);
     setModuleData((prev) =>
@@ -247,6 +251,7 @@ export default function ModuleScreen() {
             name,
             description,
             isPublic,
+            updatedAt,
             itemsCount: updatedCards.length,
           }
         : prev,

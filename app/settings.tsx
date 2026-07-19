@@ -1,3 +1,4 @@
+import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Toggle } from "@/src/components/common/Toggle";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
@@ -153,6 +154,8 @@ export default function SettingsScreen() {
       <ScreenHeader title="Settings" />
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$4" gap="$5" pt="$2">
+          <AvatarPicker />
+
           <YStack gap="$2">
             <Text fontSize="$5" fontWeight="bold" color="$color">
               Personal information
