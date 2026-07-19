@@ -80,6 +80,7 @@ export default function TabsLayout() {
             bottom: insets.bottom + 19,
             height: 68,
             backgroundColor: "transparent",
+            borderTopWidth: 0,
             elevation: 10,
             shadowColor: "#000",
             shadowOpacity: 0.35,
@@ -92,7 +93,7 @@ export default function TabsLayout() {
               tint="dark"
               style={{
                 ...StyleSheet.absoluteFillObject,
-                borderRadius: 27,
+                borderRadius: 22,
                 overflow: "hidden",
                 borderWidth: 2,
                 borderColor:

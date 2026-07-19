@@ -3,7 +3,7 @@ import { TEXT } from "@/src/constants/typography";
 import { Folder } from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Pressable } from "react-native";
-import { Image, Text, YStack, useTheme } from "tamagui";
+import { Image, Text, YStack } from "tamagui";
 
 interface FolderCardProps {
   folder: {
@@ -14,14 +14,22 @@ interface FolderCardProps {
     modules?: unknown[];
     _count?: { modules?: number };
   };
+  index?: number;
   onPress: () => void;
 }
 
 const isImageUrl = (icon?: string | null) =>
   !!icon && /^(https?:|file:|data:|content:)/.test(icon);
 
-export function FolderCard({ folder, onPress }: FolderCardProps) {
-  const theme = useTheme();
+const ICON_GRADIENTS: [string, string][] = [
+  ["#2dd4bf", "#a3e635"],
+  ["#4338ca", "#65a30d"],
+  ["#4338ca", "#0d9488"],
+];
+
+export function FolderCard({ folder, index = 0, onPress }: FolderCardProps) {
+  const [gradientStart, gradientEnd] =
+    ICON_GRADIENTS[index % ICON_GRADIENTS.length];
   const moduleCount =
     folder._count?.modules ??
     folder.modules?.length ??
@@ -40,7 +48,7 @@ export function FolderCard({ folder, onPress }: FolderCardProps) {
         h={76}
       >
         <LinearGradient
-          colors={[theme.gradientHeroStart.get(), theme.gradientHeroMid.get()]}
+          colors={[gradientStart, gradientEnd]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{

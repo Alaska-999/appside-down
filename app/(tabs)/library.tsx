@@ -185,9 +185,10 @@ export default function Library() {
                 </Text>
               ) : null
             }
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <FolderCard
                 folder={item}
+                index={index}
                 onPress={() =>
                   router.push({
                     pathname: "/folder/[id]",
