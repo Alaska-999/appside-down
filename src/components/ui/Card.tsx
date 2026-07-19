@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { YStack, YStackProps } from "tamagui";
-import { GlowSurface } from "./GlowSurface";
+import { GlowSurface, GlowSurfaceProps } from "./GlowSurface";
 
 type CardVariant = "solid" | "soft" | "glass";
 
@@ -9,53 +9,57 @@ interface CardProps extends YStackProps {
   children?: ReactNode;
 }
 
+const GLASS_VARIANTS: Record<
+  "soft" | "glass",
+  Pick<
+    GlowSurfaceProps,
+    "br" | "glowRadius" | "glowOpacity" | "insetHighlightColor"
+  >
+> = {
+  soft: {
+    br: "$cardSoft",
+    glowRadius: 18,
+    glowOpacity: 0.07,
+    insetHighlightColor: "rgba(255,255,255,0.1)",
+  },
+  glass: {
+    br: "$card",
+    glowRadius: 28,
+    glowOpacity: 0.14,
+    insetHighlightColor: "rgba(255,255,255,0.18)",
+  },
+};
+
 export function AppCard(props: CardProps) {
   const { variant = "solid", children, ...rest } = props;
 
-  if (variant === "glass") {
+  if (variant === "solid") {
     return (
-      <GlowSurface
-        glow
-        insetHighlight
-        br="$card"
-        p="$cardPad"
-        bg="$glassBg"
+      <YStack
+        br="$4"
+        p="$4"
+        bg="$backgroundStrong"
         borderWidth={1}
-        borderColor="$glassBorder"
+        borderColor="$borderColor"
         {...rest}
       >
         {children}
-      </GlowSurface>
-    );
-  }
-
-  if (variant === "soft") {
-    return (
-      <GlowSurface
-        glow
-        insetHighlight
-        br="$cardSoft"
-        p="$cardPad"
-        bg="$glassBg"
-        borderWidth={1}
-        borderColor="$glassBorder"
-        {...rest}
-      >
-        {children}
-      </GlowSurface>
+      </YStack>
     );
   }
 
   return (
-    <YStack
-      br="$4"
-      p="$4"
-      bg="$backgroundStrong"
+    <GlowSurface
+      glow
+      insetHighlight
+      p="$cardPad"
+      bg="$glassBg"
       borderWidth={1}
-      borderColor="$borderColor"
+      borderColor="$glassBorder"
+      {...GLASS_VARIANTS[variant]}
       {...rest}
     >
       {children}
-    </YStack>
+    </GlowSurface>
   );
 }

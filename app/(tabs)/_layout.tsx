@@ -1,7 +1,7 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { BookOpen, House, PlusCircle } from "@tamagui/lucide-icons";
-import { Tabs } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { Tabs } from "expo-router";
 import { ComponentType, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
@@ -33,11 +33,11 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
 
     return (
       <YStack
-        shadowColor="$glowColor"
-        shadowOpacity={1}
-        shadowRadius={14}
+        shadowColor="$glowSoft"
+        shadowOpacity={0.1}
+        shadowRadius={20}
         shadowOffset={{ width: 0, height: 0 }}
-        elevation={6}
+        elevation={1}
       >
         <LinearGradient
           colors={[
@@ -45,7 +45,7 @@ function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
             theme.accentGradientEnd.get(),
           ]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          end={{ x: 1.3, y: 1.3 }}
           style={{
             width: 26,
             height: 26,
@@ -87,6 +87,12 @@ export default function TabsLayout() {
             shadowRadius: 16,
             shadowOffset: { width: 0, height: 10 },
           },
+          tabBarItemStyle: {
+            justifyContent: "center",
+            alignItems: "center",
+            paddingTop: 8,
+          },
+
           tabBarLabelStyle: { fontSize: 12 },
           tabBarActiveTintColor: theme.color.get(),
           tabBarInactiveTintColor: theme.colorMuted.get(),

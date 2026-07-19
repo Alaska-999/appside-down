@@ -1,19 +1,17 @@
+import { FolderCard } from "@/src/components/cards/FolderCard";
+import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { AppSheet } from "@/src/components/ui/Sheet";
+import { TEXT } from "@/src/constants/typography";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import {
-  AlignJustify,
-  Check,
-  Globe,
-  Lock,
-  Search,
-  Star,
-} from "@tamagui/lucide-icons";
+import { AlignJustify, Check, Search } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar, Input, Sheet, Text, XStack, YStack } from "tamagui";
+import { Input, Text, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
 
@@ -113,39 +111,38 @@ export default function Library() {
     SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
 
   return (
-    <YStack f={1} bg="$background" pt={insets.top}>
-      <YStack px="$4" gap="$3" f={1}>
-        {/* нативний хедер таб-бару вимкнено (headerShown: false) — тайтл тепер малює сам екран */}
-        <Text fontSize="$7" fontWeight="bold" color="$color">
+    <ScreenBackground>
+      <YStack f={1} px="$screenX" gap="$3" pt={insets.top}>
+        <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
           Library
         </Text>
+
         <SegmentedControl
           options={["Folders", "Modules"]}
           selected={tab}
           onChange={setTab}
         />
 
-        {/* Search + sort row */}
         <XStack gap="$2" ai="center">
           <XStack
             f={1}
-            bg="$backgroundHover"
-            br="$10"
-            px="$3"
+            bg="$glassBg"
+            br={999}
+            px={19}
+            py={14}
             ai="center"
-            gap="$2"
+            gap={9}
             borderWidth={1}
-            borderColor="$borderColor"
-            h={40}
+            borderColor="$glassBorder"
           >
-            <Search size={16} color="$colorMuted" />
+            <Search size={20} color="$colorMuted" opacity={0.6} />
             <Input
               f={1}
               unstyled
               placeholder="Search..."
               value={search}
               onChangeText={setSearch}
-              fontSize="$4"
+              fontSize={TEXT.pill}
               color="$color"
               placeholderTextColor="$colorMuted"
             />
@@ -153,17 +150,17 @@ export default function Library() {
 
           <Pressable onPress={() => setSortSheetOpen(true)}>
             <XStack
-              bg="$backgroundHover"
-              borderWidth={1}
-              borderColor="$borderColor"
-              br="$10"
-              px="$3"
-              h={40}
+              bg="$glassBg"
+              br={999}
+              px={14}
+              py={14}
               ai="center"
-              gap="$1"
+              gap={7}
+              borderWidth={1}
+              borderColor="$glassBorder"
             >
-              <AlignJustify size={14} color="$colorMuted" />
-              <Text fontSize="$3" color="$colorMuted">
+              <AlignJustify size={16} color="$color" />
+              <Text fontSize={TEXT.pill} fontWeight="600" color="$color">
                 {currentSortLabel}
               </Text>
             </XStack>
@@ -178,7 +175,7 @@ export default function Library() {
             data={filteredFolders}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
+            contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">
@@ -187,47 +184,15 @@ export default function Library() {
               ) : null
             }
             renderItem={({ item }) => (
-              <Pressable
+              <FolderCard
+                folder={item}
                 onPress={() =>
                   router.push({
                     pathname: "/folder/[id]",
                     params: { id: item.id },
                   })
                 }
-              >
-                <XStack
-                  bg="$backgroundHover"
-                  br="$4"
-                  p="$4"
-                  ai="center"
-                  gap="$3"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                >
-                  <Avatar circular size="$4" bg="$backgroundCard">
-                    {item.icon ? (
-                      <Avatar.Image
-                        src={item.icon}
-                        accessibilityLabel={item.name}
-                      />
-                    ) : null}
-                    <Avatar.Fallback jc="center" ai="center">
-                      <Text fontSize="$5">📂</Text>
-                    </Avatar.Fallback>
-                  </Avatar>
-                  <YStack f={1}>
-                    <Text fontSize="$5" fontWeight="600" color="$color">
-                      {item.name}
-                    </Text>
-                    {item.moduleIds && item.moduleIds.length > 0 && (
-                      <Text fontSize="$3" color="$colorMuted">
-                        {item.moduleIds.length} module
-                        {item.moduleIds.length !== 1 ? "s" : ""}
-                      </Text>
-                    )}
-                  </YStack>
-                </XStack>
-              </Pressable>
+              />
             )}
           />
         ) : (
@@ -235,7 +200,7 @@ export default function Library() {
             data={filteredModules}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12, paddingBottom: 32 }}
+            contentContainerStyle={{ gap: 10, paddingBottom: 32 }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">
@@ -248,107 +213,59 @@ export default function Library() {
               ) : null
             }
             renderItem={({ item }) => (
-              <Pressable
+              <ModuleCard
+                module={item}
                 onPress={() =>
                   router.push({
                     pathname: "/module/[id]",
                     params: { id: item.id },
                   })
                 }
-              >
-                <XStack
-                  bg="$backgroundHover"
-                  br="$4"
-                  p="$4"
-                  ai="center"
-                  gap="$3"
-                  borderWidth={1}
-                  borderColor="$borderColor"
-                >
-                  <YStack f={1} gap="$1">
-                    <Text fontSize="$5" fontWeight="600" color="$color">
-                      {item.name}
-                    </Text>
-                    <XStack ai="center" gap="$1.5">
-                      <Text fontSize="$3" color="$colorMuted">
-                        {item.itemsCount} card{item.itemsCount !== 1 ? "s" : ""}
-                      </Text>
-                      <Text color="$borderColor">·</Text>
-                      {item.isPublic ? (
-                        <Globe size={12} color="$colorMuted" />
-                      ) : (
-                        <Lock size={12} color="$colorMuted" />
-                      )}
-                      <Text fontSize="$3" color="$colorMuted">
-                        {item.isPublic ? "Public" : "Private"}
-                      </Text>
-                      {item.user?.username && (
-                        <>
-                          <Text color="$borderColor">·</Text>
-                          <Text fontSize="$3" color="$colorMuted">
-                            by {item.user.username}
-                          </Text>
-                        </>
-                      )}
-                    </XStack>
-                  </YStack>
-                  {item.isFavorite && (
-                    <Star
-                      size={16}
-                      color="$statusWarning"
-                      fill="$statusWarning"
-                    />
-                  )}
-                </XStack>
-              </Pressable>
+              />
             )}
           />
         )}
       </YStack>
 
-      <Sheet
-        modal
+      <AppSheet
         open={sortSheetOpen}
         onOpenChange={setSortSheetOpen}
+        title="Sort by"
         snapPoints={[30]}
-        dismissOnSnapToBottom
+        plain
       >
-        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-        <Sheet.Handle />
-        <Sheet.Frame p="$4" bg="$background" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">
-            Sort by
-          </Text>
-          <YStack gap="$2">
-            {SORT_OPTIONS.map((option) =>
-              tab === 0 && option.key === "favs" ? null : (
-                <Pressable
-                  key={option.key}
-                  onPress={() => {
-                    setSortOrder(option.key);
-                    setSortSheetOpen(false);
-                  }}
+        <YStack gap="$2" p="$4">
+          {SORT_OPTIONS.map((option) =>
+            tab === 0 && option.key === "favs" ? null : (
+              <Pressable
+                key={option.key}
+                onPress={() => {
+                  setSortOrder(option.key);
+                  setSortSheetOpen(false);
+                }}
+              >
+                <XStack
+                  bg={
+                    sortOrder === option.key ? "$glassBgStrong" : "transparent"
+                  }
+                  br={19}
+                  px={19}
+                  py={16}
+                  ai="center"
+                  jc="space-between"
                 >
-                  <XStack
-                    bg="$buttonSecondaryBg"
-                    br="$4"
-                    px="$4"
-                    py="$3"
-                    ai="center"
-                  >
-                    <Text f={1} fontSize="$5" color="$color">
-                      {option.label}
-                    </Text>
-                    {sortOrder === option.key && (
-                      <Check size={18} color="$color" />
-                    )}
-                  </XStack>
-                </Pressable>
-              ),
-            )}
-          </YStack>
-        </Sheet.Frame>
-      </Sheet>
-    </YStack>
+                  <Text fontSize="$5" fontWeight="600" color="$color">
+                    {option.label}
+                  </Text>
+                  {sortOrder === option.key && (
+                    <Check size={18} color="$accentGradientStart" />
+                  )}
+                </XStack>
+              </Pressable>
+            ),
+          )}
+        </YStack>
+      </AppSheet>
+    </ScreenBackground>
   );
 }

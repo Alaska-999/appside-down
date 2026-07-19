@@ -1,5 +1,6 @@
-import { AppCard } from "@/src/components/ui/Card";
 import { Badge } from "@/src/components/ui/Badge";
+import { AppCard } from "@/src/components/ui/Card";
+import { TEXT } from "@/src/constants/typography";
 import { Globe, Lock, Star } from "@tamagui/lucide-icons";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -19,41 +20,51 @@ interface ModuleCardProps {
 export function ModuleCard({ module, onPress }: ModuleCardProps) {
   return (
     <Pressable onPress={onPress}>
-      <AppCard variant="soft" fd="row" ai="center" gap="$3">
+      <AppCard
+        variant="soft"
+        fd="row"
+        ai="center"
+        gap={16}
+        br={20}
+        px={15}
+        py={17}
+        h={76}
+      >
         <YStack f={1} gap="$1">
-          <Text fontSize="$5" fontWeight="600" color="$color">
-            {module.name}
-          </Text>
           <XStack ai="center" gap="$1.5">
-            <Text fontSize="$3" color="$colorMuted">
+            <Text fontSize={TEXT.cardTitle} fontWeight="700" color="$color">
+              {module.name}
+            </Text>
+            {module.isFavorite && (
+              <Star size={16} color="#A3E635" fill="#A3E635" />
+            )}
+          </XStack>
+          <XStack ai="center" gap="$1.5" flexWrap="wrap">
+            <Text fontSize={TEXT.cardMeta} color="$colorMuted">
               {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
             </Text>
-            <Text color="$borderColor">·</Text>
             <Badge
               tone="neutral"
               icon={
                 module.isPublic ? (
-                  <Globe size={12} color="$colorMuted" />
+                  <Globe size={13} color="$colorMuted" />
                 ) : (
-                  <Lock size={12} color="$colorMuted" />
+                  <Lock size={13} color="$colorMuted" />
                 )
               }
             >
               {module.isPublic ? "Public" : "Private"}
             </Badge>
-            {module.user?.username && (
+            {module.isPublic && module.user?.username && (
               <>
-                <Text color="$borderColor">·</Text>
-                <Text fontSize="$3" color="$colorMuted">
+                <Text color="$colorMuted">·</Text>
+                <Text fontSize={TEXT.cardMeta} color="$colorMuted">
                   by {module.user.username}
                 </Text>
               </>
             )}
           </XStack>
         </YStack>
-        {module.isFavorite && (
-          <Star size={16} color="$statusWarning" fill="$statusWarning" />
-        )}
       </AppCard>
     </Pressable>
   );

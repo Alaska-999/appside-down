@@ -41,6 +41,8 @@ const tokens = createTokens({
 
         auroraText: '#EFFDF8',
         auroraMuted: '#8FA8B8',
+
+        nearBlack: '#0D1117',
     },
     space: {
         ...config.tokens.space,
@@ -130,10 +132,13 @@ const appConfig = createTamagui({
             gradientHeroEnd: tokens.color.heroLime,
             tabBarBg: 'rgba(255,255,255,0.92)',
             glassBg: 'rgba(255,255,255,0.6)',
+            glassBgStrong: 'rgba(15,23,42,0.06)',
             glassBorder: 'rgba(15,23,42,0.08)',
             glowColor: 'rgba(45,212,191,0.35)',
             glowSoft: 'rgba(45,212,191,0.15)',
             glowHero: 'rgba(13,148,136,0.25)',
+            sheetBg: 'rgba(248,250,252,0.96)',
+            onAccentText: tokens.color.nearBlack,
 
             buttonBg: tokens.color.slate6,
             buttonText: tokens.color.white,
@@ -174,10 +179,13 @@ const appConfig = createTamagui({
             gradientHeroEnd: tokens.color.heroLime,
             tabBarBg: 'rgba(26,40,52,0.92)',
             glassBg: 'rgba(220,255,245,0.06)',
+            glassBgStrong: 'rgba(220,255,245,0.08)',
             glassBorder: 'rgba(220,255,245,0.14)',
             glowColor: 'rgba(45,212,191,0.5)',
             glowSoft: 'rgba(45,212,191,0.1)',
             glowHero: 'rgba(13,148,136,0.3)',
+            sheetBg: 'rgba(26,40,52,0.96)',
+            onAccentText: tokens.color.nearBlack,
 
             buttonBg: tokens.color.white,
             buttonText: tokens.color.pureBlack,

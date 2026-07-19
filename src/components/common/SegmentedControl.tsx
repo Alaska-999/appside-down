@@ -1,3 +1,5 @@
+import { TEXT } from "@/src/constants/typography";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 import Animated, {
@@ -5,33 +7,49 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Text, useThemeName, XStack } from "tamagui";
+import { Text, useTheme, XStack } from "tamagui";
 
 interface SegmentedControlProps {
   options: string[];
   selected: number;
   onChange: (index: number) => void;
+  size?: "small" | "medium";
 }
 
-export function SegmentedControl({ options, selected, onChange }: SegmentedControlProps) {
-  // theme.token.get() всередині style Animated.View Reanimated не вміє розпарсити
-  // ("Invalid color value: [object Object]") — тому тут звичайні рядки-літерали,
-  // синхронізовані з tamagui.config.ts, а не useTheme()
-  const themeName = useThemeName();
-  const pillBg = themeName === "dark" ? "#221F35" : "#FFFFFF";
-  const pillGlow = themeName === "dark" ? "rgba(129,140,248,0.6)" : "rgba(99,102,241,0.35)";
+export function SegmentedControl({
+  options,
+  selected,
+  onChange,
+  size = "medium",
+}: SegmentedControlProps) {
+  const theme = useTheme();
+  const gradientColors = [
+    theme.accentGradientStart.get(),
+    theme.accentGradientEnd.get(),
+  ] as const;
+  const pillGlow = "rgba(45,212,191,0.5)";
   const [containerWidth, setContainerWidth] = useState(0);
-  const PADDING = 4;
-  const GAP = 4;
-  const tabWidth = containerWidth > 0
-    ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) / options.length
-    : 0;
+
+  const isSmall = size === "small";
+  const PADDING = isSmall ? 2 : 3;
+  const GAP = isSmall ? 2 : 3;
+  const py = isSmall ? "$1.5" : "$2";
+  const containerBr = isSmall ? 10 : 14;
+  const pillBr = isSmall ? 8 : 11;
+
+  const tabWidth =
+    containerWidth > 0
+      ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) /
+        options.length
+      : 0;
 
   const translateX = useSharedValue(0);
 
   useEffect(() => {
     if (tabWidth > 0) {
-      translateX.value = withTiming(selected * (tabWidth + GAP), { duration: 200 });
+      translateX.value = withTiming(selected * (tabWidth + GAP), {
+        duration: 200,
+      });
     }
   }, [selected, tabWidth]);
 
@@ -44,9 +62,10 @@ export function SegmentedControl({ options, selected, onChange }: SegmentedContr
       bg="$glassBg"
       borderWidth={1}
       borderColor="$glassBorder"
-      br="$4"
-      p="$1"
-      gap="$1"
+      br={containerBr}
+      p={PADDING}
+      gap={GAP}
+      mb="$3"
       position="relative"
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
@@ -59,8 +78,8 @@ export function SegmentedControl({ options, selected, onChange }: SegmentedContr
               left: PADDING,
               width: tabWidth,
               bottom: PADDING,
-              borderRadius: 6,
-              backgroundColor: pillBg,
+              borderRadius: pillBr,
+              overflow: "hidden",
               shadowColor: pillGlow,
               shadowOpacity: 0.5,
               shadowRadius: 6,
@@ -68,16 +87,23 @@ export function SegmentedControl({ options, selected, onChange }: SegmentedContr
             },
             pillStyle,
           ]}
-        />
+        >
+          <LinearGradient
+            colors={gradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
       )}
 
       {options.map((option, i) => (
         <Pressable key={option} onPress={() => onChange(i)} style={{ flex: 1 }}>
-          <XStack py="$2" jc="center" ai="center">
+          <XStack py={py} jc="center" ai="center">
             <Text
-              fontSize="$4"
-              fontWeight={selected === i ? "600" : "400"}
-              color={selected === i ? "$color" : "$colorMuted"}
+              fontSize={TEXT.cardMeta}
+              fontWeight="700"
+              color={selected === i ? "colorMuted" : "$colorMuted"}
             >
               {option}
             </Text>

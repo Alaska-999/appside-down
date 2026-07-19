@@ -1,10 +1,11 @@
+import { TEXT } from "@/src/constants/typography";
 import { ReactNode } from "react";
 import { Text, XStack } from "tamagui";
 
 type BadgeTone = "neutral" | "success" | "danger" | "info";
 
 const TONE_STYLES: Record<BadgeTone, { bg: string; color: string }> = {
-  neutral: { bg: "$glassBg", color: "$colorSecondary" },
+  neutral: { bg: "$glassBgStrong", color: "$colorMuted" },
   success: { bg: "$statusSuccess", color: "white" },
   danger: { bg: "$statusDanger", color: "white" },
   info: { bg: "$statusInfo", color: "white" },
@@ -22,16 +23,16 @@ export function Badge({ tone = "neutral", icon, children }: BadgeProps) {
   return (
     <XStack
       ai="center"
-      gap="$1"
-      px="$2"
-      py="$1"
-      br="$10"
+      gap={3}
+      px={11}
+      py={3}
+      br={999}
       bg={bg}
-      borderWidth={tone === "neutral" ? 1 : 0}
+      borderWidth={1}
       borderColor="$glassBorder"
     >
       {icon}
-      <Text fontSize="$1" fontWeight="600" color={color}>
+      <Text fontSize={TEXT.badge} fontWeight="600" color={color}>
         {children}
       </Text>
     </XStack>
