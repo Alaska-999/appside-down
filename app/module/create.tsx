@@ -1,44 +1,70 @@
+import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { ModuleForm, moduleSchema } from "@/src/validation/entities";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Input, ScrollView, Text, YStack } from "tamagui";
+import { Button, ScrollView, Text, YStack } from "tamagui";
 
 export default function ModuleCreate() {
   const insets = useSafeAreaInsets();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [flashcards, setFlashcards] = useState([
-    { term: "", definition: "" },
-    { term: "", definition: "" },
-  ]);
+  const [serverError, setServerError] = useState<string | null>(null);
   const { returnFolderId } = useLocalSearchParams<{
     returnFolderId?: string;
   }>();
 
-  const handleCreateModule = async () => {
-    if (!name) {
-      alert("Please enter a name for the module");
-      return;
-    }
-    const items = flashcards.map((i) => ({
-      term: i.term,
-      definition: i.definition,
-    }));
+  const form = useForm<ModuleForm>({
+    resolver: zodResolver(moduleSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      flashcards: [
+        { term: "", definition: "" },
+        { term: "", definition: "" },
+      ],
+    },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+  });
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = form;
 
-    if (items.length === 0) {
-      alert("Please add at least one complete card");
-      return;
-    }
+  const flashcardsError =
+    errors.flashcards?.root?.message ??
+    (errors.flashcards as { message?: string } | undefined)?.message;
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "flashcards",
+  });
+
+  // серверна помилка зникає, щойно юзер щось міняє у формі
+  useEffect(() => {
+    const subscription = form.watch(() => setServerError(null));
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  const onSubmit = async (data: ModuleForm) => {
+    setServerError(null);
 
     const module = {
-      flashcards: items.filter((i) => i.term.trim() || i.definition.trim()),
-      name: name || "Untitled Module",
-      description: description || "",
+      name: data.name,
+      description: data.description,
+      // повністю порожні рядки-заготовки не відправляємо;
+      // наполовину заповнені — контент юзера, зберігаємо як є
+      flashcards: data.flashcards.filter(
+        (card) => card.term || card.definition,
+      ),
     };
+
     try {
       const response = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/modules`,
@@ -68,87 +94,94 @@ export default function ModuleCreate() {
       }
     } catch (error) {
       console.error(error);
-      alert("Failed to create module");
-    }
-  };
-
-  const addCard = () => {
-    setFlashcards([...flashcards, { term: "", definition: "" }]);
-  };
-
-  const updateCard = (
-    index: number,
-    field: "term" | "definition",
-    value: string,
-  ) => {
-    const updatedCards = [...flashcards];
-    updatedCards[index][field] = value;
-    setFlashcards(updatedCards);
-  };
-
-  const removeCard = (index: number) => {
-    if (flashcards.length > 1) {
-      setFlashcards(flashcards.filter((_, i) => i !== index));
+      setServerError("Failed to create module. Please try again");
     }
   };
 
   return (
-    <YStack f={1} bg="$background">
-      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-        <ScreenHeaderCreate onCreate={handleCreateModule} />
-      </YStack>
-      <ScrollView f={1} contentContainerStyle={{ paddingTop: 100, paddingBottom: insets.bottom + 40, paddingHorizontal: 16 }}>
-        <YStack gap="$4" width="100%">
-          <Text
-            fontSize="$8"
-            fontWeight="bold"
-            textAlign="center"
-            mb="$2"
-            mt="$4"
-          >
-            New Module
-          </Text>
-
-          <Input
-            placeholder="Untitled Module"
-            value={name}
-            onChangeText={setName}
-            size="$5"
+    <FormProvider {...form}>
+      <YStack f={1} bg="$background">
+        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
+          <ScreenHeaderCreate
+            onCreate={() => {
+              if (!isSubmitting) handleSubmit(onSubmit)();
+            }}
           />
-
-          <Input
-            placeholder="Description (optional)"
-            value={description}
-            onChangeText={setDescription}
-            size="$4"
-            bg="transparent"
-          />
-
-          <YStack gap="$6" mt="$6">
-            {flashcards.map((flashcard, index) => (
-              <FlashcardEditItem
-                key={index}
-                index={index}
-                term={flashcard.term}
-                definition={flashcard.definition}
-                onUpdate={updateCard}
-                onRemove={removeCard}
-                showRemove={flashcards.length > 1}
-              />
-            ))}
-          </YStack>
-
-          <Button
-            icon={<Plus size="$1" />}
-            onPress={addCard}
-            mt="$4"
-            bg="$buttonSecondaryBg"
-            br="$10"
-          >
-            <Text color="$buttonSecondaryText">Add Card</Text>
-          </Button>
         </YStack>
-      </ScrollView>
-    </YStack>
+        <ScrollView
+          f={1}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            paddingTop: 100,
+            paddingBottom: insets.bottom + 40,
+            paddingHorizontal: 16,
+          }}
+        >
+          <YStack gap="$4" width="100%">
+            <Text
+              fontSize="$8"
+              fontWeight="bold"
+              textAlign="center"
+              mb="$2"
+              mt="$4"
+            >
+              New Module
+            </Text>
+
+            <FormInput
+              control={control}
+              name="name"
+              placeholder="Untitled Module"
+              size="$5"
+            />
+
+            <FormInput
+              control={control}
+              name="description"
+              placeholder="Description (optional)"
+              size="$4"
+              bg="transparent"
+            />
+
+            <YStack gap="$6" mt="$6">
+              {fields.map((field, index) => (
+                <FlashcardEditItem
+                  key={field.id}
+                  control={control}
+                  termName={`flashcards.${index}.term`}
+                  definitionName={`flashcards.${index}.definition`}
+                  index={index}
+                  onRemove={remove}
+                  showRemove={fields.length > 1}
+                />
+              ))}
+            </YStack>
+
+            {flashcardsError && (
+              <Text color="$statusDanger" fontSize="$2">
+                {flashcardsError}
+              </Text>
+            )}
+
+            {serverError && (
+              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+                {serverError}
+              </Text>
+            )}
+
+            <Button
+              icon={<Plus size="$1" />}
+              onPress={() => append({ term: "", definition: "" })}
+              mt="$4"
+              bg="$buttonSecondaryBg"
+              br="$10"
+            >
+              <Text color="$buttonSecondaryText">Add Card</Text>
+            </Button>
+          </YStack>
+        </ScrollView>
+      </YStack>
+    </FormProvider>
   );
 }

@@ -1,22 +1,47 @@
+import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { FolderForm, folderSchema } from "@/src/validation/entities";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Input, Text, XStack, YStack } from "tamagui";
+import { useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Keyboard } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
 
 export default function FolderCreate() {
-  const [name, setName] = useState("");
   const [customImageUri, setCustomImageUri] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleCreateFolder = async () => {
+  const form = useForm<FolderForm>({
+    resolver: zodResolver(folderSchema),
+    defaultValues: { name: "" },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+  });
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
+
+  // серверна помилка зникає, щойно юзер щось міняє у формі
+  useEffect(() => {
+    const subscription = form.watch(() => setServerError(null));
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  const onSubmit = async (data: FolderForm) => {
+    setServerError(null);
+
     try {
       const response = await protectedFetch(
         `${process.env.EXPO_PUBLIC_API_URL}/folders`,
         {
           method: "POST",
           body: JSON.stringify({
-            name: name || "Untitled Folder",
+            name: data.name,
             icon: customImageUri || "",
             tags: [],
           }),
@@ -35,42 +60,59 @@ export default function FolderCreate() {
       });
     } catch (error) {
       console.error(error);
-      alert("Error creating folder");
+      setServerError("Failed to create folder. Please try again");
     }
   };
 
   return (
-    <YStack f={1} bg="$background">
-      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-        <ScreenHeaderCreate onCreate={handleCreateFolder} />
-      </YStack>
+    <FormProvider {...form}>
+      <YStack f={1} bg="$background">
+        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
+          <ScreenHeaderCreate
+            onCreate={() => {
+              if (!isSubmitting) handleSubmit(onSubmit)();
+            }}
+          />
+        </YStack>
 
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        p="$4"
-        bg="$background"
-        gap="$4"
-        width="100%"
-      >
-        <Text fontSize="$6" fontWeight="bold">
-          New Folder
-        </Text>
-        <ImagePickerAvatar
-          imageUri={customImageUri}
-          defaultColor={"#22222B"}
-          onImageSelected={setCustomImageUri}
-        />
-        <Input
-          placeholder="Untitled Folder"
-          value={name}
-          onChangeText={setName}
+        <YStack
+          f={1}
+          jc="center"
+          ai="center"
+          p="$4"
+          bg="$background"
+          gap="$4"
           width="100%"
-          height={50}
-        />
-        <XStack height={50} marginHorizontal="$4" alignItems="center"></XStack>
+          onPress={Keyboard.dismiss}
+        >
+          <Text fontSize="$6" fontWeight="bold">
+            New Folder
+          </Text>
+          <ImagePickerAvatar
+            imageUri={customImageUri}
+            defaultColor={"#22222B"}
+            onImageSelected={setCustomImageUri}
+          />
+          <FormInput
+            control={control}
+            name="name"
+            placeholder="Untitled Folder"
+            height={50}
+          />
+
+          {serverError && (
+            <Text color="$statusDanger" fontSize="$3" textAlign="center">
+              {serverError}
+            </Text>
+          )}
+
+          <XStack
+            height={50}
+            marginHorizontal="$4"
+            alignItems="center"
+          ></XStack>
+        </YStack>
       </YStack>
-    </YStack>
+    </FormProvider>
   );
 }

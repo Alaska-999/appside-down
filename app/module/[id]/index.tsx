@@ -4,6 +4,7 @@ import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Flashcard, Module } from "@/src/types";
+import { cardSideText } from "@/src/utils/cardText";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
   AlignJustify,
@@ -559,7 +560,7 @@ export default function ModuleScreen() {
                           fontWeight="600"
                           color="$color"
                         >
-                          {card.term}
+                          {cardSideText(card.term)}
                         </Text>
                         <XStack gap="$3" ai="center">
                           <Pressable hitSlop={8}>
@@ -588,7 +589,7 @@ export default function ModuleScreen() {
                         </XStack>
                       </XStack>
                       <Text fontSize="$4" color="$colorSecondary">
-                        {card.definition}
+                        {cardSideText(card.definition)}
                       </Text>
                     </YStack>
                   ))}

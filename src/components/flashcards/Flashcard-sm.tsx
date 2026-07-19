@@ -1,4 +1,5 @@
 import { useFlipCard } from "@/src/hooks/useFlipCard";
+import { cardSideText } from "@/src/utils/cardText";
 import Animated from "react-native-reanimated";
 import { Card, Text } from "tamagui";
 
@@ -51,7 +52,7 @@ export function FlashcardSm({
           numberOfLines={4}
           ellipsizeMode="tail"
         >
-          {term}
+          {cardSideText(term)}
         </Text>
       </AnimatedCard>
       <AnimatedCard
@@ -75,7 +76,7 @@ export function FlashcardSm({
           numberOfLines={4}
           ellipsizeMode="tail"
         >
-          {definition}
+          {cardSideText(definition)}
         </Text>
       </AnimatedCard>
     </Card>

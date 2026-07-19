@@ -1,6 +1,7 @@
 import { useFlipCard } from "@/src/hooks/useFlipCard";
 import { useSwipeCard } from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
+import { cardSideText } from "@/src/utils/cardText";
 import { Star, Volume2 } from "@tamagui/lucide-icons";
 import { StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -33,11 +34,11 @@ export function FlashcardLg({
   revertKey,
 }: FlashcardLgProps) {
   const front = showDefinitionFirst
-    ? { label: "Definition", text: card?.definition }
-    : { label: "Term", text: card?.term };
+    ? { label: "Definition", text: cardSideText(card?.definition) }
+    : { label: "Term", text: cardSideText(card?.term) };
   const back = showDefinitionFirst
-    ? { label: "Term", text: card?.term }
-    : { label: "Definition", text: card?.definition };
+    ? { label: "Term", text: cardSideText(card?.term) }
+    : { label: "Definition", text: cardSideText(card?.definition) };
   const { flip, frontAnimatedStyle, backAnimatedStyle } = useFlipCard({
     direction,
     resetKey: card?.id,

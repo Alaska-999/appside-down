@@ -7,8 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Keyboard } from "react-native";
 import { Button, Text, YStack } from "tamagui";
 
 export default function Signup() {
@@ -17,15 +18,23 @@ export default function Signup() {
 
   const setAuth = useAuthStore((state) => state.setAuth);
 
+  const form = useForm<SignupForm>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { email: "", username: "", password: "" },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+  });
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<SignupForm>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: { email: "", username: "", password: "" },
-    mode: "onTouched",
-  });
+  } = form;
+
+  // серверна помилка зникає, щойно юзер щось міняє у формі
+  useEffect(() => {
+    const subscription = form.watch(() => setServerError(null));
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async ({ email, username, password }: SignupForm) => {
     setServerError(null);
@@ -78,80 +87,90 @@ export default function Signup() {
   };
 
   return (
-    <YStack f={1} bg="$background">
-      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-        <ScreenHeader />
-      </YStack>
-
-      <YStack f={1} jc="center" ai="center" p="$4" bg="$background" gap="$4">
-        <YStack ai="center">
-          <Text fontSize="$8" fontWeight="bold">
-            Sign Up!
-          </Text>
+    <FormProvider {...form}>
+      <YStack f={1} bg="$background">
+        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
+          <ScreenHeader />
         </YStack>
 
-        <YStack width="100%" gap="$2">
-          <FormInput
-            control={control}
-            name="email"
-            placeholder="Email"
-            textContentType="emailAddress"
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <FormInput
-            control={control}
-            name="username"
-            placeholder="Username"
-            textContentType="username"
-            autoCapitalize="none"
-          />
-          <FormInput
-            control={control}
-            name="password"
-            placeholder="Password"
-            secureTextEntry={!showPassword}
-            textContentType="newPassword"
-            bg="$backgroundSoft"
-            rightElement={
-              <Button
-                pos="absolute"
-                right="$2"
-                size="$3"
-                chromeless
-                circular
-                onPress={() => setShowPassword(!showPassword)}
-                icon={
-                  showPassword ? (
-                    <EyeOff size="$1" color="$colorSecondary" />
-                  ) : (
-                    <Eye size="$1" color="$colorSecondary" />
-                  )
-                }
-              />
-            }
-          />
-
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3" textAlign="center">
-              {serverError}
+        <YStack
+          f={1}
+          jc="center"
+          ai="center"
+          p="$4"
+          bg="$background"
+          gap="$4"
+          onPress={Keyboard.dismiss}
+        >
+          <YStack ai="center">
+            <Text fontSize="$8" fontWeight="bold">
+              Sign Up!
             </Text>
-          )}
+          </YStack>
 
-          <Button
-            size="$4"
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText">
-              {isSubmitting ? "Signing up..." : "Sign Up"}
-            </Text>
-          </Button>
+          <YStack width="100%" gap="$2">
+            <FormInput
+              control={control}
+              name="email"
+              placeholder="Email"
+              textContentType="emailAddress"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <FormInput
+              control={control}
+              name="username"
+              placeholder="Username"
+              textContentType="username"
+              autoCapitalize="none"
+            />
+            <FormInput
+              control={control}
+              name="password"
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              textContentType="newPassword"
+              bg="$backgroundSoft"
+              rightElement={
+                <Button
+                  pos="absolute"
+                  right="$2"
+                  size="$3"
+                  chromeless
+                  circular
+                  onPress={() => setShowPassword(!showPassword)}
+                  icon={
+                    showPassword ? (
+                      <EyeOff size="$1" color="$colorSecondary" />
+                    ) : (
+                      <Eye size="$1" color="$colorSecondary" />
+                    )
+                  }
+                />
+              }
+            />
+
+            {serverError && (
+              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+                {serverError}
+              </Text>
+            )}
+
+            <Button
+              size="$4"
+              bg="$buttonBg"
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              opacity={isSubmitting ? 0.6 : 1}
+              mt="$2"
+            >
+              <Text color="$buttonText">
+                {isSubmitting ? "Signing up..." : "Sign Up"}
+              </Text>
+            </Button>
+          </YStack>
         </YStack>
       </YStack>
-    </YStack>
+    </FormProvider>
   );
 }

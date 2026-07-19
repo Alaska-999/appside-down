@@ -7,23 +7,31 @@ import {
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Alert } from "react-native";
+import { useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { Alert, Keyboard } from "react-native";
 import { Button, Text, YStack } from "tamagui";
 
 export default function ChangePasswordScreen() {
   const [serverError, setServerError] = useState<string | null>(null);
 
+  const form = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: { oldPassword: "", newPassword: "", confirmPassword: "" },
+    mode: "onSubmit",
+    reValidateMode: "onSubmit",
+  });
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<ChangePasswordForm>({
-    resolver: zodResolver(changePasswordSchema),
-    defaultValues: { oldPassword: "", newPassword: "", confirmPassword: "" },
-    mode: "onTouched",
-  });
+  } = form;
+
+  // серверна помилка зникає, щойно юзер щось міняє у формі
+  useEffect(() => {
+    const subscription = form.watch(() => setServerError(null));
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async ({ oldPassword, newPassword }: ChangePasswordForm) => {
     setServerError(null);
@@ -54,49 +62,51 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <YStack f={1} bg="$background">
-      <ScreenHeader title="Change password" />
-      <YStack f={1} px="$4" gap="$3" pt="$4">
-        <FormInput
-          control={control}
-          name="oldPassword"
-          placeholder="Current password"
-          secureTextEntry
-          textContentType="password"
-        />
-        <FormInput
-          control={control}
-          name="newPassword"
-          placeholder="New password"
-          secureTextEntry
-          textContentType="newPassword"
-        />
-        <FormInput
-          control={control}
-          name="confirmPassword"
-          placeholder="Confirm new password"
-          secureTextEntry
-          textContentType="newPassword"
-        />
+    <FormProvider {...form}>
+      <YStack f={1} bg="$background">
+        <ScreenHeader title="Change password" />
+        <YStack f={1} px="$4" gap="$3" pt="$4" onPress={Keyboard.dismiss}>
+          <FormInput
+            control={control}
+            name="oldPassword"
+            placeholder="Current password"
+            secureTextEntry
+            textContentType="password"
+          />
+          <FormInput
+            control={control}
+            name="newPassword"
+            placeholder="New password"
+            secureTextEntry
+            textContentType="newPassword"
+          />
+          <FormInput
+            control={control}
+            name="confirmPassword"
+            placeholder="Confirm new password"
+            secureTextEntry
+            textContentType="newPassword"
+          />
 
-        {serverError && (
-          <Text color="$statusDanger" fontSize="$3">
-            {serverError}
-          </Text>
-        )}
+          {serverError && (
+            <Text color="$statusDanger" fontSize="$3">
+              {serverError}
+            </Text>
+          )}
 
-        <Button
-          bg="$buttonBg"
-          onPress={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-          opacity={isSubmitting ? 0.6 : 1}
-          mt="$2"
-        >
-          <Text color="$buttonText" fontWeight="600">
-            {isSubmitting ? "Saving..." : "Save"}
-          </Text>
-        </Button>
+          <Button
+            bg="$buttonBg"
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+            opacity={isSubmitting ? 0.6 : 1}
+            mt="$2"
+          >
+            <Text color="$buttonText" fontWeight="600">
+              {isSubmitting ? "Saving..." : "Save"}
+            </Text>
+          </Button>
+        </YStack>
       </YStack>
-    </YStack>
+    </FormProvider>
   );
 }
