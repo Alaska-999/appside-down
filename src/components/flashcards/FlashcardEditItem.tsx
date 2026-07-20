@@ -1,3 +1,4 @@
+import { FormInput } from "@/src/components/common/FormInput";
 import { AppCard } from "@/src/components/ui/Card";
 import { X } from "@tamagui/lucide-icons";
 import { Ref } from "react";
@@ -9,7 +10,7 @@ import {
   useController,
   useFormContext,
 } from "react-hook-form";
-import { Button, Input, TamaguiElement, Text, YStack } from "tamagui";
+import { Button, Text, YStack } from "tamagui";
 
 interface FlashcardEditItemProps<T extends FieldValues> {
   control: Control<T>;
@@ -63,15 +64,6 @@ export function FlashcardEditItem<T extends FieldValues>({
     }
   };
 
-  const setMergedRef =
-    (fieldRef: (node: TextInput | null) => void, forwardedRef?: Ref<TextInput>) =>
-    (node: TamaguiElement | null) => {
-      const textInputNode = node as TextInput | null;
-      fieldRef(textInputNode);
-      if (typeof forwardedRef === "function") forwardedRef(textInputNode);
-      else if (forwardedRef) (forwardedRef as { current: TextInput | null }).current = textInputNode;
-    };
-
   return (
     <YStack gap="$1">
       <AppCard
@@ -99,51 +91,35 @@ export function FlashcardEditItem<T extends FieldValues>({
 
         <YStack>
           <FieldLabel tone="term">TERM</FieldLabel>
-          <Input
-            unstyled
-            ref={setMergedRef(term.field.ref, termRef)}
+          <FormInput
+            control={control}
+            name={termName}
+            ref={termRef}
+            variant="underline"
+            inputSize="lg"
+            hideError
             placeholder="Enter term"
-            placeholderTextColor="$colorMuted"
-            value={term.field.value as string}
-            onChangeText={(text) => {
-              clearListError();
-              term.field.onChange(text);
-            }}
-            onBlur={term.field.onBlur}
+            onValueChange={clearListError}
             returnKeyType={onSubmitTerm ? "next" : undefined}
             blurOnSubmit={onSubmitTerm ? false : undefined}
             onSubmitEditing={onSubmitTerm}
-            fontSize={19}
-            color="$color"
-            pb="$1"
-            bbw={1}
-            bc={term.fieldState.error ? "$statusDanger" : "transparent"}
-            focusStyle={{ bc: "$accentGradientStart", bbw: 2 }}
           />
         </YStack>
 
         <YStack>
           <FieldLabel tone="definition">DEFINITION</FieldLabel>
-          <Input
-            unstyled
-            ref={setMergedRef(definition.field.ref, definitionRef)}
+          <FormInput
+            control={control}
+            name={definitionName}
+            ref={definitionRef}
+            variant="underline"
+            inputSize="lg"
+            hideError
             placeholder="Enter definition"
-            placeholderTextColor="$colorMuted"
-            value={definition.field.value as string}
-            onChangeText={(text) => {
-              clearListError();
-              definition.field.onChange(text);
-            }}
-            onBlur={definition.field.onBlur}
+            onValueChange={clearListError}
             returnKeyType={onSubmitDefinition ? "next" : undefined}
             blurOnSubmit={onSubmitDefinition ? false : undefined}
             onSubmitEditing={onSubmitDefinition}
-            fontSize={19}
-            color="$color"
-            pb="$1"
-            bbw={1}
-            bc={definition.fieldState.error ? "$statusDanger" : "transparent"}
-            focusStyle={{ bc: "$accentGradientStart", bbw: 2 }}
           />
         </YStack>
       </AppCard>

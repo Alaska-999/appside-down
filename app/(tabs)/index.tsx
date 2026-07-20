@@ -5,15 +5,15 @@ import { Chip } from "@/src/components/ui/Chip";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { SearchField } from "@/src/components/ui/SearchField";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Search, X } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
+import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 type PublicModuleResult = {
   id: string;
@@ -230,34 +230,11 @@ export default function Home() {
               onPress={navigateToProfile}
             />
           </XStack>
-
-          <XStack
-            bg="$glassBg"
-            br={999}
-            px={19}
-            py={14}
-            ai="center"
-            gap={9}
-            borderWidth={1}
-            borderColor="$glassBorder"
-          >
-            <Search size={20} color="$colorMuted" opacity={0.6} />
-            <Input
-              f={1}
-              unstyled
-              placeholder="Search public modules..."
-              value={search}
-              onChangeText={setSearch}
-              fontSize={16}
-              color="$color"
-              placeholderTextColor="$colorMuted"
-            />
-            {search.length > 0 && (
-              <Pressable hitSlop={13} onPress={() => setSearch("")}>
-                <X size={20} color="$colorMuted" />
-              </Pressable>
-            )}
-          </XStack>
+          <SearchField
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search public modules..."
+          />
         </YStack>
 
         {searching ? (

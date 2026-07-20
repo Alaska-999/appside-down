@@ -1,9 +1,10 @@
+import { IconButton } from "@/src/components/ui/IconButton";
 import { Ban, Camera, Folder } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { Image } from "react-native";
-import { Button, YStack } from "tamagui";
+import { useTheme, YStack } from "tamagui";
 
 interface ImagePickerAvatarProps {
   imageUri: string | null;
@@ -18,6 +19,8 @@ export const ImagePickerAvatar: React.FC<ImagePickerAvatarProps> = ({
   imageUri,
   onImageSelected,
 }) => {
+  const theme = useTheme();
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -57,13 +60,13 @@ export const ImagePickerAvatar: React.FC<ImagePickerAvatarProps> = ({
           width={AVATAR_SIZE}
           height={AVATAR_SIZE}
           borderRadius={AVATAR_RADIUS}
-          shadowColor="#2dd4bf"
-          shadowOpacity={0.25}
+          shadowColor="$accentGradientStart"
+          shadowOpacity={0.2}
           shadowRadius={18}
           shadowOffset={{ width: 0, height: 0 }}
         >
           <LinearGradient
-            colors={["#2dd4bf", "#a3e635"]}
+            colors={[theme.accentGradientStart.get(), theme.accentGradientEnd.get()]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
@@ -74,39 +77,31 @@ export const ImagePickerAvatar: React.FC<ImagePickerAvatarProps> = ({
               justifyContent: "center",
             }}
           >
-            <Folder size={52} color="#fff" strokeWidth={1.5} />
+            <Folder size={52} color={theme.onAccentText.get()} strokeWidth={1.5} />
           </LinearGradient>
         </YStack>
       )}
 
-      <Button
+      <IconButton
         pos="absolute"
         right={-4}
         bottom={-4}
-        circular
+        variant="badge"
         size={42}
-        bg="$auroraSurfaceStrong"
-        bw={3}
-        borderColor="$background"
         elevation="$2"
-        icon={<Camera size={18} color="#fff" />}
+        icon={<Camera size={18} color="$color" />}
         onPress={pickImage}
-        pressStyle={{ scale: 0.92 }}
       />
 
       {imageUri && (
-        <Button
+        <IconButton
           pos="absolute"
           right={-4}
           top={-4}
-          circular
+          variant="danger"
           size={30}
-          bg="$statusDanger"
-          bw={2}
-          borderColor="$background"
-          icon={<Ban size={12} color="#fff" />}
+          icon={<Ban size={12} color="white" />}
           onPress={() => onImageSelected(null)}
-          pressStyle={{ scale: 0.92 }}
         />
       )}
     </YStack>

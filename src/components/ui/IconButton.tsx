@@ -2,13 +2,40 @@ import * as Haptics from "expo-haptics";
 import { ReactElement } from "react";
 import { Button, ButtonProps } from "tamagui";
 
-interface IconButtonProps extends Omit<ButtonProps, "icon" | "onPress"> {
+type IconButtonVariant = "glass" | "badge" | "danger";
+
+interface IconButtonProps extends Omit<ButtonProps, "icon" | "onPress" | "size" | "variant"> {
   icon: ReactElement;
-  size?: "$2" | "$3" | "$4";
+  variant?: IconButtonVariant;
+  size?: ButtonProps["size"] | number;
   onPress?: () => void;
 }
 
-export function IconButton({ icon, size = "$3", onPress, ...rest }: IconButtonProps) {
+const VARIANT_STYLES: Record<IconButtonVariant, Partial<ButtonProps>> = {
+  glass: {
+    bg: "$glassBg",
+    borderWidth: 1,
+    borderColor: "$glassBorder",
+  },
+  badge: {
+    bg: "$backgroundStrong",
+    borderWidth: 3,
+    borderColor: "$background",
+  },
+  danger: {
+    bg: "$statusDanger",
+    borderWidth: 2,
+    borderColor: "$background",
+  },
+};
+
+export function IconButton({
+  icon,
+  variant = "glass",
+  size = "$3",
+  onPress,
+  ...rest
+}: IconButtonProps) {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
@@ -18,12 +45,10 @@ export function IconButton({ icon, size = "$3", onPress, ...rest }: IconButtonPr
     <Button
       circular
       size={size}
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
       icon={icon}
       onPress={handlePress}
       pressStyle={{ scale: 0.92 }}
+      {...VARIANT_STYLES[variant]}
       {...rest}
     />
   );

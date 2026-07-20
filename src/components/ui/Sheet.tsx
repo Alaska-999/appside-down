@@ -1,8 +1,11 @@
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { X } from "@tamagui/lucide-icons";
 import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Sheet, Text, XStack } from "tamagui";
+
+type SheetVariant = "solid" | "glass";
 
 interface AppSheetProps {
   open: boolean;
@@ -11,7 +14,16 @@ interface AppSheetProps {
   snapPoints?: number[];
   children: ReactNode;
   plain?: boolean;
+  variant?: SheetVariant;
 }
+
+const VARIANT_STYLES: Record<
+  SheetVariant,
+  { overlayOpacity: number; cornerRadius: number; handleColor: string }
+> = {
+  solid: { overlayOpacity: 0.5, cornerRadius: 30, handleColor: "$glassBorder" },
+  glass: { overlayOpacity: 0.25, cornerRadius: 35, handleColor: "rgba(220,255,245,0.35)" },
+};
 
 export function AppSheet({
   open,
@@ -20,21 +32,33 @@ export function AppSheet({
   snapPoints = [90],
   children,
   plain = false,
+  variant = "solid",
 }: AppSheetProps) {
   const insets = useSafeAreaInsets();
+  const { overlayOpacity, cornerRadius, handleColor } = VARIANT_STYLES[variant];
 
   return (
     <Sheet modal open={open} onOpenChange={onOpenChange} snapPoints={snapPoints} dismissOnSnapToBottom>
-      <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-      <Sheet.Handle bg="$glassBorder" w={49} h={5} br={3} />
+      <Sheet.Overlay bg="$pureBlack" opacity={overlayOpacity} />
+      <Sheet.Handle bg={handleColor} w={49} h={5} br={3} />
       <Sheet.Frame
-        bg="$sheetBg"
-        borderTopWidth={1}
+        bg={variant === "glass" ? "transparent" : "$sheetBg"}
+        borderTopWidth={variant === "glass" ? 0 : 1}
         borderColor="$glassBorder"
-        btlr={30}
-        btrr={30}
+        btlr={cornerRadius}
+        btrr={cornerRadius}
         pb={insets.bottom}
+        overflow="hidden"
+        pos="relative"
       >
+        {variant === "glass" && (
+          <LiquidGlass
+            intensity={65}
+            borderWidth={1}
+            borderColor="rgba(220, 255, 245, 0.15)"
+            backgroundColor="rgba(19, 21, 32, 0.45)"
+          />
+        )}
         {plain ? (
           title && (
             <Text px="$4" pt="$2" pb="$3" fontSize="$6" fontWeight="700" color="$color">

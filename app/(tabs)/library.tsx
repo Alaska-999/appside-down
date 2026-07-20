@@ -2,16 +2,17 @@ import { FolderCard } from "@/src/components/cards/FolderCard";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { TEXT } from "@/src/constants/typography";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { AlignJustify, Check, Search } from "@tamagui/lucide-icons";
+import { AlignJustify, Check } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Input, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
 
@@ -125,29 +126,7 @@ export default function Library() {
           />
 
           <XStack gap="$2" ai="center">
-            <XStack
-              f={1}
-              bg="$glassBg"
-              br={999}
-              px={19}
-              py={14}
-              ai="center"
-              gap={9}
-              borderWidth={1}
-              borderColor="$glassBorder"
-            >
-              <Search size={20} color="$colorMuted" opacity={0.6} />
-              <Input
-                f={1}
-                unstyled
-                placeholder="Search..."
-                value={search}
-                onChangeText={setSearch}
-                fontSize={TEXT.pill}
-                color="$color"
-                placeholderTextColor="$colorMuted"
-              />
-            </XStack>
+            <SearchField value={search} onChangeText={setSearch} f={1} />
 
             <Pressable onPress={() => setSortSheetOpen(true)}>
               <XStack
@@ -177,7 +156,11 @@ export default function Library() {
             data={filteredFolders}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 19, gap: 10, paddingBottom: 32 }}
+            contentContainerStyle={{
+              paddingHorizontal: 19,
+              gap: 10,
+              paddingBottom: 32,
+            }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">
@@ -203,7 +186,11 @@ export default function Library() {
             data={filteredModules}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 19, gap: 10, paddingBottom: 32 }}
+            contentContainerStyle={{
+              paddingHorizontal: 19,
+              gap: 10,
+              paddingBottom: 32,
+            }}
             ListEmptyComponent={
               !loading ? (
                 <Text color="$colorMuted">

@@ -1,5 +1,4 @@
 import { ChevronLeft, X } from "@tamagui/lucide-icons";
-import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import { ReactNode, useEffect } from "react";
 import { useWindowDimensions } from "react-native";
@@ -24,21 +23,6 @@ interface ScreenHeaderProps {
   onClose?: () => void;
 }
 
-function HeaderShell({ children }: { children: ReactNode }) {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <YStack pos="relative" overflow="hidden">
-      <BlurView
-        intensity={30}
-        tint="light"
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <YStack pt={insets.top}>{children}</YStack>
-    </YStack>
-  );
-}
-
 export function ScreenHeader({
   variant = "default",
   title,
@@ -50,6 +34,7 @@ export function ScreenHeader({
   onClose,
 }: ScreenHeaderProps) {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
 
   const progressPct =
@@ -68,23 +53,45 @@ export function ScreenHeader({
 
   if (variant === "create") {
     return (
-      <HeaderShell>
-        <XStack jc="space-between" width="100%" p="$2">
-          <Button chromeless onPress={() => router.back()}>
+      <XStack
+        jc="space-between"
+        ai="center"
+        width="100%"
+        px="$screenX"
+        pt={insets.top + 10}
+        bg="$background"
+      >
+        <Button
+          chromeless
+          onPress={() => router.back()}
+          p={0}
+          pressStyle={{ opacity: 0.7 }}
+        >
+          <Text color="$colorMuted" fontWeight="600" fontSize={16}>
             Cancel
-          </Button>
-          <Button chromeless onPress={onCreate}>
+          </Text>
+        </Button>
+
+        <Button chromeless onPress={onCreate} p={0} pressStyle={{ opacity: 0.7 }}>
+          <Text color="$accentGradientEnd" fontWeight="700" fontSize={16}>
             Create
-          </Button>
-        </XStack>
-      </HeaderShell>
+          </Text>
+        </Button>
+      </XStack>
     );
   }
 
   if (variant === "flashcards") {
     return (
-      <HeaderShell>
-        <XStack ai="center" p="$4" pb="$2" jc="space-between">
+      <YStack>
+        <XStack
+          ai="center"
+          p="$4"
+          pb="$2"
+          pt={insets.top}
+          bg="$background"
+          justifyContent="space-between"
+        >
           <Button
             icon={<X size="$2" color="$color" />}
             circular
@@ -96,35 +103,44 @@ export function ScreenHeader({
           </Text>
           {rightAction}
         </XStack>
-        <XStack pos="relative" width="100%" height={3}>
-          <XStack pos="absolute" bottom={0} bg="$backgroundCard" width="100%" height={3} />
-          <Animated.View
-            style={[
-              { position: "absolute", bottom: 0, height: 3, backgroundColor: "#6366F1" },
-              barStyle,
-            ]}
-          />
-        </XStack>
-      </HeaderShell>
+        <XStack
+          position="absolute"
+          bottom={0}
+          bg="$backgroundCard"
+          width="100%"
+          height={3}
+        />
+        <Animated.View
+          style={[
+            {
+              position: "absolute",
+              bottom: 0,
+              height: 3,
+              backgroundColor: "#94A3B8",
+            },
+            barStyle,
+          ]}
+        />
+      </YStack>
     );
   }
 
   return (
-    <HeaderShell>
-      <XStack ai="center" p="$4">
-        <Button
-          icon={<ChevronLeft size="$2" color="$color" />}
-          circular
-          onPress={() => router.back()}
-          ml="$-3"
-        />
-        {title && (
-          <Text color="$color" fontSize="$6" fow="bold" ml="$2">
-            {title}
-          </Text>
-        )}
-        {right && <XStack f={1} jc="flex-end">{right}</XStack>}
-      </XStack>
-    </HeaderShell>
+    <XStack ai="center" p="$4" pt={insets.top} bg="$background">
+      <Button
+        icon={<ChevronLeft size="$2" color="$color" />}
+        circular
+        onPress={() => router.back()}
+        ml="$-3"
+      />
+
+      {title && (
+        <Text color="$color" fontSize="$6" fow="bold" ml="$2">
+          {title}
+        </Text>
+      )}
+
+      {right && <XStack f={1} jc="flex-end">{right}</XStack>}
+    </XStack>
   );
 }

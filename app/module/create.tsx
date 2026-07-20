@@ -1,6 +1,7 @@
 import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
-import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
+import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
+import { AppButton } from "@/src/components/ui/Button";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
@@ -11,7 +12,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export default function ModuleCreate() {
   const insets = useSafeAreaInsets();
@@ -116,7 +117,8 @@ export default function ModuleCreate() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeaderCreate
+          <ScreenHeader
+            variant="create"
             onCreate={() => {
               if (!isSubmitting) handleSubmit(onSubmit)();
             }}
@@ -224,21 +226,15 @@ export default function ModuleCreate() {
               </Text>
             )}
 
-            <Button
-              onPress={() => append({ term: "", definition: "" })}
-              mt={22}
-              bg="$glassBg"
-              borderWidth={1}
-              borderColor="rgba(163, 230, 53, 0.4)"
-              br="$control"
-              py={16}
-              h="auto"
-              pressStyle={{ opacity: 0.8, borderColor: "$accentGradientEnd" }}
-            >
-              <Text color="$accentGradientEnd" fontWeight="700" fontSize={16}>
+            <YStack mt={22}>
+              <AppButton
+                variant="outline"
+                size="lg"
+                onPress={() => append({ term: "", definition: "" })}
+              >
                 + Add Card
-              </Text>
-            </Button>
+              </AppButton>
+            </YStack>
           </YStack>
         </KeyboardAwareScrollView>
       </YStack>

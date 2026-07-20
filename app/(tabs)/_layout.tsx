@@ -1,10 +1,9 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { BookOpen, House, PlusCircle } from "@tamagui/lucide-icons";
-import { BlurView } from "expo-blur"; // <-- Імпортуємо BlurView
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { ComponentType, useState } from "react";
-import { StyleSheet } from "react-native"; // <-- Імпортуємо StyleSheet для absoluteFill
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
 
@@ -88,21 +87,13 @@ export default function TabsLayout() {
             shadowOffset: { width: 0, height: 10 },
           },
           tabBarBackground: () => (
-            <BlurView
+            <LiquidGlass
               intensity={25}
-              tint="dark"
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                borderRadius: 22,
-                marginLeft: 5,
-                marginRight: 5,
-                overflow: "hidden",
-                borderWidth: 2,
-                borderColor:
-                  theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)",
-
-                backgroundColor: "rgba(15, 22, 36, 0.4)",
-              }}
+              borderRadius={22}
+              borderWidth={2}
+              borderColor={theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)"}
+              backgroundColor="rgba(15, 22, 36, 0.4)"
+              style={{ marginLeft: 5, marginRight: 5 }}
             />
           ),
           tabBarItemStyle: {

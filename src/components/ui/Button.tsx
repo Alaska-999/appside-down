@@ -1,10 +1,11 @@
+import { stateOpacity } from "@/tamagui.config";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { Text, useTheme, YStack } from "tamagui";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 const SIZE_STYLES: Record<
@@ -14,6 +15,16 @@ const SIZE_STYLES: Record<
   sm: { height: 36, paddingHorizontal: 14, fontSize: 13 },
   md: { height: 48, paddingHorizontal: 20, fontSize: 15 },
   lg: { height: 56, paddingHorizontal: 24, fontSize: 17 },
+};
+
+const VARIANT_STYLES: Record<
+  Exclude<ButtonVariant, "primary">,
+  { bg?: string; borderWidth?: number; borderColor?: string; textColor: string }
+> = {
+  secondary: { bg: "$glassBg", borderWidth: 1, borderColor: "$glassBorder", textColor: "$color" },
+  outline: { bg: "$glassBg", borderWidth: 1, borderColor: "$accentBorderSoft", textColor: "$accentGradientEnd" },
+  ghost: { textColor: "$color" },
+  danger: { bg: "$statusDanger", textColor: "white" },
 };
 
 interface AppButtonProps {
@@ -35,6 +46,7 @@ export function AppButton({
 }: AppButtonProps) {
   const theme = useTheme();
   const { height, paddingHorizontal, fontSize } = SIZE_STYLES[size];
+  const variantStyle = variant !== "primary" ? VARIANT_STYLES[variant] : null;
 
   const handlePress = () => {
     if (disabled) return;
@@ -47,29 +59,21 @@ export function AppButton({
       f={1}
       height={height}
       px={paddingHorizontal}
-      br="$10"
+      br={999}
       ai="center"
       jc="center"
       fd="row"
       gap="$2"
-      opacity={disabled ? 0.5 : 1}
-      bg={
-        variant === "secondary"
-          ? "$glassBg"
-          : variant === "ghost"
-            ? "transparent"
-            : variant === "danger"
-              ? "$statusDanger"
-              : undefined
-      }
-      borderWidth={variant === "secondary" ? 1 : 0}
-      borderColor="$glassBorder"
+      opacity={disabled ? stateOpacity.disabled : 1}
+      bg={variantStyle?.bg}
+      borderWidth={variantStyle?.borderWidth}
+      borderColor={variantStyle?.borderColor}
     >
       {icon}
       <Text
         fontSize={fontSize}
         fontWeight="600"
-        color={variant === "primary" || variant === "danger" ? "white" : "$color"}
+        color={variant === "primary" ? "$onAccentText" : variantStyle!.textColor}
       >
         {children}
       </Text>
@@ -77,7 +81,11 @@ export function AppButton({
   );
 
   return (
-    <Pressable onPress={handlePress} disabled={disabled} style={{ borderRadius: 999 }}>
+    <Pressable
+      onPress={handlePress}
+      disabled={disabled}
+      style={({ pressed }) => ({ borderRadius: 999, opacity: pressed ? 0.85 : 1 })}
+    >
       {variant === "primary" ? (
         <LinearGradient
           colors={[theme.accentGradientStart.get(), theme.accentGradientEnd.get()]}
