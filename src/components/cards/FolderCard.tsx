@@ -37,16 +37,7 @@ export function FolderCard({ folder, index = 0, onPress }: FolderCardProps) {
     0;
   return (
     <Pressable onPress={onPress}>
-      <AppCard
-        variant="soft"
-        fd="row"
-        ai="center"
-        gap={16}
-        br={20}
-        px={15}
-        py={17}
-        h={76}
-      >
+      <AppCard variant="soft" size="md" fd="row" ai="center" gap={16} h={76}>
         <LinearGradient
           colors={[gradientStart, gradientEnd]}
           start={{ x: 0, y: 0 }}

@@ -27,12 +27,10 @@ export function ModuleCard({ module, onPress }: ModuleCardProps) {
     <Pressable onPress={onPress}>
       <AppCard
         variant="soft"
+        size="md"
         fd="row"
         ai="center"
         gap={16}
-        br={20}
-        px={15}
-        py={17}
         h={76}
         borderLeftWidth={3}
         borderLeftColor={module.isPublic ? "$accentGradientStart" : "$glassBorder"}

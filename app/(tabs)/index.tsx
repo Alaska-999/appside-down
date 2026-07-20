@@ -43,7 +43,7 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         router.push({ pathname: "/module/[id]", params: { id: module.id } })
       }
     >
-      <AppCard variant="soft" px="$cardPad" py={16} gap="$0.5">
+      <AppCard variant="soft" size="md" gap="$0.5">
         <Text fontSize={17} fontWeight="700" color="$color">
           {module.name}
         </Text>
@@ -269,7 +269,7 @@ export default function Home() {
                       style={{ flex: 1 }}
                       onPress={() => openModule(featuredModule.id)}
                     >
-                      <AppCard variant="glass" f={1} gap={9} ai="flex-start">
+                      <AppCard variant="glass" size="lg" f={1} gap={9} ai="flex-start">
                         <ProgressRing
                           progress={featuredStats.progress}
                           label={`${Math.round(featuredStats.progress * 100)}%`}
@@ -290,7 +290,7 @@ export default function Home() {
                     </Pressable>
                   ) : null}
 
-                  <AppCard variant="glass" f={1} gap="$1" ai="flex-start">
+                  <AppCard variant="glass" size="lg" f={1} gap="$1" ai="flex-start">
                     <Text fontSize={31} fontWeight="900" color="$color">
                       {modules.length}
                     </Text>

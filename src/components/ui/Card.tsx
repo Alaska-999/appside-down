@@ -2,28 +2,31 @@ import { ReactNode } from "react";
 import { YStack, YStackProps } from "tamagui";
 import { GlowSurface, GlowSurfaceProps } from "./GlowSurface";
 
-type CardVariant = "solid" | "soft" | "glass";
+type CardVariant = "solid" | "soft" | "glass" | "flat";
+type CardSize = "sm" | "md" | "lg";
 
 interface CardProps extends YStackProps {
   variant?: CardVariant;
+  size?: CardSize;
   children?: ReactNode;
 }
 
-const GLASS_VARIANTS: Record<
+const SIZE_STYLES: Record<CardSize, { px: number; py: number; br: number }> = {
+  sm: { px: 14, py: 14, br: 18 },
+  md: { px: 19, py: 17, br: 20 },
+  lg: { px: 19, py: 19, br: 23 },
+};
+
+const GLOW_VARIANTS: Record<
   "soft" | "glass",
-  Pick<
-    GlowSurfaceProps,
-    "br" | "glowRadius" | "glowOpacity" | "insetHighlightColor"
-  >
+  Pick<GlowSurfaceProps, "glowRadius" | "glowOpacity" | "insetHighlightColor">
 > = {
   soft: {
-    br: "$cardSoft",
     glowRadius: 18,
     glowOpacity: 0.07,
     insetHighlightColor: "rgba(255,255,255,0.1)",
   },
   glass: {
-    br: "$card",
     glowRadius: 28,
     glowOpacity: 0.14,
     insetHighlightColor: "rgba(255,255,255,0.18)",
@@ -31,7 +34,8 @@ const GLASS_VARIANTS: Record<
 };
 
 export function AppCard(props: CardProps) {
-  const { variant = "solid", children, ...rest } = props;
+  const { variant = "solid", size = "md", children, ...rest } = props;
+  const sizeStyle = SIZE_STYLES[size];
 
   if (variant === "solid") {
     return (
@@ -48,15 +52,33 @@ export function AppCard(props: CardProps) {
     );
   }
 
+  if (variant === "flat") {
+    return (
+      <YStack
+        br={sizeStyle.br}
+        px={sizeStyle.px}
+        py={sizeStyle.py}
+        bg="$glassBgSubtle"
+        border="1"
+        borderColor="$glassBgStrong"
+        {...rest}
+      >
+        {children}
+      </YStack>
+    );
+  }
+
   return (
     <GlowSurface
       glow
       insetHighlight
-      p="$cardPad"
+      br={sizeStyle.br}
+      px={sizeStyle.px}
+      py={sizeStyle.py}
       bg="$glassBg"
       borderWidth={1}
       borderColor="$glassBorder"
-      {...GLASS_VARIANTS[variant]}
+      {...GLOW_VARIANTS[variant]}
       {...rest}
     >
       {children}

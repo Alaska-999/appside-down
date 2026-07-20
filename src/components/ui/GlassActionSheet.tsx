@@ -1,9 +1,10 @@
+import { AppCard } from "@/src/components/ui/Card";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { Pressable } from "react-native";
-import { Sheet, Text, XStack, YStack } from "tamagui";
+import { Sheet, Text, YStack } from "tamagui";
 
 export interface GlassActionSheetAction {
   key: string;
@@ -78,16 +79,7 @@ export function GlassActionSheet({
         <YStack gap={14} pos="relative" zIndex={1}>
           {actions.map((action) => (
             <Pressable key={action.key} onPress={action.onPress}>
-              <XStack
-                ai="center"
-                gap={16}
-                bg="$glassBgSubtle"
-                borderWidth={1}
-                borderColor="rgba(220,255,245,0.08)"
-                br={22}
-                px={19}
-                py={16}
-              >
+              <AppCard variant="flat" size="md" fd="row" ai="center" gap={16}>
                 <LinearGradient
                   colors={action.gradient}
                   start={{ x: 0, y: 0 }}
@@ -111,7 +103,7 @@ export function GlassActionSheet({
                   </Text>
                 </YStack>
                 <ChevronRight size={20} color="$colorMuted" opacity={0.5} />
-              </XStack>
+              </AppCard>
             </Pressable>
           ))}
         </YStack>
