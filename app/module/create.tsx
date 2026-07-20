@@ -1,8 +1,8 @@
 import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
-import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
-import { AppButton } from "@/src/components/ui/Button";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
+import { AppButton } from "@/src/components/ui/Button";
+import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -152,14 +152,8 @@ export default function ModuleCreate() {
                 control={control}
                 name="name"
                 placeholder="Untitled Module"
-                bg="$glassBg"
-                borderColor="$glassBorder"
-                borderWidth={1}
-                fontSize={16}
-                color="$color"
-                br="$control"
-                height={50}
-                px={20}
+                variant="glass"
+                inputSize="md"
               />
             </YStack>
 
@@ -168,14 +162,8 @@ export default function ModuleCreate() {
                 control={control}
                 name="description"
                 placeholder="Description (optional)"
-                bg="$glassBg"
-                borderColor="$glassBorder"
-                borderWidth={1}
-                fontSize={16}
-                color="$color"
-                br="$control"
-                height={50}
-                px={20}
+                variant="glass"
+                inputSize="md"
               />
             </YStack>
 

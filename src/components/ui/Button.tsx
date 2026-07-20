@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { Text, useTheme, YStack } from "tamagui";
 
-type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+type ButtonVariant = "primary" | "soft" | "secondary" | "outline" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 const SIZE_STYLES: Record<
@@ -18,13 +18,21 @@ const SIZE_STYLES: Record<
 };
 
 const VARIANT_STYLES: Record<
-  Exclude<ButtonVariant, "primary">,
+  Exclude<ButtonVariant, "primary" | "soft">,
   { bg?: string; borderWidth?: number; borderColor?: string; textColor: string }
 > = {
   secondary: { bg: "$glassBg", borderWidth: 1, borderColor: "$glassBorder", textColor: "$color" },
   outline: { bg: "$glassBg", borderWidth: 1, borderColor: "$accentBorderSoft", textColor: "$accentGradientEnd" },
   ghost: { textColor: "$color" },
   danger: { bg: "$statusDanger", textColor: "white" },
+};
+
+const GRADIENT_VARIANT_STYLES: Record<
+  "primary" | "soft",
+  { start: "accentGradientStart" | "gradientHeroMid"; end: "accentGradientEnd" | "gradientHeroEnd"; textColor: string }
+> = {
+  primary: { start: "accentGradientStart", end: "accentGradientEnd", textColor: "$onAccentText" },
+  soft: { start: "gradientHeroMid", end: "gradientHeroEnd", textColor: "$color" },
 };
 
 interface AppButtonProps {
@@ -46,7 +54,9 @@ export function AppButton({
 }: AppButtonProps) {
   const theme = useTheme();
   const { height, paddingHorizontal, fontSize } = SIZE_STYLES[size];
-  const variantStyle = variant !== "primary" ? VARIANT_STYLES[variant] : null;
+  const isGradient = variant === "primary" || variant === "soft";
+  const variantStyle = !isGradient ? VARIANT_STYLES[variant] : null;
+  const gradientStyle = isGradient ? GRADIENT_VARIANT_STYLES[variant] : null;
 
   const handlePress = () => {
     if (disabled) return;
@@ -73,7 +83,7 @@ export function AppButton({
       <Text
         fontSize={fontSize}
         fontWeight="600"
-        color={variant === "primary" ? "$onAccentText" : variantStyle!.textColor}
+        color={gradientStyle ? gradientStyle.textColor : variantStyle!.textColor}
       >
         {children}
       </Text>
@@ -86,9 +96,9 @@ export function AppButton({
       disabled={disabled}
       style={({ pressed }) => ({ borderRadius: 999, opacity: pressed ? 0.85 : 1 })}
     >
-      {variant === "primary" ? (
+      {gradientStyle ? (
         <LinearGradient
-          colors={[theme.accentGradientStart.get(), theme.accentGradientEnd.get()]}
+          colors={[theme[gradientStyle.start].get(), theme[gradientStyle.end].get()]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{ borderRadius: 999 }}

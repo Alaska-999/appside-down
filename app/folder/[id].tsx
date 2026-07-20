@@ -1,13 +1,27 @@
+import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { AppButton } from "@/src/components/ui/Button";
+import { AppCard } from "@/src/components/ui/Card";
+import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { IconButton } from "@/src/components/ui/IconButton";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
+import { ChevronLeft, Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, Pressable, ScrollView } from "react-native";
-import { Avatar, Button, Input, Sheet, Text, XStack, YStack } from "tamagui";
+import { useForm } from "react-hook-form";
+import { Alert, Image, Pressable, ScrollView } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, useTheme, XStack, YStack } from "tamagui";
 
-type FolderModule = { id: string; name: string; itemsCount: number };
+type FolderModule = {
+  id: string;
+  name: string;
+  itemsCount: number;
+  authorUsername?: string;
+};
 
 type FolderDetail = {
   id: string;
@@ -22,10 +36,13 @@ function mapModule(raw: any): FolderModule {
     id: raw.id,
     name: raw.name,
     itemsCount: raw._count?.flashcards ?? raw.itemsCount ?? 0,
+    authorUsername: raw.user?.username,
   };
 }
 
 export default function FolderScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [folder, setFolder] = useState<FolderDetail | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -33,12 +50,12 @@ export default function FolderScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [editName, setEditName] = useState("");
   const [editIconUri, setEditIconUri] = useState<string | null>(null);
   const [editLoading, setEditLoading] = useState(false);
+  const editForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
 
   const [showTagInput, setShowTagInput] = useState(false);
-  const [newTagName, setNewTagName] = useState("");
+  const tagForm = useForm<{ tag: string }>({ defaultValues: { tag: "" } });
 
   useFocusEffect(
     useCallback(() => {
@@ -57,13 +74,15 @@ export default function FolderScreen() {
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const raw = await res.json();
+      const tags: string[] = raw.tags ?? [];
       setFolder({
         id: raw.id,
         name: raw.name,
         icon: raw.icon ?? "",
-        tags: raw.tags ?? [],
+        tags,
         modules: (raw.modules ?? []).map(mapModule),
       });
+      setSelectedTag((prev) => prev ?? tags[0] ?? null);
     } catch (err) {
       console.error("[FolderScreen] fetch error:", err);
       setError("Failed to load folder");
@@ -74,13 +93,14 @@ export default function FolderScreen() {
 
   const openEdit = () => {
     if (!folder) return;
-    setEditName(folder.name);
+    editForm.reset({ name: folder.name });
     setEditIconUri(folder.icon || null);
     setEditOpen(true);
   };
 
   const handleEdit = async () => {
-    if (!folder || !editName.trim()) return;
+    const name = editForm.getValues("name").trim();
+    if (!folder || !name) return;
     setEditLoading(true);
     try {
       const res = await protectedFetch(
@@ -88,16 +108,14 @@ export default function FolderScreen() {
         {
           method: "PUT",
           body: JSON.stringify({
-            name: editName.trim(),
+            name,
             icon: editIconUri ?? "",
           }),
         },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       setFolder((prev) =>
-        prev
-          ? { ...prev, name: editName.trim(), icon: editIconUri ?? "" }
-          : prev,
+        prev ? { ...prev, name, icon: editIconUri ?? "" } : prev,
       );
       setEditOpen(false);
     } catch (err) {
@@ -145,13 +163,13 @@ export default function FolderScreen() {
   };
 
   const handleAddTag = async () => {
-    if (!newTagName.trim() || !folder) return;
-    const trimmed = newTagName.trim();
+    const trimmed = tagForm.getValues("tag").trim();
+    if (!trimmed || !folder) return;
     if (folder.tags.includes(trimmed)) return;
     try {
       const newTags = await patchTags([...folder.tags, trimmed]);
       setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
-      setNewTagName("");
+      tagForm.reset({ tag: "" });
       setShowTagInput(false);
     } catch (err) {
       console.error("[FolderScreen] add tag error:", err);
@@ -172,7 +190,7 @@ export default function FolderScreen() {
               folder.tags.filter((t) => t !== tag),
             );
             setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
-            if (selectedTag === tag) setSelectedTag(null);
+            if (selectedTag === tag) setSelectedTag(newTags[0] ?? null);
           } catch (err) {
             console.error("[FolderScreen] delete tag error:", err);
             Alert.alert("Error", "Failed to delete tag");
@@ -241,148 +259,162 @@ export default function FolderScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <ScreenHeader />
-
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack px="$4" gap="$5" pb="$8">
-          {/* Folder header: icon + name + actions */}
-          <XStack ai="center" gap="$3" pt="$2">
-            <Avatar circular size="$6" bg="$backgroundCard">
-              {folder.icon ? (
-                <Avatar.Image
-                  src={folder.icon}
-                  accessibilityLabel={folder.name}
+          <YStack gap="$3" pt={insets.top + 10}>
+            <XStack jc="space-between" ai="center">
+              <IconButton
+                icon={<ChevronLeft size="$1" color="$color" />}
+                onPress={() => router.back()}
+              />
+              <XStack gap="$2">
+                <IconButton
+                  icon={<Pencil size="$1" color="$color" />}
+                  onPress={openEdit}
                 />
-              ) : null}
-              <Avatar.Fallback jc="center" ai="center">
-                <Text fontSize="$7">📁</Text>
-              </Avatar.Fallback>
-            </Avatar>
+                <IconButton
+                  icon={<Trash2 size="$1" color="$statusDanger" />}
+                  onPress={handleDelete}
+                />
+              </XStack>
+            </XStack>
 
-            <Text f={1} fontSize="$7" fontWeight="bold" color="$color">
-              {folder.name}
-            </Text>
-
-            <Button
-              size="$3"
-              circular
-              icon={<Pencil size="$1" color="$color" />}
-              bg="$backgroundCard"
-              onPress={openEdit}
-            />
-            <Button
-              size="$3"
-              circular
-              icon={<Trash2 size="$1" color="$statusDanger" />}
-              bg="$backgroundCard"
-              onPress={handleDelete}
-            />
-          </XStack>
+            <YStack ai="center" gap="$2">
+              <YStack
+                width={102}
+                height={102}
+                br={30}
+                overflow="hidden"
+                bg="$backgroundStrong"
+                ai="center"
+                jc="center"
+              >
+                {folder.icon ? (
+                  <Image
+                    source={{ uri: folder.icon }}
+                    style={{ width: "100%", height: "100%" }}
+                    resizeMode="cover"
+                    accessibilityLabel={folder.name}
+                  />
+                ) : (
+                  <Text fontSize="$8">📁</Text>
+                )}
+              </YStack>
+              <Text fontSize="$7" fontWeight="bold" color="$color">
+                {folder.name}
+              </Text>
+              <Text fontSize="$3" color="$colorMuted">
+                {folder.modules.length} module
+                {folder.modules.length !== 1 ? "s" : ""}
+              </Text>
+            </YStack>
+          </YStack>
 
           {/* Tags */}
           <YStack gap="$2">
-            <Text fontSize="$3" color="$colorMuted" fontWeight="600" tt="uppercase" ls={0.8}>
-              Tags
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <XStack gap="$2" ai="center">
-                {folder.tags.map((tag) => (
-                  <Pressable
-                    key={tag}
-                    onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  >
-                    <XStack
-                      bg={selectedTag === tag ? "$buttonBg" : "$backgroundHover"}
-                      br="$10"
-                      px="$3"
-                      py="$1"
-                      ai="center"
-                      gap="$1"
-                      borderWidth={1}
-                      borderColor={selectedTag === tag ? "transparent" : "$borderColor"}
-                    >
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            >
+              <XStack gap="$2.5" ai="center">
+                {folder.tags.map((tag) => {
+                  const isOn = selectedTag === tag;
+                  const tagContent = (
+                    <>
                       <Text
-                        fontSize="$3"
-                        color={selectedTag === tag ? "$buttonText" : "$colorSecondary"}
+                        fontSize="$4"
+                        fontWeight={isOn ? "800" : "700"}
+                        color={isOn ? "$onAccentText" : "$colorSecondary"}
                       >
                         {tag}
                       </Text>
-                      <Pressable hitSlop={8} onPress={() => handleDeleteTag(tag)}>
+                      <Pressable
+                        hitSlop={8}
+                        onPress={() => handleDeleteTag(tag)}
+                      >
                         <X
-                          size={12}
-                          color={selectedTag === tag ? "$buttonText" : "$colorMuted"}
+                          size={13}
+                          color={isOn ? "$onAccentText" : "$colorMuted"}
                         />
                       </Pressable>
-                    </XStack>
-                  </Pressable>
-                ))}
-
-                {showTagInput ? (
-                  <XStack ai="center" gap="$2">
-                    <Input
-                      size="$3"
-                      placeholder="Tag name"
-                      value={newTagName}
-                      onChangeText={setNewTagName}
-                      onSubmitEditing={handleAddTag}
-                      autoFocus
-                      minWidth={100}
-                    />
-                    <Button size="$3" onPress={handleAddTag} bg="$buttonBg" br="$10">
-                      <Text color="$buttonText">Add</Text>
-                    </Button>
-                    <Pressable onPress={() => { setShowTagInput(false); setNewTagName(""); }}>
-                      <XStack
-                        bg="$backgroundHover"
-                        borderWidth={1}
-                        borderColor="$borderColor"
-                        br="$10"
-                        w={32}
-                        h={32}
-                        ai="center"
-                        jc="center"
-                      >
-                        <X size={14} color="$colorMuted" />
-                      </XStack>
-                    </Pressable>
-                  </XStack>
-                ) : (
-                  <Pressable onPress={() => setShowTagInput(true)}>
-                    <XStack
-                      bg="$backgroundHover"
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                      br="$10"
-                      w={32}
-                      h={32}
-                      ai="center"
-                      jc="center"
+                    </>
+                  );
+                  return (
+                    <Pressable
+                      key={tag}
+                      onPress={() => setSelectedTag(isOn ? null : tag)}
                     >
-                      <Plus size={14} color="$colorMuted" />
-                    </XStack>
-                  </Pressable>
-                )}
+                      {isOn ? (
+                        <LinearGradient
+                          colors={[
+                            theme.accentGradientStart.get(),
+                            theme.accentGradientEnd.get(),
+                          ]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 8,
+                            borderRadius: 999,
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                          }}
+                        >
+                          {tagContent}
+                        </LinearGradient>
+                      ) : (
+                        <XStack
+                          bg="$glassBg"
+                          borderWidth={1}
+                          borderColor="$glassBorder"
+                          br="$10"
+                          px="$4"
+                          py="$2"
+                          ai="center"
+                          gap="$2"
+                        >
+                          {tagContent}
+                        </XStack>
+                      )}
+                    </Pressable>
+                  );
+                })}
+
+                <Pressable onPress={() => setShowTagInput(true)}>
+                  <XStack
+                    bg="$glassBg"
+                    borderWidth={1}
+                    borderColor="$glassBorder"
+                    br="$10"
+                    w={44}
+                    h={44}
+                    ai="center"
+                    jc="center"
+                  >
+                    <Plus size={16} color="$colorMuted" />
+                  </XStack>
+                </Pressable>
               </XStack>
             </ScrollView>
           </YStack>
 
-          {/* Modules section */}
           <YStack gap="$3">
             <XStack jc="space-between" ai="center">
               <Text
                 fontSize="$3"
-                color="$colorMuted"
+                color="$auroraMuted"
                 fontWeight="600"
                 tt="uppercase"
               >
                 Modules ({visibleModules.length})
               </Text>
               {visibleModules.length > 0 && (
-                <Button
-                  size="$3"
-                  icon={<Plus size="$1" />}
-                  bg="$buttonSecondaryBg"
-                  br="$10"
+                <AppButton
+                  variant="secondary"
+                  size="sm"
+                  icon={<Plus size={16} color="$color" />}
                   onPress={() =>
                     router.push({
                       pathname: "/folder/add-modules" as any,
@@ -390,10 +422,8 @@ export default function FolderScreen() {
                     })
                   }
                 >
-                  <Text color="$buttonSecondaryText" fontSize="$3">
-                    Add
-                  </Text>
-                </Button>
+                  Add
+                </AppButton>
               )}
             </XStack>
 
@@ -402,9 +432,7 @@ export default function FolderScreen() {
                 <Text fontSize="$5" color="$colorMuted" textAlign="center">
                   No study materials yet
                 </Text>
-                <Button
-                  bg="$buttonBg"
-                  br="$10"
+                <AppButton
                   onPress={() =>
                     router.push({
                       pathname: "/folder/add-modules" as any,
@@ -412,17 +440,17 @@ export default function FolderScreen() {
                     })
                   }
                 >
-                  <Text color="$buttonText">Add study materials</Text>
-                </Button>
+                  Add study materials
+                </AppButton>
               </YStack>
             ) : (
               <YStack gap="$3">
                 {visibleModules.map((mod) => (
-                  <XStack
+                  <AppCard
                     key={mod.id}
-                    bg="$backgroundCard"
-                    br="$4"
-                    p="$4"
+                    variant="glass"
+                    size="sm"
+                    fd="row"
                     ai="center"
                     gap="$3"
                   >
@@ -441,17 +469,18 @@ export default function FolderScreen() {
                         </Text>
                         <Text fontSize="$3" color="$colorMuted">
                           {mod.itemsCount} card{mod.itemsCount !== 1 ? "s" : ""}
+                          {mod.authorUsername
+                            ? ` · by ${mod.authorUsername}`
+                            : ""}
                         </Text>
                       </YStack>
                     </Pressable>
-                    <Button
-                      size="$3"
-                      circular
+                    <IconButton
+                      size="$2"
                       icon={<X size="$1" color="$statusDanger" />}
-                      bg="$backgroundCard"
                       onPress={() => handleRemoveModule(mod.id)}
                     />
-                  </XStack>
+                  </AppCard>
                 ))}
               </YStack>
             )}
@@ -460,39 +489,69 @@ export default function FolderScreen() {
       </ScrollView>
 
       {/* Edit folder sheet */}
-      <Sheet
+      <GlassSheet
         open={editOpen}
         onOpenChange={setEditOpen}
+        title="Edit Folder"
         snapPoints={[50]}
-        dismissOnSnapToBottom
       >
-        <Sheet.Overlay />
-        <Sheet.Handle />
-        <Sheet.Frame p="$4" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">
-            Edit Folder
-          </Text>
-
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ gap: 16 }}
+        >
           <ImagePickerAvatar
             imageUri={editIconUri}
             defaultColor="#22222B"
             onImageSelected={setEditIconUri}
           />
 
-          <Input
+          <FormInput
+            control={editForm.control}
+            name="name"
+            variant="glass"
+            inputSize="lg"
             placeholder="Folder name"
-            value={editName}
-            onChangeText={setEditName}
-            size="$5"
           />
 
-          <Button bg="$buttonBg" onPress={handleEdit} disabled={editLoading}>
-            <Text color="$buttonText">
-              {editLoading ? "Saving..." : "Save"}
-            </Text>
-          </Button>
-        </Sheet.Frame>
-      </Sheet>
+          <AppButton onPress={handleEdit} disabled={editLoading}>
+            {editLoading ? "Saving..." : "Save"}
+          </AppButton>
+        </KeyboardAwareScrollView>
+      </GlassSheet>
+
+      {/* Add tag sheet */}
+      <GlassSheet
+        open={showTagInput}
+        onOpenChange={(open: boolean) => {
+          setShowTagInput(open);
+          if (!open) tagForm.reset({ tag: "" });
+        }}
+        title="Add Tag"
+        snapPoints={[30]}
+      >
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ gap: 16 }}
+        >
+          <FormInput
+            control={tagForm.control}
+            name="tag"
+            variant="glass"
+            inputSize="sm"
+            placeholder="Tag name"
+            onSubmitEditing={handleAddTag}
+            autoFocus
+          />
+
+          <AppButton onPress={handleAddTag}>Add</AppButton>
+        </KeyboardAwareScrollView>
+      </GlassSheet>
     </YStack>
   );
 }
