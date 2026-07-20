@@ -1,4 +1,3 @@
-import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -6,9 +5,9 @@ import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { Input, Text, XStack, YStack } from "tamagui";
 
 export default function FolderCreate() {
   const [customImageUri, setCustomImageUri] = useState<string | null>(null);
@@ -26,7 +25,6 @@ export default function FolderCreate() {
     formState: { isSubmitting },
   } = form;
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -81,23 +79,48 @@ export default function FolderCreate() {
           ai="center"
           p="$4"
           bg="$background"
-          gap="$4"
+          gap="$5"
           width="100%"
           onPress={Keyboard.dismiss}
         >
-          <Text fontSize="$6" fontWeight="bold">
+          <Text color="$color" fontSize={20} fontWeight="800">
             New Folder
           </Text>
           <ImagePickerAvatar
             imageUri={customImageUri}
-            defaultColor={"#22222B"}
             onImageSelected={setCustomImageUri}
           />
-          <FormInput
+
+          <Controller
             control={control}
             name="name"
-            placeholder="Untitled Folder"
-            height={50}
+            render={({ field, fieldState }) => (
+              <YStack width="100%" gap="$1">
+                <Input
+                  width="100%"
+                  bg="$glassBg"
+                  borderWidth={1}
+                  borderColor={
+                    fieldState.error ? "$statusDanger" : "$glassBorder"
+                  }
+                  br={16}
+                  fontSize={18}
+                  color="$color"
+                  placeholder="Untitled Folder"
+                  placeholderTextColor="$colorMuted"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onBlur={field.onBlur}
+                  height={60}
+                  px={20}
+                />
+                {fieldState.error && (
+                  <Text color="$statusDanger" fontSize="$2">
+                    {fieldState.error.message}
+                  </Text>
+                )}
+              </YStack>
+            )}
           />
 
           {serverError && (

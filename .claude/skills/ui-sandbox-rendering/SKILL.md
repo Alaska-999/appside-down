@@ -11,6 +11,19 @@ This app's design-system redesign follows a strict rule: **never guess a visual 
 
 This skill is a thin wrapper around **`superpowers:brainstorming`**'s visual companion tool — it does not reimplement anything. `superpowers:brainstorming` already owns: starting the server, the screen directory convention, the one-question-at-a-time dialogue for refining a design, and getting explicit approval before implementation.
 
+## Reuse over proliferation — check existing components first
+
+Before mocking up any new card/tile/surface, **input/field**, **button**, or **modal/sheet**, inventory what already exists and design as an extension of it, not a new one-off. This app has an explicit anti-pattern to avoid: ending up with many slightly-different styles of the same UI family across screens (e.g. Home's bento tiles, `FolderCard`, `ModuleCard`, generic `AppCard`/`GlowSurface` for cards; several near-identical text fields; per-screen button variants; per-flow modal chrome) instead of one flexible, parameterized family per UI category.
+
+- Before sketching a new mockup, list the reusable primitives that already exist for the category you're touching:
+  - **Cards/tiles:** `AppCard`, `GlowSurface`, `Card`, `FolderCard`, `ModuleCard`, `Badge`.
+  - **Inputs:** `FormInput` (`src/components/common/FormInput.tsx`), `ImagePickerAvatar`.
+  - **Buttons:** `Button`, `IconButton`.
+  - **Modals/sheets:** `Sheet`/`AppSheet` (`plain` prop for header-less), `CreateActionSheet`.
+  Check `docs/superpowers/mockups/` for how each was last used.
+- Default assumption: a new screen's card/input/button/modal should be a **variant or prop** of an existing component (color accent, icon slot, size, border style, header vs. plain), not a visually distinct new component. Only design something genuinely new if the existing family truly can't express the use case — and say so explicitly when proposing the mockup, so the user can weigh in before it multiplies.
+- When presenting mockup options to the user, note which existing component each option reuses vs. what it would newly introduce, so "which do you like" and "which is more reusable" aren't decided independently of each other.
+
 ## When to use this vs. inline HTML tricks
 
 Any time a screen's visual design isn't yet approved — a new screen migration, a palette/layout variant comparison, a fix to a reported visual discrepancy — use this skill. Do not write throwaway design HTML outside the sandbox convention; it fragments where mockups live and this project has already had one incident of losing an untracked mockup file for exactly that reason.

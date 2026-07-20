@@ -56,7 +56,7 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   );
 }
 
-function SectionTitle({
+export function SectionTitle({
   children,
   tone = "muted",
 }: {
@@ -206,7 +206,12 @@ export default function Home() {
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
             <YStack f={1}>
-              <Text fontSize={35} fontWeight="800" color="$color" lineHeight={39}>
+              <Text
+                fontSize={35}
+                fontWeight="800"
+                color="$color"
+                lineHeight={39}
+              >
                 Hi,
               </Text>
               <XStack ai="center" flexWrap="wrap">

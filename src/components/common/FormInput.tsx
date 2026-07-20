@@ -16,11 +16,9 @@ type FormInputProps<T extends FieldValues> = {
 } & Omit<InputProps, "value" | "onChangeText">;
 
 function FormInputInner<T extends FieldValues>(
-  { control, name, rightElement, ...inputProps }: FormInputProps<T>,
+  { control, name, rightElement, borderColor, ...inputProps }: FormInputProps<T>,
   ref: Ref<TextInput>,
 ) {
-  // потрібен FormProvider навколо форми: звідси беремо clearErrors,
-  // щоб показана помилка зникала, щойно юзер знову почав вводити
   const formContext = useFormContext();
 
   return (
@@ -36,8 +34,6 @@ function FormInputInner<T extends FieldValues>(
               placeholderTextColor="$colorMuted"
               {...inputProps}
               ref={(node: TamaguiElement | null) => {
-                // Input у react-native — це насправді TextInput,
-                // хоча tamagui типізує ref як TamaguiElement
                 const textInputNode = node as TextInput | null;
                 field.ref(textInputNode);
                 if (typeof ref === "function") ref(textInputNode);
@@ -51,7 +47,9 @@ function FormInputInner<T extends FieldValues>(
                 field.onChange(text);
               }}
               onBlur={field.onBlur}
-              borderColor={fieldState.error ? "$statusDanger" : "$borderColor"}
+              borderColor={
+                fieldState.error ? "$statusDanger" : borderColor ?? "$borderColor"
+              }
             />
             {rightElement}
           </XStack>
@@ -66,7 +64,6 @@ function FormInputInner<T extends FieldValues>(
   );
 }
 
-// forwardRef + generics потребує явного каста типу, інакше TS губить дженерик T
 export const FormInput = forwardRef(FormInputInner) as <T extends FieldValues>(
   props: FormInputProps<T> & { ref?: Ref<TextInput> },
 ) => ReturnType<typeof FormInputInner>;

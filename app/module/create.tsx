@@ -1,10 +1,10 @@
+import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -52,7 +52,6 @@ export default function ModuleCreate() {
   const definitionRefs = useRef<Array<TextInput | null>>([]);
   const prevFieldsLength = useRef(fields.length);
 
-  // фокус на нову картку тільки коли масив реально виріс (не при кожному рендері)
   useEffect(() => {
     if (fields.length > prevFieldsLength.current) {
       termRefs.current[fields.length - 1]?.focus();
@@ -64,7 +63,6 @@ export default function ModuleCreate() {
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -76,8 +74,6 @@ export default function ModuleCreate() {
     const module = {
       name: data.name,
       description: data.description,
-      // повністю порожні рядки-заготовки не відправляємо;
-      // наполовину заповнені — контент юзера, зберігаємо як є
       flashcards: data.flashcards.filter(
         (card) => card.term || card.definition,
       ),
@@ -126,6 +122,7 @@ export default function ModuleCreate() {
             }}
           />
         </YStack>
+
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
@@ -134,36 +131,55 @@ export default function ModuleCreate() {
           contentContainerStyle={{
             paddingTop: 100,
             paddingBottom: insets.bottom + 40,
-            paddingHorizontal: 16,
+            paddingHorizontal: 0,
           }}
         >
-          <YStack gap="$4" width="100%">
+          <YStack width="100%" px="$screenX">
             <Text
-              fontSize="$8"
-              fontWeight="bold"
+              color="$color"
+              fontSize={26}
+              fontWeight="800"
               textAlign="center"
-              mb="$2"
-              mt="$4"
+              mb={24}
             >
               New Module
             </Text>
 
-            <FormInput
-              control={control}
-              name="name"
-              placeholder="Untitled Module"
-              size="$5"
-            />
+            <YStack mb={14}>
+              <FormInput
+                control={control}
+                name="name"
+                placeholder="Untitled Module"
+                bg="$glassBg"
+                borderColor="$glassBorder"
+                borderWidth={1}
+                fontSize={16}
+                color="$color"
+                br="$control"
+                height={50}
+                px={20}
+              />
+            </YStack>
 
-            <FormInput
-              control={control}
-              name="description"
-              placeholder="Description (optional)"
-              size="$4"
-              bg="transparent"
-            />
+            <YStack mb={24}>
+              <FormInput
+                control={control}
+                name="description"
+                placeholder="Description (optional)"
+                bg="$glassBg"
+                borderColor="$glassBorder"
+                borderWidth={1}
+                fontSize={16}
+                color="$color"
+                br="$control"
+                height={50}
+                px={20}
+              />
+            </YStack>
 
-            <YStack gap="$6" mt="$6">
+            <SectionTitle>FLASHCARDS</SectionTitle>
+
+            <YStack gap={16} mt={11}>
               {fields.map((field, index) => (
                 <FlashcardEditItem
                   key={field.id}
@@ -192,25 +208,36 @@ export default function ModuleCreate() {
             </YStack>
 
             {flashcardsError && (
-              <Text color="$statusDanger" fontSize="$2">
+              <Text color="$statusDanger" fontSize="$2" mt="$2">
                 {flashcardsError}
               </Text>
             )}
 
             {serverError && (
-              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+              <Text
+                color="$statusDanger"
+                fontSize="$3"
+                textAlign="center"
+                mt="$2"
+              >
                 {serverError}
               </Text>
             )}
 
             <Button
-              icon={<Plus size="$1" />}
               onPress={() => append({ term: "", definition: "" })}
-              mt="$4"
-              bg="$buttonSecondaryBg"
-              br="$10"
+              mt={22}
+              bg="$glassBg"
+              borderWidth={1}
+              borderColor="rgba(163, 230, 53, 0.4)"
+              br="$control"
+              py={16}
+              h="auto"
+              pressStyle={{ opacity: 0.8, borderColor: "$accentGradientEnd" }}
             >
-              <Text color="$buttonSecondaryText">Add Card</Text>
+              <Text color="$accentGradientEnd" fontWeight="700" fontSize={16}>
+                + Add Card
+              </Text>
             </Button>
           </YStack>
         </KeyboardAwareScrollView>
