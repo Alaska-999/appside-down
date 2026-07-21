@@ -40,6 +40,7 @@ export function ModuleCard({
         ai="center"
         gap={16}
         accentBorder={module.isPublic}
+        height={83}
       >
         <YStack f={1} gap="$1">
           <XStack
