@@ -1,9 +1,10 @@
+import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { AppButton } from "@/src/components/ui/Button";
-import { AppCard } from "@/src/components/ui/Card";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ChevronLeft, Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
@@ -16,11 +17,40 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, useTheme, XStack, YStack } from "tamagui";
 
+export const AuroraGlow = () => {
+  return (
+    <LinearGradient
+      pointerEvents="none"
+      colors={[
+        "transparent",
+        "rgba(45, 212, 191, 0.05)",
+        "rgba(45, 212, 191, 0.22)",
+        "rgba(163, 230, 53, 0.18)",
+        "rgba(163, 230, 53, 0.05)",
+        "transparent",
+      ]}
+      locations={[0, 0.18, 0.35, 0.55, 0.72, 0.85]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0.18 }}
+      style={{
+        position: "absolute",
+        top: -20,
+        left: -54,
+        right: -54,
+        height: 260,
+        transform: [{ rotate: "-6deg" }],
+      }}
+    />
+  );
+};
+
 type FolderModule = {
   id: string;
   name: string;
   itemsCount: number;
-  authorUsername?: string;
+  isPublic?: boolean;
+  isFavorite?: boolean;
+  user?: { username: string } | null;
 };
 
 type FolderDetail = {
@@ -36,7 +66,9 @@ function mapModule(raw: any): FolderModule {
     id: raw.id,
     name: raw.name,
     itemsCount: raw._count?.flashcards ?? raw.itemsCount ?? 0,
-    authorUsername: raw.user?.username,
+    isPublic: raw.isPublic,
+    isFavorite: raw.isFavorite,
+    user: raw.user ?? null,
   };
 }
 
@@ -260,20 +292,29 @@ export default function FolderScreen() {
   return (
     <YStack f={1} bg="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack px="$4" gap="$5" pb="$8">
-          <YStack gap="$3" pt={insets.top + 10}>
+        <YStack px="$4" gap="$6" pb="$8">
+          <YStack
+            gap="$3"
+            pt={insets.top + 10}
+            pos="relative"
+            overflow="hidden"
+          >
+            <AuroraGlow />
             <XStack jc="space-between" ai="center">
               <IconButton
+                variant="liquidGlass"
                 icon={<ChevronLeft size="$1" color="$color" />}
                 onPress={() => router.back()}
               />
               <XStack gap="$2">
                 <IconButton
-                  icon={<Pencil size="$1" color="$color" />}
+                  variant="liquidGlass"
+                  icon={<Pencil size={15} color="$color" />}
                   onPress={openEdit}
                 />
                 <IconButton
-                  icon={<Trash2 size="$1" color="$statusDanger" />}
+                  variant="liquidGlass"
+                  icon={<Trash2 size="$1" color="$color" />}
                   onPress={handleDelete}
                 />
               </XStack>
@@ -412,7 +453,7 @@ export default function FolderScreen() {
               </Text>
               {visibleModules.length > 0 && (
                 <AppButton
-                  variant="secondary"
+                  variant="ghost"
                   size="sm"
                   icon={<Plus size={16} color="$color" />}
                   onPress={() =>
@@ -428,59 +469,81 @@ export default function FolderScreen() {
             </XStack>
 
             {visibleModules.length === 0 ? (
-              <YStack bg="$backgroundCard" br="$4" p="$6" ai="center" gap="$3">
-                <Text fontSize="$5" color="$colorMuted" textAlign="center">
-                  No study materials yet
+              <YStack
+                bg="$glassBg"
+                borderWidth={1}
+                borderColor="$glassBorder"
+                br={20}
+                p="$6"
+                ai="center"
+                gap="$2"
+                pos="relative"
+                overflow="hidden"
+              >
+                <YStack w={52} h={52} mb={4}>
+                  <GlowSurface
+                    glow
+                    glowColor="$glowColor"
+                    glowRadius={14}
+                    glowOpacity={0.5}
+                    br={16}
+                    f={1}
+                  >
+                    <LinearGradient
+                      colors={[
+                        theme.accentGradientStart.get(),
+                        theme.accentGradientEnd.get(),
+                      ]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        width: 52,
+                        height: 52,
+                        borderRadius: 16,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text fontSize={24}>📖</Text>
+                    </LinearGradient>
+                  </GlowSurface>
+                </YStack>
+
+                <Text fontSize="$6" fontWeight="800" color="$color">
+                  This folder is empty
                 </Text>
-                <AppButton
-                  onPress={() =>
-                    router.push({
-                      pathname: "/folder/add-modules" as any,
-                      params: { folderId: id },
-                    })
-                  }
-                >
-                  Add study materials
-                </AppButton>
+                <Text fontSize="$3" color="$colorMuted" textAlign="center">
+                  Add your first module to get going
+                </Text>
+
+                <YStack width="100%" mt="$2">
+                  <AppButton
+                    icon={<Plus size={16} color="$onAccentText" />}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/folder/add-modules" as any,
+                        params: { folderId: id },
+                      })
+                    }
+                  >
+                    Add study materials
+                  </AppButton>
+                </YStack>
               </YStack>
             ) : (
               <YStack gap="$3">
                 {visibleModules.map((mod) => (
-                  <AppCard
-                    key={mod.id}
-                    variant="glass"
-                    size="sm"
-                    fd="row"
-                    ai="center"
-                    gap="$3"
-                  >
-                    <Pressable
-                      style={{ flex: 1 }}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/module/[id]",
-                          params: { id: mod.id },
-                        })
-                      }
-                    >
-                      <YStack gap="$1">
-                        <Text fontSize="$5" fontWeight="600" color="$color">
-                          {mod.name}
-                        </Text>
-                        <Text fontSize="$3" color="$colorMuted">
-                          {mod.itemsCount} card{mod.itemsCount !== 1 ? "s" : ""}
-                          {mod.authorUsername
-                            ? ` · by ${mod.authorUsername}`
-                            : ""}
-                        </Text>
-                      </YStack>
-                    </Pressable>
-                    <IconButton
-                      size="$2"
-                      icon={<X size="$1" color="$statusDanger" />}
-                      onPress={() => handleRemoveModule(mod.id)}
-                    />
-                  </AppCard>
+                  <ModuleCard
+                    module={mod}
+                    removeButton={true}
+                    onRemoveButtonPress={() => handleRemoveModule(mod.id)}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/module/[id]",
+                        params: { id: mod.id },
+                      })
+                    }
+                  />
                 ))}
               </YStack>
             )}
@@ -546,7 +609,6 @@ export default function FolderScreen() {
             inputSize="sm"
             placeholder="Tag name"
             onSubmitEditing={handleAddTag}
-            autoFocus
           />
 
           <AppButton onPress={handleAddTag}>Add</AppButton>

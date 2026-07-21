@@ -5,8 +5,23 @@ import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { Text, useTheme, YStack } from "tamagui";
 
-type ButtonVariant = "primary" | "soft" | "secondary" | "outline" | "ghost" | "danger";
+type ButtonVariant =
+  | "primary"
+  | "soft"
+  | "hero"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "glass";
 type ButtonSize = "sm" | "md" | "lg";
+type GradientVariant = "primary" | "soft" | "hero";
+type GradientColorKey =
+  | "accentGradientStart"
+  | "accentGradientEnd"
+  | "gradientHeroStart"
+  | "gradientHeroMid"
+  | "gradientHeroEnd";
 
 const SIZE_STYLES: Record<
   ButtonSize,
@@ -18,21 +33,47 @@ const SIZE_STYLES: Record<
 };
 
 const VARIANT_STYLES: Record<
-  Exclude<ButtonVariant, "primary" | "soft">,
+  Exclude<ButtonVariant, GradientVariant>,
   { bg?: string; borderWidth?: number; borderColor?: string; textColor: string }
 > = {
-  secondary: { bg: "$glassBg", borderWidth: 1, borderColor: "$glassBorder", textColor: "$color" },
-  outline: { bg: "$glassBg", borderWidth: 1, borderColor: "$accentBorderSoft", textColor: "$accentGradientEnd" },
+  secondary: {
+    bg: "$glassBg",
+    borderWidth: 1,
+    borderColor: "$glassBorder",
+    textColor: "$color",
+  },
+  outline: {
+    bg: "$glassBg",
+    borderWidth: 1,
+    borderColor: "$accentBorderSoft",
+    textColor: "$accentGradientEnd",
+  },
   ghost: { textColor: "$color" },
   danger: { bg: "$statusDanger", textColor: "white" },
+  glass: {
+    bg: "rgba(45,212,191,0.12)",
+    textColor: "$mint",
+    borderWidth: 1,
+    borderColor: "rgba(45, 212, 191, 0.28)",
+  },
 };
 
 const GRADIENT_VARIANT_STYLES: Record<
-  "primary" | "soft",
-  { start: "accentGradientStart" | "gradientHeroMid"; end: "accentGradientEnd" | "gradientHeroEnd"; textColor: string }
+  GradientVariant,
+  { colors: GradientColorKey[]; textColor: string }
 > = {
-  primary: { start: "accentGradientStart", end: "accentGradientEnd", textColor: "$onAccentText" },
-  soft: { start: "gradientHeroMid", end: "gradientHeroEnd", textColor: "$color" },
+  primary: {
+    colors: ["accentGradientStart", "accentGradientEnd"],
+    textColor: "$onAccentText",
+  },
+  soft: {
+    colors: ["gradientHeroMid", "gradientHeroEnd"],
+    textColor: "$color",
+  },
+  hero: {
+    colors: ["gradientHeroStart", "gradientHeroMid", "gradientHeroEnd"],
+    textColor: "white",
+  },
 };
 
 interface AppButtonProps {
@@ -54,7 +95,8 @@ export function AppButton({
 }: AppButtonProps) {
   const theme = useTheme();
   const { height, paddingHorizontal, fontSize } = SIZE_STYLES[size];
-  const isGradient = variant === "primary" || variant === "soft";
+  const isGradient =
+    variant === "primary" || variant === "soft" || variant === "hero";
   const variantStyle = !isGradient ? VARIANT_STYLES[variant] : null;
   const gradientStyle = isGradient ? GRADIENT_VARIANT_STYLES[variant] : null;
 
@@ -83,7 +125,9 @@ export function AppButton({
       <Text
         fontSize={fontSize}
         fontWeight="600"
-        color={gradientStyle ? gradientStyle.textColor : variantStyle!.textColor}
+        color={
+          gradientStyle ? gradientStyle.textColor : variantStyle!.textColor
+        }
       >
         {children}
       </Text>
@@ -94,11 +138,20 @@ export function AppButton({
     <Pressable
       onPress={handlePress}
       disabled={disabled}
-      style={({ pressed }) => ({ borderRadius: 999, opacity: pressed ? 0.85 : 1 })}
+      style={({ pressed }) => ({
+        borderRadius: 999,
+        opacity: pressed ? 0.85 : 1,
+      })}
     >
       {gradientStyle ? (
         <LinearGradient
-          colors={[theme[gradientStyle.start].get(), theme[gradientStyle.end].get()]}
+          colors={
+            gradientStyle.colors.map((key) => theme[key].get()) as [
+              string,
+              string,
+              ...string[],
+            ]
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={{ borderRadius: 999 }}

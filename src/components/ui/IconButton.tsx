@@ -1,8 +1,10 @@
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import * as Haptics from "expo-haptics";
 import { ReactElement } from "react";
+import { View } from "react-native";
 import { Button, ButtonProps } from "tamagui";
 
-type IconButtonVariant = "glass" | "badge" | "danger";
+type IconButtonVariant = "glass" | "liquidGlass" | "badge" | "danger";
 
 interface IconButtonProps extends Omit<ButtonProps, "icon" | "onPress" | "size" | "variant"> {
   icon: ReactElement;
@@ -11,7 +13,7 @@ interface IconButtonProps extends Omit<ButtonProps, "icon" | "onPress" | "size" 
   onPress?: () => void;
 }
 
-const VARIANT_STYLES: Record<IconButtonVariant, Partial<ButtonProps>> = {
+const VARIANT_STYLES: Record<Exclude<IconButtonVariant, "liquidGlass">, Partial<ButtonProps>> = {
   glass: {
     bg: "$glassBg",
     borderWidth: 1,
@@ -40,6 +42,29 @@ export function IconButton({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
   };
+
+  if (variant === "liquidGlass") {
+    return (
+      <View style={{ borderRadius: 999, overflow: "hidden" }}>
+        <LiquidGlass
+          intensity={50}
+          borderRadius={999}
+          borderWidth={1}
+          borderColor="rgba(220, 255, 245, 0.15)"
+          backgroundColor="rgba(19, 21, 32, 0.3)"
+        />
+        <Button
+          circular
+          size={size}
+          icon={icon}
+          onPress={handlePress}
+          pressStyle={{ scale: 0.92 }}
+          bg="transparent"
+          {...rest}
+        />
+      </View>
+    );
+  }
 
   return (
     <Button

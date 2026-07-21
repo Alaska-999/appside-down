@@ -37,7 +37,7 @@ export function FolderCard({ folder, index = 0, onPress }: FolderCardProps) {
     0;
   return (
     <Pressable onPress={onPress}>
-      <AppCard variant="soft" size="md" fd="row" ai="center" gap={16} h={76}>
+      <AppCard variant="soft" size="md" fd="row" ai="center" gap={16}>
         <LinearGradient
           colors={[gradientStart, gradientEnd]}
           start={{ x: 0, y: 0 }}
@@ -68,7 +68,7 @@ export function FolderCard({ folder, index = 0, onPress }: FolderCardProps) {
           <Text fontSize={TEXT.cardTitle} fontWeight="700" color="$color">
             {folder.name}
           </Text>
-          <Text fontSize={TEXT.cardMeta} color="$colorMuted">
+          <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
             {moduleCount} module{moduleCount !== 1 ? "s" : ""}
           </Text>
         </YStack>

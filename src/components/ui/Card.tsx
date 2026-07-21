@@ -8,6 +8,7 @@ type CardSize = "sm" | "md" | "lg";
 interface CardProps extends YStackProps {
   variant?: CardVariant;
   size?: CardSize;
+  accentBorder?: boolean;
   children?: ReactNode;
 }
 
@@ -34,8 +35,18 @@ const GLOW_VARIANTS: Record<
 };
 
 export function AppCard(props: CardProps) {
-  const { variant = "solid", size = "md", children, ...rest } = props;
+  const {
+    variant = "solid",
+    size = "md",
+    accentBorder,
+    children,
+    ...rest
+  } = props;
   const sizeStyle = SIZE_STYLES[size];
+  const accentBorderStyle = {
+    borderLeftWidth: accentBorder ? 3 : 0,
+    borderLeftColor: accentBorder ? "$accentGradientStart" : "$glassBorder",
+  };
 
   if (variant === "solid") {
     return (
@@ -45,6 +56,7 @@ export function AppCard(props: CardProps) {
         bg="$backgroundStrong"
         borderWidth={1}
         borderColor="$borderColor"
+        {...accentBorderStyle}
         {...rest}
       >
         {children}
@@ -61,6 +73,7 @@ export function AppCard(props: CardProps) {
         bg="$glassBgSubtle"
         border="1"
         borderColor="$glassBgStrong"
+        {...accentBorderStyle}
         {...rest}
       >
         {children}
@@ -79,6 +92,7 @@ export function AppCard(props: CardProps) {
       borderWidth={1}
       borderColor="$glassBorder"
       {...GLOW_VARIANTS[variant]}
+      {...accentBorderStyle}
       {...rest}
     >
       {children}
