@@ -45,6 +45,7 @@ export function FlashcardsComplete({
           label={`${Math.round(pct * 100)}%`}
           labelFontSize={20 * MOCKUP_SCALE}
           caption="known"
+          animated
         />
       </YStack>
 

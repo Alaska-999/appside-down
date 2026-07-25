@@ -1,7 +1,16 @@
+import { useEffect } from "react";
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
 import { Text, useTheme, View } from "tamagui";
 
 const MOCKUP_SCALE = 390 / 290;
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface ProgressRingProps {
   progress: number;
@@ -11,6 +20,7 @@ interface ProgressRingProps {
   labelFontSize?: number;
   caption?: string;
   color?: string;
+  animated?: boolean;
 }
 
 export function ProgressRing({
@@ -21,6 +31,7 @@ export function ProgressRing({
   labelFontSize = 13,
   caption,
   color,
+  animated = false,
 }: ProgressRingProps) {
   const theme = useTheme();
   const ringColor = color ?? theme.accentGradientEnd.get();
@@ -29,7 +40,20 @@ export function ProgressRing({
 
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - Math.min(Math.max(progress, 0), 1));
+  const clamped = Math.min(Math.max(progress, 0), 1);
+
+  const animatedProgress = useSharedValue(animated ? 0 : clamped);
+
+  useEffect(() => {
+    animatedProgress.value = withTiming(clamped, {
+      duration: animated ? 900 : 0,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [clamped, animated]);
+
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference * (1 - animatedProgress.value),
+  }));
 
   return (
     <View
@@ -52,7 +76,7 @@ export function ProgressRing({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        <Circle
+        <AnimatedCircle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -60,7 +84,7 @@ export function ProgressRing({
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          animatedProps={animatedProps}
           strokeLinecap="butt"
           rotation={-90}
           origin={`${size / 2}, ${size / 2}`}
