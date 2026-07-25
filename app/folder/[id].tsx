@@ -2,6 +2,7 @@ import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
 import { AppButton } from "@/src/components/ui/Button";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
 import { GlowSurface } from "@/src/components/ui/GlowSurface";
@@ -12,64 +13,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Image, Pressable, ScrollView, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, {
-  Defs,
-  FeGaussianBlur,
-  Filter,
-  LinearGradient as SvgLinearGradient,
-  Rect,
-  Stop,
-} from "react-native-svg";
 import { Text, useTheme, XStack, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
-
-export const AuroraGlow = () => {
-  const bandTop = -90 * MOCKUP_SCALE;
-  const bandInset = -40 * MOCKUP_SCALE;
-  const bandHeight = 180 * MOCKUP_SCALE;
-  const blurStdDeviation = 22 * MOCKUP_SCALE;
-  const canvasPadding = blurStdDeviation * 4;
-
-  return (
-    <View
-      pointerEvents="none"
-      style={{
-        position: "absolute",
-        top: bandTop - canvasPadding,
-        left: bandInset - canvasPadding,
-        right: bandInset - canvasPadding,
-        height: bandHeight + canvasPadding * 2,
-        transform: [{ rotate: "-6deg" }],
-      }}
-    >
-      <Svg width="100%" height="100%">
-        <Defs>
-          <SvgLinearGradient id="auroraBand" x1="0%" y1="0%" x2="100%" y2="17.6%">
-            <Stop offset="0" stopColor="#2dd4bf" stopOpacity={0} />
-            <Stop offset="0.35" stopColor="#2dd4bf" stopOpacity={0.2} />
-            <Stop offset="0.55" stopColor="#a3e635" stopOpacity={0.16} />
-            <Stop offset="0.8" stopColor="#a3e635" stopOpacity={0} />
-          </SvgLinearGradient>
-          <Filter id="auroraBlur" x="-30%" y="-30%" width="160%" height="160%">
-            <FeGaussianBlur stdDeviation={blurStdDeviation} />
-          </Filter>
-        </Defs>
-        <Rect
-          x="0"
-          y={canvasPadding}
-          width="100%"
-          height={bandHeight}
-          fill="url(#auroraBand)"
-          filter="url(#auroraBlur)"
-        />
-      </Svg>
-    </View>
-  );
-};
 
 type FolderModule = {
   id: string;
@@ -481,7 +428,7 @@ export default function FolderScreen() {
                   onPress={() =>
                     router.push({
                       pathname: "/folder/add-modules" as any,
-                      params: { folderId: id },
+                      params: { folderId: id, folderName: folder.name },
                     })
                   }
                 >
@@ -544,7 +491,7 @@ export default function FolderScreen() {
                     onPress={() =>
                       router.push({
                         pathname: "/folder/add-modules" as any,
-                        params: { folderId: id },
+                        params: { folderId: id, folderName: folder.name },
                       })
                     }
                   >
@@ -556,6 +503,7 @@ export default function FolderScreen() {
               <YStack gap="$3">
                 {visibleModules.map((mod) => (
                   <ModuleCard
+                    key={mod.id}
                     module={mod}
                     removeButton={true}
                     onRemoveButtonPress={() => handleRemoveModule(mod.id)}

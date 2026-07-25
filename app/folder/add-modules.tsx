@@ -1,16 +1,23 @@
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { ModuleCard } from "@/src/components/cards/ModuleCard";
+import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
+import { Badge } from "@/src/components/ui/Badge";
+import { AppButton } from "@/src/components/ui/Button";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { SearchField } from "@/src/components/ui/SearchField";
+import { TEXT } from "@/src/constants/typography";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Search } from "@tamagui/lucide-icons";
+import { Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Input, Text, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
 type ModuleItem = {
   id: string;
   name: string;
   itemsCount: number;
+  isPublic?: boolean;
   selected: boolean;
 };
 
@@ -19,13 +26,17 @@ function mapModule(raw: any): ModuleItem {
     id: raw.id,
     name: raw.name,
     itemsCount: raw._count?.flashcards ?? raw.itemsCount ?? 0,
+    isPublic: raw.isPublic,
     selected: false,
   };
 }
 
 export default function AddModules() {
   const insets = useSafeAreaInsets();
-  const { folderId } = useLocalSearchParams<{ folderId: string }>();
+  const { folderId, folderName } = useLocalSearchParams<{
+    folderId: string;
+    folderName?: string;
+  }>();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,8 +59,6 @@ export default function AddModules() {
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const raw: any[] = await res.json();
-      console.log(JSON.stringify(raw));
-      console.log(folderId);
       const available = raw
         .filter((m) => {
           const isAlreadyInThisFolder = m.folders?.some(
@@ -88,7 +97,6 @@ export default function AddModules() {
       );
 
       if (!response.ok) {
-        console.log(response);
         setError("Failed to add some modules");
         return;
       }
@@ -106,55 +114,65 @@ export default function AddModules() {
     m.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const title = folderName ? `Add to ${folderName}` : "Add Materials";
+
   return (
     <YStack f={1} bg="$background">
-      <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-        <ScreenHeader />
-      </YStack>
+      <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
 
-      <YStack px="$4" pt="$12" gap="$4" f={1} mt="$5">
-        <XStack jc="space-between" ai="center">
-          <Text fontSize="$7" fontWeight="bold">
-            Add Materials
+      <YStack f={1} pt={insets.top + 10}>
+        <XStack
+          px="$screenX"
+          mb={19}
+          jc="space-between"
+          ai="center"
+        >
+          <IconButton
+            variant="liquidGlass"
+            icon={<ChevronLeft size="$1" color="$color" />}
+            onPress={() => router.back()}
+          />
+          <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
+            {title}
           </Text>
-          <Button
-            size="$3"
-            bg="$buttonSecondaryBg"
-            br="$10"
-            onPress={() =>
-              router.push({
-                pathname: "/module/create",
-                params: { returnFolderId: folderId },
-              })
-            }
-          >
-            <Text color="$buttonSecondaryText" fontSize="$3">
-              Create new
-            </Text>
-          </Button>
+          <View style={{ opacity: 0 }} pointerEvents="none">
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size="$1" color="$color" />}
+            />
+          </View>
         </XStack>
 
-        <XStack bg="$backgroundCard" br="$4" px="$3" ai="center" gap="$2">
-          <Search size="$1" color="$colorMuted" />
-          <Input
+        <XStack px="$screenX">
+          <SearchField
             f={1}
-            placeholder="Search modules..."
             value={search}
             onChangeText={setSearch}
-            bg="transparent"
-            borderWidth={0}
-            size="$4"
+            placeholder="Search modules..."
           />
         </XStack>
 
-        {loading && <Text color="$colorMuted">Loading...</Text>}
-        {error && <Text color="$statusDanger">{error}</Text>}
+        {loading && (
+          <Text px="$screenX" mt="$3" color="$colorMuted">
+            Loading...
+          </Text>
+        )}
+        {error && (
+          <Text px="$screenX" mt="$3" color="$statusDanger">
+            {error}
+          </Text>
+        )}
 
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12, paddingBottom: 100 }}
+          contentContainerStyle={{
+            paddingHorizontal: 19,
+            paddingTop: 16,
+            paddingBottom: 100,
+            gap: 12,
+          }}
           ListEmptyComponent={
             !loading ? (
               <Text color="$colorMuted" textAlign="center" mt="$4">
@@ -163,48 +181,46 @@ export default function AddModules() {
             ) : null
           }
           renderItem={({ item }) => (
-            <Pressable onPress={() => toggleModule(item.id)}>
-              <XStack
-                bg={item.selected ? "$buttonBg" : "$backgroundCard"}
-                br="$4"
-                p="$4"
-                ai="center"
-                gap="$3"
-              >
-                <XStack
-                  w={22}
-                  h={22}
-                  br="$2"
-                  bw={2}
-                  borderColor={item.selected ? "$buttonText" : "$borderColor"}
-                  bg={item.selected ? "$buttonText" : "transparent"}
-                  jc="center"
-                  ai="center"
-                >
-                  {item.selected && (
-                    <Text fontSize="$2" color="$buttonBg">
-                      ✓
-                    </Text>
-                  )}
-                </XStack>
-                <YStack f={1}>
-                  <Text
-                    fontSize="$5"
-                    fontWeight="600"
-                    color={item.selected ? "$buttonText" : "$color"}
-                  >
-                    {item.name}
-                  </Text>
-                  <Text
-                    fontSize="$3"
-                    color={item.selected ? "$buttonText" : "$colorMuted"}
-                  >
-                    {item.itemsCount} card{item.itemsCount !== 1 ? "s" : ""}
-                  </Text>
-                </YStack>
-              </XStack>
-            </Pressable>
+            <ModuleCard
+              module={{
+                id: item.id,
+                name: item.name,
+                itemsCount: item.itemsCount,
+                isPublic: item.isPublic,
+              }}
+              dimmed={item.selected}
+              trailing={
+                item.selected ? (
+                  <Badge tone="mint" icon={<Check size={11} color="$mint" />}>
+                    Added
+                  </Badge>
+                ) : (
+                  <IconButton
+                    size="$2"
+                    icon={<Plus size="$1" color="$color" />}
+                    onPress={() => toggleModule(item.id)}
+                  />
+                )
+              }
+              onPress={() => toggleModule(item.id)}
+            />
           )}
+          ListFooterComponent={
+            <YStack mt={7}>
+              <AppButton
+                variant="secondary"
+                icon={<Plus size={16} color="$color" />}
+                onPress={() =>
+                  router.push({
+                    pathname: "/module/create",
+                    params: { returnFolderId: folderId },
+                  })
+                }
+              >
+                Create new module
+              </AppButton>
+            </YStack>
+          }
         />
       </YStack>
 
@@ -214,19 +230,18 @@ export default function AddModules() {
           bottom={0}
           left={0}
           right={0}
-          p="$4"
-          pb={insets.bottom + 16}
-          bg="$background"
+          pt={19}
+          px="$section"
+          pb={Math.max(insets.bottom + 16, 32)}
+          bg="rgba(19,21,32,0.92)"
           btw={1}
-          borderColor="$borderColor"
+          borderColor="$glassBorder"
         >
-          <Button bg="$buttonBg" br="$10" onPress={handleAdd} disabled={saving}>
-            <Text color="$buttonText">
-              {saving
-                ? "Adding..."
-                : `Add ${selectedIds.length} module${selectedIds.length !== 1 ? "s" : ""}`}
-            </Text>
-          </Button>
+          <AppButton onPress={handleAdd} disabled={saving}>
+            {saving
+              ? "Adding..."
+              : `Done · ${selectedIds.length} added`}
+          </AppButton>
         </YStack>
       )}
     </YStack>

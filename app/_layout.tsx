@@ -1,3 +1,5 @@
+import "@tamagui/native/setup-expo-linear-gradient";
+
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config from "@/tamagui.config";
