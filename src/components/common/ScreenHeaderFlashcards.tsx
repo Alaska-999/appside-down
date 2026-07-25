@@ -1,4 +1,6 @@
+import { IconButton } from "@/src/components/ui/IconButton";
 import { X } from "@tamagui/lucide-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useWindowDimensions } from "react-native";
@@ -8,10 +10,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, XStack, YStack } from "tamagui";
+import { Text, useTheme, XStack, YStack } from "tamagui";
+
+const MOCKUP_SCALE = 390 / 290;
+const BAR_HEIGHT = 4 * MOCKUP_SCALE;
 
 export function ScreenHeaderFlashcards({
-  title,
   rightAction,
   progress,
   total,
@@ -26,6 +30,7 @@ export function ScreenHeaderFlashcards({
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
+  const theme = useTheme();
 
   const progressPct = Number(total) > 0 ? Number(progress) / Number(total) : 0;
   const barWidth = useSharedValue(progressPct * screenWidth);
@@ -41,40 +46,43 @@ export function ScreenHeaderFlashcards({
       <XStack
         ai="center"
         p="$4"
-        pb="$2"
+        pb={0}
         pt={insets.top}
-        bg="$background"
         justifyContent="space-between"
       >
-        <Button
-          icon={<X size="$2" color="$color" />}
-          circular
-          onPress={() => onClose ? onClose() : router.back()}
-          ml="$-3"
+        <IconButton
+          icon={<X size="$1.5" color="$color" />}
+          variant="liquidGlass"
+          onPress={() => (onClose ? onClose() : router.back())}
         />
         <Text>
-          {progress}/{total}
+          <Text fontSize={17.5} fontWeight="800" color="$color">
+            {progress}
+          </Text>
+          <Text fontSize={17.5} fontWeight="600" color="$colorMuted">
+            {" "}
+            / {total}
+          </Text>
         </Text>
         {rightAction}
       </XStack>
       <XStack
-        position="absolute"
-        bottom={0}
-        bg="$backgroundCard"
-        width="100%"
-        height={3}
-      />
-      <Animated.View
-        style={[
-          {
-            position: "absolute",
-            bottom: 0,
-            height: 3,
-            backgroundColor: "#94A3B8",
-          },
-          barStyle,
-        ]}
-      />
+        mx="$4"
+        mt={10 * MOCKUP_SCALE}
+        bg="rgba(220,255,245,0.1)"
+        height={BAR_HEIGHT}
+        br={999}
+        overflow="hidden"
+      >
+        <Animated.View style={[{ height: "100%" }, barStyle]}>
+          <LinearGradient
+            colors={[theme.accentGradientStart.get(), theme.accentGradientEnd.get()]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ flex: 1, borderRadius: 999 }}
+          />
+        </Animated.View>
+      </XStack>
     </YStack>
   );
 }

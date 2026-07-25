@@ -1,5 +1,8 @@
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
+import { AppButton } from "@/src/components/ui/Button";
+import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { IconButton } from "@/src/components/ui/IconButton";
 import { Flashcard } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { EditModuleForm, editModuleSchema } from "@/src/validation/entities";
@@ -9,7 +12,6 @@ import {
   ChevronDown,
   Globe,
   Lock,
-  Plus,
   X,
 } from "@tamagui/lucide-icons";
 import { useEffect, useRef, useState } from "react";
@@ -17,7 +19,7 @@ import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { Pressable } from "react-native";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Button, Sheet, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 interface EditCardsSheetProps {
   open: boolean;
@@ -73,8 +75,6 @@ export function EditCardsSheet({
     errors.flashcards?.root?.message ??
     (errors.flashcards as { message?: string } | undefined)?.message;
 
-  // keyName: наші картки мають власне поле id, тому ключ рендеру
-  // useFieldArray кладе в окреме поле fieldKey, щоб не перетерти id
   const { fields, append, remove } = useFieldArray({
     control,
     name: "flashcards",
@@ -85,7 +85,6 @@ export function EditCardsSheet({
   const definitionRefs = useRef<Array<TextInput | null>>([]);
   const prevFieldsLength = useRef(fields.length);
 
-  // фокус на нову картку тільки коли масив реально виріс (не при кожному рендері)
   useEffect(() => {
     if (fields.length > prevFieldsLength.current) {
       termRefs.current[fields.length - 1]?.focus();
@@ -96,7 +95,6 @@ export function EditCardsSheet({
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) => definitionRefs.current[index]?.focus();
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -131,8 +129,6 @@ export function EditCardsSheet({
   const onSubmit = async (data: EditModuleForm) => {
     setServerError(null);
 
-    // повністю порожні картки не зберігаємо: нові — просто випадають,
-    // існуючі, які юзер стер повністю, — видаляються з бази
     const isEmpty = (card: { term: string; definition: string }) =>
       !card.term && !card.definition;
     const keptCards = data.flashcards.filter((c) => !isEmpty(c));
@@ -214,79 +210,65 @@ export function EditCardsSheet({
 
   return (
     <FormProvider {...form}>
-      <Sheet
-        modal
+      <GlassSheet
         open={open}
         onOpenChange={onOpenChange}
+        title="Edit module"
         snapPoints={[90]}
-        dismissOnSnapToBottom
+        leftAction={
+          <IconButton
+            variant="glass"
+            size="$2"
+            icon={<X size={16} color="$colorSecondary" />}
+            onPress={() => onOpenChange(false)}
+          />
+        }
+        rightAction={
+          <AppButton
+            variant="primary"
+            size="sm"
+            onPress={handleSubmit(onSubmit)}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : "Save"}
+          </AppButton>
+        }
       >
-        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-        <Sheet.Handle />
-        <Sheet.Frame bg="$background">
-          <XStack
-            px="$4"
-            pt="$3"
-            pb="$3"
-            ai="center"
-            jc="space-between"
-            borderBottomWidth={1}
-            borderColor="$borderColor"
-          >
-            <Pressable hitSlop={8} onPress={() => onOpenChange(false)}>
-              <X size={20} color="$colorMuted" />
-            </Pressable>
-            <Text fontSize="$5" fontWeight="bold" color="$color">
-              Edit cards
-            </Text>
-            <Button
-              size="$3"
-              bg="$buttonBg"
-              br="$10"
-              onPress={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-              opacity={isSubmitting ? 0.6 : 1}
-            >
-              <Text color="$buttonText" fontSize="$3">
-                {isSubmitting ? "Saving..." : "Save"}
-              </Text>
-            </Button>
-          </XStack>
-
-          <KeyboardAwareScrollView
-            style={{ flex: 1 }}
-            bottomOffset={40}
-            showsVerticalScrollIndicator={false}
-            keyboardDismissMode="on-drag"
-            keyboardShouldPersistTaps="handled"
-          >
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+        >
+          <YStack gap="$3">
             <FormInput
               control={control}
               name="name"
               placeholder="Untitled Module"
-              size="$5"
+              variant="glass"
+              inputSize="md"
             />
 
             <FormInput
               control={control}
               name="description"
               placeholder="Description (optional)"
-              size="$4"
-              bg="transparent"
+              variant="glass"
+              inputSize="md"
             />
 
-            {/* Privacy dropdown */}
-            <YStack px="$4" pt="$3">
+            <YStack>
               <Pressable onPress={() => setPrivacyOpen((prev) => !prev)}>
                 <XStack
-                  bg="$backgroundHover"
-                  br="$4"
+                  bg="$glassBg"
+                  br={16}
                   px="$4"
-                  py="$3"
+                  height={48}
                   ai="center"
                   jc="space-between"
                   borderWidth={1}
-                  borderColor="$borderColor"
+                  borderColor="$glassBorder"
                 >
                   <XStack ai="center" gap="$2">
                     {isPublic ? (
@@ -308,11 +290,11 @@ export function EditCardsSheet({
 
               {privacyOpen && (
                 <YStack
-                  bg="$backgroundHover"
-                  br="$4"
-                  mt="$1"
+                  bg="$glassBg"
+                  br={16}
+                  mt="$2"
                   borderWidth={1}
-                  borderColor="$borderColor"
+                  borderColor="$glassBorder"
                   overflow="hidden"
                 >
                   {(
@@ -349,7 +331,7 @@ export function EditCardsSheet({
                           </Text>
                         </YStack>
                         {isPublic === value && (
-                          <Check size={16} color="$color" />
+                          <Check size={16} color="$accentGradientStart" />
                         )}
                       </XStack>
                     </Pressable>
@@ -357,58 +339,53 @@ export function EditCardsSheet({
                 </YStack>
               )}
             </YStack>
+          </YStack>
 
-            <YStack px="$4" py="$4" gap="$6">
-              {fields.map((field, index) => (
-                <FlashcardEditItem
-                  key={field.fieldKey}
-                  control={control}
-                  termName={`flashcards.${index}.term`}
-                  definitionName={`flashcards.${index}.definition`}
-                  index={index}
-                  onRemove={handleRemove}
-                  showRemove={fields.length > 1}
-                  termRef={(node) => {
-                    termRefs.current[index] = node;
-                  }}
-                  definitionRef={(node) => {
-                    definitionRefs.current[index] = node;
-                  }}
-                  onSubmitTerm={() => focusDefinition(index)}
-                  onSubmitDefinition={() => {
-                    if (index + 1 < fields.length) {
-                      focusTerm(index + 1);
-                    } else {
-                      append({ id: `new-${Date.now()}`, term: "", definition: "", isNew: true });
-                    }
-                  }}
-                />
-              ))}
+          <YStack pt="$5" gap="$4">
+            {fields.map((field, index) => (
+              <FlashcardEditItem
+                key={field.fieldKey}
+                control={control}
+                termName={`flashcards.${index}.term`}
+                definitionName={`flashcards.${index}.definition`}
+                index={index}
+                onRemove={handleRemove}
+                showRemove={fields.length > 1}
+                termRef={(node) => {
+                  termRefs.current[index] = node;
+                }}
+                definitionRef={(node) => {
+                  definitionRefs.current[index] = node;
+                }}
+                onSubmitTerm={() => focusDefinition(index)}
+                onSubmitDefinition={() => {
+                  if (index + 1 < fields.length) {
+                    focusTerm(index + 1);
+                  } else {
+                    append({ id: `new-${Date.now()}`, term: "", definition: "", isNew: true });
+                  }
+                }}
+              />
+            ))}
 
-              {flashcardsError && (
-                <Text color="$statusDanger" fontSize="$2">
-                  {flashcardsError}
-                </Text>
-              )}
+            {flashcardsError && (
+              <Text color="$statusDanger" fontSize="$2">
+                {flashcardsError}
+              </Text>
+            )}
 
-              {serverError && (
-                <Text color="$statusDanger" fontSize="$3" textAlign="center">
-                  {serverError}
-                </Text>
-              )}
+            {serverError && (
+              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+                {serverError}
+              </Text>
+            )}
 
-              <Button
-                icon={<Plus size="$1" />}
-                onPress={handleAdd}
-                bg="$buttonSecondaryBg"
-                br="$10"
-              >
-                <Text color="$buttonSecondaryText">Add Card</Text>
-              </Button>
-            </YStack>
-          </KeyboardAwareScrollView>
-        </Sheet.Frame>
-      </Sheet>
+            <AppButton variant="outline" size="lg" onPress={handleAdd}>
+              + Add Card
+            </AppButton>
+          </YStack>
+        </KeyboardAwareScrollView>
+      </GlassSheet>
     </FormProvider>
   );
 }

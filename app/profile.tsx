@@ -16,7 +16,7 @@ export default function ProfileScreen() {
         <UserAvatar
           avatarUrl={user?.avatarUrl}
           username={user?.username}
-          size="$8"
+          size={84}
         />
 
         <YStack ai="center" gap="$1">

@@ -108,7 +108,7 @@ export function AppButton({
 
   const content = (
     <YStack
-      f={1}
+      w="100%"
       height={height}
       px={paddingHorizontal}
       br={999}

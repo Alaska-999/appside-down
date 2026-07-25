@@ -1,11 +1,15 @@
 import Svg, { Circle } from "react-native-svg";
 import { Text, useTheme, View } from "tamagui";
 
+const MOCKUP_SCALE = 390 / 290;
+
 interface ProgressRingProps {
   progress: number;
   size?: number;
   strokeWidth?: number;
   label?: string;
+  labelFontSize?: number;
+  caption?: string;
   color?: string;
 }
 
@@ -14,6 +18,8 @@ export function ProgressRing({
   size = 64,
   strokeWidth = 8,
   label,
+  labelFontSize = 13,
+  caption,
   color,
 }: ProgressRingProps) {
   const theme = useTheme();
@@ -61,8 +67,13 @@ export function ProgressRing({
         />
       </Svg>
       {label && (
-        <Text fontSize={13} fontWeight="800" color="$color">
+        <Text fontSize={labelFontSize} fontWeight="800" color="$color">
           {label}
+        </Text>
+      )}
+      {caption && (
+        <Text fontSize={9.5 * MOCKUP_SCALE} color="$colorMuted" mt={-2}>
+          {caption}
         </Text>
       )}
     </View>

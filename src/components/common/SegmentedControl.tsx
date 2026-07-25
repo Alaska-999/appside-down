@@ -103,7 +103,7 @@ export function SegmentedControl({
             <Text
               fontSize={TEXT.cardMeta}
               fontWeight="700"
-              color={selected === i ? "colorMuted" : "$colorMuted"}
+              color={selected === i ? "$onAccentText" : "$colorMuted"}
             >
               {option}
             </Text>

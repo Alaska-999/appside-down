@@ -24,9 +24,9 @@ export function Toggle({
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      ["#E2E8F0", "#6366F1"],
+      ["rgba(220,255,245,0.14)", "#2dd4bf"],
     ),
-    shadowColor: "#6366F1",
+    shadowColor: "#2dd4bf",
     shadowOpacity: progress.value * 0.6,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },

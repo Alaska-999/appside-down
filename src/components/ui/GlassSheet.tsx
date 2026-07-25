@@ -1,12 +1,14 @@
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ReactNode } from "react";
-import { Sheet, Text, YStack } from "tamagui";
+import { Sheet, Text, XStack, YStack } from "tamagui";
 
 interface GlassSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   snapPoints?: number[];
+  leftAction?: ReactNode;
+  rightAction?: ReactNode;
   children: ReactNode;
 }
 
@@ -15,8 +17,11 @@ export function GlassSheet({
   onOpenChange,
   title,
   snapPoints = [40],
+  leftAction,
+  rightAction,
   children,
 }: GlassSheetProps) {
+  const hasHeaderActions = Boolean(leftAction || rightAction);
   return (
     <Sheet
       modal
@@ -54,16 +59,39 @@ export function GlassSheet({
           alignSelf="center"
         />
 
-        <Text
-          color="$color"
-          fontSize={24}
-          fontWeight="800"
-          mb={19}
-          pos="relative"
-          zIndex={1}
-        >
-          {title}
-        </Text>
+        {hasHeaderActions ? (
+          <XStack
+            ai="center"
+            jc="space-between"
+            gap="$2"
+            mb={19}
+            pos="relative"
+            zIndex={1}
+          >
+            {leftAction ?? <YStack width={40} />}
+            <Text
+              f={1}
+              color="$color"
+              fontSize={19}
+              fontWeight="800"
+              textAlign="center"
+            >
+              {title}
+            </Text>
+            {rightAction ?? <YStack width={40} />}
+          </XStack>
+        ) : (
+          <Text
+            color="$color"
+            fontSize={24}
+            fontWeight="800"
+            mb={19}
+            pos="relative"
+            zIndex={1}
+          >
+            {title}
+          </Text>
+        )}
 
         <YStack f={1} pos="relative" zIndex={1}>
           {children}

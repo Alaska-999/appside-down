@@ -1,7 +1,10 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { Toggle } from "@/src/components/common/Toggle";
+import { AppButton } from "@/src/components/ui/Button";
+import { GlassSheet } from "@/src/components/ui/GlassSheet";
 import { useGameStore } from "@/src/store/useGameStore";
-import { Button, Sheet, Text, XStack, YStack } from "tamagui";
+import { RotateCcw } from "lucide-react-native";
+import { Text, XStack, YStack } from "tamagui";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;
@@ -22,23 +25,24 @@ export function FlashcardsSettingsSheet({
   };
 
   return (
-    <Sheet
-      modal
+    <GlassSheet
       open={open}
       onOpenChange={onOpenChange}
+      title="Settings"
       snapPoints={[65]}
-      dismissOnSnapToBottom
     >
-      <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-      <Sheet.Handle />
-      <Sheet.Frame p="$4" bg="$background" gap="$4">
-        <Text fontSize="$6" fontWeight="bold">
-          Settings
-        </Text>
-
+      <YStack gap="$4">
         <YStack gap="$2">
-          <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
-            <Text f={1} fontSize="$5" color="$color">
+          <XStack
+            bg="$glassBg"
+            borderWidth={1}
+            borderColor="$glassBorder"
+            br={16}
+            height={59}
+            px="$4"
+            ai="center"
+          >
+            <Text f={1} color="$color" fontWeight="600">
               Shuffle cards
             </Text>
             <Toggle
@@ -46,8 +50,16 @@ export function FlashcardsSettingsSheet({
               onToggle={() => updateSettings({ shuffle: !settings.shuffle })}
             />
           </XStack>
-          <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
-            <Text f={1} fontSize="$5" color="$color">
+          <XStack
+            bg="$glassBg"
+            borderWidth={1}
+            borderColor="$glassBorder"
+            br={16}
+            height={59}
+            px="$4"
+            ai="center"
+          >
+            <Text f={1} color="$color" fontWeight="600">
               Text to speech
             </Text>
             <Toggle
@@ -57,8 +69,16 @@ export function FlashcardsSettingsSheet({
               }
             />
           </XStack>
-          <XStack bg="$buttonSecondaryBg" br="$4" px="$4" py="$3" ai="center">
-            <Text f={1} fontSize="$5" color="$color">
+          <XStack
+            bg="$glassBg"
+            borderWidth={1}
+            borderColor="$glassBorder"
+            br={16}
+            height={59}
+            px="$4"
+            ai="center"
+          >
+            <Text f={1} color="$color" fontWeight="600">
               Sort into piles
             </Text>
             <Toggle
@@ -71,7 +91,13 @@ export function FlashcardsSettingsSheet({
         </YStack>
 
         <YStack gap="$2">
-          <Text fontSize="$3" color="$colorMuted" px="$1">
+          <Text
+            fontSize="$3"
+            color="$auroraMuted"
+            fontWeight="600"
+            tt="uppercase"
+            px="$1"
+          >
             Card orientation
           </Text>
           <SegmentedControl
@@ -85,17 +111,16 @@ export function FlashcardsSettingsSheet({
           />
         </YStack>
 
-        <Button
-          size="$5"
-          bg="$buttonSecondaryBg"
-          br="$4"
+        <AppButton
+          variant="secondary"
+          icon={<RotateCcw size={18} color="$statusDanger" />}
           onPress={handleRestart}
         >
-          <Text f={1} fontSize="$5" color="$statusDanger">
+          <Text color="$statusDanger" fontWeight="600">
             Restart game
           </Text>
-        </Button>
-      </Sheet.Frame>
-    </Sheet>
+        </AppButton>
+      </YStack>
+    </GlassSheet>
   );
 }
