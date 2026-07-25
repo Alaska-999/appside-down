@@ -1,6 +1,7 @@
 import { AppCard } from "@/src/components/ui/Card";
 import { TEXT } from "@/src/constants/typography";
 import { Star, X } from "@tamagui/lucide-icons";
+import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { Text, View, XStack, YStack } from "tamagui";
 import { IconButton } from "../ui/IconButton";
@@ -16,6 +17,8 @@ interface ModuleCardProps {
   };
   removeButton?: boolean;
   onRemoveButtonPress?: () => void;
+  trailing?: ReactNode;
+  dimmed?: boolean;
   onPress: () => void;
 }
 
@@ -30,6 +33,8 @@ export function ModuleCard({
   onPress,
   removeButton,
   onRemoveButtonPress,
+  trailing,
+  dimmed,
 }: ModuleCardProps) {
   return (
     <Pressable onPress={onPress}>
@@ -42,7 +47,7 @@ export function ModuleCard({
         accentBorder={module.isPublic}
         height={83}
       >
-        <YStack f={1} gap="$1">
+        <YStack f={1} gap="$1" opacity={dimmed ? 0.55 : 1}>
           <XStack
             ai="center"
             jc={removeButton && onRemoveButtonPress ? "unset" : "space-between"}
@@ -74,7 +79,9 @@ export function ModuleCard({
           </XStack>
         </YStack>
 
-        {removeButton && onRemoveButtonPress && (
+        {trailing}
+
+        {!trailing && removeButton && onRemoveButtonPress && (
           <IconButton
             size="$2"
             icon={<X size="$1" color="$colorlfd" />}
