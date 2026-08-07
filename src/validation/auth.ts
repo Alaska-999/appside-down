@@ -38,6 +38,26 @@ export const changePasswordSchema = z
         path: ["newPassword"],
     });
 
+export const forgotPasswordSchema = z.object({
+    email: emailSchema,
+});
+
+export const resetPasswordSchema = z
+    .object({
+        code: z
+            .string()
+            .trim()
+            .regex(/^\d{6}$/, "Enter the 6-digit code from the email"),
+        newPassword: strongPasswordSchema,
+        confirmPassword: z.string().min(1, "Confirm your new password"),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+    });
+
 export type LoginForm = z.infer<typeof loginSchema>;
 export type SignupForm = z.infer<typeof signupSchema>;
 export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
+export type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;

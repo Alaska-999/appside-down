@@ -149,6 +149,17 @@ export default function Login() {
             }
           />
 
+          <Link href="/forgot-password" asChild>
+            <Text
+              color="$colorSecondary"
+              fontSize="$3"
+              textAlign="right"
+              mt="$1"
+            >
+              Forgot password?
+            </Text>
+          </Link>
+
           {serverError && (
             <Text color="$statusDanger" fontSize="$3" textAlign="center">
               {serverError}
