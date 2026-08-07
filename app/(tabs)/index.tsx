@@ -19,6 +19,8 @@ type PublicModuleResult = {
   id: string;
   name: string;
   user?: { id: string; username: string; avatarUrl?: string | null };
+  author?: { id: string; username: string; avatarUrl?: string | null } | null;
+  authorUsername?: string | null;
   _count?: { flashcards: number };
 };
 
@@ -48,7 +50,8 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
           {module.name}
         </Text>
         <Text fontSize={14} color="$colorMuted">
-          {module.user?.username ?? "Unknown"} · {count} term
+          {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
+          {count} term
           {count !== 1 ? "s" : ""}
         </Text>
       </AppCard>

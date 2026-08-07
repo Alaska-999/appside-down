@@ -75,6 +75,9 @@ export default function ModuleScreen() {
 
   const { user } = useAuthStore();
   const isOwner = moduleData?.user?.id === user?.id;
+  const authorName =
+    moduleData?.author?.username ?? moduleData?.authorUsername ?? undefined;
+  const isDeletedAuthor = !moduleData?.author && !!moduleData?.authorUsername;
 
   useEffect(() => {
     fetchData();
@@ -163,6 +166,7 @@ export default function ModuleScreen() {
         folderIds: rawModule.folderId ? [rawModule.folderId] : [],
         tags: rawModule.tags ?? [],
         user: rawModule.user ?? null,
+        author: rawModule.author ?? null,
       });
       setFlashcards(flashcardsData);
     } catch (err) {
@@ -438,13 +442,18 @@ export default function ModuleScreen() {
 
                   <XStack ai="center" gap="$2">
                     <UserAvatar
-                      avatarUrl={moduleData.user?.avatarUrl}
-                      username={moduleData.user?.username}
+                      avatarUrl={moduleData.author?.avatarUrl}
+                      username={authorName}
                       size={35}
                     />
                     <Text fontSize={15} fontWeight="700" color="$color">
-                      {moduleData.user?.username ?? "Unknown"}
+                      {authorName ?? "Unknown"}
                     </Text>
+                    {isDeletedAuthor && (
+                      <Text fontSize={13} color="$colorMuted">
+                        (deleted account)
+                      </Text>
+                    )}
                     <Text fontSize={15} color="$colorMuted">
                       · {moduleData.itemsCount} term
                       {moduleData.itemsCount !== 1 ? "s" : ""}

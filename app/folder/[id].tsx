@@ -24,7 +24,8 @@ type FolderModule = {
   itemsCount: number;
   isPublic?: boolean;
   isFavorite?: boolean;
-  user?: { username: string } | null;
+  author?: { username: string } | null;
+  authorUsername?: string | null;
 };
 
 type FolderDetail = {
@@ -42,7 +43,8 @@ function mapModule(raw: any): FolderModule {
     itemsCount: raw._count?.flashcards ?? raw.itemsCount ?? 0,
     isPublic: raw.isPublic,
     isFavorite: raw.isFavorite,
-    user: raw.user ?? null,
+    author: raw.author ?? null,
+    authorUsername: raw.authorUsername ?? null,
   };
 }
 

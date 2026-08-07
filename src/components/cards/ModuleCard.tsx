@@ -13,7 +13,8 @@ interface ModuleCardProps {
     itemsCount: number;
     isPublic?: boolean;
     isFavorite?: boolean;
-    user?: { username: string } | null;
+    author?: { username: string } | null;
+    authorUsername?: string | null;
   };
   removeButton?: boolean;
   onRemoveButtonPress?: () => void;
@@ -68,11 +69,11 @@ export function ModuleCard({
             <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
               {module.isPublic ? "Public" : "Private"}
             </Text>
-            {module.isPublic && module.user?.username && (
+            {module.isPublic && (module.author?.username || module.authorUsername) && (
               <>
                 <Dot />
                 <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
-                  {module.user.username}
+                  {module.author?.username ?? module.authorUsername}
                 </Text>
               </>
             )}

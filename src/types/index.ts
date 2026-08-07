@@ -74,6 +74,12 @@ export interface Module {
         username: string;
         avatarUrl?: string | null;
     };
+    author?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
+    } | null;
+    authorUsername?: string | null;
 }
 
 export interface Flashcard {
