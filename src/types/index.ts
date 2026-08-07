@@ -74,6 +74,12 @@ export interface Module {
         username: string;
         avatarUrl?: string | null;
     };
+    author?: {
+        id: string;
+        username: string;
+        avatarUrl?: string | null;
+    } | null;
+    authorUsername?: string | null;
 }
 
 export interface Flashcard {
@@ -119,5 +125,6 @@ export interface FlashcardsGameState {
     flipCard: () => void;
     revertSwipe: () => void;
     restart: (onlyStillLearning?: boolean) => void;
+    toggleStar: (cardId: string) => void;
     updateSettings: (newSettings: Partial<FlashcardsGameState['settings']>) => void;
 }

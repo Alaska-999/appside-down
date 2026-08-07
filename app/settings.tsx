@@ -1,6 +1,9 @@
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Toggle } from "@/src/components/common/Toggle";
+import { AppButton } from "@/src/components/ui/Button";
+import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -10,26 +13,34 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { ReactNode, useState } from "react";
 import { Alert, Pressable } from "react-native";
-import {
-  Button,
-  Input,
-  ScrollView,
-  Sheet,
-  Text,
-  XStack,
-  YStack,
-} from "tamagui";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
-function SettingsCard({ children }: { children: ReactNode }) {
+function GlassCard({ children }: { children: ReactNode }) {
   return (
     <YStack
+      bg="$glassBg"
       borderWidth={1}
-      borderColor="$borderColor"
-      br="$4"
+      borderColor="$glassBorder"
+      br="$cardSoft"
       overflow="hidden"
     >
       {children}
     </YStack>
+  );
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <Text
+      fontSize="$3"
+      color="$auroraMuted"
+      fontWeight="600"
+      tt="uppercase"
+      px="$1"
+    >
+      {children}
+    </Text>
   );
 }
 
@@ -38,37 +49,39 @@ function SettingsRow({
   value,
   onPress,
   disabled,
+  isLast,
   right,
 }: {
   label: string;
   value?: string;
   onPress?: () => void;
   disabled?: boolean;
+  isLast?: boolean;
   right?: ReactNode;
 }) {
   const content = (
     <XStack
       ai="center"
       jc="space-between"
-      px="$4"
-      py="$3"
-      opacity={disabled ? 0.5 : 1}
-      borderBottomWidth={1}
-      borderColor="$borderColor"
+      px={18}
+      py={14}
+      opacity={disabled ? 0.45 : 1}
+      borderBottomWidth={isLast ? 0 : 1}
+      borderColor="$glassBorderSubtle"
     >
       <YStack f={1} gap="$1">
-        <Text fontSize="$4" fontWeight="600" color="$color">
+        <Text fontSize={16} fontWeight="600" color="$color">
           {label}
         </Text>
         {value && (
-          <Text fontSize="$3" color="$colorMuted">
+          <Text fontSize={14} color="$colorMuted" mt={1}>
             {value}
           </Text>
         )}
       </YStack>
       {right ??
         (onPress && !disabled && (
-          <ChevronRight size={18} color="$colorMuted" />
+          <ChevronRight size={16} color="$colorMuted" />
         ))}
     </XStack>
   );
@@ -152,44 +165,44 @@ export default function SettingsScreen() {
   return (
     <YStack f={1} bg="$background">
       <ScreenHeader title="Settings" />
+
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <YStack px="$4" gap="$5" pt="$2">
-          <AvatarPicker />
+        <YStack px="$4" gap="$5" pt="$2" pb="$8">
+          <GlowSurface
+            glow
+            glowOpacity={0.1}
+            bg="$glassBg"
+            borderWidth={1}
+            borderColor="$glassBorder"
+            br="$cardSoft"
+            px={18}
+            py={18}
+            fd="row"
+            ai="center"
+            gap={16}
+          >
+            <AvatarPicker size={76} />
+            <YStack f={1}>
+              <Text fontSize={19} fontWeight="800" color="$color">
+                {user?.username ?? "Unknown"}
+              </Text>
+              <Text fontSize={14} color="$colorMuted" mt={3}>
+                {user?.email ?? ""}
+              </Text>
+            </YStack>
+          </GlowSurface>
+
+          <GlassCard>
+            <SettingsRow
+              label="Create password"
+              isLast
+              onPress={() => router.push("/change-password")}
+            />
+          </GlassCard>
 
           <YStack gap="$2">
-            <Text fontSize="$5" fontWeight="bold" color="$color">
-              Personal information
-            </Text>
-            <SettingsCard>
-              <SettingsRow
-                label="Username"
-                value={user?.username ?? "Unknown"}
-              />
-              <SettingsRow label="Email" value={user?.email ?? ""} />
-              <SettingsRow
-                label="Create password"
-                onPress={() => router.push("/change-password")}
-              />
-            </SettingsCard>
-          </YStack>
-
-          <YStack gap="$2">
-            <Text fontSize="$5" fontWeight="bold" color="$color">
-              App version
-            </Text>
-            <SettingsCard>
-              <SettingsRow
-                label="Version"
-                value={Constants.expoConfig?.version ?? "unknown"}
-              />
-            </SettingsCard>
-          </YStack>
-
-          <YStack gap="$2">
-            <Text fontSize="$5" fontWeight="bold" color="$color">
-              Preferences
-            </Text>
-            <SettingsCard>
+            <SectionTitle>Preferences</SectionTitle>
+            <GlassCard>
               <SettingsRow
                 label="Push notifications"
                 right={
@@ -210,6 +223,7 @@ export default function SettingsScreen() {
               />
               <SettingsRow
                 label="Haptic feedback"
+                isLast
                 right={
                   <Toggle
                     value={hapticFeedbackEnabled}
@@ -217,46 +231,40 @@ export default function SettingsScreen() {
                   />
                 }
               />
-            </SettingsCard>
+            </GlassCard>
           </YStack>
 
           <YStack gap="$2">
-            <Text fontSize="$5" fontWeight="bold" color="$color">
-              About
-            </Text>
-            <SettingsCard>
+            <SectionTitle>About</SectionTitle>
+            <GlassCard>
               <SettingsRow label="Privacy policy" disabled />
               <SettingsRow label="Terms of service" disabled />
-              <SettingsRow label="Help Centre" disabled />
-            </SettingsCard>
+              <SettingsRow
+                label="Version"
+                value={Constants.expoConfig?.version ?? "unknown"}
+                isLast
+              />
+            </GlassCard>
           </YStack>
 
-          <YStack gap="$3" pb="$6">
-            <Button
-              icon={<LogOut size="$1" color="$statusDanger" />}
-              bg="$buttonSecondaryBg"
+          <YStack gap="$3">
+            <AppButton
+              variant="secondary"
+              icon={<LogOut size={18} color="$statusDanger" />}
               onPress={logout}
-              width="100%"
             >
               <Text color="$statusDanger" fontWeight="600">
                 Log Out
               </Text>
-            </Button>
-            <Button
-              bg="$statusDanger"
-              onPress={() => setDeleteSheetOpen(true)}
-              width="100%"
-            >
-              <Text color="white" fontWeight="600">
-                Delete account
-              </Text>
-            </Button>
+            </AppButton>
+            <AppButton variant="danger" onPress={() => setDeleteSheetOpen(true)}>
+              Delete account
+            </AppButton>
           </YStack>
         </YStack>
       </ScrollView>
 
-      <Sheet
-        modal
+      <GlassSheet
         open={deleteSheetOpen}
         onOpenChange={(open: boolean) => {
           setDeleteSheetOpen(open);
@@ -265,50 +273,63 @@ export default function SettingsScreen() {
             setDeleteError(null);
           }
         }}
-        snapPoints={[35]}
-        dismissOnSnapToBottom
+        title="Delete account"
+        snapPoints={[45]}
       >
-        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-        <Sheet.Handle />
-        <Sheet.Frame p="$4" bg="$background" gap="$3">
-          <Text fontSize="$6" fontWeight="bold" color="$color">
-            Delete account
-          </Text>
-          <Text fontSize="$3" color="$colorMuted">
-            This permanently deletes your account and all your folders, modules,
-            and flashcards. This cannot be undone.
-          </Text>
-          <Input
-            placeholder="Password"
-            size="$4"
-            secureTextEntry
-            value={deletePassword}
-            onChangeText={setDeletePassword}
-            textContentType="password"
-          />
-          {deleteError && (
-            <Text color="$statusDanger" fontSize="$3">
-              {deleteError}
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          showsVerticalScrollIndicator={false}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+        >
+          <YStack gap="$3">
+            <Text fontSize={16} color="$colorMuted" lineHeight={23}>
+              This permanently deletes your account and all your folders,
+              modules, and flashcards. This cannot be undone.
             </Text>
-          )}
-          <XStack gap="$3">
-            <Button f={1} onPress={() => setDeleteSheetOpen(false)}>
-              <Text>Cancel</Text>
-            </Button>
-            <Button
-              f={1}
-              bg="$statusDanger"
-              onPress={handleDeleteAccount}
-              disabled={isDeleting}
-              opacity={isDeleting ? 0.6 : 1}
-            >
-              <Text color="white" fontWeight="600">
-                Delete
+            <Input
+              placeholder="Password"
+              height={49}
+              px={16}
+              br={16}
+              bg="$glassBg"
+              borderWidth={1}
+              borderColor="$glassBorder"
+              placeholderTextColor="$colorSecondary"
+              color="$color"
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              textContentType="password"
+            />
+            {deleteError && (
+              <Text color="$statusDanger" fontSize={14}>
+                {deleteError}
               </Text>
-            </Button>
-          </XStack>
-        </Sheet.Frame>
-      </Sheet>
+            )}
+            <XStack gap="$3">
+              <YStack f={1}>
+                <AppButton
+                  variant="secondary"
+                  onPress={() => setDeleteSheetOpen(false)}
+                >
+                  Cancel
+                </AppButton>
+              </YStack>
+              <YStack f={1}>
+                <AppButton
+                  variant="danger"
+                  onPress={handleDeleteAccount}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </AppButton>
+              </YStack>
+            </XStack>
+          </YStack>
+        </KeyboardAwareScrollView>
+      </GlassSheet>
     </YStack>
   );
 }

@@ -1,6 +1,6 @@
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
-import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
+import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,6 @@ export default function FolderCreate() {
     formState: { isSubmitting },
   } = form;
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -68,7 +67,8 @@ export default function FolderCreate() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeaderCreate
+          <ScreenHeader
+            variant="create"
             onCreate={() => {
               if (!isSubmitting) handleSubmit(onSubmit)();
             }}
@@ -81,23 +81,25 @@ export default function FolderCreate() {
           ai="center"
           p="$4"
           bg="$background"
-          gap="$4"
+          gap="$5"
           width="100%"
           onPress={Keyboard.dismiss}
         >
-          <Text fontSize="$6" fontWeight="bold">
+          <Text color="$color" fontSize={20} fontWeight="800">
             New Folder
           </Text>
           <ImagePickerAvatar
             imageUri={customImageUri}
-            defaultColor={"#22222B"}
             onImageSelected={setCustomImageUri}
           />
+
           <FormInput
             control={control}
             name="name"
+            variant="glass"
+            inputSize="lg"
+            width="100%"
             placeholder="Untitled Folder"
-            height={50}
           />
 
           {serverError && (

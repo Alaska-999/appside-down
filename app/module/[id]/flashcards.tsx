@@ -2,15 +2,21 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
+import { StatusPill } from "@/src/components/flashcards/StatusPill";
+import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
+import { IconButton } from "@/src/components/ui/IconButton";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
+import { protectedFetch } from "@/src/utils/protectedFetch";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
 import { soundComplete } from "@/src/utils/sounds";
 import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
-import { Button, PortalProvider, Text, XStack, YStack } from "tamagui";
+import { PortalProvider, Text, XStack, YStack } from "tamagui";
+
+const MOCKUP_SCALE = 390 / 290;
 
 export default function FlashcardsGame() {
   const activeCards = useGameStore((state) => state.activeCards);
@@ -24,6 +30,7 @@ export default function FlashcardsGame() {
   const swipeLeft = useGameStore((state) => state.swipeLeft);
   const revertSwipe = useGameStore((state) => state.revertSwipe);
   const restart = useGameStore((state) => state.restart);
+  const toggleStar = useGameStore((state) => state.toggleStar);
   const addEvent = useStudyQueueStore((state) => state.addEvent);
   const flush = useStudyQueueStore((state) => state.flush);
   const router = useRouter();
@@ -70,6 +77,23 @@ export default function FlashcardsGame() {
     setRevertCount((c) => c + 1);
   }, [currentIndex, revertSwipe]);
 
+  const handleToggleStar = useCallback(async () => {
+    const card = activeCards[currentIndex];
+    if (!card) return;
+    const newValue = !card.isStarred;
+    toggleStar(card.id);
+    try {
+      const res = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${card.id}`,
+        { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+    } catch (err) {
+      console.error("[FlashcardsGame] star error:", err);
+      toggleStar(card.id);
+    }
+  }, [activeCards, currentIndex, toggleStar]);
+
   const isComplete = currentIndex >= activeCards.length;
 
   useEffect(() => {
@@ -95,15 +119,15 @@ export default function FlashcardsGame() {
   return (
     <PortalProvider>
       <YStack f={1} bg="$background">
+        <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
         <ScreenHeaderFlashcards
           rightAction={
-            <Button
+            <IconButton
               icon={<Settings2 size="$1.5" color="$color" />}
-              circular
+              variant="liquidGlass"
               onPress={() => {
                 setSettingsSheetOpen(true);
               }}
-              ml="$-3"
             />
           }
           total={activeCards.length.toString()}
@@ -130,49 +154,19 @@ export default function FlashcardsGame() {
             stillLearning={stillLearningPiles.length}
           />
         ) : (
-          <YStack f={1} mt={20} overflow="hidden">
+          <YStack f={1} mt={12 * MOCKUP_SCALE} overflow="hidden">
             {settings.sortByPiles && (
-              <XStack
-                justifyContent="space-between"
-                px="$5"
-                alignItems="flex-start"
-              >
-                <YStack alignItems="center" gap={4}>
-                  <XStack
-                    bg="$statusDanger"
-                    br={20}
-                    px="$3"
-                    py="$2"
-                    alignItems="center"
-                    gap="$1"
-                  >
-                    <Text color="white" fontWeight="700" fontSize="$4">
-                      {stillLearningPiles.length}
-                    </Text>
-                    <X size="$1" color="white" />
-                  </XStack>
-                  <Text fontSize="$1" color="$colorMuted">
-                    Learning
-                  </Text>
-                </YStack>
-                <YStack alignItems="center" gap={4}>
-                  <XStack
-                    bg="$statusSuccess"
-                    br={20}
-                    px="$3"
-                    py="$2"
-                    alignItems="center"
-                    gap="$1"
-                  >
-                    <Check size="$1" color="white" />
-                    <Text color="white" fontWeight="700" fontSize="$4">
-                      {knownPiles.length}
-                    </Text>
-                  </XStack>
-                  <Text fontSize="$1" color="$colorMuted">
-                    Known
-                  </Text>
-                </YStack>
+              <XStack justifyContent="space-between" px="$5" mt="$3">
+                <StatusPill
+                  icon={<X size={13 * MOCKUP_SCALE} color="#EF4444" />}
+                  text={stillLearningPiles.length.toString()}
+                  variant="danger"
+                />
+                <StatusPill
+                  icon={<Check size={13 * MOCKUP_SCALE} color="#10B981" />}
+                  text={knownPiles.length.toString()}
+                  variant="success"
+                />
               </XStack>
             )}
 
@@ -182,24 +176,25 @@ export default function FlashcardsGame() {
               showDefinitionFirst={
                 settings.cardOrientation === "definition_first"
               }
-              onTts={() => {}}
-              onStar={() => {}}
+              onStar={handleToggleStar}
               onSwipeLeft={handleSwipeLeft}
               onSwipeRight={handleSwipeRight}
               revertKey={revertCount}
             />
 
-            <XStack justifyContent="center" alignItems="center" mb="$5">
-              <Button
-                icon={<RotateCcw size="$1.5" color="$color" />}
-                circular
-                size="$3"
-                bg="transparent"
+            <YStack alignItems="center" mb="$5" gap={8 * MOCKUP_SCALE}>
+              <Text fontSize={10 * MOCKUP_SCALE} color="$colorMuted" textAlign="center">
+                ← still learning · know it →
+              </Text>
+              <IconButton
+                icon={<RotateCcw size="$1.5" color="$colorSecondary" />}
+                variant="glass"
+                size={40 * MOCKUP_SCALE}
                 disabled={currentIndex === 0}
                 opacity={currentIndex === 0 ? 0.3 : 1}
                 onPress={handleRevert}
               />
-            </XStack>
+            </YStack>
           </YStack>
         )}
       </YStack>

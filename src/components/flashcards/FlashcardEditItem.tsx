@@ -1,4 +1,8 @@
+import { FormInput } from "@/src/components/common/FormInput";
+import { AppCard } from "@/src/components/ui/Card";
 import { X } from "@tamagui/lucide-icons";
+import { Ref } from "react";
+import type { TextInput } from "react-native";
 import {
   Control,
   FieldValues,
@@ -6,7 +10,7 @@ import {
   useController,
   useFormContext,
 } from "react-hook-form";
-import { Button, Input, Text, YStack } from "tamagui";
+import { Button, Text, YStack } from "tamagui";
 
 interface FlashcardEditItemProps<T extends FieldValues> {
   control: Control<T>;
@@ -15,6 +19,25 @@ interface FlashcardEditItemProps<T extends FieldValues> {
   index: number;
   onRemove: (index: number) => void;
   showRemove: boolean;
+  termRef?: Ref<TextInput>;
+  definitionRef?: Ref<TextInput>;
+  onSubmitTerm?: () => void;
+  onSubmitDefinition?: () => void;
+}
+
+function FieldLabel({ tone, children }: { tone: "term" | "definition"; children: string }) {
+  return (
+    <Text
+      fontSize={13}
+      fontWeight="800"
+      letterSpacing={0.8}
+      textTransform="uppercase"
+      color={tone === "term" ? "$accentGradientEnd" : "$accentGradientStart"}
+      mb={4}
+    >
+      {children}
+    </Text>
+  );
 }
 
 export function FlashcardEditItem<T extends FieldValues>({
@@ -24,13 +47,15 @@ export function FlashcardEditItem<T extends FieldValues>({
   index,
   onRemove,
   showRemove,
+  termRef,
+  definitionRef,
+  onSubmitTerm,
+  onSubmitDefinition,
 }: FlashcardEditItemProps<T>) {
   const term = useController({ control, name: termName });
   const definition = useController({ control, name: definitionName });
   const error = term.fieldState.error ?? definition.fieldState.error;
 
-  // помилка рівня списку карток ("Add at least 2 cards") зникає,
-  // щойно юзер починає заповнювати будь-яку картку
   const formContext = useFormContext();
   const arrayName = termName.split(".")[0];
   const clearListError = () => {
@@ -41,7 +66,14 @@ export function FlashcardEditItem<T extends FieldValues>({
 
   return (
     <YStack gap="$1">
-      <YStack bg="$backgroundHover" p="$4" br="$4" gap="$5" pos="relative">
+      <AppCard
+        variant="soft"
+        p="$cardPad"
+        gap={12}
+        pos="relative"
+        borderLeftWidth={4}
+        borderLeftColor="$accentGradientStart"
+      >
         {showRemove && (
           <Button
             pos="absolute"
@@ -50,55 +82,47 @@ export function FlashcardEditItem<T extends FieldValues>({
             size="$2"
             circular
             chromeless
-            icon={<X size="$1" color="$colorSecondary" o={0.7} />}
+            o={0.5}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            icon={<X size="$1" color="$colorMuted" />}
             onPress={() => onRemove(index)}
           />
         )}
 
-        <YStack mt="$2">
-          <Input
-            unstyled
+        <YStack>
+          <FieldLabel tone="term">TERM</FieldLabel>
+          <FormInput
+            control={control}
+            name={termName}
+            ref={termRef}
+            variant="underline"
+            inputSize="lg"
+            hideError
             placeholder="Enter term"
-            placeholderTextColor="$colorMuted"
-            value={term.field.value as string}
-            onChangeText={(text) => {
-              clearListError();
-              term.field.onChange(text);
-            }}
-            onBlur={term.field.onBlur}
-            fontSize="$5"
-            pb="$1"
-            bbw={1}
-            bc={term.fieldState.error ? "$statusDanger" : "$borderColor"}
-            focusStyle={{ bc: "$primary", bbw: 2 }}
+            onValueChange={clearListError}
+            returnKeyType={onSubmitTerm ? "next" : undefined}
+            blurOnSubmit={onSubmitTerm ? false : undefined}
+            onSubmitEditing={onSubmitTerm}
           />
-          <Text fontSize="$1" color="$colorSecondary" mt="$1" fow="600" o={0.7}>
-            TERM
-          </Text>
         </YStack>
 
         <YStack>
-          <Input
-            unstyled
+          <FieldLabel tone="definition">DEFINITION</FieldLabel>
+          <FormInput
+            control={control}
+            name={definitionName}
+            ref={definitionRef}
+            variant="underline"
+            inputSize="lg"
+            hideError
             placeholder="Enter definition"
-            placeholderTextColor="$colorMuted"
-            value={definition.field.value as string}
-            onChangeText={(text) => {
-              clearListError();
-              definition.field.onChange(text);
-            }}
-            onBlur={definition.field.onBlur}
-            fontSize="$5"
-            pb="$1"
-            bbw={1}
-            bc={definition.fieldState.error ? "$statusDanger" : "$borderColor"}
-            focusStyle={{ bc: "$primary", bbw: 2 }}
+            onValueChange={clearListError}
+            returnKeyType={onSubmitDefinition ? "next" : undefined}
+            blurOnSubmit={onSubmitDefinition ? false : undefined}
+            onSubmitEditing={onSubmitDefinition}
           />
-          <Text fontSize="$1" color="$colorSecondary" mt="$1" fow="600" o={0.7}>
-            DEFINITION
-          </Text>
         </YStack>
-      </YStack>
+      </AppCard>
 
       {error && (
         <Text color="$statusDanger" fontSize="$2">

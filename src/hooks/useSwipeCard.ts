@@ -97,7 +97,7 @@ export function useSwipeCard({
     const backgroundColor = interpolateColor(
       translateX.value,
       [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
-      ["#DC2626", "#F8FAFC", "#059669"]
+      ["rgba(239,68,68,0.3)", "rgba(220,255,245,0)", "rgba(16,185,129,0.3)"]
     );
     return { backgroundColor };
   });

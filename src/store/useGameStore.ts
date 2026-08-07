@@ -92,6 +92,16 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
         });
     },
 
+    toggleStar: (cardId) => {
+        const flip = (cards: Flashcard[]) =>
+            cards.map((c) => (c.id === cardId ? { ...c, isStarred: !c.isStarred } : c));
+        set((state) => ({
+            activeCards: flip(state.activeCards),
+            knownPiles: flip(state.knownPiles),
+            stillLearningPiles: flip(state.stillLearningPiles),
+        }));
+    },
+
     updateSettings: (newSettings) => {
         set((state) => {
             const updated = { ...state.settings, ...newSettings };

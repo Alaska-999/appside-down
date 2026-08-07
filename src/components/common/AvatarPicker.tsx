@@ -7,9 +7,18 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { Button, Spinner, YStack } from "tamagui";
 
-export function AvatarPicker() {
+interface AvatarPickerProps {
+  size?: number;
+}
+
+export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
   const { user } = useAuthStore();
   const [uploading, setUploading] = useState(false);
+  const isDefaultSize = size === 120;
+  const scale = size / 120;
+  const badgeSize = Math.round(36 * scale);
+  const badgeIconSize = Math.round(16 * scale);
+  const badgeOffset = Math.round(-6 * scale);
 
   const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
     setUploading(true);
@@ -77,15 +86,12 @@ export function AvatarPicker() {
   };
 
   return (
-    <YStack ai="center" gap="$2" py="$4">
-      {/* фіксований 120x120 блок — щоб абсолютні кнопки завжди чіплялись
-         до краю круга, а не до краю батьківського контейнера, ширина
-         якого залежить від того, чи є ai="center" в екрана, що юзає цей компонент */}
-      <YStack width={120} height={120} pos="relative">
+    <YStack ai="center" gap="$2" py={isDefaultSize ? "$4" : 0}>
+      <YStack width={size} height={size} pos="relative">
         <UserAvatar
           avatarUrl={user?.avatarUrl}
           username={user?.username}
-          size={120}
+          size={size}
         />
 
         {uploading && (
@@ -107,15 +113,20 @@ export function AvatarPicker() {
 
         <Button
           pos="absolute"
-          right="$-2"
-          bottom="$4"
+          right={isDefaultSize ? "$-2" : badgeOffset}
+          bottom={isDefaultSize ? "$4" : badgeOffset}
           circular
-          size="$3"
+          size={isDefaultSize ? "$3" : badgeSize}
           bg="$background"
           bw={2}
           borderColor="$borderColor"
           elevation="$2"
-          icon={<Camera size="$1" color="$colorSecondary" />}
+          icon={
+            <Camera
+              size={isDefaultSize ? "$1" : badgeIconSize}
+              color="$colorSecondary"
+            />
+          }
           onPress={pickImage}
           disabled={uploading}
           pressStyle={{ scale: 0.9 }}
@@ -124,15 +135,20 @@ export function AvatarPicker() {
         {user?.avatarUrl && (
           <Button
             pos="absolute"
-            right="$-2"
-            top="$4"
+            right={isDefaultSize ? "$-2" : badgeOffset}
+            top={isDefaultSize ? "$4" : badgeOffset}
             circular
-            size="$3"
+            size={isDefaultSize ? "$3" : badgeSize}
             bg="$background"
             bw={2}
             borderColor="$borderColor"
             elevation="$2"
-            icon={<Ban size="$1" color="$statusDanger" />}
+            icon={
+              <Ban
+                size={isDefaultSize ? "$1" : badgeIconSize}
+                color="$statusDanger"
+              />
+            }
             onPress={removeAvatar}
             disabled={uploading}
             pressStyle={{ scale: 0.9 }}

@@ -1,15 +1,18 @@
+import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
-import { ScreenHeaderCreate } from "@/src/components/common/ScreenHeaderCreate";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
+import { AppButton } from "@/src/components/ui/Button";
+import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import type { TextInput } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, ScrollView, Text, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export default function ModuleCreate() {
   const insets = useSafeAreaInsets();
@@ -46,7 +49,21 @@ export default function ModuleCreate() {
     name: "flashcards",
   });
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
+  const termRefs = useRef<Array<TextInput | null>>([]);
+  const definitionRefs = useRef<Array<TextInput | null>>([]);
+  const prevFieldsLength = useRef(fields.length);
+
+  useEffect(() => {
+    if (fields.length > prevFieldsLength.current) {
+      termRefs.current[fields.length - 1]?.focus();
+    }
+    prevFieldsLength.current = fields.length;
+  }, [fields.length]);
+
+  const focusTerm = (index: number) => termRefs.current[index]?.focus();
+  const focusDefinition = (index: number) =>
+    definitionRefs.current[index]?.focus();
+
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -58,8 +75,6 @@ export default function ModuleCreate() {
     const module = {
       name: data.name,
       description: data.description,
-      // повністю порожні рядки-заготовки не відправляємо;
-      // наполовину заповнені — контент юзера, зберігаємо як є
       flashcards: data.flashcards.filter(
         (card) => card.term || card.definition,
       ),
@@ -102,49 +117,59 @@ export default function ModuleCreate() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeaderCreate
+          <ScreenHeader
+            variant="create"
             onCreate={() => {
               if (!isSubmitting) handleSubmit(onSubmit)();
             }}
           />
         </YStack>
-        <ScrollView
-          f={1}
+
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             paddingTop: 100,
             paddingBottom: insets.bottom + 40,
-            paddingHorizontal: 16,
+            paddingHorizontal: 0,
           }}
         >
-          <YStack gap="$4" width="100%">
+          <YStack width="100%" px="$screenX">
             <Text
-              fontSize="$8"
-              fontWeight="bold"
+              color="$color"
+              fontSize={26}
+              fontWeight="800"
               textAlign="center"
-              mb="$2"
-              mt="$4"
+              mb={24}
             >
               New Module
             </Text>
 
-            <FormInput
-              control={control}
-              name="name"
-              placeholder="Untitled Module"
-              size="$5"
-            />
+            <YStack mb={14}>
+              <FormInput
+                control={control}
+                name="name"
+                placeholder="Untitled Module"
+                variant="glass"
+                inputSize="md"
+              />
+            </YStack>
 
-            <FormInput
-              control={control}
-              name="description"
-              placeholder="Description (optional)"
-              size="$4"
-              bg="transparent"
-            />
+            <YStack mb={24}>
+              <FormInput
+                control={control}
+                name="description"
+                placeholder="Description (optional)"
+                variant="glass"
+                inputSize="md"
+              />
+            </YStack>
 
-            <YStack gap="$6" mt="$6">
+            <SectionTitle>FLASHCARDS</SectionTitle>
+
+            <YStack gap={16} mt={11}>
               {fields.map((field, index) => (
                 <FlashcardEditItem
                   key={field.id}
@@ -154,33 +179,52 @@ export default function ModuleCreate() {
                   index={index}
                   onRemove={remove}
                   showRemove={fields.length > 1}
+                  termRef={(node) => {
+                    termRefs.current[index] = node;
+                  }}
+                  definitionRef={(node) => {
+                    definitionRefs.current[index] = node;
+                  }}
+                  onSubmitTerm={() => focusDefinition(index)}
+                  onSubmitDefinition={() => {
+                    if (index + 1 < fields.length) {
+                      focusTerm(index + 1);
+                    } else {
+                      append({ term: "", definition: "" });
+                    }
+                  }}
                 />
               ))}
             </YStack>
 
             {flashcardsError && (
-              <Text color="$statusDanger" fontSize="$2">
+              <Text color="$statusDanger" fontSize="$2" mt="$2">
                 {flashcardsError}
               </Text>
             )}
 
             {serverError && (
-              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+              <Text
+                color="$statusDanger"
+                fontSize="$3"
+                textAlign="center"
+                mt="$2"
+              >
                 {serverError}
               </Text>
             )}
 
-            <Button
-              icon={<Plus size="$1" />}
-              onPress={() => append({ term: "", definition: "" })}
-              mt="$4"
-              bg="$buttonSecondaryBg"
-              br="$10"
-            >
-              <Text color="$buttonSecondaryText">Add Card</Text>
-            </Button>
+            <YStack mt={22}>
+              <AppButton
+                variant="outline"
+                size="lg"
+                onPress={() => append({ term: "", definition: "" })}
+              >
+                + Add Card
+              </AppButton>
+            </YStack>
           </YStack>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );

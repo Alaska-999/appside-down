@@ -1,6 +1,12 @@
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
+import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
+import { UserAvatar } from "@/src/components/common/UserAvatar";
+import { Badge } from "@/src/components/ui/Badge";
+import { AppButton } from "@/src/components/ui/Button";
+import { AppCard } from "@/src/components/ui/Card";
+import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { IconButton } from "@/src/components/ui/IconButton";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Flashcard, Module } from "@/src/types";
@@ -11,7 +17,7 @@ import {
   ArrowLeftRight,
   BookmarkPlus,
   Check,
-  CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   FileText,
   GraduationCap,
@@ -26,6 +32,7 @@ import {
   X,
   Zap,
 } from "@tamagui/lucide-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -37,14 +44,18 @@ import {
   ViewToken,
   useWindowDimensions,
 } from "react-native";
-import { Avatar, Button, Sheet, Text, XStack, YStack } from "tamagui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text, useTheme, XStack, YStack } from "tamagui";
 
 const GAP = 12;
 const PEEK = 28;
+const LIME = "#A3E635";
 
 type SortOrder = "original" | "alphabetical";
 
 export default function ModuleScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [moduleData, setModuleData] = useState<Module | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -64,6 +75,9 @@ export default function ModuleScreen() {
 
   const { user } = useAuthStore();
   const isOwner = moduleData?.user?.id === user?.id;
+  const authorName =
+    moduleData?.author?.username ?? moduleData?.authorUsername ?? undefined;
+  const isDeletedAuthor = !moduleData?.author && !!moduleData?.authorUsername;
 
   useEffect(() => {
     fetchData();
@@ -127,7 +141,6 @@ export default function ModuleScreen() {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    console.log("fetch data");
     try {
       const [moduleRes, flashcardsRes] = await Promise.all([
         protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, {
@@ -153,6 +166,7 @@ export default function ModuleScreen() {
         folderIds: rawModule.folderId ? [rawModule.folderId] : [],
         tags: rawModule.tags ?? [],
         user: rawModule.user ?? null,
+        author: rawModule.author ?? null,
       });
       setFlashcards(flashcardsData);
     } catch (err) {
@@ -324,320 +338,382 @@ export default function ModuleScreen() {
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 });
 
+  const actionButtons = moduleData ? getActionButtons(id) : [];
+  const actionRows = [
+    actionButtons.slice(0, 3),
+    actionButtons.slice(3, 6),
+  ];
+
   return (
     <YStack f={1} bg="$background">
-      <ScreenHeader
-        right={
-          isOwner ? (
-            <XStack gap="$3" ai="center">
-              <Pressable hitSlop={8} onPress={handleToggleFavorite}>
-                <Star
-                  size={22}
-                  color={
-                    moduleData?.isFavorite ? "$statusWarning" : "$colorMuted"
-                  }
-                  fill={
-                    moduleData?.isFavorite ? "$statusWarning" : "transparent"
-                  }
-                />
-              </Pressable>
-              <Pressable hitSlop={8} onPress={() => setMenuSheetOpen(true)}>
-                <MoreHorizontal size={22} color="$color" />
-              </Pressable>
-            </XStack>
-          ) : undefined
-        }
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
 
-      {loading && (
-        <Text color="$colorMuted" textAlign="center" mt="$4">
-          Loading...
-        </Text>
-      )}
-      {error && (
-        <Text color="$statusDanger" textAlign="center" mt="$4">
-          {error}
-        </Text>
-      )}
-
-      {moduleData && (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <YStack pb="$10" gap="$6">
-            {/* Flashcard carousel */}
-            {flashcards.length > 0 && (
-              <YStack gap="$3" pt="$4">
-                <FlatList
-                  data={flashcards}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={{ flexGrow: 0 }}
-                  snapToInterval={CARD_WIDTH + GAP}
-                  decelerationRate="fast"
-                  contentContainerStyle={{ paddingHorizontal: PEEK }}
-                  ItemSeparatorComponent={() => <View style={{ width: GAP }} />}
-                  keyExtractor={(item) => item.id}
-                  onViewableItemsChanged={onViewableItemsChanged}
-                  viewabilityConfig={viewabilityConfig.current}
-                  renderItem={({ item }) => (
-                    <FlashcardSm
-                      term={item.term}
-                      definition={item.definition}
-                      width={CARD_WIDTH}
+        <YStack pb="$10" gap="$6">
+          <XStack px="$4" pt={insets.top + 10} jc="space-between" ai="center">
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size="$1" color="$color" />}
+              onPress={() => router.back()}
+            />
+            {moduleData && isOwner && (
+              <XStack gap="$2">
+                <IconButton
+                  variant="liquidGlass"
+                  icon={
+                    <Star
+                      size={18}
+                      color={moduleData.isFavorite ? LIME : "$colorMuted"}
+                      fill={moduleData.isFavorite ? LIME : "transparent"}
                     />
-                  )}
+                  }
+                  onPress={handleToggleFavorite}
                 />
-                <XStack gap="$2" jc="center">
-                  {flashcards.map((_, i) => (
-                    <View
-                      key={i}
-                      style={{
-                        height: 6,
-                        borderRadius: 3,
-                        width: i === currentIndex ? 16 : 6,
-                        backgroundColor:
-                          i === currentIndex ? "#9696ab" : "#E2E8F0",
-                      }}
-                    />
-                  ))}
-                </XStack>
-              </YStack>
+                <IconButton
+                  variant="liquidGlass"
+                  icon={<MoreHorizontal size={18} color="$color" />}
+                  onPress={() => setMenuSheetOpen(true)}
+                />
+              </XStack>
             )}
+          </XStack>
 
-            <YStack px="$4" gap="$5">
-              {/* Title + author */}
-              <YStack gap="$2">
-                <XStack ai="flex-start" jc="space-between" gap="$3">
-                  <Text
-                    f={1}
-                    fontSize="$8"
-                    fontWeight="bold"
-                    color="$color"
-                    lh={36}
-                  >
-                    {moduleData.name}
-                  </Text>
-                  <Pressable hitSlop={8}>
-                    <CheckCircle2 size={24} color="$colorMuted" />
-                  </Pressable>
-                </XStack>
+          {loading && (
+            <Text color="$colorMuted" textAlign="center" mt="$4">
+              Loading...
+            </Text>
+          )}
+          {error && (
+            <Text color="$statusDanger" textAlign="center" mt="$4">
+              {error}
+            </Text>
+          )}
 
-                <XStack ai="center" gap="$2">
-                  <Avatar circular size="$3">
-                    {moduleData.user?.avatarUrl ? (
-                      <Avatar.Image src={moduleData.user.avatarUrl} />
-                    ) : null}
-                    <Avatar.Fallback
-                      bg="$backgroundHover"
-                      jc="center"
-                      ai="center"
-                    >
-                      <Text fontSize="$2" color="$colorSecondary">
-                        {moduleData.user?.username?.[0]?.toUpperCase() ?? "?"}
-                      </Text>
-                    </Avatar.Fallback>
-                  </Avatar>
-                  <Text fontSize="$3" fontWeight="600" color="$color">
-                    {moduleData.user?.username ?? "Unknown"}
-                  </Text>
-                  <Text color="$borderColor">·</Text>
-                  <Text fontSize="$3" color="$colorMuted">
-                    {moduleData.itemsCount} term
-                    {moduleData.itemsCount !== 1 ? "s" : ""}
-                  </Text>
-                </XStack>
-              </YStack>
-
-              {/* Tags */}
-              {moduleData.tags && moduleData.tags.length > 0 && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <XStack gap="$2">
-                    {moduleData.tags.map((tag) => (
-                      <XStack
-                        key={tag}
-                        bg="$backgroundHover"
-                        br="$10"
-                        px="$3"
-                        py="$1"
-                        ai="center"
-                        gap="$1"
-                        borderWidth={1}
-                        borderColor="$borderColor"
-                      >
-                        <Text fontSize="$3" color="$colorSecondary">
-                          {tag}
-                        </Text>
-                        {isOwner && (
-                          <Pressable
-                            hitSlop={8}
-                            onPress={() => handleDeleteTag(tag)}
-                          >
-                            <X size={12} color="$colorMuted" />
-                          </Pressable>
-                        )}
-                      </XStack>
+          {moduleData && (
+            <>
+              {flashcards.length > 0 && (
+                <YStack gap="$3">
+                  <FlatList
+                    data={flashcards}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ flexGrow: 0 }}
+                    snapToInterval={CARD_WIDTH + GAP}
+                    decelerationRate="fast"
+                    contentContainerStyle={{ paddingHorizontal: PEEK }}
+                    ItemSeparatorComponent={() => (
+                      <View style={{ width: GAP }} />
+                    )}
+                    keyExtractor={(item) => item.id}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig.current}
+                    renderItem={({ item }) => (
+                      <FlashcardSm
+                        term={item.term}
+                        definition={item.definition}
+                        width={CARD_WIDTH}
+                      />
+                    )}
+                  />
+                  <XStack gap="$2" jc="center">
+                    {flashcards.map((_, i) => (
+                      <View
+                        key={i}
+                        style={{
+                          height: 6,
+                          borderRadius: 3,
+                          width: i === currentIndex ? 16 : 6,
+                          backgroundColor:
+                            i === currentIndex
+                              ? theme.accentGradientStart.get()
+                              : "rgba(220,255,245,0.18)",
+                        }}
+                      />
                     ))}
                   </XStack>
-                </ScrollView>
-              )}
-
-              {/* Action buttons */}
-              {isOwner ? (
-                <YStack gap="$2">
-                  {getActionButtons(id).map(
-                    ({ key, label, Icon, locked, onPress }) => (
-                      <Pressable
-                        key={key}
-                        onPress={() => onPress(moduleData, flashcards)}
-                      >
-                        <XStack
-                          bg="$backgroundHover"
-                          br="$4"
-                          px="$4"
-                          py="$3"
-                          ai="center"
-                          gap="$3"
-                          borderWidth={1}
-                          borderColor="$borderColor"
-                        >
-                          <Icon size={20} color="$colorSecondary" />
-                          <Text
-                            f={1}
-                            fontSize="$5"
-                            fontWeight="500"
-                            color="$color"
-                          >
-                            {label}
-                          </Text>
-                          {locked && <Lock size={14} color="$colorMuted" />}
-                          <ChevronRight size={16} color="$colorMuted" />
-                        </XStack>
-                      </Pressable>
-                    ),
-                  )}
                 </YStack>
-              ) : (
-                <Button
-                  size="$5"
-                  bg="$buttonBg"
-                  br="$10"
-                  icon={<BookmarkPlus size="$1" color="$buttonText" />}
-                  disabled={saving}
-                  opacity={saving ? 0.6 : 1}
-                  onPress={handleSaveToLibrary}
-                >
-                  <Text fontSize="$5" fontWeight="600" color="$buttonText">
-                    {saving ? "Saving..." : "Save to library"}
-                  </Text>
-                </Button>
               )}
 
-              {/* Terms section */}
-              {sortedFlashcards.length > 0 && (
-                <YStack gap="$3">
-                  <XStack ai="center" jc="space-between">
-                    <Text fontSize="$6" fontWeight="bold" color="$color">
-                      Terms
-                    </Text>
-                    <Pressable onPress={() => setSortSheetOpen(true)}>
-                      <XStack ai="center" gap="$1" py="$1" px="$2">
-                        <Text fontSize="$3" color="$colorMuted">
-                          {sortOrder === "original" ? "Original" : "A–Z"}
-                        </Text>
-                        <AlignJustify size={14} color="$colorMuted" />
-                      </XStack>
-                    </Pressable>
-                  </XStack>
+              <YStack px="$4" gap="$5">
+                <YStack gap="$2">
+                  <Text fontSize={24} fontWeight="800" color="$color">
+                    {moduleData.name}
+                  </Text>
 
-                  {sortedFlashcards.map((card) => (
-                    <YStack
-                      key={card.id}
-                      bg="$backgroundHover"
-                      br="$4"
-                      p="$4"
-                      gap="$2"
-                      borderWidth={1}
-                      borderColor="$borderColor"
-                    >
-                      <XStack ai="flex-start" jc="space-between" gap="$2">
-                        <Text
-                          f={1}
-                          fontSize="$4"
-                          fontWeight="600"
-                          color="$color"
+                  <XStack ai="center" gap="$2">
+                    <UserAvatar
+                      avatarUrl={moduleData.author?.avatarUrl}
+                      username={authorName}
+                      size={35}
+                    />
+                    <Text fontSize={15} fontWeight="700" color="$color">
+                      {authorName ?? "Unknown"}
+                    </Text>
+                    {isDeletedAuthor && (
+                      <Text fontSize={13} color="$colorMuted">
+                        (deleted account)
+                      </Text>
+                    )}
+                    <Text fontSize={15} color="$colorMuted">
+                      · {moduleData.itemsCount} term
+                      {moduleData.itemsCount !== 1 ? "s" : ""}
+                    </Text>
+                    <View style={{ marginLeft: "auto" }}>
+                      <Badge tone={moduleData.isPublic ? "mint" : "neutral"}>
+                        {moduleData.isPublic ? "Public" : "Private"}
+                      </Badge>
+                    </View>
+                  </XStack>
+                </YStack>
+
+                {moduleData.tags && moduleData.tags.length > 0 && (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <XStack gap="$2">
+                      {moduleData.tags.map((tag) => (
+                        <XStack
+                          key={tag}
+                          bg="$glassBg"
+                          borderWidth={1}
+                          borderColor="$glassBorder"
+                          br="$10"
+                          px="$3"
+                          py="$1.5"
+                          ai="center"
+                          gap="$1.5"
                         >
-                          {cardSideText(card.term)}
-                        </Text>
-                        <XStack gap="$3" ai="center">
-                          <Pressable hitSlop={8}>
-                            <Volume2 size={16} color="$colorMuted" />
-                          </Pressable>
+                          <Text fontSize={13} color="$colorSecondary">
+                            {tag}
+                          </Text>
                           {isOwner && (
                             <Pressable
                               hitSlop={8}
-                              onPress={() => handleToggleStar(card)}
+                              onPress={() => handleDeleteTag(tag)}
                             >
-                              <Star
-                                size={16}
-                                color={
-                                  card.isStarred
-                                    ? "$statusWarning"
-                                    : "$colorMuted"
-                                }
-                                fill={
-                                  card.isStarred
-                                    ? "$statusWarning"
-                                    : "transparent"
-                                }
-                              />
+                              <X size={12} color="$colorMuted" />
                             </Pressable>
                           )}
                         </XStack>
-                      </XStack>
-                      <Text fontSize="$4" color="$colorSecondary">
-                        {cardSideText(card.definition)}
-                      </Text>
-                    </YStack>
-                  ))}
-                </YStack>
-              )}
-            </YStack>
-          </YStack>
-        </ScrollView>
-      )}
+                      ))}
+                    </XStack>
+                  </ScrollView>
+                )}
 
-      {/* Menu sheet */}
-      <Sheet
-        modal
+                {isOwner ? (
+                  <YStack gap="$3">
+                    <Text
+                      fontSize="$3"
+                      color="$auroraMuted"
+                      fontWeight="600"
+                      tt="uppercase"
+                    >
+                      Study modes
+                    </Text>
+                    <YStack gap={11}>
+                      {actionRows.map((row, rowIndex) => (
+                        <XStack key={rowIndex} gap={11}>
+                          {row.map(({ key, label, Icon, locked, onPress }) => {
+                            const isAccent = key === "flashcards";
+                            return (
+                              <Pressable
+                                key={key}
+                                style={{ flex: 1 }}
+                                onPress={() => onPress(moduleData, flashcards)}
+                              >
+                                <YStack
+                                  br={22}
+                                  pt={16}
+                                  px={8}
+                                  pb={14}
+                                  ai="center"
+                                  jc="center"
+                                  pos="relative"
+                                  opacity={locked ? 0.5 : 1}
+                                  bg={isAccent ? "$mintGlassBg" : "$glassBg"}
+                                  borderWidth={1}
+                                  borderColor={
+                                    isAccent
+                                      ? "rgba(45,212,191,0.45)"
+                                      : "$glassBorder"
+                                  }
+                                  shadowColor={
+                                    isAccent ? "#2dd4bf" : undefined
+                                  }
+                                  shadowOpacity={isAccent ? 0.2 : 0}
+                                  shadowRadius={isAccent ? 22 : 0}
+                                  shadowOffset={{ width: 0, height: 0 }}
+                                >
+                                  {locked && (
+                                    <View
+                                      style={{
+                                        position: "absolute",
+                                        top: 8,
+                                        right: 9,
+                                        opacity: 0.6,
+                                      }}
+                                    >
+                                      <Lock size={12} color="$colorMuted" />
+                                    </View>
+                                  )}
+                                  {isAccent ? (
+                                    <LinearGradient
+                                      colors={[
+                                        theme.accentGradientStart.get(),
+                                        theme.accentGradientEnd.get(),
+                                      ]}
+                                      start={{ x: 0, y: 0 }}
+                                      end={{ x: 1, y: 1 }}
+                                      style={{
+                                        width: 46,
+                                        height: 46,
+                                        borderRadius: 15,
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 6,
+                                      }}
+                                    >
+                                      <Icon
+                                        size={20}
+                                        color={theme.onAccentText.get()}
+                                      />
+                                    </LinearGradient>
+                                  ) : (
+                                    <YStack
+                                      width={46}
+                                      height={46}
+                                      br={15}
+                                      bg="$glassBgStrong"
+                                      borderWidth={1}
+                                      borderColor="$glassBorder"
+                                      ai="center"
+                                      jc="center"
+                                      mb={6}
+                                    >
+                                      <Icon
+                                        size={20}
+                                        color="$colorSecondary"
+                                      />
+                                    </YStack>
+                                  )}
+                                  <Text
+                                    fontSize={14}
+                                    fontWeight="700"
+                                    color="$color"
+                                  >
+                                    {label}
+                                  </Text>
+                                </YStack>
+                              </Pressable>
+                            );
+                          })}
+                        </XStack>
+                      ))}
+                    </YStack>
+                  </YStack>
+                ) : (
+                  <AppButton
+                    icon={<BookmarkPlus size={18} color="$onAccentText" />}
+                    disabled={saving}
+                    onPress={handleSaveToLibrary}
+                  >
+                    {saving ? "Saving..." : "Save to library"}
+                  </AppButton>
+                )}
+
+                {sortedFlashcards.length > 0 && (
+                  <YStack gap="$3">
+                    <XStack ai="center" jc="space-between">
+                      <Text
+                        fontSize="$3"
+                        color="$auroraMuted"
+                        fontWeight="600"
+                        tt="uppercase"
+                      >
+                        Terms · {sortedFlashcards.length}
+                      </Text>
+                      <Pressable onPress={() => setSortSheetOpen(true)}>
+                        <XStack ai="center" gap="$1" py="$1" px="$2">
+                          <Text fontSize={13} color="$colorMuted">
+                            {sortOrder === "original" ? "Original" : "A–Z"}
+                          </Text>
+                          <AlignJustify size={14} color="$colorMuted" />
+                        </XStack>
+                      </Pressable>
+                    </XStack>
+
+                    <YStack gap="$2">
+                      {sortedFlashcards.map((card) => (
+                        <AppCard key={card.id} variant="soft" size="md" gap="$2">
+                          <XStack ai="flex-start" jc="space-between" gap="$2">
+                            <Text
+                              f={1}
+                              fontSize={17}
+                              fontWeight="700"
+                              color="$color"
+                            >
+                              {cardSideText(card.term)}
+                            </Text>
+                            <XStack gap="$3" ai="center">
+                              <Pressable hitSlop={8}>
+                                <Volume2 size={16} color="$colorMuted" />
+                              </Pressable>
+                              {isOwner && (
+                                <Pressable
+                                  hitSlop={8}
+                                  onPress={() => handleToggleStar(card)}
+                                >
+                                  <Star
+                                    size={16}
+                                    color={
+                                      card.isStarred ? LIME : "$colorMuted"
+                                    }
+                                    fill={
+                                      card.isStarred ? LIME : "transparent"
+                                    }
+                                  />
+                                </Pressable>
+                              )}
+                            </XStack>
+                          </XStack>
+                          <Text fontSize={16} color="$colorSecondary">
+                            {cardSideText(card.definition)}
+                          </Text>
+                        </AppCard>
+                      ))}
+                    </YStack>
+                  </YStack>
+                )}
+              </YStack>
+            </>
+          )}
+        </YStack>
+      </ScrollView>
+
+      <GlassSheet
         open={menuSheetOpen}
         onOpenChange={setMenuSheetOpen}
+        title="Module"
         snapPoints={[25]}
-        dismissOnSnapToBottom
       >
-        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-        <Sheet.Handle />
-        <Sheet.Frame p="$4" bg="$background" gap="$3">
-          <Button
-            size="$5"
-            icon={<Pencil size="$1" />}
-            bg="$buttonSecondaryBg"
+        <YStack gap="$3">
+          <AppButton
+            variant="secondary"
+            icon={<Pencil size={18} color="$color" />}
             onPress={openEditSheet}
           >
-            <Text f={1} fontSize="$5">
-              Edit module
-            </Text>
-          </Button>
-          <Button
-            size="$5"
-            icon={<Trash2 size="$1" color="$statusDanger" />}
-            bg="$buttonSecondaryBg"
+            Edit module
+          </AppButton>
+          <AppButton
+            variant="danger"
+            icon={<Trash2 size={18} color="white" />}
             onPress={handleDeleteModule}
           >
-            <Text f={1} fontSize="$5" color="$statusDanger">
-              Delete module
-            </Text>
-          </Button>
-        </Sheet.Frame>
-      </Sheet>
+            Delete module
+          </AppButton>
+        </YStack>
+      </GlassSheet>
 
       <EditCardsSheet
         open={editSheetOpen}
@@ -654,46 +730,39 @@ export default function ModuleScreen() {
         moduleIsPublic={moduleData?.isPublic ?? false}
       />
 
-      {/* Sort sheet */}
-      <Sheet
-        modal
+      <GlassSheet
         open={sortSheetOpen}
         onOpenChange={setSortSheetOpen}
+        title="Sort by"
         snapPoints={[25]}
-        dismissOnSnapToBottom
       >
-        <Sheet.Overlay bg="$pureBlack" opacity={0.5} />
-        <Sheet.Handle />
-        <Sheet.Frame p="$4" bg="$background" gap="$4">
-          <Text fontSize="$6" fontWeight="bold">
-            Sort by
-          </Text>
-          <YStack gap="$2">
-            {(["original", "alphabetical"] as SortOrder[]).map((option) => (
-              <Pressable
-                key={option}
-                onPress={() => {
-                  setSortOrder(option);
-                  setSortSheetOpen(false);
-                }}
+        <YStack gap="$2">
+          {(["original", "alphabetical"] as SortOrder[]).map((option) => (
+            <Pressable
+              key={option}
+              onPress={() => {
+                setSortOrder(option);
+                setSortSheetOpen(false);
+              }}
+            >
+              <XStack
+                bg="$glassBg"
+                borderWidth={1}
+                borderColor="$glassBorder"
+                br="$4"
+                px="$4"
+                py="$3"
+                ai="center"
               >
-                <XStack
-                  bg="$buttonSecondaryBg"
-                  br="$4"
-                  px="$4"
-                  py="$3"
-                  ai="center"
-                >
-                  <Text f={1} fontSize="$5" color="$color">
-                    {option === "original" ? "Original" : "Alphabetical"}
-                  </Text>
-                  {sortOrder === option && <Check size={18} color="$color" />}
-                </XStack>
-              </Pressable>
-            ))}
-          </YStack>
-        </Sheet.Frame>
-      </Sheet>
+                <Text f={1} fontSize="$5" color="$color">
+                  {option === "original" ? "Original" : "Alphabetical"}
+                </Text>
+                {sortOrder === option && <Check size={18} color="$color" />}
+              </XStack>
+            </Pressable>
+          ))}
+        </YStack>
+      </GlassSheet>
     </YStack>
   );
 }

@@ -7,9 +7,10 @@ import {
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Alert, Keyboard } from "react-native";
+import type { TextInput } from "react-native";
 import { Button, Text, YStack } from "tamagui";
 
 export default function ChangePasswordScreen() {
@@ -26,6 +27,8 @@ export default function ChangePasswordScreen() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
+  const newPasswordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
@@ -72,20 +75,30 @@ export default function ChangePasswordScreen() {
             placeholder="Current password"
             secureTextEntry
             textContentType="password"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => newPasswordRef.current?.focus()}
           />
           <FormInput
+            ref={newPasswordRef}
             control={control}
             name="newPassword"
             placeholder="New password"
             secureTextEntry
             textContentType="newPassword"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
           />
           <FormInput
+            ref={confirmPasswordRef}
             control={control}
             name="confirmPassword"
             placeholder="Confirm new password"
             secureTextEntry
             textContentType="newPassword"
+            returnKeyType="done"
+            onSubmitEditing={() => handleSubmit(onSubmit)()}
           />
 
           {serverError && (
