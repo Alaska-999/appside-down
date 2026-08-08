@@ -7,10 +7,11 @@ import { AppSheet } from "@/src/components/ui/Sheet";
 import { TEXT } from "@/src/constants/typography";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { AlignJustify, Check } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -22,91 +23,65 @@ const SORT_OPTIONS: { key: SortOption; label: string }[] = [
   { key: "favs", label: "Favorites" },
 ];
 
+function LoadMoreFooter({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <YStack py="$3" ai="center">
+      <ActivityIndicator />
+    </YStack>
+  );
+}
+
 export default function Library() {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState(0);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [modules, setModules] = useState<Module[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchData();
-    }, []),
-  );
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [foldersRes, modulesRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/folders`, {
-          method: "GET",
-        }),
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules`, {
-          method: "GET",
-        }),
-      ]);
-
-      if (!foldersRes.ok)
-        throw new Error(`Folders error: ${foldersRes.status}`);
-      if (!modulesRes.ok)
-        throw new Error(`Modules error: ${modulesRes.status}`);
-
-      const [foldersData, modulesData] = await Promise.all([
-        foldersRes.json() as Promise<Folder[]>,
-        modulesRes.json() as Promise<any[]>,
-      ]);
-
-      setFolders(foldersData);
-      setModules(
-        modulesData.map((m) => ({
-          ...m,
-          itemsCount: m._count?.flashcards ?? 0,
-          folderIds: m.folderId ? [m.folderId] : [],
-        })),
-      );
-      setError(null);
-    } catch (err) {
-      console.error("[Library] fetch error:", err);
-      setError("Failed to load library");
-    } finally {
-      setLoading(false);
-    }
+  const fetchModulesPage = async (cursor: string | null) => {
+    const params = new URLSearchParams({ limit: "20", sort: sortOrder });
+    if (search) params.set("search", search);
+    if (cursor) params.set("cursor", cursor);
+    const res = await protectedFetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/modules?${params.toString()}`,
+    );
+    if (!res.ok) throw new Error(`Modules error: ${res.status}`);
+    const page = await res.json();
+    return {
+      data: page.data.map((m: any) => ({
+        ...m,
+        itemsCount: m._count?.flashcards ?? 0,
+        folderIds: m.folderId ? [m.folderId] : [],
+      })),
+      nextCursor: page.nextCursor,
+    };
   };
 
-  const filteredFolders = useMemo(() => {
-    let result = folders.filter((f) =>
-      f.name.toLowerCase().includes(search.toLowerCase()),
-    );
-    if (sortOrder === "az")
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOrder === "date")
-      result = [...result].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    return result;
-  }, [folders, search, sortOrder]);
+  const modulesList = usePaginatedCursorList<Module>(
+    fetchModulesPage,
+    `${search}|${sortOrder}`,
+  );
 
-  const filteredModules = useMemo(() => {
-    let result = modules.filter((m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()),
+  const fetchFoldersPage = async (cursor: string | null) => {
+    const params = new URLSearchParams({ limit: "20" });
+    if (search) params.set("search", search);
+    if (cursor) params.set("cursor", cursor);
+    const res = await protectedFetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/folders?${params.toString()}`,
     );
-    if (sortOrder === "az")
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-    if (sortOrder === "date")
-      result = [...result].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    if (sortOrder === "favs") result = result.filter((m) => m.isFavorite);
-    return result;
-  }, [modules, search, sortOrder]);
+    if (!res.ok) throw new Error(`Folders error: ${res.status}`);
+    return res.json();
+  };
+
+  const foldersList = usePaginatedCursorList<Folder>(fetchFoldersPage, search);
+
+  useFocusEffect(
+    useCallback(() => {
+      modulesList.refresh();
+      foldersList.refresh();
+    }, [modulesList.refresh, foldersList.refresh]),
+  );
 
   const currentSortLabel =
     SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
@@ -146,27 +121,37 @@ export default function Library() {
               </XStack>
             </Pressable>
           </XStack>
-
-          {loading && <Text color="$colorMuted">Loading...</Text>}
-          {error && <Text color="$statusDanger">{error}</Text>}
         </YStack>
 
         {tab === 0 ? (
           <FlatList
-            data={filteredFolders}
+            data={foldersList.items}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
+            onEndReached={foldersList.loadMore}
+            onEndReachedThreshold={0.4}
+            initialNumToRender={4}
+            getItemLayout={(_, index) => ({
+              length: 83,
+              offset: 93 * index,
+              index,
+            })}
             contentContainerStyle={{
               paddingHorizontal: 19,
               gap: 10,
               paddingBottom: 32,
             }}
             ListEmptyComponent={
-              !loading ? (
+              !foldersList.initialLoading ? (
                 <Text color="$colorMuted">
                   {search ? "No folders match your search" : "No folders yet"}
                 </Text>
               ) : null
+            }
+            ListFooterComponent={
+              <LoadMoreFooter
+                visible={foldersList.loading && !foldersList.initialLoading}
+              />
             }
             renderItem={({ item, index }) => (
               <FolderCard
@@ -183,16 +168,24 @@ export default function Library() {
           />
         ) : (
           <FlatList
-            data={filteredModules}
+            data={modulesList.items}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
+            onEndReached={modulesList.loadMore}
+            onEndReachedThreshold={0.4}
+            initialNumToRender={4}
+            getItemLayout={(_, index) => ({
+              length: 83,
+              offset: 93 * index,
+              index,
+            })}
             contentContainerStyle={{
               paddingHorizontal: 19,
               gap: 10,
               paddingBottom: 32,
             }}
             ListEmptyComponent={
-              !loading ? (
+              !modulesList.initialLoading ? (
                 <Text color="$colorMuted">
                   {search
                     ? "No modules match your search"
@@ -201,6 +194,11 @@ export default function Library() {
                       : "No modules yet"}
                 </Text>
               ) : null
+            }
+            ListFooterComponent={
+              <LoadMoreFooter
+                visible={modulesList.loading && !modulesList.initialLoading}
+              />
             }
             renderItem={({ item }) => (
               <ModuleCard

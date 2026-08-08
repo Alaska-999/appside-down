@@ -6,12 +6,13 @@ import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
+import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
@@ -30,6 +31,20 @@ type HomeModule = {
   updatedAt: string;
   flashcards?: { status: LearningStatus }[];
   _count?: { flashcards: number };
+};
+
+type ContinueLearningEntry = {
+  id: string;
+  name: string;
+  updatedAt: string;
+  known: number;
+  total: number;
+};
+
+type Stats = {
+  totalModules: number;
+  cardsLearned: number;
+  continueLearning: ContinueLearningEntry[];
 };
 
 const CHIP_GRADIENTS: [string, string][] = [
@@ -84,9 +99,11 @@ export default function Home() {
   const insets = useSafeAreaInsets();
 
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<PublicModuleResult[]>([]);
-  const [modules, setModules] = useState<HomeModule[]>([]);
-  const [publicModules, setPublicModules] = useState<PublicModuleResult[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [recentModules, setRecentModules] = useState<HomeModule[]>([]);
+  const [discoverModules, setDiscoverModules] = useState<PublicModuleResult[]>(
+    [],
+  );
   const { user } = useAuthStore();
 
   const searching = search.trim().length >= 2;
@@ -99,96 +116,79 @@ export default function Home() {
   );
 
   const fetchData = async () => {
+    // stats - gives total statistics: totalModules, cardsLearned, continueLearning.
+    // recentModules - gives last 6 your modules for the horizontal row "Recent" on Home. Without infinite scroll, fixed 6 items.
+    // discoverModules - gives 6 foreign public modules for the "Discover" section, excluding your own (excludeOwn=true).
     try {
-      const [modulesRes, publicRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules`, {
-          method: "GET",
-        }),
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/public`, {
-          method: "GET",
-        }),
+      const [statsRes, recentRes, discoverRes] = await Promise.all([
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/stats`),
+        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules?limit=6`),
+        protectedFetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/modules/public?limit=6&excludeOwn=true`,
+        ),
       ]);
-      if (!modulesRes.ok)
-        throw new Error(`Modules error: ${modulesRes.status}`);
-      if (!publicRes.ok) throw new Error(`Public error: ${publicRes.status}`);
+      if (!statsRes.ok) throw new Error(`Stats error: ${statsRes.status}`);
+      if (!recentRes.ok) throw new Error(`Modules error: ${recentRes.status}`);
+      if (!discoverRes.ok)
+        throw new Error(`Public error: ${discoverRes.status}`);
 
-      const [modulesData, publicData] = await Promise.all([
-        modulesRes.json() as Promise<HomeModule[]>,
-        publicRes.json() as Promise<PublicModuleResult[]>,
+      const [statsData, recentData, discoverData] = await Promise.all([
+        statsRes.json() as Promise<Stats>,
+        recentRes.json() as Promise<{
+          data: HomeModule[];
+          nextCursor: string | null;
+        }>,
+        discoverRes.json() as Promise<{
+          data: PublicModuleResult[];
+          nextCursor: string | null;
+        }>,
       ]);
-      setModules(modulesData);
-      setPublicModules(publicData);
+      setStats(statsData);
+      setRecentModules(recentData.data);
+      setDiscoverModules(discoverData.data);
     } catch (err) {
       console.error("[Home] fetch error:", err);
     }
   };
 
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   useEffect(() => {
-    const query = search.trim();
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/modules/public?search=${encodeURIComponent(query)}`,
-        );
-        if (!res.ok) throw new Error(`Error: ${res.status}`);
-        setResults(await res.json());
-      } catch (err) {
-        console.error("[Home] search error:", err);
-        setResults([]);
-      }
-    }, 400);
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
     return () => clearTimeout(timer);
   }, [search]);
 
-  const continueLearning = useMemo(() => {
-    return modules
-      .filter((m) => {
-        const statuses = m.flashcards?.map((f) => f.status) ?? [];
-        if (statuses.length === 0) return false;
-        const started = statuses.some((s) => s !== "UNSTUDIED");
-        const unfinished = statuses.some((s) => s !== "KNOWN");
-        return started && unfinished;
-      })
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      )
-      .slice(0, 5);
-  }, [modules]);
+  const fetchSearchPage = useCallback(
+    async (cursor: string | null) => {
+      const params = new URLSearchParams({
+        search: debouncedSearch,
+        limit: "20",
+      });
+      if (cursor) params.set("cursor", cursor);
+      const res = await protectedFetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/modules/public?${params.toString()}`,
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      return res.json();
+    },
+    [debouncedSearch],
+  );
 
-  const featuredModule = continueLearning[0];
-  const featuredStats = useMemo(() => {
-    if (!featuredModule) return null;
-    const statuses = featuredModule.flashcards?.map((f) => f.status) ?? [];
-    const total = statuses.length;
-    const known = statuses.filter((s) => s === "KNOWN").length;
-    return { total, known, progress: total ? known / total : 0 };
-  }, [featuredModule]);
+  const searchList = usePaginatedCursorList<PublicModuleResult>(
+    fetchSearchPage,
+    debouncedSearch,
+  );
 
-  const cardsLearned = useMemo(() => {
-    return modules.reduce((sum, m) => {
-      const known =
-        m.flashcards?.filter((f) => f.status === "KNOWN").length ?? 0;
-      return sum + known;
-    }, 0);
-  }, [modules]);
-
-  const recent = useMemo(() => {
-    return [...modules]
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-      )
-      .slice(0, 6);
-  }, [modules]);
-
-  const discover = useMemo(() => {
-    return publicModules.filter((m) => m.user?.id !== user?.id).slice(0, 10);
-  }, [publicModules, user?.id]);
+  const featuredModule = stats?.continueLearning[0];
+  const featuredStats = featuredModule
+    ? {
+        known: featuredModule.known,
+        total: featuredModule.total,
+        progress: featuredModule.total
+          ? featuredModule.known / featuredModule.total
+          : 0,
+      }
+    : null;
 
   const navigateToProfile = () => {
     router.push({
@@ -241,19 +241,25 @@ export default function Home() {
         </YStack>
 
         {searching ? (
-          <ScrollView
+          <FlatList
+            data={debouncedSearch.length >= 2 ? searchList.items : []}
+            keyExtractor={(m) => m.id}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-          >
-            <YStack px="$screenX" gap="$2" pb="$4">
-              {results.map((m) => (
-                <PublicModuleRow key={m.id} module={m} />
-              ))}
-              {results.length === 0 && (
+            contentContainerStyle={{
+              paddingHorizontal: 19,
+              gap: 8,
+              paddingBottom: 16,
+            }}
+            onEndReached={searchList.loadMore}
+            onEndReachedThreshold={0.4}
+            renderItem={({ item }) => <PublicModuleRow module={item} />}
+            ListEmptyComponent={
+              !searchList.initialLoading ? (
                 <Text color="$colorMuted">No public modules found</Text>
-              )}
-            </YStack>
-          </ScrollView>
+              ) : null
+            }
+          />
         ) : (
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -272,7 +278,13 @@ export default function Home() {
                       style={{ flex: 1 }}
                       onPress={() => openModule(featuredModule.id)}
                     >
-                      <AppCard variant="glass" size="lg" f={1} gap={9} ai="flex-start">
+                      <AppCard
+                        variant="glass"
+                        size="lg"
+                        f={1}
+                        gap={9}
+                        ai="flex-start"
+                      >
                         <ProgressRing
                           progress={featuredStats.progress}
                           label={`${Math.round(featuredStats.progress * 100)}%`}
@@ -293,9 +305,15 @@ export default function Home() {
                     </Pressable>
                   ) : null}
 
-                  <AppCard variant="glass" size="lg" f={1} gap="$1" ai="flex-start">
+                  <AppCard
+                    variant="glass"
+                    size="lg"
+                    f={1}
+                    gap="$1"
+                    ai="flex-start"
+                  >
                     <Text fontSize={31} fontWeight="900" color="$color">
-                      {modules.length}
+                      {stats?.totalModules ?? 0}
                     </Text>
                     <SectionTitle tone="onGlass">Total modules</SectionTitle>
                     <Text
@@ -304,19 +322,19 @@ export default function Home() {
                       color="$accentGradientStart"
                       mt={12}
                     >
-                      {cardsLearned}
+                      {stats?.cardsLearned ?? 0}
                     </Text>
                     <SectionTitle tone="onGlass">Cards learned</SectionTitle>
                   </AppCard>
                 </XStack>
               </YStack>
 
-              {recent.length > 0 && (
+              {recentModules.length > 0 && (
                 <YStack gap={14}>
                   <SectionTitle>Recent</SectionTitle>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <XStack gap={11}>
-                      {recent.map((m, i) => {
+                      {recentModules.map((m, i) => {
                         const count = m._count?.flashcards ?? 0;
                         return (
                           <Chip
@@ -337,11 +355,11 @@ export default function Home() {
                 </YStack>
               )}
 
-              {discover.length > 0 && (
+              {discoverModules.length > 0 && (
                 <YStack gap={14}>
                   <SectionTitle>Discover</SectionTitle>
                   <YStack gap={14}>
-                    {discover.map((m) => (
+                    {discoverModules.map((m) => (
                       <PublicModuleRow key={m.id} module={m} />
                     ))}
                   </YStack>
