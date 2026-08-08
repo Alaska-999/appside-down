@@ -11,9 +11,10 @@ interface AuthState {
   user: UserProfile | null;
   token: string | null;
   isHydrated: boolean;
+  sessionExpired: boolean;
   setAuth: (user: UserProfile, token: string) => void;
   setToken: (token: string) => void;
-  logout: () => Promise<void>;
+  logout: (opts?: { expired?: boolean }) => Promise<void>;
   updateAvatar: (avatarUrl: string | null) => void;
   _setHydrated: (val: boolean) => void;
 }
@@ -24,9 +25,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isHydrated: false,
+      sessionExpired: false,
 
       setAuth: (user, token) => {
-        set({ user, token });
+        set({ user, token, sessionExpired: false });
         SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token);
       },
 
@@ -35,8 +37,8 @@ export const useAuthStore = create<AuthState>()(
         SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token);
       },
 
-      logout: async () => {
-        set({ user: null, token: null });
+      logout: async (opts) => {
+        set({ user: null, token: null, sessionExpired: opts?.expired ?? false });
         const { useStudyQueueStore } = await import("./useStudyQueueStore");
         useStudyQueueStore.getState().clear();
         await Promise.all([

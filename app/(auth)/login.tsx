@@ -20,6 +20,7 @@ export default function Login() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const setAuth = useAuthStore((state) => state.setAuth);
+  const sessionExpired = useAuthStore((state) => state.sessionExpired);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -108,6 +109,19 @@ export default function Login() {
             Welcome!
           </Text>
         </YStack>
+
+        {sessionExpired && (
+          <YStack
+            width="100%"
+            bg="$backgroundSoft"
+            borderRadius="$4"
+            p="$3"
+          >
+            <Text color="$colorSecondary" fontSize="$3" textAlign="center">
+              Your session has expired. Please log in again.
+            </Text>
+          </YStack>
+        )}
 
         <YStack width="100%" gap="$2">
           <FormInput

@@ -441,6 +441,12 @@ export default function ModuleScreen() {
                     {moduleData.name}
                   </Text>
 
+                  {!!moduleData.description && (
+                    <Text fontSize={15} color="$colorMuted">
+                      {moduleData.description}
+                    </Text>
+                  )}
+
                   <XStack ai="center" gap="$2">
                     <UserAvatar
                       avatarUrl={moduleData.author?.avatarUrl}

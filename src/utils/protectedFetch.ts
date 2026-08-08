@@ -21,20 +21,20 @@ const refreshAccessToken = (): Promise<string> => {
 
   refreshPromise = (async () => {
     const rt = await SecureStore.getItemAsync("refreshToken");
-    const userId = useAuthStore.getState().user?.id;
-    if (!rt || !userId) {
-      useAuthStore.getState().logout();
+    if (!rt) {
+      const wasLoggedIn = !!useAuthStore.getState().user;
+      useAuthStore.getState().logout({ expired: wasLoggedIn });
       throw new Error("No refresh token found");
     }
 
     const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, refreshToken: rt }),
+      body: JSON.stringify({ refreshToken: rt }),
     });
 
     if (!res.ok) {
-      useAuthStore.getState().logout();
+      useAuthStore.getState().logout({ expired: true });
       throw new Error("Failed to refresh token");
     }
 
@@ -56,9 +56,9 @@ export const protectedFetch = async (
   options: RequestInit = {},
   _retried = false,
 ): Promise<Response> => {
-  const token = useAuthStore.getState().token;
+  let token = useAuthStore.getState().token;
   if (!token) {
-    throw new Error("No token found");
+    token = await refreshAccessToken();
   }
 
   const response = await fetch(url, {

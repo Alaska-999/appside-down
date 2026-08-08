@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/src/store/useAuthStore";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type CursorPage<T> = { data: T[]; nextCursor: string | null };
@@ -41,13 +42,16 @@ export function usePaginatedCursorList<T>(
   }, []);
 
 
+  const isLoggedIn = useAuthStore((state) => !!state.user);
+
   //on resetKey change reload data
   useEffect(() => {
+    if (!isLoggedIn) return;
     setItems([]);
     setNextCursor(null);
     setInitialLoading(true);
     load(null);
-  }, [resetKey, load]);
+  }, [resetKey, load, isLoggedIn]);
 
   //calls when scroll to the end
   const loadMore = useCallback(() => {

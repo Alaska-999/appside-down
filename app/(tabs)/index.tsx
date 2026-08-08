@@ -105,15 +105,17 @@ export default function Home() {
   const [discoverModules, setDiscoverModules] = useState<PublicModuleResult[]>(
     [],
   );
-  const { user } = useAuthStore();
+  const { user, isHydrated } = useAuthStore();
+  const isLoggedIn = !!user;
 
   const searching = search.trim().length >= 2;
   const todayIndex = (new Date().getDay() + 6) % 7;
 
   useFocusEffect(
     useCallback(() => {
+      if (!isHydrated || !isLoggedIn) return;
       fetchData();
-    }, []),
+    }, [isHydrated, isLoggedIn]),
   );
 
   const fetchData = async () => {
