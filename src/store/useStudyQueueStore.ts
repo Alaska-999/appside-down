@@ -1,10 +1,12 @@
 import { API_BASE_URL } from "@/src/api/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Crypto from "expo-crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { protectedFetch } from "../utils/protectedFetch";
 
 export interface StudyEventInput {
+  id: string;
   flashcardId: string;
   moduleId: string;
   status: "KNOWN" | "STILL_LEARNING";
@@ -14,7 +16,7 @@ export interface StudyEventInput {
 interface StudyQueueState {
   events: StudyEventInput[];
   flushing: boolean;
-  addEvent: (event: StudyEventInput) => void;
+  addEvent: (event: Omit<StudyEventInput, "id">) => void;
   flush: () => Promise<void>;
   clear: () => void;
 }
@@ -29,7 +31,9 @@ export const useStudyQueueStore = create<StudyQueueState>()(
       flushing: false,
 
       addEvent: (event) => {
-        set((state) => ({ events: [...state.events, event] }));
+        set((state) => ({
+          events: [...state.events, { ...event, id: Crypto.randomUUID() }],
+        }));
         if (get().events.length >= FLUSH_THRESHOLD) {
           get().flush();
         }
@@ -61,6 +65,15 @@ export const useStudyQueueStore = create<StudyQueueState>()(
       name: "study-queue-storage",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ events: state.events }),
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as { events?: StudyEventInput[] };
+        return {
+          events: (state.events ?? []).map((e) =>
+            e.id ? e : { ...e, id: Crypto.randomUUID() },
+          ),
+        };
+      },
     },
   ),
 );
