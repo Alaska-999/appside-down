@@ -3,7 +3,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { Pressable } from "react-native";
-import { Text, useTheme, YStack } from "tamagui";
+import { Spinner, Text, useTheme, YStack } from "tamagui";
 
 type ButtonVariant =
   | "primary"
@@ -81,6 +81,7 @@ interface AppButtonProps {
   size?: ButtonSize;
   onPress?: () => void;
   disabled?: boolean;
+  loading?: boolean;
   icon?: ReactNode;
   children: ReactNode;
 }
@@ -90,6 +91,7 @@ export function AppButton({
   size = "md",
   onPress,
   disabled,
+  loading,
   icon,
   children,
 }: AppButtonProps) {
@@ -99,9 +101,13 @@ export function AppButton({
     variant === "primary" || variant === "soft" || variant === "hero";
   const variantStyle = !isGradient ? VARIANT_STYLES[variant] : null;
   const gradientStyle = isGradient ? GRADIENT_VARIANT_STYLES[variant] : null;
+  const textColor = gradientStyle
+    ? gradientStyle.textColor
+    : variantStyle!.textColor;
+  const isBlocked = disabled || loading;
 
   const handlePress = () => {
-    if (disabled) return;
+    if (isBlocked) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
   };
@@ -116,19 +122,13 @@ export function AppButton({
       jc="center"
       fd="row"
       gap="$2"
-      opacity={disabled ? stateOpacity.disabled : 1}
+      opacity={loading ? 0.85 : disabled ? stateOpacity.disabled : 1}
       bg={variantStyle?.bg}
       borderWidth={variantStyle?.borderWidth}
       borderColor={variantStyle?.borderColor}
     >
-      {icon}
-      <Text
-        fontSize={fontSize}
-        fontWeight="600"
-        color={
-          gradientStyle ? gradientStyle.textColor : variantStyle!.textColor
-        }
-      >
+      {loading ? <Spinner size="small" color={textColor} /> : icon}
+      <Text fontSize={fontSize} fontWeight="600" color={textColor}>
         {children}
       </Text>
     </YStack>
@@ -137,10 +137,10 @@ export function AppButton({
   return (
     <Pressable
       onPress={handlePress}
-      disabled={disabled}
+      disabled={isBlocked}
       style={({ pressed }) => ({
         borderRadius: 999,
-        opacity: pressed ? 0.85 : 1,
+        opacity: pressed && !loading ? 0.85 : 1,
       })}
     >
       {gradientStyle ? (

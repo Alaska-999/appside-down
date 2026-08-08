@@ -18,6 +18,23 @@ const SIZE_STYLES: Record<FormInputSize, { height: number; fontSize: number; px:
   lg: { height: 60, fontSize: 19, px: 20 },
 };
 
+const MOCKUP_SCALE = 390 / 290;
+
+const GLASS_DEFAULTS = {
+  paddingVertical: 13 * MOCKUP_SCALE,
+  paddingHorizontal: 15 * MOCKUP_SCALE,
+  fontSize: 14.5 * MOCKUP_SCALE,
+  borderRadius: 16 * MOCKUP_SCALE,
+};
+
+const GLASS_FOCUS_STYLE = {
+  borderColor: "rgba(45,212,191,0.55)",
+  shadowColor: "rgba(45,212,191,0.12)",
+  shadowOpacity: 1,
+  shadowRadius: 14 * MOCKUP_SCALE,
+  shadowOffset: { width: 0, height: 0 },
+};
+
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
@@ -60,18 +77,25 @@ function FormInputInner<T extends FieldValues>(
           <XStack width="100%" ai="center" pos="relative">
             <Input
               f={1}
-              size={sizeStyle ? undefined : "$4"}
+              size={sizeStyle || isGlass ? undefined : "$4"}
               height={isUnderline ? undefined : sizeStyle?.height}
-              px={isUnderline ? undefined : sizeStyle?.px}
-              fontSize={sizeStyle?.fontSize}
+              py={isUnderline || sizeStyle ? undefined : isGlass ? GLASS_DEFAULTS.paddingVertical : undefined}
+              px={isUnderline ? undefined : sizeStyle?.px ?? (isGlass ? GLASS_DEFAULTS.paddingHorizontal : undefined)}
+              fontSize={sizeStyle?.fontSize ?? (isGlass ? GLASS_DEFAULTS.fontSize : undefined)}
               placeholderTextColor="$colorSecondary"
               color={color ?? "$color"}
               unstyled={isUnderline || undefined}
               bbw={isUnderline ? 1 : undefined}
               pb={isUnderline ? "$1" : undefined}
-              focusStyle={isUnderline ? { bc: "$accentGradientStart", bbw: 2 } : undefined}
+              focusStyle={
+                isUnderline
+                  ? { bc: "$accentGradientStart", bbw: 2 }
+                  : isGlass
+                    ? GLASS_FOCUS_STYLE
+                    : undefined
+              }
               bg={isUnderline ? undefined : bg ?? (isGlass ? "$glassBg" : undefined)}
-              br={isUnderline ? undefined : br ?? (isGlass ? 16 : undefined)}
+              br={isUnderline ? undefined : br ?? (isGlass ? GLASS_DEFAULTS.borderRadius : undefined)}
               borderWidth={isUnderline ? undefined : borderWidth ?? 1}
               {...inputProps}
               ref={(node: TamaguiElement | null) => {

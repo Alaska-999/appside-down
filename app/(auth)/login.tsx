@@ -1,5 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
+import { AppButton } from "@/src/components/ui/Button";
+import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import { AuthHeading } from "@/src/components/ui/AuthHeading";
+import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
@@ -9,10 +13,13 @@ import { Link, router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Keyboard } from "react-native";
+import { Pressable } from "react-native";
 import type { TextInput } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, YStack } from "tamagui";
+
+const MOCKUP_SCALE = 390 / 290;
 
 export default function Login() {
   const insets = useSafeAreaInsets();
@@ -35,7 +42,6 @@ export default function Login() {
   } = form;
   const passwordRef = useRef<TextInput>(null);
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -93,112 +99,131 @@ export default function Login() {
 
   return (
     <FormProvider {...form}>
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        p="$4"
-        pt={insets.top + 16}
-        pb={insets.bottom + 16}
-        bg="$background"
-        gap="$4"
-        onPress={Keyboard.dismiss}
-      >
-        <YStack ai="center">
-          <Text fontSize="$8" fontWeight="bold">
-            Welcome!
-          </Text>
-        </YStack>
+      <YStack f={1} bg="$background">
+        <AuroraBeams />
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingHorizontal: 18 * MOCKUP_SCALE,
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 16,
+          }}
+        >
+          <AuthHeading
+            titlePrefix="Welcome"
+            titleHighlight="back"
+            subtitle="Log in to keep your streak alive"
+          />
 
-        {sessionExpired && (
-          <YStack
-            width="100%"
-            bg="$backgroundSoft"
-            borderRadius="$4"
-            p="$3"
-          >
-            <Text color="$colorSecondary" fontSize="$3" textAlign="center">
-              Your session has expired. Please log in again.
-            </Text>
+          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
+            {sessionExpired && (
+              <YStack
+                width="100%"
+                bg="$mintGlassBg"
+                borderWidth={1}
+                borderColor="$mintGlassBorder"
+                br={16 * MOCKUP_SCALE}
+                px={13 * MOCKUP_SCALE}
+                py={11 * MOCKUP_SCALE}
+              >
+                <Text
+                  color="#c9e8e0"
+                  fontSize={12 * MOCKUP_SCALE}
+                  lineHeight={12 * MOCKUP_SCALE * 1.45}
+                  textAlign="center"
+                >
+                  Your session has expired. Please log in again.
+                </Text>
+              </YStack>
+            )}
+
+            <FormInput
+              control={control}
+              name="email"
+              placeholder="Email"
+              variant="glass"
+              textContentType="emailAddress"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => passwordRef.current?.focus()}
+            />
+            <FormInput
+              ref={passwordRef}
+              control={control}
+              name="password"
+              placeholder="Password"
+              variant="glass"
+              secureTextEntry={!showPassword}
+              textContentType="password"
+              returnKeyType="done"
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+              rightElement={
+                <Button
+                  pos="absolute"
+                  right="$2"
+                  size="$3"
+                  chromeless
+                  circular
+                  onPress={() => setShowPassword(!showPassword)}
+                  icon={
+                    showPassword ? (
+                      <EyeOff size="$1" color="$colorSecondary" />
+                    ) : (
+                      <Eye size="$1" color="$colorSecondary" />
+                    )
+                  }
+                />
+              }
+            />
+
+            <Link href="/forgot-password" asChild>
+              <Pressable hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}>
+                <Text
+                  color="$mint"
+                  fontSize={12.5 * MOCKUP_SCALE}
+                  fontWeight="600"
+                  textAlign="right"
+                  mt={2 * MOCKUP_SCALE}
+                >
+                  Forgot password?
+                </Text>
+              </Pressable>
+            </Link>
+
+            {serverError && (
+              <Text
+                color="$statusDanger"
+                fontSize={12.5 * MOCKUP_SCALE}
+                textAlign="center"
+              >
+                {serverError}
+              </Text>
+            )}
+
+            <YStack mt={10 * MOCKUP_SCALE}>
+              <AppButton
+                variant="soft"
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+              >
+                {isSubmitting ? "Logging in..." : "Log in"}
+              </AppButton>
+            </YStack>
+
+            <AuthSwitchLink
+              href="/signup"
+              prompt="New here?"
+              action="Create account"
+            />
           </YStack>
-        )}
-
-        <YStack width="100%" gap="$2">
-          <FormInput
-            control={control}
-            name="email"
-            placeholder="Email"
-            textContentType="emailAddress"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            returnKeyType="next"
-            blurOnSubmit={false}
-            onSubmitEditing={() => passwordRef.current?.focus()}
-          />
-          <FormInput
-            ref={passwordRef}
-            control={control}
-            name="password"
-            placeholder="Password"
-            secureTextEntry={!showPassword}
-            textContentType="password"
-            bg="$backgroundSoft"
-            returnKeyType="done"
-            onSubmitEditing={() => handleSubmit(onSubmit)()}
-            rightElement={
-              <Button
-                pos="absolute"
-                right="$2"
-                size="$3"
-                chromeless
-                circular
-                onPress={() => setShowPassword(!showPassword)}
-                icon={
-                  showPassword ? (
-                    <EyeOff size="$1" color="$colorSecondary" />
-                  ) : (
-                    <Eye size="$1" color="$colorSecondary" />
-                  )
-                }
-              />
-            }
-          />
-
-          <Link href="/forgot-password" asChild>
-            <Text
-              color="$colorSecondary"
-              fontSize="$3"
-              textAlign="right"
-              mt="$1"
-            >
-              Forgot password?
-            </Text>
-          </Link>
-
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3" textAlign="center">
-              {serverError}
-            </Text>
-          )}
-
-          <Button
-            size="$4"
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText">
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Text>
-          </Button>
-          <Link href="/signup" asChild>
-            <Button size="$4" bg="$buttonSecondaryBg" mt="$2" width="100%">
-              <Text color="$buttonSecondaryText">Sign up</Text>
-            </Button>
-          </Link>
-        </YStack>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );

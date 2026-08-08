@@ -1,16 +1,21 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
+import { AppButton } from "@/src/components/ui/Button";
+import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Keyboard } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
+
+const MOCKUP_SCALE = 390 / 290;
 
 export default function ForgotPassword() {
   const insets = useSafeAreaInsets();
@@ -61,62 +66,67 @@ export default function ForgotPassword() {
 
   return (
     <FormProvider {...form}>
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        p="$4"
-        pt={insets.top + 16}
-        pb={insets.bottom + 16}
-        bg="$background"
-        gap="$4"
-        onPress={Keyboard.dismiss}
-      >
-        <YStack ai="center" gap="$2">
-          <Text fontSize="$8" fontWeight="bold">
-            Forgot password?
-          </Text>
-          <Text color="$colorSecondary" fontSize="$3" textAlign="center">
-            Enter your email and we will send you a reset code
-          </Text>
-        </YStack>
-
-        <YStack width="100%" gap="$2">
-          <FormInput
-            control={control}
-            name="email"
-            placeholder="Email"
-            textContentType="emailAddress"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            returnKeyType="done"
-            onSubmitEditing={() => handleSubmit(onSubmit)()}
+      <YStack f={1} bg="$background">
+        <AuroraBeams />
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingHorizontal: 18 * MOCKUP_SCALE,
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 16,
+          }}
+        >
+          <AuthHeading
+            titlePrefix="Forgot"
+            titleHighlight="password?"
+            subtitle="Enter your email and we'll send you a reset code"
           />
 
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3" textAlign="center">
-              {serverError}
-            </Text>
-          )}
+          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
+            <FormInput
+              control={control}
+              name="email"
+              placeholder="Email"
+              variant="glass"
+              textContentType="emailAddress"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              returnKeyType="done"
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+            />
 
-          <Button
-            size="$4"
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText">
-              {isSubmitting ? "Sending..." : "Send code"}
-            </Text>
-          </Button>
-          <Link href="/login" asChild>
-            <Button size="$4" bg="$buttonSecondaryBg" mt="$2" width="100%">
-              <Text color="$buttonSecondaryText">Back to login</Text>
-            </Button>
-          </Link>
-        </YStack>
+            {serverError && (
+              <Text
+                color="$statusDanger"
+                fontSize={12.5 * MOCKUP_SCALE}
+                textAlign="center"
+              >
+                {serverError}
+              </Text>
+            )}
+
+            <YStack mt={10 * MOCKUP_SCALE}>
+              <AppButton
+                variant="soft"
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+              >
+                {isSubmitting ? "Sending..." : "Send code"}
+              </AppButton>
+            </YStack>
+
+            <YStack mt={10 * MOCKUP_SCALE}>
+              <AppButton variant="secondary" onPress={() => router.push("/login")}>
+                Back to login
+              </AppButton>
+            </YStack>
+          </YStack>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );

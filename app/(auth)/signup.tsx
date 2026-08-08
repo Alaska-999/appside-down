@@ -1,6 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { AppButton } from "@/src/components/ui/Button";
+import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import { AuthHeading } from "@/src/components/ui/AuthHeading";
+import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
@@ -10,11 +13,15 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Keyboard } from "react-native";
 import type { TextInput } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, YStack } from "tamagui";
 
+const MOCKUP_SCALE = 390 / 290;
+
 export default function Signup() {
+  const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -35,7 +42,6 @@ export default function Signup() {
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -94,30 +100,32 @@ export default function Signup() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeader />
-        </YStack>
-
-        <YStack
-          f={1}
-          jc="center"
-          ai="center"
-          p="$4"
-          bg="$background"
-          gap="$4"
-          onPress={Keyboard.dismiss}
+        <AuroraBeams />
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingHorizontal: 18 * MOCKUP_SCALE,
+            paddingTop: insets.top + 16,
+            paddingBottom: insets.bottom + 16,
+          }}
         >
-          <YStack ai="center">
-            <Text fontSize="$8" fontWeight="bold">
-              Sign Up!
-            </Text>
-          </YStack>
+          <AuthHeading
+            titlePrefix="Create"
+            titleHighlight="account"
+            subtitle="Flashcards, streaks and progress — all yours"
+          />
 
-          <YStack width="100%" gap="$2">
+          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
             <FormInput
               control={control}
               name="email"
               placeholder="Email"
+              variant="glass"
               textContentType="emailAddress"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -130,6 +138,7 @@ export default function Signup() {
               control={control}
               name="username"
               placeholder="Username"
+              variant="glass"
               textContentType="username"
               autoCapitalize="none"
               returnKeyType="next"
@@ -141,9 +150,9 @@ export default function Signup() {
               control={control}
               name="password"
               placeholder="Password"
+              variant="glass"
               secureTextEntry={!showPassword}
               textContentType="newPassword"
-              bg="$backgroundSoft"
               returnKeyType="done"
               onSubmitEditing={() => handleSubmit(onSubmit)()}
               rightElement={
@@ -166,25 +175,32 @@ export default function Signup() {
             />
 
             {serverError && (
-              <Text color="$statusDanger" fontSize="$3" textAlign="center">
+              <Text
+                color="$statusDanger"
+                fontSize={12.5 * MOCKUP_SCALE}
+                textAlign="center"
+              >
                 {serverError}
               </Text>
             )}
 
-            <Button
-              size="$4"
-              bg="$buttonBg"
-              onPress={handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-              opacity={isSubmitting ? 0.6 : 1}
-              mt="$2"
-            >
-              <Text color="$buttonText">
-                {isSubmitting ? "Signing up..." : "Sign Up"}
-              </Text>
-            </Button>
+            <YStack mt={10 * MOCKUP_SCALE}>
+              <AppButton
+                variant="soft"
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+              >
+                {isSubmitting ? "Signing up..." : "Sign up"}
+              </AppButton>
+            </YStack>
+
+            <AuthSwitchLink
+              href="/login"
+              prompt="Already have an account?"
+              action="Log in"
+            />
           </YStack>
-        </YStack>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );

@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { AppButton } from "@/src/components/ui/Button";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
   ChangePasswordForm,
@@ -12,7 +13,10 @@ import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Alert, Keyboard } from "react-native";
 import type { TextInput } from "react-native";
-import { Button, Text, YStack } from "tamagui";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { Text, YStack } from "tamagui";
+
+const MOCKUP_SCALE = 390 / 290;
 
 export default function ChangePasswordScreen() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -31,7 +35,6 @@ export default function ChangePasswordScreen() {
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
-  // серверна помилка зникає, щойно юзер щось міняє у формі
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
@@ -69,57 +72,66 @@ export default function ChangePasswordScreen() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <ScreenHeader title="Change password" />
-        <YStack f={1} px="$4" gap="$3" pt="$4" onPress={Keyboard.dismiss}>
-          <FormInput
-            control={control}
-            name="oldPassword"
-            placeholder="Current password"
-            secureTextEntry
-            textContentType="password"
-            returnKeyType="next"
-            blurOnSubmit={false}
-            onSubmitEditing={() => newPasswordRef.current?.focus()}
-          />
-          <FormInput
-            ref={newPasswordRef}
-            control={control}
-            name="newPassword"
-            placeholder="New password"
-            secureTextEntry
-            textContentType="newPassword"
-            returnKeyType="next"
-            blurOnSubmit={false}
-            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-          />
-          <FormInput
-            ref={confirmPasswordRef}
-            control={control}
-            name="confirmPassword"
-            placeholder="Confirm new password"
-            secureTextEntry
-            textContentType="newPassword"
-            returnKeyType="done"
-            onSubmitEditing={() => handleSubmit(onSubmit)()}
-          />
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          bottomOffset={40}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
+        >
+          <YStack gap={10 * MOCKUP_SCALE} onPress={Keyboard.dismiss}>
+            <FormInput
+              control={control}
+              name="oldPassword"
+              placeholder="Current password"
+              variant="glass"
+              secureTextEntry
+              textContentType="password"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => newPasswordRef.current?.focus()}
+            />
+            <FormInput
+              ref={newPasswordRef}
+              control={control}
+              name="newPassword"
+              placeholder="New password"
+              variant="glass"
+              secureTextEntry
+              textContentType="newPassword"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+            />
+            <FormInput
+              ref={confirmPasswordRef}
+              control={control}
+              name="confirmPassword"
+              placeholder="Confirm new password"
+              variant="glass"
+              secureTextEntry
+              textContentType="newPassword"
+              returnKeyType="done"
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+            />
 
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3">
-              {serverError}
-            </Text>
-          )}
+            {serverError && (
+              <Text color="$statusDanger" fontSize={12.5 * MOCKUP_SCALE} textAlign="center">
+                {serverError}
+              </Text>
+            )}
 
-          <Button
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText" fontWeight="600">
-              {isSubmitting ? "Saving..." : "Save"}
-            </Text>
-          </Button>
-        </YStack>
+            <YStack mt={10 * MOCKUP_SCALE}>
+              <AppButton
+                variant="soft"
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+              >
+                {isSubmitting ? "Saving..." : "Save"}
+              </AppButton>
+            </YStack>
+          </YStack>
+        </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );
