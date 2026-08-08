@@ -1,6 +1,10 @@
 import { FolderCard } from "@/src/components/cards/FolderCard";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import {
+  FadeTabPanes,
+  useFadeTabs,
+} from "@/src/components/ui/FadeTabPanes";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet } from "@/src/components/ui/Sheet";
@@ -10,7 +14,7 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { AlignJustify, Check } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, XStack, YStack } from "tamagui";
@@ -32,9 +36,143 @@ function LoadMoreFooter({ visible }: { visible: boolean }) {
   );
 }
 
+const MemoFolderCard = memo(
+  FolderCard,
+  (prev, next) => prev.folder === next.folder && prev.index === next.index,
+);
+const MemoModuleCard = memo(
+  ModuleCard,
+  (prev, next) => prev.module === next.module,
+);
+
+const LIST_STYLE = { flex: 1 } as const;
+
+const LIST_CONTENT_STYLE = {
+  paddingHorizontal: 19,
+  gap: 10,
+  paddingBottom: 32,
+} as const;
+
+const getRowLayout = (_: unknown, index: number) => ({
+  length: 83,
+  offset: 93 * index,
+  index,
+});
+
+const keyById = (item: { id: string }) => item.id;
+
+const FoldersPane = memo(function FoldersPane({
+  items,
+  loading,
+  initialLoading,
+  loadMore,
+  search,
+}: {
+  items: Folder[];
+  loading: boolean;
+  initialLoading: boolean;
+  loadMore: () => void;
+  search: string;
+}) {
+  const renderFolder = useCallback(
+    ({ item, index }: { item: Folder; index: number }) => (
+      <MemoFolderCard
+        folder={item}
+        index={index}
+        onPress={() =>
+          router.push({ pathname: "/folder/[id]", params: { id: item.id } })
+        }
+      />
+    ),
+    [],
+  );
+
+  return (
+    <FlatList
+      data={items}
+      style={LIST_STYLE}
+      keyExtractor={keyById}
+      showsVerticalScrollIndicator={false}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.4}
+      initialNumToRender={4}
+      getItemLayout={getRowLayout}
+      contentContainerStyle={LIST_CONTENT_STYLE}
+      ListEmptyComponent={
+        !initialLoading ? (
+          <Text color="$colorMuted">
+            {search ? "No folders match your search" : "No folders yet"}
+          </Text>
+        ) : null
+      }
+      ListFooterComponent={
+        <LoadMoreFooter visible={loading && !initialLoading} />
+      }
+      renderItem={renderFolder}
+    />
+  );
+});
+
+const ModulesPane = memo(function ModulesPane({
+  items,
+  loading,
+  initialLoading,
+  loadMore,
+  search,
+  sortOrder,
+}: {
+  items: Module[];
+  loading: boolean;
+  initialLoading: boolean;
+  loadMore: () => void;
+  search: string;
+  sortOrder: SortOption;
+}) {
+  const renderModule = useCallback(
+    ({ item }: { item: Module }) => (
+      <MemoModuleCard
+        module={item}
+        onPress={() =>
+          router.push({ pathname: "/module/[id]", params: { id: item.id } })
+        }
+      />
+    ),
+    [],
+  );
+
+  return (
+    <FlatList
+      data={items}
+      style={LIST_STYLE}
+      keyExtractor={keyById}
+      showsVerticalScrollIndicator={false}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.4}
+      initialNumToRender={4}
+      getItemLayout={getRowLayout}
+      contentContainerStyle={LIST_CONTENT_STYLE}
+      ListEmptyComponent={
+        !initialLoading ? (
+          <Text color="$colorMuted">
+            {search
+              ? "No modules match your search"
+              : sortOrder === "favs"
+                ? "No favorite modules yet"
+                : "No modules yet"}
+          </Text>
+        ) : null
+      }
+      ListFooterComponent={
+        <LoadMoreFooter visible={loading && !initialLoading} />
+      }
+      renderItem={renderModule}
+    />
+  );
+});
+
 export default function Library() {
   const insets = useSafeAreaInsets();
-  const [tab, setTab] = useState(0);
+  const tabs = useFadeTabs(0);
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
@@ -96,8 +234,8 @@ export default function Library() {
 
           <SegmentedControl
             options={["Folders", "Modules"]}
-            selected={tab}
-            onChange={setTab}
+            selected={tabs.index}
+            onChange={tabs.onChange}
           />
 
           <XStack gap="$2" ai="center">
@@ -123,96 +261,23 @@ export default function Library() {
           </XStack>
         </YStack>
 
-        {tab === 0 ? (
-          <FlatList
-            data={foldersList.items}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            onEndReached={foldersList.loadMore}
-            onEndReachedThreshold={0.4}
-            initialNumToRender={4}
-            getItemLayout={(_, index) => ({
-              length: 83,
-              offset: 93 * index,
-              index,
-            })}
-            contentContainerStyle={{
-              paddingHorizontal: 19,
-              gap: 10,
-              paddingBottom: 32,
-            }}
-            ListEmptyComponent={
-              !foldersList.initialLoading ? (
-                <Text color="$colorMuted">
-                  {search ? "No folders match your search" : "No folders yet"}
-                </Text>
-              ) : null
-            }
-            ListFooterComponent={
-              <LoadMoreFooter
-                visible={foldersList.loading && !foldersList.initialLoading}
-              />
-            }
-            renderItem={({ item, index }) => (
-              <FolderCard
-                folder={item}
-                index={index}
-                onPress={() =>
-                  router.push({
-                    pathname: "/folder/[id]",
-                    params: { id: item.id },
-                  })
-                }
-              />
-            )}
+        <FadeTabPanes controller={tabs}>
+          <FoldersPane
+            items={foldersList.items}
+            loading={foldersList.loading}
+            initialLoading={foldersList.initialLoading}
+            loadMore={foldersList.loadMore}
+            search={search}
           />
-        ) : (
-          <FlatList
-            data={modulesList.items}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            onEndReached={modulesList.loadMore}
-            onEndReachedThreshold={0.4}
-            initialNumToRender={4}
-            getItemLayout={(_, index) => ({
-              length: 83,
-              offset: 93 * index,
-              index,
-            })}
-            contentContainerStyle={{
-              paddingHorizontal: 19,
-              gap: 10,
-              paddingBottom: 32,
-            }}
-            ListEmptyComponent={
-              !modulesList.initialLoading ? (
-                <Text color="$colorMuted">
-                  {search
-                    ? "No modules match your search"
-                    : sortOrder === "favs"
-                      ? "No favorite modules yet"
-                      : "No modules yet"}
-                </Text>
-              ) : null
-            }
-            ListFooterComponent={
-              <LoadMoreFooter
-                visible={modulesList.loading && !modulesList.initialLoading}
-              />
-            }
-            renderItem={({ item }) => (
-              <ModuleCard
-                module={item}
-                onPress={() =>
-                  router.push({
-                    pathname: "/module/[id]",
-                    params: { id: item.id },
-                  })
-                }
-              />
-            )}
+          <ModulesPane
+            items={modulesList.items}
+            loading={modulesList.loading}
+            initialLoading={modulesList.initialLoading}
+            loadMore={modulesList.loadMore}
+            search={search}
+            sortOrder={sortOrder}
           />
-        )}
+        </FadeTabPanes>
       </YStack>
 
       <AppSheet
@@ -224,7 +289,7 @@ export default function Library() {
       >
         <YStack gap="$2" p="$4">
           {SORT_OPTIONS.map((option) =>
-            tab === 0 && option.key === "favs" ? null : (
+            tabs.index === 0 && option.key === "favs" ? null : (
               <Pressable
                 key={option.key}
                 onPress={() => {

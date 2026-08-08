@@ -9,6 +9,7 @@ import {
   Sora_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/sora";
+import "@tamagui/native/setup-expo-linear-gradient";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";

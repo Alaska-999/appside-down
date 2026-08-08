@@ -23,6 +23,11 @@ export function SegmentedControl({
   size = "medium",
 }: SegmentedControlProps) {
   const theme = useTheme();
+  const [internalSelected, setInternalSelected] = useState(selected);
+
+  useEffect(() => {
+    setInternalSelected(selected);
+  }, [selected]);
   const gradientColors = [
     theme.accentGradientStart.get(),
     theme.accentGradientEnd.get(),
@@ -47,11 +52,11 @@ export function SegmentedControl({
 
   useEffect(() => {
     if (tabWidth > 0) {
-      translateX.value = withTiming(selected * (tabWidth + GAP), {
+      translateX.value = withTiming(internalSelected * (tabWidth + GAP), {
         duration: 200,
       });
     }
-  }, [selected, tabWidth]);
+  }, [internalSelected, tabWidth]);
 
   const pillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -98,12 +103,19 @@ export function SegmentedControl({
       )}
 
       {options.map((option, i) => (
-        <Pressable key={option} onPress={() => onChange(i)} style={{ flex: 1 }}>
+        <Pressable
+          key={option}
+          onPress={() => {
+            setInternalSelected(i);
+            onChange(i);
+          }}
+          style={{ flex: 1 }}
+        >
           <XStack py={py} jc="center" ai="center">
             <Text
               fontSize={TEXT.cardMeta}
               fontWeight="700"
-              color={selected === i ? "$onAccentText" : "$colorMuted"}
+              color={internalSelected === i ? "$onAccentText" : "$colorMuted"}
             >
               {option}
             </Text>
