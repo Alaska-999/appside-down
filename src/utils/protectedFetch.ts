@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import * as SecureStore from "expo-secure-store";
 
@@ -13,54 +14,62 @@ const buildHeaders = (options: RequestInit, token: string): HeadersInit => {
   };
 };
 
-export const protectedFetch = async (
-  url: string,
-  options: RequestInit = {},
-) => {
-  const token = useAuthStore.getState().token;
-  const userId = useAuthStore.getState().user?.id;
-  if (!token) {
-    throw new Error("No token found");
-  }
+let refreshPromise: Promise<string> | null = null;
 
-  const headers = buildHeaders(options, token);
-  const response = await fetch(url, { ...options, headers });
+const refreshAccessToken = (): Promise<string> => {
+  if (refreshPromise) return refreshPromise;
 
-  if (response.status === 401) {
-    console.log("401 refetch");
-    const refreshToken = await SecureStore.getItemAsync("refreshToken");
-    if (!refreshToken) {
+  refreshPromise = (async () => {
+    const rt = await SecureStore.getItemAsync("refreshToken");
+    const userId = useAuthStore.getState().user?.id;
+    if (!rt || !userId) {
       useAuthStore.getState().logout();
       throw new Error("No refresh token found");
     }
 
-    const refreshResponse = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, refreshToken }),
-      },
-    );
+    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, refreshToken: rt }),
+    });
 
-    if (!refreshResponse.ok) {
+    if (!res.ok) {
       useAuthStore.getState().logout();
       throw new Error("Failed to refresh token");
     }
 
-    const data = await refreshResponse.json();
-    useAuthStore
-      .getState()
-      .setAuth(useAuthStore.getState().user!, data.access_token);
+    const data = await res.json();
+    useAuthStore.getState().setToken(data.access_token);
     if (data.refresh_token) {
       await SecureStore.setItemAsync("refreshToken", data.refresh_token);
     }
+    return data.access_token as string;
+  })().finally(() => {
+    refreshPromise = null;
+  });
 
-    return fetch(url, {
-      ...options,
-      headers: buildHeaders(options, data.access_token),
-    });
+  return refreshPromise;
+};
+
+export const protectedFetch = async (
+  url: string,
+  options: RequestInit = {},
+  _retried = false,
+): Promise<Response> => {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error("No token found");
   }
 
-  return response;
+  const response = await fetch(url, {
+    ...options,
+    headers: buildHeaders(options, token),
+  });
+
+  if (response.status !== 401 || _retried) {
+    return response;
+  }
+
+  await refreshAccessToken();
+  return protectedFetch(url, options, true);
 };

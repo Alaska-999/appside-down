@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -15,6 +16,7 @@ interface StudyQueueState {
   flushing: boolean;
   addEvent: (event: StudyEventInput) => void;
   flush: () => Promise<void>;
+  clear: () => void;
 }
 
 const FLUSH_THRESHOLD = 10;
@@ -40,7 +42,7 @@ export const useStudyQueueStore = create<StudyQueueState>()(
           while (get().events.length > 0) {
             const batch = get().events.slice(0, MAX_BATCH);
             const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/study/events`,
+              `${API_BASE_URL}/study/events`,
               { method: "POST", body: JSON.stringify({ events: batch }) },
             );
             if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -52,6 +54,8 @@ export const useStudyQueueStore = create<StudyQueueState>()(
           set({ flushing: false });
         }
       },
+
+      clear: () => set({ events: [] }),
     }),
     {
       name: "study-queue-storage",

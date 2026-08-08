@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -31,7 +32,7 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
       } as unknown as Blob);
 
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/users/me/avatar`,
+        `${API_BASE_URL}/users/me/avatar`,
         { method: "PATCH", body: formData },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -72,7 +73,7 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
     setUploading(true);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/users/me/avatar`,
+        `${API_BASE_URL}/users/me/avatar`,
         { method: "DELETE" },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);

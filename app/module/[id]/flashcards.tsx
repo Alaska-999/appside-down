@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlashcards";
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
@@ -84,7 +85,7 @@ export default function FlashcardsGame() {
     toggleStar(card.id);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${card.id}`,
+        `${API_BASE_URL}/flashcards/${card.id}`,
         { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);

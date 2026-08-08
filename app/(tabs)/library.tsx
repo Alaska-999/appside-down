@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FolderCard } from "@/src/components/cards/FolderCard";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
@@ -182,7 +183,7 @@ export default function Library() {
     if (search) params.set("search", search);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/modules?${params.toString()}`,
+      `${API_BASE_URL}/modules?${params.toString()}`,
     );
     if (!res.ok) throw new Error(`Modules error: ${res.status}`);
     const page = await res.json();
@@ -206,7 +207,7 @@ export default function Library() {
     if (search) params.set("search", search);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/folders?${params.toString()}`,
+      `${API_BASE_URL}/folders?${params.toString()}`,
     );
     if (!res.ok) throw new Error(`Folders error: ${res.status}`);
     return res.json();

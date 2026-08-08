@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
@@ -36,7 +37,7 @@ export default function FolderCreate() {
 
     try {
       const response = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/folders`,
+        `${API_BASE_URL}/folders`,
         {
           method: "POST",
           body: JSON.stringify({

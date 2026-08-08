@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { StreakCard } from "@/src/components/cards/StreakCard";
 import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { AppCard } from "@/src/components/ui/Card";
@@ -121,10 +122,10 @@ export default function Home() {
     // discoverModules - gives 6 foreign public modules for the "Discover" section, excluding your own (excludeOwn=true).
     try {
       const [statsRes, recentRes, discoverRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/stats`),
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules?limit=6`),
+        protectedFetch(`${API_BASE_URL}/modules/stats`),
+        protectedFetch(`${API_BASE_URL}/modules?limit=6`),
         protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/modules/public?limit=6&excludeOwn=true`,
+          `${API_BASE_URL}/modules/public?limit=6&excludeOwn=true`,
         ),
       ]);
       if (!statsRes.ok) throw new Error(`Stats error: ${statsRes.status}`);
@@ -166,7 +167,7 @@ export default function Home() {
       });
       if (cursor) params.set("cursor", cursor);
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/modules/public?${params.toString()}`,
+        `${API_BASE_URL}/modules/public?${params.toString()}`,
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       return res.json();

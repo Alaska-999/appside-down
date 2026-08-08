@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Toggle } from "@/src/components/common/Toggle";
@@ -10,7 +11,6 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { ReactNode, useState } from "react";
 import { Alert, Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -111,16 +111,17 @@ export default function SettingsScreen() {
 
   const logout = async () => {
     try {
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user?.id }),
-      });
+      const res = await protectedFetch(
+        `${API_BASE_URL}/auth/logout`,
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        console.error("Logout request failed");
+      }
     } catch (error) {
       console.error(error);
     } finally {
-      useAuthStore.getState().logout();
-      await SecureStore.deleteItemAsync("refreshToken");
+      await useAuthStore.getState().logout();
       router.replace("/login");
     }
   };
@@ -135,7 +136,7 @@ export default function SettingsScreen() {
     setIsDeleting(true);
     try {
       const response = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/account`,
+        `${API_BASE_URL}/auth/account`,
         {
           method: "DELETE",
           body: JSON.stringify({ password: deletePassword }),
@@ -151,8 +152,7 @@ export default function SettingsScreen() {
       }
 
       setDeleteSheetOpen(false);
-      useAuthStore.getState().logout();
-      await SecureStore.deleteItemAsync("refreshToken");
+      await useAuthStore.getState().logout();
       router.replace("/login");
     } catch (err) {
       console.error("[SettingsScreen] delete account error:", err);

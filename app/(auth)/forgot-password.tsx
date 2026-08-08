@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import {
   ForgotPasswordForm,
@@ -37,7 +38,7 @@ export default function ForgotPassword() {
 
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/forgot-password`,
+        `${API_BASE_URL}/auth/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

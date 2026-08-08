@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -45,7 +46,7 @@ export default function Signup() {
 
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/signup`,
+        `${API_BASE_URL}/auth/signup`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

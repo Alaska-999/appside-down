@@ -5,6 +5,7 @@ const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Invalid email"
 const strongPasswordSchema = z
     .string()
     .min(8, "At least 8 characters")
+    .max(72, "Max 72 characters")
     .regex(/[0-9]/, "Must contain at least one number");
 
 export const loginSchema = z.object({

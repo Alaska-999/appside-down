@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
@@ -77,7 +78,7 @@ export default function FolderScreen() {
     setError(null);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+        `${API_BASE_URL}/folders/${id}`,
         { method: "GET" },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -112,7 +113,7 @@ export default function FolderScreen() {
     setEditLoading(true);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+        `${API_BASE_URL}/folders/${id}`,
         {
           method: "PUT",
           body: JSON.stringify({
@@ -146,7 +147,7 @@ export default function FolderScreen() {
           onPress: async () => {
             try {
               const res = await protectedFetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+                `${API_BASE_URL}/folders/${id}`,
                 { method: "DELETE" },
               );
               if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -163,7 +164,7 @@ export default function FolderScreen() {
 
   const patchTags = async (newTags: string[]) => {
     const res = await protectedFetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}`,
+      `${API_BASE_URL}/folders/${id}`,
       { method: "PATCH", body: JSON.stringify({ tags: newTags }) },
     );
     if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -217,7 +218,7 @@ export default function FolderScreen() {
         onPress: async () => {
           try {
             const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/folders/${id}/modules/remove`,
+              `${API_BASE_URL}/folders/${id}/modules/remove`,
               {
                 method: "PATCH",
                 body: JSON.stringify({ moduleIds: [moduleId] }),

@@ -1,15 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { UserProfile } from "../types";
+
+const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 
 interface AuthState {
   user: UserProfile | null;
   token: string | null;
   isHydrated: boolean;
   setAuth: (user: UserProfile, token: string) => void;
-  logout: () => void;
-  updateStreak: (newStreak: number) => void;
+  setToken: (token: string) => void;
+  logout: () => Promise<void>;
   updateAvatar: (avatarUrl: string | null) => void;
   _setHydrated: (val: boolean) => void;
 }
@@ -21,19 +25,25 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isHydrated: false,
 
-      setAuth: (user, token) => set({ user, token }),
+      setAuth: (user, token) => {
+        set({ user, token });
+        SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token);
+      },
 
-      logout: () => set({ user: null, token: null }),
+      setToken: (token) => {
+        set({ token });
+        SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token);
+      },
 
-      updateStreak: (newStreak) =>
-        set((state) => ({
-          user: state.user
-            ? {
-                ...state.user,
-                streak: { ...state.user.streak, currentStreak: newStreak },
-              }
-            : null,
-        })),
+      logout: async () => {
+        set({ user: null, token: null });
+        const { useStudyQueueStore } = await import("./useStudyQueueStore");
+        useStudyQueueStore.getState().clear();
+        await Promise.all([
+          SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
+          SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+        ]);
+      },
 
       updateAvatar: (avatarUrl) =>
         set((state) => ({
@@ -45,8 +55,12 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ user: state.user }),
       onRehydrateStorage: () => (state) => {
-        state?._setHydrated(true);
+        SecureStore.getItemAsync(ACCESS_TOKEN_KEY).then((token) => {
+          if (token) state?.setToken(token);
+          state?._setHydrated(true);
+        });
       },
     },
   ),

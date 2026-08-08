@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
 import { Badge } from "@/src/components/ui/Badge";
@@ -54,11 +55,12 @@ export default function AddModules() {
     setError(null);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/modules`,
+        `${API_BASE_URL}/modules?limit=50`,
         { method: "GET" },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
-      const raw: any[] = await res.json();
+      const page: { data: any[] } = await res.json();
+      const raw: any[] = page.data ?? [];
       const available = raw
         .filter((m) => {
           const isAlreadyInThisFolder = m.folders?.some(
@@ -89,7 +91,7 @@ export default function AddModules() {
     setSaving(true);
     try {
       const response = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/folders/${folderId}/modules`,
+        `${API_BASE_URL}/folders/${folderId}/modules`,
         {
           method: "PATCH",
           body: JSON.stringify({ moduleIds: selectedIds }),

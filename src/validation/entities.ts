@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-// вміст карток не валідуємо — це контент юзера і його відповідальність;
 // повністю порожні рядки просто відфільтровуються перед відправкою.
-// Єдина вимога — щонайменше 2 непорожні картки (є хоч term, хоч definition)
+// Єдина вимога — щонайменше 2 непорожні картки (є хоч term, хоч definition).
+// Ліміти term/definition збігаються з бекендом (CreateFlashcardDto) —
+// щоб форма не пропускала те, що потім відхилить сервер.
 export const moduleSchema = z
   .object({
     name: z
@@ -13,8 +14,8 @@ export const moduleSchema = z
     description: z.string().trim().max(300, "Max 300 characters"),
     flashcards: z.array(
       z.object({
-        term: z.string().trim(),
-        definition: z.string().trim(),
+        term: z.string().trim().max(200, "Max 200 characters"),
+        definition: z.string().trim().max(500, "Max 500 characters"),
       }),
     ),
   })
@@ -48,8 +49,8 @@ export const editModuleSchema = z
       z.object({
         id: z.string(),
         isNew: z.boolean().optional(),
-        term: z.string().trim(),
-        definition: z.string().trim(),
+        term: z.string().trim().max(200, "Max 200 characters"),
+        definition: z.string().trim().max(500, "Max 500 characters"),
       }),
     ),
   })

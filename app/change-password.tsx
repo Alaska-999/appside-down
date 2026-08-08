@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -41,7 +42,7 @@ export default function ChangePasswordScreen() {
 
     try {
       const response = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/password`,
+        `${API_BASE_URL}/auth/password`,
         {
           method: "PATCH",
           body: JSON.stringify({ oldPassword, newPassword }),

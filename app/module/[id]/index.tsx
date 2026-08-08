@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
 import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
@@ -143,11 +144,11 @@ export default function ModuleScreen() {
     setError(null);
     try {
       const [moduleRes, flashcardsRes] = await Promise.all([
-        protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`, {
+        protectedFetch(`${API_BASE_URL}/modules/${id}`, {
           method: "GET",
         }),
         protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/flashcards/module/${id}`,
+          `${API_BASE_URL}/flashcards/module/${id}`,
           { method: "GET" },
         ),
       ]);
@@ -191,7 +192,7 @@ export default function ModuleScreen() {
     );
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${card.id}`,
+        `${API_BASE_URL}/flashcards/${card.id}`,
         { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -211,7 +212,7 @@ export default function ModuleScreen() {
     setModuleData((prev) => (prev ? { ...prev, isFavorite: newValue } : prev));
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+        `${API_BASE_URL}/modules/${id}`,
         { method: "PATCH", body: JSON.stringify({ isFavorite: newValue }) },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -228,7 +229,7 @@ export default function ModuleScreen() {
     setSaving(true);
     try {
       const res = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}/save`,
+        `${API_BASE_URL}/modules/${id}/save`,
         { method: "POST" },
       );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -286,7 +287,7 @@ export default function ModuleScreen() {
             onPress: async () => {
               try {
                 const res = await protectedFetch(
-                  `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+                  `${API_BASE_URL}/modules/${id}`,
                   { method: "DELETE" },
                 );
                 if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -313,7 +314,7 @@ export default function ModuleScreen() {
           const newTags = (moduleData.tags ?? []).filter((t) => t !== tag);
           try {
             const res = await protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/modules/${id}`,
+              `${API_BASE_URL}/modules/${id}`,
               { method: "PATCH", body: JSON.stringify({ tags: newTags }) },
             );
             if (!res.ok) throw new Error(`Error: ${res.status}`);

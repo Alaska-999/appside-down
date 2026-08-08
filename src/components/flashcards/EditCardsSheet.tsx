@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { AppButton } from "@/src/components/ui/Button";
@@ -142,7 +143,7 @@ export function EditCardsSheet({
         Promise.all(
           idsToDelete.map((cardId) =>
             protectedFetch(
-              `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${cardId}`,
+              `${API_BASE_URL}/flashcards/${cardId}`,
               {
                 method: "DELETE",
               },
@@ -154,7 +155,7 @@ export function EditCardsSheet({
             .filter((c) => !c.isNew)
             .map((c) =>
               protectedFetch(
-                `${process.env.EXPO_PUBLIC_API_URL}/flashcards/${c.id}`,
+                `${API_BASE_URL}/flashcards/${c.id}`,
                 {
                   method: "PATCH",
                   body: JSON.stringify({
@@ -169,7 +170,7 @@ export function EditCardsSheet({
           keptCards
             .filter((c) => c.isNew)
             .map((c) =>
-              protectedFetch(`${process.env.EXPO_PUBLIC_API_URL}/flashcards`, {
+              protectedFetch(`${API_BASE_URL}/flashcards`, {
                 method: "POST",
                 body: JSON.stringify({
                   term: c.term,
@@ -180,7 +181,7 @@ export function EditCardsSheet({
             ),
         ),
         protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/modules/${moduleId}`,
+          `${API_BASE_URL}/modules/${moduleId}`,
           {
             method: "PATCH",
             body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "@/src/api/config";
 import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
@@ -82,7 +83,7 @@ export default function ModuleCreate() {
 
     try {
       const response = await protectedFetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/modules`,
+        `${API_BASE_URL}/modules`,
         {
           method: "POST",
           body: JSON.stringify(module),
@@ -94,7 +95,7 @@ export default function ModuleCreate() {
       const newModule = await response.json();
       if (returnFolderId) {
         await protectedFetch(
-          `${process.env.EXPO_PUBLIC_API_URL}/folders/${returnFolderId}/modules`,
+          `${API_BASE_URL}/folders/${returnFolderId}/modules`,
           {
             method: "POST",
             body: JSON.stringify({ moduleId: newModule.id }),

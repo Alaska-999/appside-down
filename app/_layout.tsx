@@ -10,15 +10,45 @@ import {
   useFonts,
 } from "@expo-google-fonts/sora";
 import "@tamagui/native/setup-expo-linear-gradient";
+import "@tamagui/native/setup-zeego";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Button, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { PortalProvider, TamaguiProvider, Theme } from "tamagui";
 
 const queryClient = new QueryClient();
+
+export function ErrorBoundary({
+  error,
+  retry,
+}: {
+  error: Error;
+  retry: () => Promise<void>;
+}) {
+  if (__DEV__) {
+    console.error(error);
+  }
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 16,
+        padding: 24,
+        backgroundColor: "#000",
+      }}
+    >
+      <Text style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>
+        Something went wrong. Please try again.
+      </Text>
+      <Button title="Retry" onPress={retry} />
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const { token, isHydrated } = useAuthStore();
@@ -31,14 +61,12 @@ export default function RootLayout() {
   });
   const segments = useSegments();
   const router = useRouter();
-  console.log("hello");
 
   useEffect(() => {
     if (!isHydrated) return;
 
     const inAuthGroup = segments[0] === "(auth)";
 
-    console.log(token, inAuthGroup);
     const performRedirect = () => {
       if (!token && !inAuthGroup) {
         router.replace("/login");
