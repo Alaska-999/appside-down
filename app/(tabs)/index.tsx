@@ -315,11 +315,12 @@ export default function Home() {
                             label={`${Math.round(featuredStats.progress * 100)}%`}
                           />
                           <Text
-                            fontSize={16}
+                            fontSize={14}
                             fontWeight="700"
                             color="$color"
-                            numberOfLines={1}
-                            mt="$3"
+                            numberOfLines={2}
+                            ellipsizeMode="tail"
+                            mt={6}
                           >
                             Continue: {featuredModule.name}
                           </Text>
@@ -356,27 +357,32 @@ export default function Home() {
               </YStack>
 
               {recentModules.length > 0 && (
-                <YStack gap={14}>
-                  <SectionTitle>Recent</SectionTitle>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <XStack gap={11}>
-                      {recentModules.map((m, i) => {
-                        const count = m._count?.flashcards ?? 0;
-                        return (
-                          <Chip
-                            key={m.id}
-                            size="lg"
-                            monogram={m.name.slice(0, 1).toUpperCase()}
-                            title={m.name}
-                            meta={`${count} card${count !== 1 ? "s" : ""}`}
-                            gradientColors={
-                              CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]
-                            }
-                            onPress={() => openModule(m.id)}
-                          />
-                        );
-                      })}
-                    </XStack>
+                <YStack gap={14} mx={-screenGutter}>
+                  <SectionTitle px={screenGutter}>Recent</SectionTitle>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: screenGutter,
+                      gap: 11,
+                    }}
+                  >
+                    {recentModules.map((m, i) => {
+                      const count = m._count?.flashcards ?? 0;
+                      return (
+                        <Chip
+                          key={m.id}
+                          size="lg"
+                          monogram={m.name.slice(0, 1).toUpperCase()}
+                          title={m.name}
+                          meta={`${count} card${count !== 1 ? "s" : ""}`}
+                          gradientColors={
+                            CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]
+                          }
+                          onPress={() => openModule(m.id)}
+                        />
+                      );
+                    })}
                   </ScrollView>
                 </YStack>
               )}

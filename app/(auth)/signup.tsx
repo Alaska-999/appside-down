@@ -97,7 +97,7 @@ export default function Signup() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams />
+        <AuroraBeams intensity={1.3} />
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}

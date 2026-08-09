@@ -7,9 +7,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Pressable, StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
-import { Card, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 290;
+const MOCKUP_SCALE = 390 / 235;
+const CARD_RADIUS = 22 * MOCKUP_SCALE;
+const BORDER_WIDTH = 1.5;
 
 interface FlashcardLgProps {
   card: Flashcard | undefined;
@@ -23,67 +25,85 @@ interface FlashcardLgProps {
   revertKey?: number;
 }
 
-const AnimatedCard = Animated.createAnimatedComponent(Card);
-
 function CardFace({ style, text }: { style: object; text: string }) {
   return (
-    <AnimatedCard
-      style={style}
-      pos="absolute"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      bg="rgba(220,255,245,0.07)"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br={22 * MOCKUP_SCALE}
-      shadowColor="#2dd4bf"
-      shadowOpacity={0.13}
-      shadowRadius={28 * MOCKUP_SCALE}
-      shadowOffset={{ width: 0, height: 0 }}
-      elevation={0}
-      p={20 * MOCKUP_SCALE}
-      overflow="hidden"
-      alignItems="center"
-      justifyContent="center"
-    >
-      <LinearGradient
-        colors={["rgba(255,255,255,0.12)", "rgba(255,255,255,0)"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={{
+    <Animated.View
+      style={[
+        {
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          height: 16,
+          bottom: 0,
+          borderRadius: CARD_RADIUS + BORDER_WIDTH,
+          shadowColor: "#2dd4bf",
+          shadowOpacity: 0.25,
+          shadowRadius: 34 * MOCKUP_SCALE,
+          shadowOffset: { width: 0, height: 0 },
+          elevation: 0,
+        },
+        style,
+      ]}
+    >
+      <LinearGradient
+        colors={["#2DD4BF", "rgba(99,102,241,0.7)", "#A3E635"]}
+        locations={[0, 0.45, 1]}
+        start={{ x: 0.18, y: 0.12 }}
+        end={{ x: 0.82, y: 0.88 }}
+        style={{
+          flex: 1,
+          borderRadius: CARD_RADIUS + BORDER_WIDTH,
+          padding: BORDER_WIDTH,
         }}
-        pointerEvents="none"
-      />
+      >
+        <YStack
+          f={1}
+          br={CARD_RADIUS}
+          bg="rgba(13,17,26,0.96)"
+          overflow="hidden"
+          ai="center"
+          jc="center"
+          p={20 * MOCKUP_SCALE}
+        >
+          <LinearGradient
+            colors={["rgba(255,255,255,0.12)", "rgba(255,255,255,0)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 16,
+            }}
+            pointerEvents="none"
+          />
 
-      <YStack alignItems="center" justifyContent="center">
-        <Text
-          fontSize={22 * MOCKUP_SCALE}
-          fontWeight="800"
-          color="$color"
-          textAlign="center"
-          numberOfLines={6}
-          ellipsizeMode="tail"
-        >
-          {text}
-        </Text>
-        <Text
-          fontSize={10 * MOCKUP_SCALE}
-          color="$colorMuted"
-          tt="uppercase"
-          letterSpacing={0.5 * MOCKUP_SCALE}
-          mt={10 * MOCKUP_SCALE}
-        >
-          tap to flip
-        </Text>
-      </YStack>
-    </AnimatedCard>
+          <YStack alignItems="center" justifyContent="center">
+            <Text
+              fontSize={24 * MOCKUP_SCALE}
+              fontWeight="800"
+              color="$color"
+              textAlign="center"
+              numberOfLines={6}
+              ellipsizeMode="tail"
+            >
+              {text}
+            </Text>
+            <Text
+              fontSize={9.5 * MOCKUP_SCALE}
+              color="#5EEAD4"
+              tt="uppercase"
+              letterSpacing={1.4}
+              fontWeight="700"
+              mt={8 * MOCKUP_SCALE}
+            >
+              tap to flip
+            </Text>
+          </YStack>
+        </YStack>
+      </LinearGradient>
+    </Animated.View>
   );
 }
 

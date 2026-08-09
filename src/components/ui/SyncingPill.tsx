@@ -6,17 +6,16 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { Text, useTheme, XStack, XStackProps } from "tamagui";
+import { Text, XStack, XStackProps } from "tamagui";
 
 const MOCKUP_SCALE = 390 / 250;
 
 const DOT_SIZE = 6 * MOCKUP_SCALE;
 const DOT_RADIUS = 3 * MOCKUP_SCALE;
 const PULSE_HALF_DURATION = 500;
+const MINT = "#2DD4BF";
 
 export function SyncingPill({ ...rest }: XStackProps) {
-  const theme = useTheme();
-  const mint = theme.accentGradientStart.get();
   const opacity = useSharedValue(1);
 
   useEffect(() => {
@@ -52,7 +51,7 @@ export function SyncingPill({ ...rest }: XStackProps) {
             width: DOT_SIZE,
             height: DOT_SIZE,
             borderRadius: DOT_RADIUS,
-            backgroundColor: mint,
+            backgroundColor: MINT,
           },
           dotStyle,
         ]}

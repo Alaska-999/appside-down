@@ -1,18 +1,83 @@
 import { AppButton } from "@/src/components/ui/Button";
-import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
-import { ProgressRing } from "@/src/components/ui/ProgressRing";
+import { GradientText } from "@/src/components/ui/GradientText";
+import { ScreenAtmosphere } from "@/src/components/ui/ScreenAtmosphere";
+import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { useGameStore } from "@/src/store/useGameStore";
-import { Check, X } from "@tamagui/lucide-icons";
+import { useEffect } from "react";
+import { DimensionValue } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 290;
+const MOCKUP_SCALE = 390 / 265;
 
 interface FlashcardsCompleteProps {
   total: number;
   known: number;
   stillLearning: number;
+}
+
+interface SparkSpec {
+  size: number;
+  top: DimensionValue;
+  left?: DimensionValue;
+  right?: DimensionValue;
+  color: string;
+  delay: number;
+}
+
+const SPARKS: SparkSpec[] = [
+  { size: 4, top: "10%", left: "14%", color: "#A3E635", delay: 0 },
+  { size: 5, top: "18%", right: "12%", color: "#5EEAD4", delay: 700 },
+  { size: 3, top: "46%", left: "8%", color: "#A3E635", delay: 1300 },
+];
+
+function Spark({ spark }: { spark: SparkSpec }) {
+  const opacity = useSharedValue(0.25);
+
+  useEffect(() => {
+    opacity.value = withDelay(
+      spark.delay,
+      withRepeat(
+        withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true,
+      ),
+    );
+  }, [opacity, spark.delay]);
+
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          top: spark.top,
+          left: spark.left,
+          right: spark.right,
+          width: spark.size * MOCKUP_SCALE,
+          height: spark.size * MOCKUP_SCALE,
+          borderRadius: 999,
+          backgroundColor: spark.color,
+          shadowColor: spark.color,
+          shadowOpacity: 0.8,
+          shadowRadius: 8 * MOCKUP_SCALE,
+          shadowOffset: { width: 0, height: 0 },
+        },
+        style,
+      ]}
+    />
+  );
 }
 
 export function FlashcardsComplete({
@@ -26,43 +91,34 @@ export function FlashcardsComplete({
 
   return (
     <YStack f={1} pt={insets.top} pb={insets.bottom + 16}>
-      <AuroraGlow mintOpacity={0.16} limeOpacity={0.13} />
+      <ScreenAtmosphere halo />
 
-      <YStack alignItems="center" pt="$5" gap="$1">
-        <Text fontSize={20 * MOCKUP_SCALE} fontWeight="800" color="$color">
+      {SPARKS.map((spark, index) => (
+        <Spark key={index} spark={spark} />
+      ))}
+
+      <YStack alignItems="center" pt={30 * MOCKUP_SCALE}>
+        <OrbitProgress percent={pct} />
+      </YStack>
+
+      <YStack alignItems="center" mt={12 * MOCKUP_SCALE} gap={2}>
+        <GradientText fontSize={50 * MOCKUP_SCALE} fontWeight="800" lineHeight={50 * MOCKUP_SCALE}>
+          {Math.round(pct * 100)}%
+        </GradientText>
+        <Text fontSize={11 * MOCKUP_SCALE} color="$colorMuted" mt={3 * MOCKUP_SCALE}>
+          of orbit travelled
+        </Text>
+        <Text fontSize={19 * MOCKUP_SCALE} fontWeight="800" color="$color" mt={8 * MOCKUP_SCALE}>
           Nice run! 🎉
         </Text>
-        <Text fontSize="$3" color="$colorMuted">
-          You&apos;re getting there
-        </Text>
       </YStack>
 
-      <YStack alignItems="center" pt="$5" pb="$4">
-        <ProgressRing
-          progress={pct}
-          size={110 * MOCKUP_SCALE}
-          strokeWidth={12}
-          label={`${Math.round(pct * 100)}%`}
-          labelFontSize={20 * MOCKUP_SCALE}
-          caption="known"
-          animated
-        />
-      </YStack>
-
-      <XStack alignItems="center" jc="center" gap="$3">
-        <StatusPill
-          icon={<Check size={13 * MOCKUP_SCALE} color="#10B981" />}
-          text={`${known} known`}
-          variant="success"
-        />
-        <StatusPill
-          icon={<X size={13 * MOCKUP_SCALE} color="#EF4444" />}
-          text={`${stillLearning} learning`}
-          variant="danger"
-        />
+      <XStack alignItems="center" jc="center" gap="$2" mt={12 * MOCKUP_SCALE}>
+        <StatusPill tone="known" count={known} label="known" />
+        <StatusPill tone="learning" count={stillLearning} label="learning" />
       </XStack>
 
-      <YStack f={1} />
+      <View f={1} />
 
       <YStack px="$5" gap="$3">
         {stillLearning > 0 && (

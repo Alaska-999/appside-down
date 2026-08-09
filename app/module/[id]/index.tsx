@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
-import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
+import { ScreenAtmosphere } from "@/src/components/ui/ScreenAtmosphere";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { Badge } from "@/src/components/ui/Badge";
 import { AppButton } from "@/src/components/ui/Button";
@@ -23,7 +23,6 @@ import {
   BookmarkPlus,
   Check,
   ChevronLeft,
-  ChevronRight,
   FileText,
   GraduationCap,
   Layers,
@@ -31,6 +30,7 @@ import {
   Lock,
   MoreHorizontal,
   Pencil,
+  Play,
   Sparkles,
   Star,
   Trash2,
@@ -38,39 +38,33 @@ import {
   X,
   Zap,
 } from "@tamagui/lucide-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  View,
-  ViewToken,
-  useWindowDimensions,
-} from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+import { SharedValue } from "react-native-reanimated";
+import { Carousel } from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, useTheme, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
-const GAP = 12;
-const PEEK = 28;
 const LIME = "#A3E635";
-const CAROUSEL_CARD_HEIGHT = 164;
+const MOCKUP_SCALE = 390 / 235;
+const STACK_HEIGHT = 118 * MOCKUP_SCALE;
+const STACK_CARD_HEIGHT = 95 * MOCKUP_SCALE;
+const CHIP_WIDTH = 47.25 * MOCKUP_SCALE;
 
 type SortOrder = "original" | "alphabetical";
 
 function ModuleSkeleton() {
   return (
     <YStack pb="$10" gap="$6">
-      <YStack px={PEEK}>
-        <Skeleton height={CAROUSEL_CARD_HEIGHT} borderRadius={24} />
+      <YStack px="$screenX">
+        <Skeleton height={STACK_HEIGHT} borderRadius={24} />
       </YStack>
 
       <YStack px="$screenX" gap="$4">
         <Skeleton height={28} width="70%" borderRadius={8} />
         <Skeleton height={16} width="45%" borderRadius={6} />
-        <Skeleton height={83} borderRadius={20} />
+        <Skeleton height={52} borderRadius={999} />
         <Skeleton height={83} borderRadius={20} />
       </YStack>
     </YStack>
@@ -78,22 +72,18 @@ function ModuleSkeleton() {
 }
 
 export default function ModuleScreen() {
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [moduleData, setModuleData] = useState<Module | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const { width: screenWidth } = useWindowDimensions();
 
-  const CARD_WIDTH = screenWidth - PEEK * 2 - GAP;
   const initGame = useGameStore((state) => state.initGame);
   const currentModule = useGameStore((state) => state.currentModule);
 
@@ -351,27 +341,14 @@ export default function ModuleScreen() {
     ]);
   };
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        setCurrentIndex(viewableItems[0].index);
-      }
-    },
-    [],
-  );
-
-  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 });
-
   const actionButtons = moduleData ? getActionButtons(id) : [];
-  const actionRows = [
-    actionButtons.slice(0, 3),
-    actionButtons.slice(3, 6),
-  ];
+  const studyNow = actionButtons.find((button) => button.key === "flashcards");
+  const modeChips = actionButtons.filter((button) => button.key !== "flashcards");
 
   return (
     <YStack f={1} bg="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
+        <ScreenAtmosphere />
 
         <YStack pb="$10" gap="$6">
           <XStack px="$screenX" pt={insets.top + 10 + topPaddingBoost} jc="space-between" ai="center">
@@ -419,51 +396,42 @@ export default function ModuleScreen() {
           {moduleData && (
             <>
               {flashcards.length > 0 && (
-                <YStack gap="$3">
-                  <FlatList
+                <YStack px="$screenX" height={STACK_HEIGHT}>
+                  <Carousel
                     data={flashcards}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={{ flexGrow: 0 }}
-                    snapToInterval={CARD_WIDTH + GAP}
-                    decelerationRate="fast"
-                    contentContainerStyle={{ paddingHorizontal: PEEK }}
-                    ItemSeparatorComponent={() => (
-                      <View style={{ width: GAP }} />
-                    )}
-                    keyExtractor={(item) => item.id}
-                    onViewableItemsChanged={onViewableItemsChanged}
-                    viewabilityConfig={viewabilityConfig.current}
-                    renderItem={({ item }) => (
+                    loop
+                    style={{ width: "100%", height: STACK_HEIGHT }}
+                    layout={{
+                      type: "horizontal-stack",
+                      visibleCount: 3,
+                      exitDirection: "left",
+                      spacing: 8,
+                      scaleStep: 0.05,
+                      opacityStep: 0.5,
+                      rotation: 4,
+                    }}
+                    keyExtractor={(item: Flashcard) => item.id}
+                    renderItem={({
+                      item,
+                      relativeProgress,
+                    }: {
+                      item: Flashcard;
+                      relativeProgress: SharedValue<number>;
+                    }) => (
                       <FlashcardSm
                         term={item.term}
                         definition={item.definition}
-                        width={CARD_WIDTH}
+                        height={STACK_CARD_HEIGHT}
+                        relativeProgress={relativeProgress}
                       />
                     )}
                   />
-                  <XStack gap="$2" jc="center">
-                    {flashcards.map((_, i) => (
-                      <View
-                        key={i}
-                        style={{
-                          height: 6,
-                          borderRadius: 3,
-                          width: i === currentIndex ? 16 : 6,
-                          backgroundColor:
-                            i === currentIndex
-                              ? theme.accentGradientStart.get()
-                              : "rgba(220,255,245,0.18)",
-                        }}
-                      />
-                    ))}
-                  </XStack>
                 </YStack>
               )}
 
               <YStack px="$screenX" gap="$5">
                 <YStack gap="$2">
-                  <Text fontSize={24} fontWeight="800" color="$color">
+                  <Text fontSize={20 * MOCKUP_SCALE} fontWeight="800" color="$color">
                     {moduleData.name}
                   </Text>
 
@@ -477,17 +445,17 @@ export default function ModuleScreen() {
                     <UserAvatar
                       avatarUrl={moduleData.author?.avatarUrl}
                       username={authorName}
-                      size={35}
+                      size={28}
                     />
-                    <Text fontSize={15} fontWeight="700" color="$color">
+                    <Text fontSize={10.5 * MOCKUP_SCALE} fontWeight="700" color="$color">
                       {authorName ?? "Unknown"}
                     </Text>
                     {isDeletedAuthor && (
-                      <Text fontSize={13} color="$colorMuted">
+                      <Text fontSize={10.5 * MOCKUP_SCALE} color="$colorMuted">
                         (deleted account)
                       </Text>
                     )}
-                    <Text fontSize={15} color="$colorMuted">
+                    <Text fontSize={10.5 * MOCKUP_SCALE} color="$colorMuted">
                       · {moduleData.itemsCount} term
                       {moduleData.itemsCount !== 1 ? "s" : ""}
                     </Text>
@@ -536,107 +504,64 @@ export default function ModuleScreen() {
 
                 {isOwner ? (
                   <YStack gap="$3">
-                    <SectionTitle tone="eyebrow">Study modes</SectionTitle>
-                    <YStack gap={11}>
-                      {actionRows.map((row, rowIndex) => (
-                        <XStack key={rowIndex} gap={11}>
-                          {row.map(({ key, label, Icon, locked, onPress }) => {
-                            const isAccent = key === "flashcards";
-                            return (
-                              <Pressable
-                                key={key}
-                                style={{ flex: 1 }}
-                                onPress={() => onPress(moduleData, flashcards)}
+                    {studyNow && (
+                      <AppButton
+                        icon={<Play size={16} color="$onAccentText" fill="$onAccentText" />}
+                        onPress={() => studyNow.onPress(moduleData, flashcards)}
+                      >
+                        Study now
+                      </AppButton>
+                    )}
+
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ gap: 6 * MOCKUP_SCALE }}
+                    >
+                      {modeChips.map(({ key, label, Icon, locked, onPress }) => (
+                        <Pressable
+                          key={key}
+                          onPress={() => onPress(moduleData, flashcards)}
+                        >
+                          <YStack
+                            width={CHIP_WIDTH}
+                            br={13 * MOCKUP_SCALE}
+                            px={4 * MOCKUP_SCALE}
+                            py={8 * MOCKUP_SCALE}
+                            ai="center"
+                            jc="center"
+                            gap={3 * MOCKUP_SCALE}
+                            pos="relative"
+                            opacity={locked ? 0.5 : 1}
+                            bg="$glassBgSubtle"
+                            borderWidth={1}
+                            borderColor="$glassBorder"
+                          >
+                            {locked && (
+                              <View
+                                style={{
+                                  position: "absolute",
+                                  top: 5,
+                                  right: 5,
+                                  opacity: 0.6,
+                                }}
                               >
-                                <YStack
-                                  br={22}
-                                  pt={16}
-                                  px={8}
-                                  pb={14}
-                                  ai="center"
-                                  jc="center"
-                                  pos="relative"
-                                  opacity={locked ? 0.5 : 1}
-                                  bg={isAccent ? "$mintGlassBg" : "$glassBg"}
-                                  borderWidth={1}
-                                  borderColor={
-                                    isAccent
-                                      ? "rgba(45,212,191,0.45)"
-                                      : "$glassBorder"
-                                  }
-                                  shadowColor={
-                                    isAccent ? "#2dd4bf" : undefined
-                                  }
-                                  shadowOpacity={isAccent ? 0.2 : 0}
-                                  shadowRadius={isAccent ? 22 : 0}
-                                  shadowOffset={{ width: 0, height: 0 }}
-                                >
-                                  {locked && (
-                                    <View
-                                      style={{
-                                        position: "absolute",
-                                        top: 8,
-                                        right: 9,
-                                        opacity: 0.6,
-                                      }}
-                                    >
-                                      <Lock size={12} color="$colorMuted" />
-                                    </View>
-                                  )}
-                                  {isAccent ? (
-                                    <LinearGradient
-                                      colors={[
-                                        theme.accentGradientStart.get(),
-                                        theme.accentGradientEnd.get(),
-                                      ]}
-                                      start={{ x: 0, y: 0 }}
-                                      end={{ x: 1, y: 1 }}
-                                      style={{
-                                        width: 46,
-                                        height: 46,
-                                        borderRadius: 15,
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        marginBottom: 6,
-                                      }}
-                                    >
-                                      <Icon
-                                        size={20}
-                                        color={theme.onAccentText.get()}
-                                      />
-                                    </LinearGradient>
-                                  ) : (
-                                    <YStack
-                                      width={46}
-                                      height={46}
-                                      br={15}
-                                      bg="$glassBgStrong"
-                                      borderWidth={1}
-                                      borderColor="$glassBorder"
-                                      ai="center"
-                                      jc="center"
-                                      mb={6}
-                                    >
-                                      <Icon
-                                        size={20}
-                                        color="$colorSecondary"
-                                      />
-                                    </YStack>
-                                  )}
-                                  <Text
-                                    fontSize={14}
-                                    fontWeight="700"
-                                    color="$color"
-                                  >
-                                    {label}
-                                  </Text>
-                                </YStack>
-                              </Pressable>
-                            );
-                          })}
-                        </XStack>
+                                <Lock size={10} color="$colorMuted" />
+                              </View>
+                            )}
+                            <Icon size={13 * MOCKUP_SCALE} color="$colorSecondary" />
+                            <Text
+                              fontSize={9.5 * MOCKUP_SCALE}
+                              fontWeight="600"
+                              color="$colorSecondary"
+                              numberOfLines={1}
+                            >
+                              {label}
+                            </Text>
+                          </YStack>
+                        </Pressable>
                       ))}
-                    </YStack>
+                    </ScrollView>
                   </YStack>
                 ) : (
                   <AppButton
@@ -673,13 +598,21 @@ export default function ModuleScreen() {
                       </Pressable>
                     </XStack>
 
-                    <YStack gap="$2">
+                    <YStack gap={7 * MOCKUP_SCALE}>
                       {sortedFlashcards.map((card) => (
-                        <AppCard key={card.id} variant="soft" size="md" gap="$2">
+                        <AppCard
+                          key={card.id}
+                          variant="flat"
+                          accentBorder
+                          br={14 * MOCKUP_SCALE}
+                          px={11 * MOCKUP_SCALE}
+                          py={9 * MOCKUP_SCALE}
+                          gap="$1"
+                        >
                           <XStack ai="flex-start" jc="space-between" gap="$2">
                             <Text
                               f={1}
-                              fontSize={17}
+                              fontSize={12 * MOCKUP_SCALE}
                               fontWeight="700"
                               color="$color"
                             >
@@ -707,7 +640,7 @@ export default function ModuleScreen() {
                               )}
                             </XStack>
                           </XStack>
-                          <Text fontSize={16} color="$colorSecondary">
+                          <Text fontSize={10.5 * MOCKUP_SCALE} color="$colorMuted">
                             {cardSideText(card.definition)}
                           </Text>
                         </AppCard>

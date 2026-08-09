@@ -47,70 +47,74 @@ interface BeamSpec {
   tier: "base" | "extra";
 }
 
-const BEAMS: BeamSpec[] = [
-  {
-    id: "b1",
-    top: 30 * MOCKUP_SCALE,
-    left: -80 * MOCKUP_SCALE,
-    stops: [
-      { offset: 0, color: "#2dd4bf", opacity: 0 },
-      { offset: 1 / 3, color: "#2dd4bf", opacity: 0.2 },
-      { offset: 2 / 3, color: "#a3e635", opacity: 0.1 },
-      { offset: 1, color: "#a3e635", opacity: 0 },
-    ],
-    drift: { duration: 9000, amplitudeX: 20, amplitudeY: 15, minOpacity: 0.88 },
-    tier: "base",
-  },
-  {
-    id: "b2",
-    top: 110 * MOCKUP_SCALE,
-    left: -40 * MOCKUP_SCALE,
-    stops: [
-      { offset: 0, color: "#6366f1", opacity: 0 },
-      { offset: 0.5, color: "#6366f1", opacity: 0.22 },
-      { offset: 1, color: "#6366f1", opacity: 0 },
-    ],
-    drift: { duration: 12500, amplitudeX: 25, amplitudeY: 20, minOpacity: 0.85 },
-    tier: "base",
-  },
-  {
-    id: "b3",
-    top: 190 * MOCKUP_SCALE,
-    left: -100 * MOCKUP_SCALE,
-    stops: [
-      { offset: 0, color: "#0d9488", opacity: 0 },
-      { offset: 0.5, color: "#0d9488", opacity: 0.14 },
-      { offset: 1, color: "#0d9488", opacity: 0 },
-    ],
-    drift: { duration: 14000, amplitudeX: 18, amplitudeY: 18, minOpacity: 0.9 },
-    tier: "base",
-  },
-  {
-    id: "b4",
-    top: 340 * MOCKUP_SCALE,
-    left: 40 * MOCKUP_SCALE,
-    stops: [
-      { offset: 0, color: "#2dd4bf", opacity: 0 },
-      { offset: 1 / 3, color: "#2dd4bf", opacity: 0.18 },
-      { offset: 2 / 3, color: "#a3e635", opacity: 0.09 },
-      { offset: 1, color: "#a3e635", opacity: 0 },
-    ],
-    drift: { duration: 11000, amplitudeX: 22, amplitudeY: 17, minOpacity: 0.87 },
-    tier: "extra",
-  },
-  {
-    id: "b5",
-    top: 460 * MOCKUP_SCALE,
-    left: -160 * MOCKUP_SCALE,
-    stops: [
-      { offset: 0, color: "#6366f1", opacity: 0 },
-      { offset: 0.5, color: "#6366f1", opacity: 0.2 },
-      { offset: 1, color: "#6366f1", opacity: 0 },
-    ],
-    drift: { duration: 13500, amplitudeX: 26, amplitudeY: 21, minOpacity: 0.84 },
-    tier: "extra",
-  },
-];
+export type AuroraGradientType = "aurora";
+
+const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
+  aurora: [
+    {
+      id: "b1",
+      top: 30 * MOCKUP_SCALE,
+      left: -80 * MOCKUP_SCALE,
+      stops: [
+        { offset: 0, color: "#2dd4bf", opacity: 0 },
+        { offset: 1 / 3, color: "#2dd4bf", opacity: 0.2 },
+        { offset: 2 / 3, color: "#a3e635", opacity: 0.1 },
+        { offset: 1, color: "#a3e635", opacity: 0 },
+      ],
+      drift: { duration: 9000, amplitudeX: 20, amplitudeY: 15, minOpacity: 0.88 },
+      tier: "base",
+    },
+    {
+      id: "b2",
+      top: 110 * MOCKUP_SCALE,
+      left: -40 * MOCKUP_SCALE,
+      stops: [
+        { offset: 0, color: "#6366f1", opacity: 0 },
+        { offset: 0.5, color: "#6366f1", opacity: 0.22 },
+        { offset: 1, color: "#6366f1", opacity: 0 },
+      ],
+      drift: { duration: 12500, amplitudeX: 25, amplitudeY: 20, minOpacity: 0.85 },
+      tier: "base",
+    },
+    {
+      id: "b3",
+      top: 190 * MOCKUP_SCALE,
+      left: -100 * MOCKUP_SCALE,
+      stops: [
+        { offset: 0, color: "#0d9488", opacity: 0 },
+        { offset: 0.5, color: "#0d9488", opacity: 0.14 },
+        { offset: 1, color: "#0d9488", opacity: 0 },
+      ],
+      drift: { duration: 14000, amplitudeX: 18, amplitudeY: 18, minOpacity: 0.9 },
+      tier: "base",
+    },
+    {
+      id: "b4",
+      top: 340 * MOCKUP_SCALE,
+      left: 40 * MOCKUP_SCALE,
+      stops: [
+        { offset: 0, color: "#2dd4bf", opacity: 0 },
+        { offset: 1 / 3, color: "#2dd4bf", opacity: 0.18 },
+        { offset: 2 / 3, color: "#a3e635", opacity: 0.09 },
+        { offset: 1, color: "#a3e635", opacity: 0 },
+      ],
+      drift: { duration: 11000, amplitudeX: 22, amplitudeY: 17, minOpacity: 0.87 },
+      tier: "extra",
+    },
+    {
+      id: "b5",
+      top: 460 * MOCKUP_SCALE,
+      left: -160 * MOCKUP_SCALE,
+      stops: [
+        { offset: 0, color: "#6366f1", opacity: 0 },
+        { offset: 0.5, color: "#6366f1", opacity: 0.2 },
+        { offset: 1, color: "#6366f1", opacity: 0 },
+      ],
+      drift: { duration: 13500, amplitudeX: 26, amplitudeY: 21, minOpacity: 0.84 },
+      tier: "extra",
+    },
+  ],
+};
 
 const MOTION_PRESETS: Record<"calm" | "lively", { durationMul: number; amplitudeMul: number }> = {
   calm: { durationMul: 0.65, amplitudeMul: 1.6 },
@@ -210,12 +214,14 @@ function Beam({
 }
 
 interface AuroraBeamsProps {
+  type?: AuroraGradientType;
   intensity?: number;
   coverage?: "top" | "full";
   motion?: "calm" | "lively";
 }
 
 export function AuroraBeams({
+  type = "aurora",
   intensity = 1,
   coverage = "top",
   motion = "calm",
@@ -223,7 +229,7 @@ export function AuroraBeams({
   const reducedMotion = useReducedMotion();
   const motionPreset = MOTION_PRESETS[motion];
 
-  const beams = BEAMS.filter((beam) => coverage === "full" || beam.tier === "base").map(
+  const beams = BEAM_SETS[type].filter((beam) => coverage === "full" || beam.tier === "base").map(
     (beam) => ({
       ...beam,
       drift: {

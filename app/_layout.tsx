@@ -1,4 +1,8 @@
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import {
+  MeshGradientBackground,
+  type MeshVariant,
+} from "@/src/components/ui/MeshGradientBackground";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { controlHeight } from "@/tamagui.config";
@@ -34,6 +38,8 @@ const SPLASH_GAP = 14 * MOCKUP_SCALE;
 const SPINNER_SIZE = 26 * MOCKUP_SCALE;
 const SPINNER_BORDER_WIDTH = 3 * MOCKUP_SCALE;
 
+const SPLASH_VARIANT: "aurora" | MeshVariant = "mesh-full";
+
 function AppSplashSpinner() {
   const rotation = useSharedValue(0);
 
@@ -55,7 +61,11 @@ function AppSplashSpinner() {
 function AppSplash() {
   return (
     <View style={styles.splashRoot}>
-      <AuroraBeams intensity={1.5} coverage="full" motion="lively" />
+      {SPLASH_VARIANT === "aurora" ? (
+        <AuroraBeams intensity={1.5} coverage="full" motion="lively" />
+      ) : (
+        <MeshGradientBackground variant={SPLASH_VARIANT} />
+      )}
       <View style={styles.splashCenter}>
         <MaskedView
           maskElement={<Text style={styles.splashName}>Appside</Text>}

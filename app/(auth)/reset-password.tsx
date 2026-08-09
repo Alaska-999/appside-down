@@ -110,16 +110,14 @@ export default function ResetPassword() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams />
-        <IconButton
-          variant="liquidGlass"
-          icon={<ChevronLeft size="$1" color="$color" />}
-          onPress={() => router.back()}
-          pos="absolute"
-          top={insets.top + 8}
-          left={screenGutter}
-          zIndex={10}
-        />
+        <AuroraBeams intensity={1.3} />
+        <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
+          <IconButton
+            variant="liquidGlass"
+            icon={<ChevronLeft size="$1" color="$color" />}
+            onPress={() => router.back()}
+          />
+        </YStack>
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
