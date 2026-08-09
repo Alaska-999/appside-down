@@ -8,11 +8,15 @@ import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { topPaddingBoost } from "@/tamagui.config";
 import {
   AlignJustify,
   ArrowLeftRight,
@@ -27,6 +31,7 @@ import {
   Lock,
   MoreHorizontal,
   Pencil,
+  Sparkles,
   Star,
   Trash2,
   Volume2,
@@ -51,8 +56,26 @@ import { Text, useTheme, XStack, YStack } from "tamagui";
 const GAP = 12;
 const PEEK = 28;
 const LIME = "#A3E635";
+const CAROUSEL_CARD_HEIGHT = 164;
 
 type SortOrder = "original" | "alphabetical";
+
+function ModuleSkeleton() {
+  return (
+    <YStack pb="$10" gap="$6">
+      <YStack px={PEEK}>
+        <Skeleton height={CAROUSEL_CARD_HEIGHT} borderRadius={24} />
+      </YStack>
+
+      <YStack px="$screenX" gap="$4">
+        <Skeleton height={28} width="70%" borderRadius={8} />
+        <Skeleton height={16} width="45%" borderRadius={6} />
+        <Skeleton height={83} borderRadius={20} />
+        <Skeleton height={83} borderRadius={20} />
+      </YStack>
+    </YStack>
+  );
+}
 
 export default function ModuleScreen() {
   const theme = useTheme();
@@ -60,7 +83,7 @@ export default function ModuleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [moduleData, setModuleData] = useState<Module | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
@@ -351,7 +374,7 @@ export default function ModuleScreen() {
         <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
 
         <YStack pb="$10" gap="$6">
-          <XStack px="$4" pt={insets.top + 10} jc="space-between" ai="center">
+          <XStack px="$screenX" pt={insets.top + 10 + topPaddingBoost} jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
               icon={<ChevronLeft size="$1" color="$color" />}
@@ -379,15 +402,18 @@ export default function ModuleScreen() {
             )}
           </XStack>
 
-          {loading && (
-            <Text color="$colorMuted" textAlign="center" mt="$4">
-              Loading...
-            </Text>
-          )}
-          {error && (
-            <Text color="$statusDanger" textAlign="center" mt="$4">
-              {error}
-            </Text>
+          {loading && <ModuleSkeleton />}
+
+          {error && !loading && (
+            <YStack px="$screenX" mt="$4">
+              <StateCard
+                variant="error"
+                title="Couldn't load module"
+                subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                buttonLabel="Retry"
+                onButtonPress={fetchData}
+              />
+            </YStack>
           )}
 
           {moduleData && (
@@ -435,7 +461,7 @@ export default function ModuleScreen() {
                 </YStack>
               )}
 
-              <YStack px="$4" gap="$5">
+              <YStack px="$screenX" gap="$5">
                 <YStack gap="$2">
                   <Text fontSize={24} fontWeight="800" color="$color">
                     {moduleData.name}
@@ -510,14 +536,7 @@ export default function ModuleScreen() {
 
                 {isOwner ? (
                   <YStack gap="$3">
-                    <Text
-                      fontSize="$3"
-                      color="$auroraMuted"
-                      fontWeight="600"
-                      tt="uppercase"
-                    >
-                      Study modes
-                    </Text>
+                    <SectionTitle tone="eyebrow">Study modes</SectionTitle>
                     <YStack gap={11}>
                       {actionRows.map((row, rowIndex) => (
                         <XStack key={rowIndex} gap={11}>
@@ -622,24 +641,28 @@ export default function ModuleScreen() {
                 ) : (
                   <AppButton
                     icon={<BookmarkPlus size={18} color="$onAccentText" />}
-                    disabled={saving}
+                    loading={saving}
                     onPress={handleSaveToLibrary}
                   >
-                    {saving ? "Saving..." : "Save to library"}
+                    Save to library
                   </AppButton>
                 )}
 
-                {sortedFlashcards.length > 0 && (
+                {sortedFlashcards.length === 0 ? (
+                  <StateCard
+                    variant="empty"
+                    icon={<Sparkles size={24} color="$color" />}
+                    title="No cards yet"
+                    subtitle="This module doesn't have any flashcards yet"
+                    buttonLabel={isOwner ? "Add cards" : undefined}
+                    onButtonPress={isOwner ? openEditSheet : undefined}
+                  />
+                ) : (
                   <YStack gap="$3">
                     <XStack ai="center" jc="space-between">
-                      <Text
-                        fontSize="$3"
-                        color="$auroraMuted"
-                        fontWeight="600"
-                        tt="uppercase"
-                      >
+                      <SectionTitle tone="eyebrow">
                         Terms · {sortedFlashcards.length}
-                      </Text>
+                      </SectionTitle>
                       <Pressable onPress={() => setSortSheetOpen(true)}>
                         <XStack ai="center" gap="$1" py="$1" px="$2">
                           <Text fontSize={13} color="$colorMuted">

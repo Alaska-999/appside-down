@@ -2,17 +2,26 @@ import { API_BASE_URL } from "@/src/api/config";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
 import { AppButton } from "@/src/components/ui/Button";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { ChevronLeft, Pencil, Plus, Trash2, X } from "@tamagui/lucide-icons";
+import { topPaddingBoost } from "@/tamagui.config";
+import {
+  BookOpen,
+  ChevronLeft,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, Image, Pressable, ScrollView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -55,8 +64,9 @@ export default function FolderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [folder, setFolder] = useState<FolderDetail | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editIconUri, setEditIconUri] = useState<string | null>(null);
@@ -74,8 +84,11 @@ export default function FolderScreen() {
   );
 
   const fetchFolder = async () => {
-    setLoading(true);
-    setError(null);
+    const isFirstLoad = !hasLoadedRef.current;
+    if (isFirstLoad) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const res = await protectedFetch(
         `${API_BASE_URL}/folders/${id}`,
@@ -92,11 +105,12 @@ export default function FolderScreen() {
         modules: (raw.modules ?? []).map(mapModule),
       });
       setSelectedTag((prev) => prev ?? tags[0] ?? null);
+      hasLoadedRef.current = true;
     } catch (err) {
       console.error("[FolderScreen] fetch error:", err);
-      setError("Failed to load folder");
+      if (isFirstLoad) setError("Failed to load folder");
     } finally {
-      setLoading(false);
+      if (isFirstLoad) setLoading(false);
     }
   };
 
@@ -244,34 +258,77 @@ export default function FolderScreen() {
 
   const visibleModules = folder?.modules ?? [];
 
-  if (loading) {
+  if (loading && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <ScreenHeader />
-        <Text color="$colorMuted" m="$4">
-          Loading...
-        </Text>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <AuroraGlow />
+          <YStack px="$screenX" gap="$6" pb="$8">
+            <YStack gap="$3" pt={insets.top + 10 + topPaddingBoost}>
+              <XStack jc="space-between" ai="center">
+                <IconButton
+                  variant="liquidGlass"
+                  icon={<ChevronLeft size="$1" color="$color" />}
+                  onPress={() => router.back()}
+                />
+              </XStack>
+              <YStack ai="center" gap="$2">
+                <Skeleton width={102} height={102} borderRadius={30} />
+                <Skeleton width={160} height={24} borderRadius={8} />
+                <Skeleton width={90} height={14} borderRadius={6} />
+              </YStack>
+            </YStack>
+
+            <XStack gap="$2.5" jc="center">
+              <Skeleton width={70} height={36} borderRadius={999} />
+              <Skeleton width={70} height={36} borderRadius={999} />
+            </XStack>
+
+            <YStack gap="$3">
+              <Skeleton height={83} borderRadius={20} />
+              <Skeleton height={83} borderRadius={20} />
+              <Skeleton height={83} borderRadius={20} />
+            </YStack>
+          </YStack>
+        </ScrollView>
       </YStack>
     );
   }
 
-  if (error || !folder) {
+  if (error && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <ScreenHeader />
-        <Text color="$statusDanger" m="$4">
-          {error ?? "Folder not found"}
-        </Text>
+        <AuroraGlow />
+        <YStack f={1} px="$screenX" gap="$3" pt={insets.top + 10 + topPaddingBoost}>
+          <XStack jc="space-between" ai="center">
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size="$1" color="$color" />}
+              onPress={() => router.back()}
+            />
+          </XStack>
+          <YStack f={1} jc="center">
+            <StateCard
+              variant="error"
+              title="Couldn't load folder"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Retry"
+              onButtonPress={fetchFolder}
+            />
+          </YStack>
+        </YStack>
       </YStack>
     );
   }
+
+  if (!folder) return null;
 
   return (
     <YStack f={1} bg="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
         <AuroraGlow />
-        <YStack px="$4" gap="$6" pb="$8">
-          <YStack gap="$3" pt={insets.top + 10}>
+        <YStack px="$screenX" gap="$6" pb="$8">
+          <YStack gap="$3" pt={insets.top + 10 + topPaddingBoost}>
             <XStack jc="space-between" ai="center">
               <IconButton
                 variant="liquidGlass"
@@ -313,7 +370,7 @@ export default function FolderScreen() {
                   <Text fontSize="$8">📁</Text>
                 )}
               </YStack>
-              <Text fontSize="$7" fontWeight="bold" color="$color">
+              <Text fontSize={28} fontWeight="bold" color="$color">
                 {folder.name}
               </Text>
               <Text fontSize="$3" color="$colorMuted">
@@ -415,14 +472,9 @@ export default function FolderScreen() {
 
           <YStack gap="$3">
             <XStack jc="space-between" ai="center">
-              <Text
-                fontSize="$3"
-                color="$auroraMuted"
-                fontWeight="600"
-                tt="uppercase"
-              >
+              <SectionTitle tone="eyebrow">
                 Modules ({visibleModules.length})
-              </Text>
+              </SectionTitle>
               {visibleModules.length > 0 && (
                 <AppButton
                   variant="ghost"
@@ -441,67 +493,19 @@ export default function FolderScreen() {
             </XStack>
 
             {visibleModules.length === 0 ? (
-              <YStack
-                bg="$glassBg"
-                borderWidth={1}
-                borderColor="$glassBorder"
-                br={20}
-                p="$6"
-                ai="center"
-                gap="$2"
-                pos="relative"
-                overflow="hidden"
-              >
-                <YStack w={52} h={52} mb={4}>
-                  <GlowSurface
-                    glow
-                    glowColor="$glowColor"
-                    glowRadius={14}
-                    glowOpacity={0.5}
-                    br={16}
-                    f={1}
-                  >
-                    <LinearGradient
-                      colors={[
-                        theme.accentGradientStart.get(),
-                        theme.accentGradientEnd.get(),
-                      ]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={{
-                        width: 52,
-                        height: 52,
-                        borderRadius: 16,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Text fontSize={24}>📖</Text>
-                    </LinearGradient>
-                  </GlowSurface>
-                </YStack>
-
-                <Text fontSize="$6" fontWeight="800" color="$color">
-                  This folder is empty
-                </Text>
-                <Text fontSize="$3" color="$colorMuted" textAlign="center">
-                  Add your first module to get going
-                </Text>
-
-                <YStack width="100%" mt="$2">
-                  <AppButton
-                    icon={<Plus size={16} color="$onAccentText" />}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/folder/add-modules" as any,
-                        params: { folderId: id, folderName: folder.name },
-                      })
-                    }
-                  >
-                    Add study materials
-                  </AppButton>
-                </YStack>
-              </YStack>
+              <StateCard
+                variant="empty"
+                icon={<BookOpen size={24} color="$color" />}
+                title="This folder is empty"
+                subtitle="Add your first module to get going"
+                buttonLabel="Add study materials"
+                onButtonPress={() =>
+                  router.push({
+                    pathname: "/folder/add-modules" as any,
+                    params: { folderId: id, folderName: folder.name },
+                  })
+                }
+              />
             ) : (
               <YStack gap="$3">
                 {visibleModules.map((mod) => (
@@ -552,8 +556,8 @@ export default function FolderScreen() {
             placeholder="Folder name"
           />
 
-          <AppButton onPress={handleEdit} disabled={editLoading}>
-            {editLoading ? "Saving..." : "Save"}
+          <AppButton onPress={handleEdit} loading={editLoading}>
+            Save
           </AppButton>
         </KeyboardAwareScrollView>
       </GlassSheet>

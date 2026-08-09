@@ -229,9 +229,9 @@ export function EditCardsSheet({
             variant="primary"
             size="sm"
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
+            loading={isSubmitting}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            Save
           </AppButton>
         }
       >

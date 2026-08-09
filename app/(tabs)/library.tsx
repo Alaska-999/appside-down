@@ -9,16 +9,20 @@ import {
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { TEXT } from "@/src/constants/typography";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
+import { screenGutter, topPaddingBoost } from "@/tamagui.config";
 import { AlignJustify, Check } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
-import { memo, useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable } from "react-native";
+import { memo, useCallback, useMemo, useState } from "react";
+import { FlatList, Pressable, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, XStack, YStack } from "tamagui";
+import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
 
@@ -32,7 +36,29 @@ function LoadMoreFooter({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
     <YStack py="$3" ai="center">
-      <ActivityIndicator />
+      <Spinner size="small" color="$mint" />
+    </YStack>
+  );
+}
+
+function LibrarySkeletonRow() {
+  return (
+    <XStack height={83} px={screenGutter} py={17} ai="center" gap={16} mb={10}>
+      <Skeleton width={40} height={40} borderRadius={13} />
+      <YStack f={1} gap={6}>
+        <Skeleton height={TEXT.cardTitle} width="70%" />
+        <Skeleton height={TEXT.cardMeta} width="45%" />
+      </YStack>
+    </XStack>
+  );
+}
+
+function LibrarySkeletonList() {
+  return (
+    <YStack pt={16}>
+      <LibrarySkeletonRow />
+      <LibrarySkeletonRow />
+      <LibrarySkeletonRow />
     </YStack>
   );
 }
@@ -49,10 +75,9 @@ const MemoModuleCard = memo(
 const LIST_STYLE = { flex: 1 } as const;
 
 const LIST_CONTENT_STYLE = {
-  paddingHorizontal: 19,
+  paddingHorizontal: screenGutter,
   gap: 10,
-  paddingBottom: 32,
-} as const;
+};
 
 const getRowLayout = (_: unknown, index: number) => ({
   length: 83,
@@ -66,15 +91,30 @@ const FoldersPane = memo(function FoldersPane({
   items,
   loading,
   initialLoading,
+  refreshing,
+  error,
   loadMore,
+  refresh,
+  retry,
   search,
+  bottomPadding,
 }: {
   items: Folder[];
   loading: boolean;
   initialLoading: boolean;
+  refreshing: boolean;
+  error: boolean;
   loadMore: () => void;
+  refresh: () => void;
+  retry: () => void;
   search: string;
+  bottomPadding: number;
 }) {
+  const theme = useTheme();
+  const contentContainerStyle = useMemo(
+    () => ({ ...LIST_CONTENT_STYLE, paddingBottom: bottomPadding }),
+    [bottomPadding],
+  );
   const renderFolder = useCallback(
     ({ item, index }: { item: Folder; index: number }) => (
       <MemoFolderCard
@@ -98,13 +138,26 @@ const FoldersPane = memo(function FoldersPane({
       onEndReachedThreshold={0.4}
       initialNumToRender={4}
       getItemLayout={getRowLayout}
-      contentContainerStyle={LIST_CONTENT_STYLE}
+      contentContainerStyle={contentContainerStyle}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.accentGradientStart.get()} />
+      }
       ListEmptyComponent={
-        !initialLoading ? (
+        initialLoading ? (
+          <LibrarySkeletonList />
+        ) : error ? (
+          <StateCard
+            variant="error"
+            title="Couldn't load folders"
+            subtitle="Looks like a connection hiccup. Your data is safe — try again."
+            buttonLabel="Retry"
+            onButtonPress={retry}
+          />
+        ) : (
           <Text color="$colorMuted">
             {search ? "No folders match your search" : "No folders yet"}
           </Text>
-        ) : null
+        )
       }
       ListFooterComponent={
         <LoadMoreFooter visible={loading && !initialLoading} />
@@ -118,17 +171,32 @@ const ModulesPane = memo(function ModulesPane({
   items,
   loading,
   initialLoading,
+  refreshing,
+  error,
   loadMore,
+  refresh,
+  retry,
   search,
   sortOrder,
+  bottomPadding,
 }: {
   items: Module[];
   loading: boolean;
   initialLoading: boolean;
+  refreshing: boolean;
+  error: boolean;
   loadMore: () => void;
+  refresh: () => void;
+  retry: () => void;
   search: string;
   sortOrder: SortOption;
+  bottomPadding: number;
 }) {
+  const theme = useTheme();
+  const contentContainerStyle = useMemo(
+    () => ({ ...LIST_CONTENT_STYLE, paddingBottom: bottomPadding }),
+    [bottomPadding],
+  );
   const renderModule = useCallback(
     ({ item }: { item: Module }) => (
       <MemoModuleCard
@@ -151,9 +219,22 @@ const ModulesPane = memo(function ModulesPane({
       onEndReachedThreshold={0.4}
       initialNumToRender={4}
       getItemLayout={getRowLayout}
-      contentContainerStyle={LIST_CONTENT_STYLE}
+      contentContainerStyle={contentContainerStyle}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.accentGradientStart.get()} />
+      }
       ListEmptyComponent={
-        !initialLoading ? (
+        initialLoading ? (
+          <LibrarySkeletonList />
+        ) : error ? (
+          <StateCard
+            variant="error"
+            title="Couldn't load modules"
+            subtitle="Looks like a connection hiccup. Your data is safe — try again."
+            buttonLabel="Retry"
+            onButtonPress={retry}
+          />
+        ) : (
           <Text color="$colorMuted">
             {search
               ? "No modules match your search"
@@ -161,7 +242,7 @@ const ModulesPane = memo(function ModulesPane({
                 ? "No favorite modules yet"
                 : "No modules yet"}
           </Text>
-        ) : null
+        )
       }
       ListFooterComponent={
         <LoadMoreFooter visible={loading && !initialLoading} />
@@ -177,6 +258,7 @@ export default function Library() {
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const tabBarClearance = TAB_BAR_HEIGHT + insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const fetchModulesPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20", sort: sortOrder });
@@ -227,7 +309,7 @@ export default function Library() {
 
   return (
     <ScreenBackground>
-      <YStack f={1} gap="$3" pt={insets.top}>
+      <YStack f={1} gap="$3" pt={insets.top + topPaddingBoost}>
         <YStack px="$screenX" gap="$3">
           <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
             Library
@@ -267,16 +349,26 @@ export default function Library() {
             items={foldersList.items}
             loading={foldersList.loading}
             initialLoading={foldersList.initialLoading}
+            refreshing={foldersList.refreshing}
+            error={foldersList.error}
             loadMore={foldersList.loadMore}
+            refresh={foldersList.refresh}
+            retry={foldersList.retry}
             search={search}
+            bottomPadding={tabBarClearance}
           />
           <ModulesPane
             items={modulesList.items}
             loading={modulesList.loading}
             initialLoading={modulesList.initialLoading}
+            refreshing={modulesList.refreshing}
+            error={modulesList.error}
             loadMore={modulesList.loadMore}
+            refresh={modulesList.refresh}
+            retry={modulesList.retry}
             search={search}
             sortOrder={sortOrder}
+            bottomPadding={tabBarClearance}
           />
         </FadeTabPanes>
       </YStack>

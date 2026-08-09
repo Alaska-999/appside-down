@@ -6,6 +6,7 @@ import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsS
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { SyncingPill } from "@/src/components/ui/SyncingPill";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -15,6 +16,7 @@ import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PortalProvider, Text, XStack, YStack } from "tamagui";
 
 const MOCKUP_SCALE = 390 / 290;
@@ -34,7 +36,9 @@ export default function FlashcardsGame() {
   const toggleStar = useGameStore((state) => state.toggleStar);
   const addEvent = useStudyQueueStore((state) => state.addEvent);
   const flush = useStudyQueueStore((state) => state.flush);
+  const flushing = useStudyQueueStore((state) => state.flushing);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [revertCount, setRevertCount] = useState(0);
   const [lastSwipeDirection, setLastSwipeDirection] = useState<
@@ -147,6 +151,10 @@ export default function FlashcardsGame() {
           open={settingsSheetOpen}
           onOpenChange={setSettingsSheetOpen}
         />
+
+        {flushing && !isComplete && (
+          <SyncingPill pos="absolute" top={insets.top + 84} right={19} zIndex={10} />
+        )}
 
         {isComplete ? (
           <FlashcardsComplete

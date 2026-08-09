@@ -5,14 +5,21 @@ import { Badge } from "@/src/components/ui/Badge";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { SearchField } from "@/src/components/ui/SearchField";
+import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { TEXT } from "@/src/constants/typography";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { screenGutter, topPaddingBoost } from "@/tamagui.config";
 import { Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { FlatList } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack, YStack } from "tamagui";
+
+function AddModulesSkeletonRow() {
+  return <Skeleton height={83} borderRadius={20} />;
+}
 
 type ModuleItem = {
   id: string;
@@ -40,9 +47,10 @@ export default function AddModules() {
   }>();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,8 +59,11 @@ export default function AddModules() {
   );
 
   const fetchAvailableModules = async () => {
-    setLoading(true);
-    setError(null);
+    const isFirstLoad = !hasLoadedRef.current;
+    if (isFirstLoad) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const res = await protectedFetch(
         `${API_BASE_URL}/modules?limit=50`,
@@ -70,11 +81,12 @@ export default function AddModules() {
         })
         .map(mapModule);
       setModules(available);
+      hasLoadedRef.current = true;
     } catch (err) {
       console.error("[AddModules] fetch error:", err);
-      setError("Failed to load modules");
+      if (isFirstLoad) setError("Failed to load modules");
     } finally {
-      setLoading(false);
+      if (isFirstLoad) setLoading(false);
     }
   };
 
@@ -122,7 +134,7 @@ export default function AddModules() {
     <YStack f={1} bg="$background">
       <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
 
-      <YStack f={1} pt={insets.top + 10}>
+      <YStack f={1} pt={insets.top + 10 + topPaddingBoost}>
         <XStack
           px="$screenX"
           mb={19}
@@ -154,76 +166,82 @@ export default function AddModules() {
           />
         </XStack>
 
-        {loading && (
-          <Text px="$screenX" mt="$3" color="$colorMuted">
-            Loading...
-          </Text>
-        )}
-        {error && (
-          <Text px="$screenX" mt="$3" color="$statusDanger">
-            {error}
-          </Text>
-        )}
-
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 19,
-            paddingTop: 16,
-            paddingBottom: 100,
-            gap: 12,
-          }}
-          ListEmptyComponent={
-            !loading ? (
+        {loading ? (
+          <YStack px="$screenX" pt={16} gap={12}>
+            <AddModulesSkeletonRow />
+            <AddModulesSkeletonRow />
+            <AddModulesSkeletonRow />
+            <AddModulesSkeletonRow />
+          </YStack>
+        ) : error ? (
+          <YStack px="$screenX" pt={16}>
+            <StateCard
+              variant="error"
+              title="Couldn't load modules"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Retry"
+              onButtonPress={fetchAvailableModules}
+            />
+          </YStack>
+        ) : (
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: screenGutter,
+              paddingTop: 16,
+              paddingBottom: 100,
+              gap: 12,
+            }}
+            ListEmptyComponent={
               <Text color="$colorMuted" textAlign="center" mt="$4">
                 No modules available
               </Text>
-            ) : null
-          }
-          renderItem={({ item }) => (
-            <ModuleCard
-              module={{
-                id: item.id,
-                name: item.name,
-                itemsCount: item.itemsCount,
-                isPublic: item.isPublic,
-              }}
-              dimmed={item.selected}
-              trailing={
-                item.selected ? (
-                  <Badge tone="mint" icon={<Check size={11} color="$mint" />}>
-                    Added
-                  </Badge>
-                ) : (
-                  <IconButton
-                    size="$2"
-                    icon={<Plus size="$1" color="$color" />}
-                    onPress={() => toggleModule(item.id)}
-                  />
-                )
-              }
-              onPress={() => toggleModule(item.id)}
-            />
-          )}
-          ListFooterComponent={
-            <YStack mt={7}>
-              <AppButton
-                variant="secondary"
-                icon={<Plus size={16} color="$color" />}
-                onPress={() =>
-                  router.push({
-                    pathname: "/module/create",
-                    params: { returnFolderId: folderId },
-                  })
+            }
+            renderItem={({ item }) => (
+              <ModuleCard
+                module={{
+                  id: item.id,
+                  name: item.name,
+                  itemsCount: item.itemsCount,
+                  isPublic: item.isPublic,
+                }}
+                dimmed={item.selected}
+                trailing={
+                  item.selected ? (
+                    <Badge tone="mint" icon={<Check size={11} color="$mint" />}>
+                      Added
+                    </Badge>
+                  ) : (
+                    <IconButton
+                      size="$2"
+                      icon={<Plus size="$1" color="$color" />}
+                      onPress={() => toggleModule(item.id)}
+                    />
+                  )
                 }
-              >
-                Create new module
-              </AppButton>
-            </YStack>
-          }
-        />
+                onPress={() => toggleModule(item.id)}
+              />
+            )}
+            ListFooterComponent={
+              <YStack mt={7}>
+                <AppButton
+                  variant="secondary"
+                  icon={<Plus size={16} color="$color" />}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/module/create",
+                      params: { returnFolderId: folderId },
+                    })
+                  }
+                >
+                  Create new module
+                </AppButton>
+              </YStack>
+            }
+          />
+        )}
       </YStack>
 
       {selectedIds.length > 0 && (
@@ -239,10 +257,8 @@ export default function AddModules() {
           btw={1}
           borderColor="$glassBorder"
         >
-          <AppButton onPress={handleAdd} disabled={saving}>
-            {saving
-              ? "Adding..."
-              : `Done · ${selectedIds.length} added`}
+          <AppButton onPress={handleAdd} loading={saving}>
+            {`Done · ${selectedIds.length} added`}
           </AppButton>
         </YStack>
       )}

@@ -7,15 +7,20 @@ import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
+import { screenGutter, topPaddingBoost } from "@/tamagui.config";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable } from "react-native";
+import { FlatList, Pressable, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScrollView, Text, XStack, YStack } from "tamagui";
+import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 type PublicModuleResult = {
   id: string;
@@ -75,29 +80,11 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   );
 }
 
-export function SectionTitle({
-  children,
-  tone = "muted",
-}: {
-  children: string;
-  tone?: "muted" | "onGlass";
-}) {
-  return (
-    <Text
-      fontSize={tone === "onGlass" ? 13 : 15}
-      fontWeight={tone === "onGlass" ? "600" : "700"}
-      color={tone === "onGlass" ? "$colorSecondary" : "$colorMuted"}
-      textTransform="uppercase"
-      letterSpacing={tone === "onGlass" ? 0.77 : 1.04}
-      mt={tone === "onGlass" ? 3 : 0}
-    >
-      {children}
-    </Text>
-  );
-}
-
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const mint = theme.accentGradientStart.get();
+  const tabBarClearance = TAB_BAR_HEIGHT + insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -105,6 +92,9 @@ export default function Home() {
   const [discoverModules, setDiscoverModules] = useState<PublicModuleResult[]>(
     [],
   );
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
   const { user, isHydrated } = useAuthStore();
   const isLoggedIn = !!user;
 
@@ -118,10 +108,10 @@ export default function Home() {
     }, [isHydrated, isLoggedIn]),
   );
 
-  const fetchData = async () => {
-    // stats - gives total statistics: totalModules, cardsLearned, continueLearning.
-    // recentModules - gives last 6 your modules for the horizontal row "Recent" on Home. Without infinite scroll, fixed 6 items.
-    // discoverModules - gives 6 foreign public modules for the "Discover" section, excluding your own (excludeOwn=true).
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(false);
     try {
       const [statsRes, recentRes, discoverRes] = await Promise.all([
         protectedFetch(`${API_BASE_URL}/modules/stats`),
@@ -151,6 +141,10 @@ export default function Home() {
       setDiscoverModules(discoverData.data);
     } catch (err) {
       console.error("[Home] fetch error:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -208,7 +202,7 @@ export default function Home() {
 
   return (
     <ScreenBackground>
-      <YStack f={1} gap="$section" pt={insets.top}>
+      <YStack f={1} gap="$section" pt={insets.top + topPaddingBoost}>
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
             <YStack f={1}>
@@ -250,13 +244,20 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
-              paddingHorizontal: 19,
+              paddingHorizontal: screenGutter,
               gap: 8,
-              paddingBottom: 16,
+              paddingBottom: tabBarClearance,
             }}
             onEndReached={searchList.loadMore}
             onEndReachedThreshold={0.4}
             renderItem={({ item }) => <PublicModuleRow module={item} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={searchList.refreshing}
+                onRefresh={searchList.refresh}
+                tintColor={mint}
+              />
+            }
             ListEmptyComponent={
               !searchList.initialLoading ? (
                 <Text color="$colorMuted">No public modules found</Text>
@@ -267,69 +268,91 @@ export default function Home() {
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchData(true)}
+                tintColor={mint}
+              />
+            }
           >
-            <YStack px="$screenX" gap="$section" pb={130}>
+            <YStack px="$screenX" gap="$section" pb={tabBarClearance}>
               <YStack gap={12}>
                 <StreakCard
                   currentStreak={user?.streak?.currentStreak ?? 0}
                   todayIndex={todayIndex}
                 />
 
-                <XStack gap={12}>
-                  {featuredModule && featuredStats ? (
-                    <Pressable
-                      style={{ flex: 1 }}
-                      onPress={() => openModule(featuredModule.id)}
-                    >
-                      <AppCard
-                        variant="glass"
-                        size="lg"
-                        f={1}
-                        gap={9}
-                        ai="flex-start"
+                {loading && !stats ? (
+                  <XStack gap={12}>
+                    <Skeleton f={1} height={156} borderRadius={23} />
+                    <Skeleton f={1} height={156} borderRadius={23} />
+                  </XStack>
+                ) : error && !stats ? (
+                  <StateCard
+                    variant="error"
+                    title="Couldn't load your stats"
+                    subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                    buttonLabel="Retry"
+                    onButtonPress={() => fetchData()}
+                  />
+                ) : (
+                  <XStack gap={12}>
+                    {featuredModule && featuredStats ? (
+                      <Pressable
+                        style={{ flex: 1 }}
+                        onPress={() => openModule(featuredModule.id)}
                       >
-                        <ProgressRing
-                          progress={featuredStats.progress}
-                          label={`${Math.round(featuredStats.progress * 100)}%`}
-                        />
-                        <Text
-                          fontSize={16}
-                          fontWeight="700"
-                          color="$color"
-                          numberOfLines={1}
-                          mt="$3"
+                        <AppCard
+                          variant="glass"
+                          size="lg"
+                          f={1}
+                          gap={9}
+                          ai="flex-start"
                         >
-                          Continue: {featuredModule.name}
-                        </Text>
-                        <Text fontSize={14} color="$colorSecondary">
-                          {featuredStats.known}/{featuredStats.total} terms
-                        </Text>
-                      </AppCard>
-                    </Pressable>
-                  ) : null}
+                          <ProgressRing
+                            progress={featuredStats.progress}
+                            label={`${Math.round(featuredStats.progress * 100)}%`}
+                          />
+                          <Text
+                            fontSize={16}
+                            fontWeight="700"
+                            color="$color"
+                            numberOfLines={1}
+                            mt="$3"
+                          >
+                            Continue: {featuredModule.name}
+                          </Text>
+                          <Text fontSize={14} color="$colorSecondary">
+                            {featuredStats.known}/{featuredStats.total} terms
+                          </Text>
+                        </AppCard>
+                      </Pressable>
+                    ) : null}
 
-                  <AppCard
-                    variant="glass"
-                    size="lg"
-                    f={1}
-                    gap="$1"
-                    ai="flex-start"
-                  >
-                    <Text fontSize={31} fontWeight="900" color="$color">
-                      {stats?.totalModules ?? 0}
-                    </Text>
-                    <SectionTitle tone="onGlass">Total modules</SectionTitle>
-                    <Text
-                      fontSize={31}
-                      fontWeight="900"
-                      color="$accentGradientStart"
-                      mt={12}
+                    <AppCard
+                      variant="glass"
+                      size="lg"
+                      f={1}
+                      gap="$1"
+                      ai="flex-start"
                     >
-                      {stats?.cardsLearned ?? 0}
-                    </Text>
-                    <SectionTitle tone="onGlass">Cards learned</SectionTitle>
-                  </AppCard>
-                </XStack>
+                      <Text fontSize={31} fontWeight="900" color="$color">
+                        {stats?.totalModules ?? 0}
+                      </Text>
+                      <SectionTitle tone="onGlass">Total modules</SectionTitle>
+                      <Text
+                        fontSize={31}
+                        fontWeight="900"
+                        color="$accentGradientStart"
+                        mt={12}
+                      >
+                        {stats?.cardsLearned ?? 0}
+                      </Text>
+                      <SectionTitle tone="onGlass">Cards learned</SectionTitle>
+                    </AppCard>
+                  </XStack>
+                )}
               </YStack>
 
               {recentModules.length > 0 && (
