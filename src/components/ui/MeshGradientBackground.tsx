@@ -1,27 +1,28 @@
-import { useEffect, type ReactNode } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
 import {
-  Blur,
+  BlendMode,
   Canvas,
-  ColorMatrix,
-  Fill,
+  Circle,
+  FractalNoise,
   Group,
   LinearGradient,
-  Paint,
   RadialGradient,
+  Rect,
+  Skia,
+  TileMode,
   vec,
 } from "@shopify/react-native-skia";
+import React, { useEffect, useMemo } from "react";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import {
   Easing,
+  SharedValue,
   interpolate,
   interpolateColor,
   useDerivedValue,
   useReducedMotion,
   useSharedValue,
   withRepeat,
-  withSequence,
   withTiming,
-  type SharedValue,
 } from "react-native-reanimated";
 
 export type MeshVariant =
@@ -34,37 +35,65 @@ interface Props {
   variant?: MeshVariant;
 }
 
-const MOCKUP_SCALE = 390 / 250;
+const MOCKUP_WIDTH = 250;
+const THIRDS = [0, 1 / 3, 2 / 3, 1];
+const HALVES = [0, 1];
 
-const MINT = "#2DD4BF";
-const MINT_LIGHT = "#5EEAD4";
-const TEAL = "#0D9488";
-const INDIGO = "#4338CA";
-const INDIGO_BRIGHT = "#6366F1";
-const LIME = "#A3E635";
-const DARK_BASE = "#11141F";
-const DARK_TEAL = "#11302F";
-const TRANSPARENT = "rgba(0, 0, 0, 0)";
-const TEAL_FADE = "rgba(13, 148, 136, 0.3)";
-const LIME_FADE = "rgba(163, 230, 53, 0.4)";
+function segmentEase(p: number, breaks: number[]) {
+  "worklet";
+  for (let i = 0; i < breaks.length - 1; i += 1) {
+    const from = breaks[i];
+    const to = breaks[i + 1];
+    if (p <= to) {
+      const t = (p - from) / (to - from);
+      const eased = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+      return from + eased * (to - from);
+    }
+  }
+  return 1;
+}
 
-const EASE = Easing.inOut(Easing.quad);
+function withAlpha(color: string, alpha: number) {
+  "worklet";
+  const parts = color
+    .slice(color.indexOf("(") + 1, color.lastIndexOf(")"))
+    .split(",");
+  const r = Math.round(Number(parts[0]));
+  const g = Math.round(Number(parts[1]));
+  const b = Math.round(Number(parts[2]));
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
-function saturateMatrix(saturation: number): number[] {
+function gradientEnds(deg: number, w: number, h: number) {
+  "worklet";
+  const rad = (deg * Math.PI) / 180;
+  const dx = Math.sin(rad);
+  const dy = -Math.cos(rad);
+  const len = Math.abs(w * dx) + Math.abs(h * dy);
+  return {
+    start: { x: w / 2 - (dx * len) / 2, y: h / 2 - (dy * len) / 2 },
+    end: { x: w / 2 + (dx * len) / 2, y: h / 2 + (dy * len) / 2 },
+  };
+}
+
+function saturationMatrix(s: number) {
+  const lr = 0.213;
+  const lg = 0.715;
+  const lb = 0.072;
   return [
-    0.213 + 0.787 * saturation,
-    0.715 - 0.715 * saturation,
-    0.072 - 0.072 * saturation,
+    lr + s * (1 - lr),
+    lg - s * lg,
+    lb - s * lb,
     0,
     0,
-    0.213 - 0.213 * saturation,
-    0.715 + 0.285 * saturation,
-    0.072 - 0.072 * saturation,
+    lr - s * lr,
+    lg + s * (1 - lg),
+    lb - s * lb,
     0,
     0,
-    0.213 - 0.213 * saturation,
-    0.715 - 0.715 * saturation,
-    0.072 + 0.928 * saturation,
+    lr - s * lr,
+    lg - s * lg,
+    lb + s * (1 - lb),
     0,
     0,
     0,
@@ -75,573 +104,432 @@ function saturateMatrix(saturation: number): number[] {
   ];
 }
 
-function pct(fraction: number, size: number, inset: number) {
-  "worklet";
-  return size * (fraction * (1 + 2 * inset) - inset);
-}
-
-function expandedBox(width: number, height: number, inset: number) {
-  return {
-    originX: -inset * width,
-    originY: -inset * height,
-    boxWidth: width * (1 + 2 * inset),
-    boxHeight: height * (1 + 2 * inset),
-  };
-}
-
-function angleToLine(
-  angleDeg: number,
-  originX: number,
-  originY: number,
-  boxWidth: number,
-  boxHeight: number,
-) {
-  "worklet";
-  const rad = (angleDeg * Math.PI) / 180;
-  const dx = Math.sin(rad);
-  const dy = -Math.cos(rad);
-  const halfW = boxWidth / 2;
-  const halfH = boxHeight / 2;
-  const length = Math.abs(dx * halfW) + Math.abs(dy * halfH);
-  const cx = originX + halfW;
-  const cy = originY + halfH;
-  return {
-    start: vec(cx - dx * length, cy - dy * length),
-    end: vec(cx + dx * length, cy + dy * length),
-  };
-}
-
-function useLoopPhase(
-  totalDuration: number,
-  steps: number,
-  reducedMotion: boolean,
-): SharedValue<number> {
+function useLoop(duration: number, alternate: boolean, enabled: boolean) {
   const phase = useSharedValue(0);
-
   useEffect(() => {
-    if (reducedMotion) {
-      phase.value = 0;
-      return;
-    }
-
-    const segmentDuration = totalDuration / steps;
-    const segments = Array.from({ length: steps }, (_, index) =>
-      withTiming(index + 1, { duration: segmentDuration, easing: EASE }),
-    );
-    phase.value = withRepeat(withSequence(...segments), -1, false);
-  }, [phase, totalDuration, steps, reducedMotion]);
-
-  return phase;
-}
-
-function usePingPongPhase(
-  fullDuration: number,
-  reducedMotion: boolean,
-): SharedValue<number> {
-  const phase = useSharedValue(0);
-
-  useEffect(() => {
-    if (reducedMotion) {
-      phase.value = 0;
-      return;
-    }
-
+    if (!enabled) return;
     phase.value = withRepeat(
-      withTiming(1, { duration: fullDuration / 2, easing: EASE }),
+      withTiming(1, {
+        duration,
+        easing: alternate ? Easing.inOut(Easing.quad) : Easing.linear,
+      }),
       -1,
-      true,
+      alternate,
     );
-  }, [phase, fullDuration, reducedMotion]);
-
+  }, [duration, alternate, enabled, phase]);
   return phase;
 }
 
-function MeshCanvas({ children }: { children: ReactNode }) {
+function useKeyframePhase(
+  duration: number,
+  breaks: number[],
+  enabled: boolean,
+) {
+  const raw = useLoop(duration, false, enabled);
+  return useDerivedValue(() => segmentEase(raw.value, breaks));
+}
+
+function useMorphColor(
+  phase: SharedValue<number>,
+  input: number[],
+  output: string[],
+) {
+  return useDerivedValue(() => {
+    const color = interpolateColor(phase.value, input, output);
+    return [withAlpha(color, 1), withAlpha(color, 0)];
+  });
+}
+
+function useTrack(
+  phase: SharedValue<number>,
+  input: number[],
+  output: number[],
+  scale: number,
+) {
+  return useDerivedValue(() => scale * interpolate(phase.value, input, output));
+}
+
+function useMeshPaint(sigma: number, saturation: number) {
+  return useMemo(() => {
+    const paint = Skia.Paint();
+    paint.setDither(true);
+    paint.setImageFilter(
+      Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp, null),
+    );
+    paint.setColorFilter(
+      Skia.ColorFilter.MakeMatrix(saturationMatrix(saturation)),
+    );
+    return paint;
+  }, [sigma, saturation]);
+}
+
+function useMeshBox(width: number, height: number, inset: number) {
+  const boxW = width * (1 + inset * 2);
+  const boxH = height * (1 + inset * 2);
+  const offset = [
+    { translateX: -width * inset },
+    { translateY: -height * inset },
+  ];
+  return { boxW, boxH, offset };
+}
+
+interface NodeProps {
+  cx: SharedValue<number>;
+  cy: SharedValue<number>;
+  rx: number;
+  ry: number;
+  colors: SharedValue<string[]>;
+}
+
+function MeshNode({ cx, cy, rx, ry, colors }: NodeProps) {
+  const transform = useDerivedValue(() => [
+    { translateX: cx.value },
+    { translateY: cy.value },
+    { scaleY: ry / rx },
+  ]);
   return (
-    <View style={styles.container}>
-      <Canvas style={StyleSheet.absoluteFill}>{children}</Canvas>
-    </View>
+    <Group transform={transform}>
+      <Circle cx={0} cy={0} r={rx}>
+        <RadialGradient c={vec(0, 0)} r={rx} colors={colors} />
+      </Circle>
+    </Group>
   );
 }
 
-const MESH_FULL_INSET = 0.12;
-const MESH_FULL_BLUR = 6 * MOCKUP_SCALE;
-const MESH_FULL_SATURATE = saturateMatrix(1.15);
-
-function MeshFull() {
-  const { width, height } = useWindowDimensions();
-  const reducedMotion = useReducedMotion();
-  const movePhase = useLoopPhase(9000, 3, reducedMotion);
-  const huePhase = useLoopPhase(12000, 3, reducedMotion);
-  const aspect = height / width;
-  const pos1Scale = (0.45 / 0.55) * aspect;
-  const pos2Scale = (0.45 / 0.55) * aspect;
-  const pos3Scale = (0.5 / 0.6) * aspect;
-  const pos4Scale = (0.4 / 0.45) * aspect;
-
-  const { originX, originY, boxWidth, boxHeight } = expandedBox(
-    width,
-    height,
-    MESH_FULL_INSET,
-  );
-
-  const baseStart = useDerivedValue(
-    () => angleToLine(165, originX, originY, boxWidth, boxHeight).start,
-  );
-  const baseEnd = useDerivedValue(
-    () => angleToLine(165, originX, originY, boxWidth, boxHeight).end,
-  );
-
-  const pos1 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.2, 0.45, 0.12, 0.2]),
-        width,
-        MESH_FULL_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.15, 0.3, 0.42, 0.15]),
-        height,
-        MESH_FULL_INSET,
-      ),
-    ),
-  );
-  const pos2 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.85, 0.65, 0.9, 0.85]),
-        width,
-        MESH_FULL_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.3, 0.12, 0.55, 0.3]),
-        height,
-        MESH_FULL_INSET,
-      ),
-    ),
-  );
-  const pos3 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.3, 0.15, 0.45, 0.3]),
-        width,
-        MESH_FULL_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.85, 0.6, 0.92, 0.85]),
-        height,
-        MESH_FULL_INSET,
-      ),
-    ),
-  );
-  const pos4 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.75, 0.85, 0.55, 0.75]),
-        width,
-        MESH_FULL_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.7, 0.88, 0.55, 0.7]),
-        height,
-        MESH_FULL_INSET,
-      ),
-    ),
-  );
-
-  const m1Colors = useDerivedValue(() => [
-    interpolateColor(
-      huePhase.value,
-      [0, 1, 2, 3],
-      [MINT, INDIGO_BRIGHT, LIME, MINT],
-    ),
-    TRANSPARENT,
-  ]);
-  const m2Colors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1, 2, 3], [TEAL, MINT, INDIGO, TEAL]),
-    TRANSPARENT,
-  ]);
-  const m3Colors = useDerivedValue(() => [
-    interpolateColor(
-      huePhase.value,
-      [0, 1, 2, 3],
-      [INDIGO, TEAL, MINT, INDIGO],
-    ),
-    TRANSPARENT,
-  ]);
-  const m4Colors = useDerivedValue(() => [
-    interpolateColor(
-      huePhase.value,
-      [0, 1, 2, 3],
-      [LIME, MINT_LIGHT, TEAL, LIME],
-    ),
-    TRANSPARENT,
-  ]);
+function Grain({ width, height }: { width: number; height: number }) {
+  const paint = useMemo(() => {
+    const p = Skia.Paint();
+    p.setColorFilter(Skia.ColorFilter.MakeMatrix(saturationMatrix(0)));
+    p.setAlphaf(0.07);
+    p.setBlendMode(BlendMode.Overlay);
+    return p;
+  }, []);
 
   return (
-    <MeshCanvas>
-      <Group
-        layer={
-          <Paint>
-            <Blur blur={MESH_FULL_BLUR} />
-            <ColorMatrix matrix={MESH_FULL_SATURATE} />
-          </Paint>
-        }
-      >
-        <Fill>
-          <LinearGradient start={baseStart} end={baseEnd} colors={[TEAL, INDIGO]} />
-        </Fill>
-        <Group origin={pos4} transform={[{ scaleY: pos4Scale }]}>
-          <Fill>
-            <RadialGradient c={pos4} r={boxWidth * 0.45} colors={m4Colors} positions={[0, 0.72]} />
-          </Fill>
-        </Group>
-        <Group origin={pos3} transform={[{ scaleY: pos3Scale }]}>
-          <Fill>
-            <RadialGradient c={pos3} r={boxWidth * 0.6} colors={m2Colors} positions={[0, 0.78]} />
-          </Fill>
-        </Group>
-        <Group origin={pos2} transform={[{ scaleY: pos2Scale }]}>
-          <Fill>
-            <RadialGradient c={pos2} r={boxWidth * 0.55} colors={m3Colors} positions={[0, 0.75]} />
-          </Fill>
-        </Group>
-        <Group origin={pos1} transform={[{ scaleY: pos1Scale }]}>
-          <Fill>
-            <RadialGradient c={pos1} r={boxWidth * 0.55} colors={m1Colors} positions={[0, 0.75]} />
-          </Fill>
-        </Group>
-      </Group>
-    </MeshCanvas>
+    <Group layer={paint}>
+      <Rect x={0} y={0} width={width} height={height}>
+        <FractalNoise freqX={0.9} freqY={0.9} octaves={2} seed={0} />
+      </Rect>
+    </Group>
   );
 }
 
-const MESH_DARK_INSET = 0.12;
-const MESH_DARK_BLUR = 8 * MOCKUP_SCALE;
-const MESH_DARK_SATURATE = saturateMatrix(1.1);
+interface VariantProps {
+  width: number;
+  height: number;
+  still: boolean;
+}
 
-function MeshDark() {
-  const { width, height } = useWindowDimensions();
-  const reducedMotion = useReducedMotion();
-  const movePhase = useLoopPhase(8000, 3, reducedMotion);
-  const huePhase = usePingPongPhase(11000, reducedMotion);
-  const aspect = height / width;
-  const pos1Scale = (0.48 / 0.6) * aspect;
-  const pos2Scale = (0.42 / 0.5) * aspect;
-  const pos3Scale = (0.45 / 0.55) * aspect;
+function MeshFull({ width, height, still }: VariantProps) {
+  const { boxW, boxH, offset } = useMeshBox(width, height, 0.12);
+  const move = useKeyframePhase(9000, THIRDS, !still);
+  const hue = useKeyframePhase(12000, THIRDS, !still);
+  const paint = useMeshPaint((width / MOCKUP_WIDTH) * 6, 1.15);
+  const base = gradientEnds(165, boxW, boxH);
 
-  const { originX, originY, boxWidth, boxHeight } = expandedBox(
-    width,
-    height,
-    MESH_DARK_INSET,
-  );
+  const x1 = useTrack(move, THIRDS, [0.2, 0.45, 0.12, 0.2], boxW);
+  const y1 = useTrack(move, THIRDS, [0.15, 0.3, 0.42, 0.15], boxH);
+  const x2 = useTrack(move, THIRDS, [0.85, 0.65, 0.9, 0.85], boxW);
+  const y2 = useTrack(move, THIRDS, [0.3, 0.12, 0.55, 0.3], boxH);
+  const x3 = useTrack(move, THIRDS, [0.3, 0.15, 0.45, 0.3], boxW);
+  const y3 = useTrack(move, THIRDS, [0.85, 0.6, 0.92, 0.85], boxH);
+  const x4 = useTrack(move, THIRDS, [0.75, 0.85, 0.55, 0.75], boxW);
+  const y4 = useTrack(move, THIRDS, [0.7, 0.88, 0.55, 0.7], boxH);
 
-  const baseStart = useDerivedValue(
-    () => angleToLine(165, originX, originY, boxWidth, boxHeight).start,
-  );
-  const baseEnd = useDerivedValue(
-    () => angleToLine(165, originX, originY, boxWidth, boxHeight).end,
-  );
-
-  const pos1 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.2, 0.45, 0.12, 0.2]),
-        width,
-        MESH_DARK_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.15, 0.3, 0.42, 0.15]),
-        height,
-        MESH_DARK_INSET,
-      ),
-    ),
-  );
-  const pos2 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.85, 0.65, 0.9, 0.85]),
-        width,
-        MESH_DARK_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.3, 0.12, 0.55, 0.3]),
-        height,
-        MESH_DARK_INSET,
-      ),
-    ),
-  );
-  const pos3 = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.3, 0.15, 0.45, 0.3]),
-        width,
-        MESH_DARK_INSET,
-      ),
-      pct(
-        interpolate(movePhase.value, [0, 1, 2, 3], [0.85, 0.6, 0.92, 0.85]),
-        height,
-        MESH_DARK_INSET,
-      ),
-    ),
-  );
-
-  const m1Colors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1], [MINT, INDIGO_BRIGHT]),
-    TRANSPARENT,
+  const m1 = useMorphColor(hue, THIRDS, [
+    "#2DD4BF",
+    "#6366F1",
+    "#A3E635",
+    "#2DD4BF",
   ]);
-  const m2Colors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1], [TEAL, MINT]),
-    TRANSPARENT,
+  const m2 = useMorphColor(hue, THIRDS, [
+    "#0D9488",
+    "#2DD4BF",
+    "#4338CA",
+    "#0D9488",
   ]);
-  const m3Colors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1], [INDIGO, TEAL]),
-    TRANSPARENT,
+  const m3 = useMorphColor(hue, THIRDS, [
+    "#4338CA",
+    "#0D9488",
+    "#2DD4BF",
+    "#4338CA",
+  ]);
+  const m4 = useMorphColor(hue, THIRDS, [
+    "#A3E635",
+    "#5EEAD4",
+    "#0D9488",
+    "#A3E635",
   ]);
 
   return (
-    <MeshCanvas>
-      <Group
-        layer={
-          <Paint>
-            <Blur blur={MESH_DARK_BLUR} />
-            <ColorMatrix matrix={MESH_DARK_SATURATE} />
-          </Paint>
-        }
-      >
-        <Fill>
-          <LinearGradient
-            start={baseStart}
-            end={baseEnd}
-            colors={[DARK_TEAL, DARK_BASE]}
-            positions={[0, 0.75]}
-          />
-        </Fill>
-        <Group origin={pos3} transform={[{ scaleY: pos3Scale }]}>
-          <Fill>
-            <RadialGradient c={pos3} r={boxWidth * 0.55} colors={m2Colors} positions={[0, 0.74]} />
-          </Fill>
-        </Group>
-        <Group origin={pos2} transform={[{ scaleY: pos2Scale }]}>
-          <Fill>
-            <RadialGradient c={pos2} r={boxWidth * 0.5} colors={m3Colors} positions={[0, 0.7]} />
-          </Fill>
-        </Group>
-        <Group origin={pos1} transform={[{ scaleY: pos1Scale }]}>
-          <Fill>
-            <RadialGradient c={pos1} r={boxWidth * 0.6} colors={m1Colors} positions={[0, 0.72]} />
-          </Fill>
-        </Group>
-      </Group>
-    </MeshCanvas>
+    <Group transform={offset} layer={paint}>
+      <Rect x={0} y={0} width={boxW} height={boxH}>
+        <LinearGradient
+          start={vec(base.start.x, base.start.y)}
+          end={vec(base.end.x, base.end.y)}
+          colors={["#0D9488", "#4338CA"]}
+        />
+      </Rect>
+      <MeshNode
+        cx={x4}
+        cy={y4}
+        rx={boxW * 0.45 * 0.72}
+        ry={boxH * 0.4 * 0.72}
+        colors={m4}
+      />
+      <MeshNode
+        cx={x3}
+        cy={y3}
+        rx={boxW * 0.6 * 0.78}
+        ry={boxH * 0.5 * 0.78}
+        colors={m2}
+      />
+      <MeshNode
+        cx={x2}
+        cy={y2}
+        rx={boxW * 0.55 * 0.75}
+        ry={boxH * 0.45 * 0.75}
+        colors={m3}
+      />
+      <MeshNode
+        cx={x1}
+        cy={y1}
+        rx={boxW * 0.55 * 0.75}
+        ry={boxH * 0.45 * 0.75}
+        colors={m1}
+      />
+    </Group>
   );
 }
 
-const FALL_MORPH_INSET = 0.1;
-const FALL_SUN_WIDTH = 280 * MOCKUP_SCALE;
-const FALL_SUN_HEIGHT = 170 * MOCKUP_SCALE;
-const FALL_SUN_TOP = -45 * MOCKUP_SCALE;
-const FALL_SUN_LEFT = -65 * MOCKUP_SCALE;
-const FALL_SUN_BLUR = 38 * MOCKUP_SCALE;
+function MeshDark({ width, height, still }: VariantProps) {
+  const { boxW, boxH, offset } = useMeshBox(width, height, 0.12);
+  const move = useKeyframePhase(8000, THIRDS, !still);
+  const hue = useLoop(5500, true, !still);
+  const paint = useMeshPaint((width / MOCKUP_WIDTH) * 8, 1.1);
+  const base = gradientEnds(165, boxW, boxH);
 
-function FallMorph() {
-  const { width, height } = useWindowDimensions();
-  const reducedMotion = useReducedMotion();
-  const huePhase = useLoopPhase(9000, 3, reducedMotion);
-  const swellPhase = usePingPongPhase(4500, reducedMotion);
-  const sunPhase = usePingPongPhase(6000, reducedMotion);
+  const x1 = useTrack(move, THIRDS, [0.2, 0.45, 0.12, 0.2], boxW);
+  const y1 = useTrack(move, THIRDS, [0.15, 0.3, 0.42, 0.15], boxH);
+  const x2 = useTrack(move, THIRDS, [0.85, 0.65, 0.9, 0.85], boxW);
+  const y2 = useTrack(move, THIRDS, [0.3, 0.12, 0.55, 0.3], boxH);
+  const x3 = useTrack(move, THIRDS, [0.3, 0.15, 0.45, 0.3], boxW);
+  const y3 = useTrack(move, THIRDS, [0.85, 0.6, 0.92, 0.85], boxH);
 
-  const { originX, originY, boxWidth, boxHeight } = expandedBox(
-    width,
-    height,
-    FALL_MORPH_INSET,
+  const m1 = useMorphColor(hue, HALVES, ["#2DD4BF", "#6366F1"]);
+  const m2 = useMorphColor(hue, HALVES, ["#0D9488", "#2DD4BF"]);
+  const m3 = useMorphColor(hue, HALVES, ["#4338CA", "#0D9488"]);
+
+  return (
+    <Group transform={offset} layer={paint}>
+      <Rect x={0} y={0} width={boxW} height={boxH}>
+        <LinearGradient
+          start={vec(base.start.x, base.start.y)}
+          end={vec(base.end.x, base.end.y)}
+          colors={["#11302F", "#11141F"]}
+          positions={[0, 0.75]}
+        />
+      </Rect>
+      <MeshNode
+        cx={x3}
+        cy={y3}
+        rx={boxW * 0.55 * 0.74}
+        ry={boxH * 0.45 * 0.74}
+        colors={m2}
+      />
+      <MeshNode
+        cx={x2}
+        cy={y2}
+        rx={boxW * 0.5 * 0.7}
+        ry={boxH * 0.42 * 0.7}
+        colors={m3}
+      />
+      <MeshNode
+        cx={x1}
+        cy={y1}
+        rx={boxW * 0.6 * 0.72}
+        ry={boxH * 0.48 * 0.72}
+        colors={m1}
+      />
+    </Group>
   );
+}
 
-  const baseStart = useDerivedValue(
-    () => angleToLine(180, originX, originY, boxWidth, boxHeight).start,
-  );
-  const baseEnd = useDerivedValue(
-    () => angleToLine(180, originX, originY, boxWidth, boxHeight).end,
-  );
+function FallMorph({ width, height, still }: VariantProps) {
+  const { boxW, boxH, offset } = useMeshBox(width, height, 0.1);
+  const hue = useKeyframePhase(9000, THIRDS, !still);
+  const swell = useLoop(4500, true, !still);
+  const sun = useLoop(6000, true, !still);
+  const sunRadius = width * 0.56;
 
-  const wallColors = useDerivedValue(() => [
-    interpolateColor(
-      huePhase.value,
-      [0, 1, 2, 3],
-      [MINT, MINT_LIGHT, INDIGO_BRIGHT, MINT],
-    ),
-    interpolateColor(huePhase.value, [0, 1, 2, 3], [TEAL, MINT, INDIGO, TEAL]),
-    TEAL_FADE,
-    DARK_BASE,
-  ]);
+  const sunBlur = useMemo(() => {
+    const paint = Skia.Paint();
+    paint.setDither(true);
+    paint.setImageFilter(
+      Skia.ImageFilter.MakeBlur(
+        (width / MOCKUP_WIDTH) * 38,
+        (width / MOCKUP_WIDTH) * 38,
+        TileMode.Decal,
+        null,
+      ),
+    );
+    return paint;
+  }, [width]);
+
+  const wallColors = useDerivedValue(() => {
+    const wt = interpolateColor(hue.value, THIRDS, [
+      "#2DD4BF",
+      "#5EEAD4",
+      "#6366F1",
+      "#2DD4BF",
+    ]);
+    const wm2 = interpolateColor(hue.value, THIRDS, [
+      "#0D9488",
+      "#2DD4BF",
+      "#4338CA",
+      "#0D9488",
+    ]);
+    return [
+      withAlpha(wt, 1),
+      withAlpha(wm2, 1),
+      "rgba(13, 148, 136, 0.3)",
+      "#11141F",
+    ];
+  });
 
   const wallTransform = useDerivedValue(() => [
-    {
-      translateY: interpolate(
-        swellPhase.value,
-        [0, 1],
-        [-0.025 * boxHeight, 0.025 * boxHeight],
-      ),
-    },
+    { translateY: interpolate(swell.value, HALVES, [-0.025, 0.025]) * boxH },
   ]);
 
-  const sunCx = FALL_SUN_LEFT + FALL_SUN_WIDTH / 2;
-  const sunCy = FALL_SUN_TOP + FALL_SUN_HEIGHT / 2;
+  const sunTransform = useDerivedValue(() => [
+    {
+      translateX:
+        width * 0.3 + interpolate(sun.value, HALVES, [0, 0.184]) * width,
+    },
+    { translateY: width * 0.16 },
+    { scale: interpolate(sun.value, HALVES, [0.9, 1.18]) },
+    { scaleY: 170 / 280 },
+  ]);
 
   const sunOpacity = useDerivedValue(() =>
-    interpolate(sunPhase.value, [0, 1], [0.45, 0.95]),
+    interpolate(sun.value, HALVES, [0.45, 0.95]),
   );
-  const sunTransform = useDerivedValue(() => [
-    { translateX: interpolate(sunPhase.value, [0, 1], [0, 46 * MOCKUP_SCALE]) },
-    { scale: interpolate(sunPhase.value, [0, 1], [0.9, 1.18]) },
-  ]);
 
   return (
-    <MeshCanvas>
-      <Group transform={wallTransform} origin={vec(width / 2, height / 2)}>
-        <Fill>
-          <LinearGradient
-            start={baseStart}
-            end={baseEnd}
-            colors={wallColors}
-            positions={[0, 0.3, 0.55, 0.84]}
-          />
-        </Fill>
-      </Group>
-      <Group origin={vec(sunCx, sunCy)} transform={[{ scaleY: FALL_SUN_HEIGHT / FALL_SUN_WIDTH }]}>
-        <Group
-          opacity={sunOpacity}
-          transform={sunTransform}
-          origin={vec(sunCx, sunCy)}
-          layer={
-            <Paint>
-              <Blur blur={FALL_SUN_BLUR} />
-            </Paint>
-          }
-        >
-          <Fill>
-            <RadialGradient
-              c={vec(sunCx, sunCy)}
-              r={FALL_SUN_WIDTH / 2}
-              colors={[LIME, LIME_FADE, TRANSPARENT]}
-              positions={[0, 0.48, 0.74]}
+    <Group>
+      <Rect x={0} y={0} width={width} height={height} color="#11141F" />
+      <Group transform={offset}>
+        <Group transform={wallTransform}>
+          <Rect x={0} y={0} width={boxW} height={boxH}>
+            <LinearGradient
+              start={vec(0, -0.06 * boxH)}
+              end={vec(0, 0.84 * boxH)}
+              colors={wallColors}
+              positions={[0, 0.4, 0.6778, 1]}
             />
-          </Fill>
+          </Rect>
         </Group>
       </Group>
-    </MeshCanvas>
+      <Group layer={sunBlur} opacity={sunOpacity}>
+        <Group transform={sunTransform}>
+          <Circle cx={0} cy={0} r={sunRadius}>
+            <RadialGradient
+              c={vec(0, 0)}
+              r={sunRadius}
+              colors={[
+                "rgba(163, 230, 53, 1)",
+                "rgba(163, 230, 53, 0.4)",
+                "rgba(163, 230, 53, 0)",
+              ]}
+              positions={[0, 0.48, 0.74]}
+            />
+          </Circle>
+        </Group>
+      </Group>
+    </Group>
   );
 }
 
-const BREATHE_CORE_INSET = 0.12;
-const BREATHE_CORE_BLUR = 7 * MOCKUP_SCALE;
-const BREATHE_CORE_SATURATE = saturateMatrix(1.12);
+function BreatheCore({ width, height, still }: VariantProps) {
+  const { boxW, boxH, offset } = useMeshBox(width, height, 0.12);
+  const move = useLoop(3500, true, !still);
+  const hue = useLoop(5000, true, !still);
+  const paint = useMeshPaint((width / MOCKUP_WIDTH) * 7, 1.12);
 
-function BreatheCore() {
-  const { width, height } = useWindowDimensions();
-  const reducedMotion = useReducedMotion();
-  const movePhase = usePingPongPhase(7000, reducedMotion);
-  const huePhase = usePingPongPhase(10000, reducedMotion);
-  const aspect = height / width;
-  const topScale = (0.4 / 0.52) * aspect;
-  const bottomScale = (0.38 / 0.46) * aspect;
+  const coreX = useDerivedValue(() => boxW * 0.5);
+  const coreY = useTrack(move, HALVES, [0.3, 0.45], boxH);
+  const counterX = useTrack(move, HALVES, [0.8, 0.6], boxW);
+  const counterY = useDerivedValue(() => boxH * 0.78);
 
-  const { originX, originY, boxWidth, boxHeight } = expandedBox(
-    width,
-    height,
-    BREATHE_CORE_INSET,
-  );
+  const m1 = useMorphColor(hue, HALVES, ["#2DD4BF", "#A3E635"]);
+  const m3 = useMorphColor(hue, HALVES, ["#4338CA", "#2DD4BF"]);
 
-  const angle = useDerivedValue(() =>
-    interpolate(movePhase.value, [0, 1], [165, 195]),
-  );
   const baseStart = useDerivedValue(
-    () => angleToLine(angle.value, originX, originY, boxWidth, boxHeight).start,
+    () =>
+      gradientEnds(interpolate(move.value, HALVES, [165, 195]), boxW, boxH)
+        .start,
   );
   const baseEnd = useDerivedValue(
-    () => angleToLine(angle.value, originX, originY, boxWidth, boxHeight).end,
+    () =>
+      gradientEnds(interpolate(move.value, HALVES, [165, 195]), boxW, boxH).end,
   );
-
-  const topPos = useDerivedValue(() =>
-    vec(
-      pct(0.5, width, BREATHE_CORE_INSET),
-      pct(
-        interpolate(movePhase.value, [0, 1], [0.3, 0.45]),
-        height,
-        BREATHE_CORE_INSET,
-      ),
-    ),
-  );
-  const bottomPos = useDerivedValue(() =>
-    vec(
-      pct(
-        interpolate(movePhase.value, [0, 1], [0.8, 0.6]),
-        width,
-        BREATHE_CORE_INSET,
-      ),
-      pct(0.78, height, BREATHE_CORE_INSET),
-    ),
-  );
-
-  const topColors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1], [MINT, LIME]),
-    TRANSPARENT,
-  ]);
-  const bottomColors = useDerivedValue(() => [
-    interpolateColor(huePhase.value, [0, 1], [INDIGO, MINT]),
-    TRANSPARENT,
-  ]);
 
   return (
-    <MeshCanvas>
-      <Group
-        layer={
-          <Paint>
-            <Blur blur={BREATHE_CORE_BLUR} />
-            <ColorMatrix matrix={BREATHE_CORE_SATURATE} />
-          </Paint>
-        }
-      >
-        <Fill>
-          <LinearGradient
-            start={baseStart}
-            end={baseEnd}
-            colors={[DARK_TEAL, DARK_BASE]}
-            positions={[0, 0.7]}
-          />
-        </Fill>
-        <Group origin={bottomPos} transform={[{ scaleY: bottomScale }]}>
-          <Fill>
-            <RadialGradient c={bottomPos} r={boxWidth * 0.46} colors={bottomColors} positions={[0, 0.7]} />
-          </Fill>
-        </Group>
-        <Group origin={topPos} transform={[{ scaleY: topScale }]}>
-          <Fill>
-            <RadialGradient c={topPos} r={boxWidth * 0.52} colors={topColors} positions={[0, 0.74]} />
-          </Fill>
-        </Group>
-      </Group>
-    </MeshCanvas>
+    <Group transform={offset} layer={paint}>
+      <Rect x={0} y={0} width={boxW} height={boxH}>
+        <LinearGradient
+          start={baseStart}
+          end={baseEnd}
+          colors={["#11302F", "#11141F"]}
+          positions={[0, 0.7]}
+        />
+      </Rect>
+      <MeshNode
+        cx={counterX}
+        cy={counterY}
+        rx={boxW * 0.46 * 0.7}
+        ry={boxH * 0.38 * 0.7}
+        colors={m3}
+      />
+      <MeshNode
+        cx={coreX}
+        cy={coreY}
+        rx={boxW * 0.52 * 0.74}
+        ry={boxH * 0.4 * 0.74}
+        colors={m1}
+      />
+    </Group>
   );
 }
 
 export function MeshGradientBackground({ variant = "mesh-dark" }: Props) {
-  if (variant === "mesh-full") {
-    return <MeshFull />;
-  }
-  if (variant === "fall-morph") {
-    return <FallMorph />;
-  }
-  if (variant === "breathe-core") {
-    return <BreatheCore />;
-  }
-  return <MeshDark />;
+  const { width, height } = useWindowDimensions();
+  const still = useReducedMotion();
+
+  return (
+    <View style={styles.container}>
+      <Canvas style={StyleSheet.absoluteFill}>
+        {variant === "mesh-full" && (
+          <MeshFull width={width} height={height} still={still} />
+        )}
+        {variant === "mesh-dark" && (
+          <MeshDark width={width} height={height} still={still} />
+        )}
+        {variant === "fall-morph" && (
+          <FallMorph width={width} height={height} still={still} />
+        )}
+        {variant === "breathe-core" && (
+          <BreatheCore width={width} height={height} still={still} />
+        )}
+        <Grain width={width} height={height} />
+      </Canvas>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: DARK_BASE,
-    overflow: "hidden",
+    backgroundColor: "#11141F",
   },
 });

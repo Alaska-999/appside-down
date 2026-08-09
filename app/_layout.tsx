@@ -1,11 +1,11 @@
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import {
   MeshGradientBackground,
-  type MeshVariant,
+  MeshVariant,
 } from "@/src/components/ui/MeshGradientBackground";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
-import { controlHeight } from "@/tamagui.config";
+import config, { controlHeight } from "@/tamagui.config";
 import {
   Sora_400Regular,
   Sora_500Medium,
@@ -14,14 +14,14 @@ import {
   Sora_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/sora";
-import MaskedView from "@react-native-masked-view/masked-view";
 import "@tamagui/native/setup-expo-linear-gradient";
-import "@tamagui/native/setup-zeego";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter, useSegments } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { Stack, useRouter, useSegments } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -29,16 +29,20 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { PortalProvider, TamaguiProvider, Theme } from "tamagui";
 
 const queryClient = new QueryClient();
 
-const MOCKUP_SCALE = 390 / 250;
-const SPLASH_NAME_SIZE = 26 * MOCKUP_SCALE;
-const SPLASH_GAP = 14 * MOCKUP_SCALE;
-const SPINNER_SIZE = 26 * MOCKUP_SCALE;
-const SPINNER_BORDER_WIDTH = 3 * MOCKUP_SCALE;
+type SplashVariant = "aurora" | MeshVariant;
 
-const SPLASH_VARIANT: "aurora" | MeshVariant = "mesh-full";
+// Доступні 5 затверджених варіантів
+const SPLASH_VARIANTS: SplashVariant[] = [
+  "mesh-full",
+  "mesh-dark",
+  "fall-morph",
+  "breathe-core",
+  "aurora",
+];
 
 function AppSplashSpinner() {
   const rotation = useSharedValue(0);
@@ -55,32 +59,42 @@ function AppSplashSpinner() {
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  return <Animated.View style={[styles.spinner, spinStyle]} />;
+  return <Animated.View style={[styles.ring, spinStyle]} />;
 }
 
-function AppSplash() {
+export function AppSplash() {
+  // Індекс активного варіанта для перемикання тапом
+  const [variantIndex, setVariantIndex] = useState(1); // За замовчуванням "mesh-dark" (№2)
+
+  const currentVariant = SPLASH_VARIANTS[variantIndex];
+
+  const handleNextVariant = () => {
+    setVariantIndex((prev) => (prev + 1) % SPLASH_VARIANTS.length);
+  };
+
   return (
-    <View style={styles.splashRoot}>
-      {SPLASH_VARIANT === "aurora" ? (
+    <Pressable style={styles.splashRoot} onPress={handleNextVariant}>
+      {/* Динамічний анімований фон */}
+      {currentVariant === "aurora" ? (
         <AuroraBeams intensity={1.5} coverage="full" motion="lively" />
       ) : (
-        <MeshGradientBackground variant={SPLASH_VARIANT} />
+        <MeshGradientBackground variant={currentVariant} />
       )}
+
+      {/* Центровий блок логотипа та спінера */}
       <View style={styles.splashCenter}>
-        <MaskedView
-          maskElement={<Text style={styles.splashName}>Appside</Text>}
-        >
-          <LinearGradient
-            colors={["#2DD4BF", "#A3E635"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <Text style={[styles.splashName, { opacity: 0 }]}>Appside</Text>
-          </LinearGradient>
-        </MaskedView>
+        <Text style={styles.wm}>Appside</Text>
         <AppSplashSpinner />
       </View>
-    </View>
+
+      {/* Підказка перемикання (для тестування) */}
+      <View style={styles.badge}>
+        <Text style={styles.badgeText}>
+          {variantIndex + 1}/{SPLASH_VARIANTS.length}: {currentVariant} (Тап
+          для зміни)
+        </Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -116,7 +130,9 @@ export function ErrorBoundary({
 
 const SPLASH_FLASH_THRESHOLD = 300;
 const SPLASH_HOLD_DURATION = 3000;
-const SPLASH_PREVIEW = false;
+// Прев'ю мешу: залишаємо true, поки триває підбір варіантів на девайсі.
+// Поверни false, щоб знову увімкнути реальний стек (TamaguiProvider/Stack нижче).
+const SPLASH_PREVIEW = true;
 
 export default function RootLayout() {
   const { token, isHydrated } = useAuthStore();
@@ -170,52 +186,74 @@ export default function RootLayout() {
     }
   }, [isHydrated, token]);
 
-  // if (SPLASH_PREVIEW || !isReady || splashHeld) {
-  return <AppSplash />;
-  // }
+  if (SPLASH_PREVIEW || !isReady || splashHeld) {
+    return <AppSplash />;
+  }
 
-  // return (
-  //   <KeyboardProvider>
-  //     <GestureHandlerRootView style={{ flex: 1 }}>
-  //       <TamaguiProvider config={config} defaultTheme="dark">
-  //         <PortalProvider>
-  //           <Theme name="dark">
-  //             <QueryClientProvider client={queryClient}>
-  //               <Stack screenOptions={{ headerShown: false }}>
-  //                 <Stack.Screen name="(tabs)" />
-  //                 <Stack.Screen name="(auth)" />
-  //               </Stack>
-  //             </QueryClientProvider>
-  //           </Theme>
-  //         </PortalProvider>
-  //       </TamaguiProvider>
-  //     </GestureHandlerRootView>
-  //   </KeyboardProvider>
-  // );
+  return (
+    <KeyboardProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <TamaguiProvider config={config} defaultTheme="dark">
+          <PortalProvider>
+            <Theme name="dark">
+              <QueryClientProvider client={queryClient}>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="(auth)" />
+                </Stack>
+              </QueryClientProvider>
+            </Theme>
+          </PortalProvider>
+        </TamaguiProvider>
+      </GestureHandlerRootView>
+    </KeyboardProvider>
+  );
 }
 
 const styles = StyleSheet.create({
   splashRoot: {
     flex: 1,
-    backgroundColor: "#11141F",
+    backgroundColor: "#11141F", // Темний фон підкладки з HTML[cite: 2]
   },
   splashCenter: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: SPLASH_GAP,
+    gap: 12,
+    zIndex: 7,
   },
-  splashName: {
-    fontSize: SPLASH_NAME_SIZE,
+  wm: {
+    fontSize: 23, // Розмір тексту з HTML[cite: 2]
+    fontFamily: "Sora_800ExtraBold",
     fontWeight: "800",
+    color: "#FFFFFF",
+    // М'яка тінь для чіткості поверх світлих зон мешу[cite: 2]
+    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 24,
   },
-  spinner: {
-    width: SPINNER_SIZE,
-    height: SPINNER_SIZE,
-    borderRadius: SPINNER_SIZE / 2,
-    borderWidth: SPINNER_BORDER_WIDTH,
-    borderColor: "rgba(220,255,245,0.12)",
-    borderTopColor: "#2DD4BF",
+  ring: {
+    width: 22, // Розміри спінера з HTML[cite: 2]
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2.5,
+    borderColor: "rgba(255,255,255,0.18)", // Напівпрозоре кільце[cite: 2]
+    borderTopColor: "rgba(255,255,255,0.9)", // Біла дуга[cite: 2]
+  },
+  badge: {
+    position: "absolute",
+    bottom: 40,
+    alignSelf: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  badgeText: {
+    color: "#8FA8B8",
+    fontSize: 11,
+    fontWeight: "600",
   },
   errorRoot: {
     flex: 1,
