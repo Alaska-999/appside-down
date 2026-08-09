@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
-import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
+import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export default function FolderCreate() {
   const [customImageUri, setCustomImageUri] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export default function FolderCreate() {
           width="100%"
           onPress={Keyboard.dismiss}
         >
-          <Text color="$color" fontSize={20} fontWeight="800">
+          <Text color="$color" fontSize={27} fontWeight="800">
             New Folder
           </Text>
           <ImagePickerAvatar
@@ -108,12 +108,6 @@ export default function FolderCreate() {
               {serverError}
             </Text>
           )}
-
-          <XStack
-            height={50}
-            marginHorizontal="$4"
-            alignItems="center"
-          ></XStack>
         </YStack>
       </YStack>
     </FormProvider>

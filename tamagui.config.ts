@@ -54,7 +54,7 @@ const tokens = createTokens({
     },
     space: {
         ...config.tokens.space,
-        screenX: 19,
+        screenX: 16,
         section: 22,
         cardPad: 19,
     },
@@ -65,6 +65,16 @@ const tokens = createTokens({
         control: 16,
     },
 })
+
+export const controlHeight = {
+    sm: 42,
+    md: 52,
+    lg: 60,
+}
+
+export const screenGutter = 16
+
+export const topPaddingBoost = 4
 
 // Shared elevation presets (shadowRadius/shadowOpacity) — use instead of inline shadow values per component
 export const elevation = {

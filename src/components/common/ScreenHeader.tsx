@@ -1,20 +1,65 @@
+import { IconButton } from "@/src/components/ui/IconButton";
+import { topPaddingBoost } from "@/tamagui.config";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, XStack } from "tamagui";
 
-export function ScreenHeader({ title, right }: { title?: string; right?: ReactNode }) {
+type ScreenHeaderVariant = "default" | "create";
+
+interface ScreenHeaderProps {
+  variant?: ScreenHeaderVariant;
+  title?: string;
+  right?: ReactNode;
+  onCreate?: () => void;
+}
+
+export function ScreenHeader({
+  variant = "default",
+  title,
+  right,
+  onCreate,
+}: ScreenHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  if (variant === "create") {
+    return (
+      <XStack
+        jc="space-between"
+        ai="center"
+        width="100%"
+        px="$screenX"
+        pt={insets.top + 10}
+        bg="$background"
+      >
+        <Button
+          chromeless
+          onPress={() => router.back()}
+          p={0}
+          pressStyle={{ opacity: 0.7 }}
+        >
+          <Text color="$colorMuted" fontWeight="600" fontSize={16}>
+            Cancel
+          </Text>
+        </Button>
+
+        <Button chromeless onPress={onCreate} p={0} pressStyle={{ opacity: 0.7 }}>
+          <Text color="$accentGradientEnd" fontWeight="700" fontSize={16}>
+            Create
+          </Text>
+        </Button>
+      </XStack>
+    );
+  }
+
   return (
-    <XStack ai="center" p="$4" pt={insets.top} bg="$background">
-      <Button
-        icon={<ChevronLeft size="$2" color="$color" />}
-        circular
+    <XStack ai="center" p="$4" pt={insets.top + topPaddingBoost} bg="$background">
+      <IconButton
+        variant="liquidGlass"
+        icon={<ChevronLeft size="$1" color="$color" />}
         onPress={() => router.back()}
-        ml="$-3"
       />
 
       {title && (

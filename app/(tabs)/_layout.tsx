@@ -7,6 +7,9 @@ import { ComponentType, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
 
+export const TAB_BAR_HEIGHT = 68;
+export const TAB_BAR_CLEARANCE_GAP = 16;
+
 function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
   return function RenderTabIcon({
     focused,
@@ -77,7 +80,7 @@ export default function TabsLayout() {
             left: 22,
             right: 22,
             bottom: insets.bottom,
-            height: 68,
+            height: TAB_BAR_HEIGHT,
             backgroundColor: "transparent",
             borderTopWidth: 0,
             elevation: 10,

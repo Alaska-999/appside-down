@@ -1,3 +1,4 @@
+import { controlHeight } from "@/tamagui.config";
 import { forwardRef, ReactNode, Ref } from "react";
 import type { TextInput } from "react-native";
 import {
@@ -13,19 +14,12 @@ type FormInputVariant = "bordered" | "glass" | "underline";
 type FormInputSize = "sm" | "md" | "lg";
 
 const SIZE_STYLES: Record<FormInputSize, { height: number; fontSize: number; px: number }> = {
-  sm: { height: 44, fontSize: 15, px: 14 },
-  md: { height: 52, fontSize: 16, px: 16 },
-  lg: { height: 60, fontSize: 19, px: 20 },
+  sm: { height: controlHeight.sm, fontSize: 14, px: 14 },
+  md: { height: controlHeight.md, fontSize: 16, px: 16 },
+  lg: { height: controlHeight.lg, fontSize: 19, px: 20 },
 };
 
 const MOCKUP_SCALE = 390 / 290;
-
-const GLASS_DEFAULTS = {
-  paddingVertical: 13 * MOCKUP_SCALE,
-  paddingHorizontal: 15 * MOCKUP_SCALE,
-  fontSize: 14.5 * MOCKUP_SCALE,
-  borderRadius: 16 * MOCKUP_SCALE,
-};
 
 const GLASS_FOCUS_STYLE = {
   borderColor: "rgba(45,212,191,0.55)",
@@ -64,9 +58,9 @@ function FormInputInner<T extends FieldValues>(
   ref: Ref<TextInput>,
 ) {
   const formContext = useFormContext();
-  const sizeStyle = inputSize ? SIZE_STYLES[inputSize] : null;
   const isUnderline = variant === "underline";
   const isGlass = variant === "glass";
+  const sizeStyle = SIZE_STYLES[inputSize ?? (isGlass ? "lg" : "md")];
 
   return (
     <Controller
@@ -77,11 +71,10 @@ function FormInputInner<T extends FieldValues>(
           <XStack width="100%" ai="center" pos="relative">
             <Input
               f={1}
-              size={sizeStyle || isGlass ? undefined : "$4"}
-              height={isUnderline ? undefined : sizeStyle?.height}
-              py={isUnderline || sizeStyle ? undefined : isGlass ? GLASS_DEFAULTS.paddingVertical : undefined}
-              px={isUnderline ? undefined : sizeStyle?.px ?? (isGlass ? GLASS_DEFAULTS.paddingHorizontal : undefined)}
-              fontSize={sizeStyle?.fontSize ?? (isGlass ? GLASS_DEFAULTS.fontSize : undefined)}
+              size={undefined}
+              height={isUnderline ? undefined : sizeStyle.height}
+              px={isUnderline ? undefined : sizeStyle.px}
+              fontSize={sizeStyle.fontSize}
               placeholderTextColor="$colorSecondary"
               color={color ?? "$color"}
               unstyled={isUnderline || undefined}
@@ -95,7 +88,7 @@ function FormInputInner<T extends FieldValues>(
                     : undefined
               }
               bg={isUnderline ? undefined : bg ?? (isGlass ? "$glassBg" : undefined)}
-              br={isUnderline ? undefined : br ?? (isGlass ? GLASS_DEFAULTS.borderRadius : undefined)}
+              br={isUnderline ? undefined : br ?? (isGlass ? "$control" : undefined)}
               borderWidth={isUnderline ? undefined : borderWidth ?? 1}
               {...inputProps}
               ref={(node: TamaguiElement | null) => {

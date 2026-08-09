@@ -1,6 +1,7 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { StreakCard } from "@/src/components/cards/StreakCard";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { BellRing, ChevronRight, Settings } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
@@ -19,20 +20,6 @@ function GlassCard({ children }: { children: ReactNode }) {
     >
       {children}
     </YStack>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      fontSize="$3"
-      color="$auroraMuted"
-      fontWeight="600"
-      tt="uppercase"
-      px="$1"
-    >
-      {children}
-    </Text>
   );
 }
 
@@ -110,7 +97,9 @@ export default function ProfileScreen() {
         />
 
         <YStack gap="$2">
-          <SectionTitle>Account</SectionTitle>
+          <SectionTitle tone="eyebrow" px="$1">
+            Account
+          </SectionTitle>
           <GlassCard>
             <AccountRow
               icon={<Settings size={18} color="$colorSecondary" />}

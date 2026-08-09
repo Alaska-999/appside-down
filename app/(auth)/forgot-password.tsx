@@ -1,8 +1,8 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AppButton } from "@/src/components/ui/Button";
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
+import { AppButton } from "@/src/components/ui/Button";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
@@ -42,14 +42,11 @@ export default function ForgotPassword() {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
         const data = await response.json();
@@ -110,18 +107,21 @@ export default function ForgotPassword() {
               </Text>
             )}
 
-            <YStack mt={10 * MOCKUP_SCALE}>
+            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
               <AppButton
+                size="lg"
                 variant="soft"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
               >
                 {isSubmitting ? "Sending..." : "Send code"}
               </AppButton>
-            </YStack>
 
-            <YStack mt={10 * MOCKUP_SCALE}>
-              <AppButton variant="secondary" onPress={() => router.push("/login")}>
+              <AppButton
+                size="lg"
+                variant="glass"
+                onPress={() => router.push("/login")}
+              >
                 Back to login
               </AppButton>
             </YStack>
@@ -131,3 +131,11 @@ export default function ForgotPassword() {
     </FormProvider>
   );
 }
+// | "primary"
+// | "soft"
+// | "hero"
+// | "secondary"
+// | "outline"
+// | "ghost"
+// | "danger"
+// | "glass";

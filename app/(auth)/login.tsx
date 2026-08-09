@@ -1,9 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AppButton } from "@/src/components/ui/Button";
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
+import { AppButton } from "@/src/components/ui/Button";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
@@ -13,8 +13,8 @@ import { Link, router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Pressable } from "react-native";
 import type { TextInput } from "react-native";
+import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, YStack } from "tamagui";
@@ -51,14 +51,11 @@ export default function Login() {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await response.json();
 
@@ -152,6 +149,7 @@ export default function Login() {
               keyboardType="email-address"
               returnKeyType="next"
               blurOnSubmit={false}
+              inputSize="lg"
               onSubmitEditing={() => passwordRef.current?.focus()}
             />
             <FormInput
@@ -207,21 +205,22 @@ export default function Login() {
               </Text>
             )}
 
-            <YStack mt={10 * MOCKUP_SCALE}>
+            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
               <AppButton
                 variant="soft"
+                size="lg"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
               >
                 {isSubmitting ? "Logging in..." : "Log in"}
               </AppButton>
-            </YStack>
 
-            <AuthSwitchLink
-              href="/signup"
-              prompt="New here?"
-              action="Create account"
-            />
+              <AuthSwitchLink
+                href="/signup"
+                prompt="New here?"
+                action="Create account"
+              />
+            </YStack>
           </YStack>
         </KeyboardAwareScrollView>
       </YStack>

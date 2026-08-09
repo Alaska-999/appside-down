@@ -1,3 +1,4 @@
+import { controlHeight } from "@/tamagui.config";
 import { Search, X } from "@tamagui/lucide-icons";
 import { Pressable } from "react-native";
 import { Input, XStack, XStackProps } from "tamagui";
@@ -21,7 +22,7 @@ export function SearchField({
       bg="$glassBg"
       br={999}
       px={19}
-      h={48}
+      h={controlHeight.md}
       ai="center"
       gap={9}
       borderWidth={1}

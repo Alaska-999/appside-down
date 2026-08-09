@@ -1,9 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { SectionTitle } from "@/app/(tabs)/index";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { AppButton } from "@/src/components/ui/Button";
-import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
+import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";

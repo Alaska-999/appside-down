@@ -1,20 +1,19 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AppButton } from "@/src/components/ui/Button";
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
+import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
-import {
-  ResetPasswordForm,
-  resetPasswordSchema,
-} from "@/src/validation/auth";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
+import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "@tamagui/lucide-icons";
+import { ChevronLeft, Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Alert, Pressable } from "react-native";
 import type { TextInput } from "react-native";
+import { Alert, Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, YStack } from "tamagui";
@@ -51,7 +50,10 @@ export default function ResetPassword() {
 
   useEffect(() => {
     if (resendCooldown === 0) return;
-    const timeout = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    const timeout = setTimeout(
+      () => setResendCooldown(resendCooldown - 1),
+      1000,
+    );
     return () => clearTimeout(timeout);
   }, [resendCooldown]);
 
@@ -60,14 +62,11 @@ export default function ResetPassword() {
     setIsResending(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
         const data = await response.json();
@@ -88,14 +87,11 @@ export default function ResetPassword() {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/reset-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code, newPassword }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, newPassword }),
+      });
 
       if (!response.ok) {
         const data = await response.json();
@@ -115,6 +111,15 @@ export default function ResetPassword() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <AuroraBeams />
+        <IconButton
+          variant="liquidGlass"
+          icon={<ChevronLeft size="$1" color="$color" />}
+          onPress={() => router.back()}
+          pos="absolute"
+          top={insets.top + 8}
+          left={screenGutter}
+          zIndex={10}
+        />
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
@@ -216,35 +221,35 @@ export default function ResetPassword() {
               </Text>
             )}
 
-            <YStack mt={10 * MOCKUP_SCALE}>
+            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
               <AppButton
+                size="lg"
                 variant="soft"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
               >
                 {isSubmitting ? "Resetting..." : "Reset password"}
               </AppButton>
-            </YStack>
 
-            <Pressable
-              onPress={resendCode}
-              disabled={resendCooldown > 0 || isResending}
-              hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-            >
-              <Text
-                color="$colorSecondary"
-                fontSize={12.5 * MOCKUP_SCALE}
-                textAlign="center"
-                mt={12 * MOCKUP_SCALE}
-                opacity={resendCooldown > 0 || isResending ? 0.5 : 1}
+              <Pressable
+                onPress={resendCode}
+                disabled={resendCooldown > 0 || isResending}
+                hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
               >
-                {isResending
-                  ? "Sending..."
-                  : resendCooldown > 0
-                    ? `Resend code in ${resendCooldown}s`
-                    : "Resend code"}
-              </Text>
-            </Pressable>
+                <Text
+                  color="$colorSecondary"
+                  fontSize={12.5 * MOCKUP_SCALE}
+                  textAlign="center"
+                  opacity={resendCooldown > 0 || isResending ? 0.5 : 1}
+                >
+                  {isResending
+                    ? "Sending..."
+                    : resendCooldown > 0
+                      ? `Resend code in ${resendCooldown}s`
+                      : "Resend code"}
+                </Text>
+              </Pressable>
+            </YStack>
           </YStack>
         </KeyboardAwareScrollView>
       </YStack>

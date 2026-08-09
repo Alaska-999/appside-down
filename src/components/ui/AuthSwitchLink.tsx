@@ -19,7 +19,6 @@ export function AuthSwitchLink({ href, prompt, action }: AuthSwitchLinkProps) {
           color="$colorSecondary"
           fontSize={12.5 * MOCKUP_SCALE}
           textAlign="center"
-          mt={14 * MOCKUP_SCALE}
         >
           {prompt}{" "}
           <Text color="$lime" fontWeight="700">

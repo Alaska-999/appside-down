@@ -71,8 +71,8 @@ export function AppCard(props: CardProps) {
         px={sizeStyle.px}
         py={sizeStyle.py}
         bg="$glassBgSubtle"
-        border="1"
-        borderColor="$glassBgStrong"
+        borderWidth={1}
+        borderColor="$glassBorder"
         {...accentBorderStyle}
         {...rest}
       >

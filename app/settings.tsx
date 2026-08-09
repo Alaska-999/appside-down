@@ -5,9 +5,11 @@ import { Toggle } from "@/src/components/common/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
 import { GlowSurface } from "@/src/components/ui/GlowSurface";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { controlHeight } from "@/tamagui.config";
 import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
@@ -27,20 +29,6 @@ function GlassCard({ children }: { children: ReactNode }) {
     >
       {children}
     </YStack>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      fontSize="$3"
-      color="$auroraMuted"
-      fontWeight="600"
-      tt="uppercase"
-      px="$1"
-    >
-      {children}
-    </Text>
   );
 }
 
@@ -201,7 +189,9 @@ export default function SettingsScreen() {
           </GlassCard>
 
           <YStack gap="$2">
-            <SectionTitle>Preferences</SectionTitle>
+            <SectionTitle tone="eyebrow" px="$1">
+              Preferences
+            </SectionTitle>
             <GlassCard>
               <SettingsRow
                 label="Push notifications"
@@ -235,7 +225,9 @@ export default function SettingsScreen() {
           </YStack>
 
           <YStack gap="$2">
-            <SectionTitle>About</SectionTitle>
+            <SectionTitle tone="eyebrow" px="$1">
+              About
+            </SectionTitle>
             <GlassCard>
               <SettingsRow label="Privacy policy" disabled />
               <SettingsRow label="Terms of service" disabled />
@@ -290,7 +282,7 @@ export default function SettingsScreen() {
             </Text>
             <Input
               placeholder="Password"
-              height={49}
+              height={controlHeight.md}
               px={16}
               br={16}
               bg="$glassBg"
@@ -321,9 +313,9 @@ export default function SettingsScreen() {
                 <AppButton
                   variant="danger"
                   onPress={handleDeleteAccount}
-                  disabled={isDeleting}
+                  loading={isDeleting}
                 >
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  Delete
                 </AppButton>
               </YStack>
             </XStack>

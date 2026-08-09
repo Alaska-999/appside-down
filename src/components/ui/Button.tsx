@@ -1,5 +1,5 @@
-import { stateOpacity } from "@/tamagui.config";
-import * as Haptics from "expo-haptics";
+import { controlHeight, stateOpacity } from "@/tamagui.config";
+import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { Pressable } from "react-native";
@@ -27,10 +27,12 @@ const SIZE_STYLES: Record<
   ButtonSize,
   { height: number; paddingHorizontal: number; fontSize: number }
 > = {
-  sm: { height: 36, paddingHorizontal: 14, fontSize: 13 },
-  md: { height: 48, paddingHorizontal: 20, fontSize: 15 },
-  lg: { height: 56, paddingHorizontal: 24, fontSize: 17 },
+  sm: { height: controlHeight.sm, paddingHorizontal: 14, fontSize: 13 },
+  md: { height: controlHeight.md, paddingHorizontal: 20, fontSize: 15 },
+  lg: { height: controlHeight.lg, paddingHorizontal: 24, fontSize: 17 },
 };
+
+const MIN_TAP_TARGET = 44;
 
 const VARIANT_STYLES: Record<
   Exclude<ButtonVariant, GradientVariant>,
@@ -105,10 +107,11 @@ export function AppButton({
     ? gradientStyle.textColor
     : variantStyle!.textColor;
   const isBlocked = disabled || loading;
+  const verticalHitSlop = Math.max(0, (MIN_TAP_TARGET - height) / 2);
 
   const handlePress = () => {
     if (isBlocked) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticTap();
     onPress?.();
   };
 
@@ -138,6 +141,7 @@ export function AppButton({
     <Pressable
       onPress={handlePress}
       disabled={isBlocked}
+      hitSlop={{ top: verticalHitSlop, bottom: verticalHitSlop }}
       style={({ pressed }) => ({
         borderRadius: 999,
         opacity: pressed && !loading ? 0.85 : 1,

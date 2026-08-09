@@ -1,9 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AppButton } from "@/src/components/ui/Button";
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
+import { AppButton } from "@/src/components/ui/Button";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
@@ -51,14 +51,11 @@ export default function Signup() {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/signup`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, username }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, username }),
+      });
 
       const data = await response.json();
 
@@ -184,21 +181,22 @@ export default function Signup() {
               </Text>
             )}
 
-            <YStack mt={10 * MOCKUP_SCALE}>
+            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
               <AppButton
+                size="lg"
                 variant="soft"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
               >
                 {isSubmitting ? "Signing up..." : "Sign up"}
               </AppButton>
-            </YStack>
 
-            <AuthSwitchLink
-              href="/login"
-              prompt="Already have an account?"
-              action="Log in"
-            />
+              <AuthSwitchLink
+                href="/login"
+                prompt="Already have an account?"
+                action="Log in"
+              />
+            </YStack>
           </YStack>
         </KeyboardAwareScrollView>
       </YStack>

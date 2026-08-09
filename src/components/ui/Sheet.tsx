@@ -21,7 +21,7 @@ const VARIANT_STYLES: Record<
   SheetVariant,
   { overlayOpacity: number; cornerRadius: number; handleColor: string }
 > = {
-  solid: { overlayOpacity: 0.5, cornerRadius: 30, handleColor: "$glassBorder" },
+  solid: { overlayOpacity: 0.5, cornerRadius: 35, handleColor: "$glassBorder" },
   glass: { overlayOpacity: 0.25, cornerRadius: 35, handleColor: "rgba(220,255,245,0.35)" },
 };
 
