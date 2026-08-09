@@ -1,7 +1,7 @@
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
-import config, { controlHeight } from "@/tamagui.config";
+import { controlHeight } from "@/tamagui.config";
 import {
   Sora_400Regular,
   Sora_500Medium,
@@ -13,13 +13,11 @@ import {
 import MaskedView from "@react-native-masked-view/masked-view";
 import "@tamagui/native/setup-expo-linear-gradient";
 import "@tamagui/native/setup-zeego";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -27,7 +25,6 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { PortalProvider, TamaguiProvider, Theme } from "tamagui";
 
 const queryClient = new QueryClient();
 
@@ -163,28 +160,28 @@ export default function RootLayout() {
     }
   }, [isHydrated, token]);
 
-  if (SPLASH_PREVIEW || !isReady || splashHeld) {
-    return <AppSplash />;
-  }
+  // if (SPLASH_PREVIEW || !isReady || splashHeld) {
+  return <AppSplash />;
+  // }
 
-  return (
-    <KeyboardProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <TamaguiProvider config={config} defaultTheme="dark">
-          <PortalProvider>
-            <Theme name="dark">
-              <QueryClientProvider client={queryClient}>
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="(auth)" />
-                </Stack>
-              </QueryClientProvider>
-            </Theme>
-          </PortalProvider>
-        </TamaguiProvider>
-      </GestureHandlerRootView>
-    </KeyboardProvider>
-  );
+  // return (
+  //   <KeyboardProvider>
+  //     <GestureHandlerRootView style={{ flex: 1 }}>
+  //       <TamaguiProvider config={config} defaultTheme="dark">
+  //         <PortalProvider>
+  //           <Theme name="dark">
+  //             <QueryClientProvider client={queryClient}>
+  //               <Stack screenOptions={{ headerShown: false }}>
+  //                 <Stack.Screen name="(tabs)" />
+  //                 <Stack.Screen name="(auth)" />
+  //               </Stack>
+  //             </QueryClientProvider>
+  //           </Theme>
+  //         </PortalProvider>
+  //       </TamaguiProvider>
+  //     </GestureHandlerRootView>
+  //   </KeyboardProvider>
+  // );
 }
 
 const styles = StyleSheet.create({
