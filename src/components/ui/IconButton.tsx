@@ -1,5 +1,5 @@
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import * as Haptics from "expo-haptics";
+import { hapticTap } from "@/src/utils/haptics";
 import { ReactElement } from "react";
 import { View } from "react-native";
 import { Button, ButtonProps } from "tamagui";
@@ -39,7 +39,7 @@ export function IconButton({
   ...rest
 }: IconButtonProps) {
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticTap();
     onPress?.();
   };
 

@@ -5,6 +5,11 @@ import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 const hapticsEnabled = () =>
   usePreferencesStore.getState().hapticFeedbackEnabled;
 
+export const hapticTap = () => {
+  if (!hapticsEnabled()) return;
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+};
+
 export const hapticSwipe = () => {
   if (!hapticsEnabled()) return;
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
