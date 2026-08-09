@@ -6,7 +6,7 @@ import {
   Path,
 } from "react-hook-form";
 import type { TextInput as RNTextInput } from "react-native";
-import { TextInput } from "react-native";
+import { Pressable, TextInput } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 const MOCKUP_SCALE = 390 / 290;
@@ -33,6 +33,17 @@ export function CodeInput<T extends FieldValues>({
   const inputRef = useRef<RNTextInput>(null);
   const [isFocused, setIsFocused] = useState(false);
 
+  const focusInput = () => {
+    if (isFocused) {
+      inputRef.current?.blur();
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
+      return;
+    }
+    inputRef.current?.focus();
+  };
+
   return (
     <Controller
       control={control}
@@ -43,43 +54,45 @@ export function CodeInput<T extends FieldValues>({
         return (
           <YStack width="100%" gap="$1">
             <YStack pos="relative" width="100%">
-              <XStack jc="center" gap={CELL_GAP}>
-                {Array.from({ length }).map((_, index) => {
-                  const char = value[index];
-                  const isFilled = Boolean(char);
-                  const isActive = isFocused && index === value.length;
+              <Pressable onPress={focusInput}>
+                <XStack jc="center" gap={CELL_GAP} pointerEvents="none">
+                  {Array.from({ length }).map((_, index) => {
+                    const char = value[index];
+                    const isFilled = Boolean(char);
+                    const isActive = isFocused && index === value.length;
 
-                  return (
-                    <YStack
-                      key={index}
-                      width={CELL_WIDTH}
-                      height={CELL_HEIGHT}
-                      br={CELL_RADIUS}
-                      bg="$glassBg"
-                      borderWidth={1}
-                      borderColor={
-                        isActive
-                          ? "rgba(163,230,53,0.65)"
-                          : isFilled
-                            ? "rgba(45,212,191,0.5)"
-                            : "$glassBorder"
-                      }
-                      shadowColor={
-                        isActive ? "rgba(163,230,53,0.15)" : undefined
-                      }
-                      shadowOpacity={isActive ? 1 : 0}
-                      shadowRadius={12 * MOCKUP_SCALE}
-                      shadowOffset={{ width: 0, height: 0 }}
-                      ai="center"
-                      jc="center"
-                    >
-                      <Text color="$color" fontSize={18 * MOCKUP_SCALE} fontWeight="700">
-                        {char ?? ""}
-                      </Text>
-                    </YStack>
-                  );
-                })}
-              </XStack>
+                    return (
+                      <YStack
+                        key={index}
+                        width={CELL_WIDTH}
+                        height={CELL_HEIGHT}
+                        br={CELL_RADIUS}
+                        bg="$glassBg"
+                        borderWidth={1}
+                        borderColor={
+                          isActive
+                            ? "rgba(163,230,53,0.65)"
+                            : isFilled
+                              ? "rgba(45,212,191,0.5)"
+                              : "$glassBorder"
+                        }
+                        shadowColor={
+                          isActive ? "rgba(163,230,53,0.15)" : undefined
+                        }
+                        shadowOpacity={isActive ? 1 : 0}
+                        shadowRadius={12 * MOCKUP_SCALE}
+                        shadowOffset={{ width: 0, height: 0 }}
+                        ai="center"
+                        jc="center"
+                      >
+                        <Text color="$color" fontSize={18 * MOCKUP_SCALE} fontWeight="700">
+                          {char ?? ""}
+                        </Text>
+                      </YStack>
+                    );
+                  })}
+                </XStack>
+              </Pressable>
               <TextInput
                 ref={inputRef}
                 value={value}
@@ -100,6 +113,7 @@ export function CodeInput<T extends FieldValues>({
                 maxLength={length}
                 autoFocus={autoFocus}
                 caretHidden
+                pointerEvents="none"
                 style={{
                   position: "absolute",
                   top: 0,
