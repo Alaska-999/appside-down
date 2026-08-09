@@ -113,7 +113,7 @@ const BEAMS: BeamSpec[] = [
 ];
 
 const MOTION_PRESETS: Record<"calm" | "lively", { durationMul: number; amplitudeMul: number }> = {
-  calm: { durationMul: 0.75, amplitudeMul: 1.4 },
+  calm: { durationMul: 0.65, amplitudeMul: 1.6 },
   lively: { durationMul: 0.55, amplitudeMul: 1.8 },
 };
 

@@ -85,17 +85,17 @@ export default function TabsLayout() {
             borderTopWidth: 0,
             elevation: 10,
             shadowColor: "#000",
-            shadowOpacity: 0.35,
-            shadowRadius: 20,
+            shadowOpacity: 0.3,
+            shadowRadius: 16,
             shadowOffset: { width: 0, height: 10 },
           },
           tabBarBackground: () => (
             <LiquidGlass
               intensity={25}
               borderRadius={22}
-              borderWidth={2}
+              borderWidth={1}
               borderColor={theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)"}
-              backgroundColor="rgba(15, 22, 36, 0.4)"
+              backgroundColor={theme.tabBarBg.get()}
               style={{ marginLeft: 5, marginRight: 5 }}
             />
           ),
