@@ -1,5 +1,9 @@
-import { controlHeight } from "@/tamagui.config";
-import { forwardRef, ReactNode, Ref } from "react";
+import {
+  InputShell,
+  InputShellSize,
+  InputShellVariant,
+} from "@/src/components/ui/InputShell";
+import { forwardRef, ReactNode, Ref, useState } from "react";
 import type { TextInput } from "react-native";
 import {
   Control,
@@ -8,121 +12,118 @@ import {
   Path,
   useFormContext,
 } from "react-hook-form";
-import { Input, InputProps, Text, TamaguiElement, XStack, YStack } from "tamagui";
+import { Input, InputProps, TamaguiElement, Text, YStack } from "tamagui";
 
-type FormInputVariant = "bordered" | "glass" | "underline";
-type FormInputSize = "sm" | "md" | "lg";
-
-const SIZE_STYLES: Record<FormInputSize, { height: number; fontSize: number; px: number }> = {
-  sm: { height: controlHeight.sm, fontSize: 14, px: 14 },
-  md: { height: controlHeight.md, fontSize: 16, px: 16 },
-  lg: { height: controlHeight.lg, fontSize: 19, px: 20 },
-};
-
-const MOCKUP_SCALE = 390 / 290;
-
-const GLASS_FOCUS_STYLE = {
-  borderColor: "rgba(45,212,191,0.55)",
-  shadowColor: "rgba(45,212,191,0.12)",
-  shadowOpacity: 1,
-  shadowRadius: 14 * MOCKUP_SCALE,
-  shadowOffset: { width: 0, height: 0 },
-};
+type FormInputVariant = InputShellVariant | "bordered";
+type FormInputSize = InputShellSize;
 
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
+  leftElement?: ReactNode;
   rightElement?: ReactNode;
   variant?: FormInputVariant;
   inputSize?: FormInputSize;
   onValueChange?: (value: string) => void;
   hideError?: boolean;
-} & Omit<InputProps, "value" | "onChangeText">;
+  showCounter?: boolean;
+} & Omit<InputProps, "value" | "onChangeText" | "size">;
 
 function FormInputInner<T extends FieldValues>(
   {
     control,
     name,
+    leftElement,
     rightElement,
-    variant = "bordered",
-    inputSize,
+    variant = "well",
+    inputSize = "md",
     onValueChange,
     hideError = false,
-    borderColor,
-    borderWidth,
-    bg,
-    br,
-    color,
+    showCounter = false,
+    maxLength,
+    multiline,
+    disabled,
     ...inputProps
   }: FormInputProps<T>,
   ref: Ref<TextInput>,
 ) {
   const formContext = useFormContext();
-  const isUnderline = variant === "underline";
-  const isGlass = variant === "glass";
-  const sizeStyle = SIZE_STYLES[inputSize ?? (isGlass ? "lg" : "md")];
+  const [focused, setFocused] = useState(false);
+  const shellVariant: InputShellVariant = variant === "bordered" ? "well" : variant;
 
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field, fieldState }) => (
-        <YStack width="100%" gap="$1">
-          <XStack width="100%" ai="center" pos="relative">
-            <Input
-              f={1}
-              size={undefined}
-              height={isUnderline ? undefined : sizeStyle.height}
-              px={isUnderline ? undefined : sizeStyle.px}
-              fontSize={sizeStyle.fontSize}
-              placeholderTextColor="$colorSecondary"
-              color={color ?? "$color"}
-              unstyled={isUnderline || undefined}
-              bbw={isUnderline ? 1 : undefined}
-              pb={isUnderline ? "$1" : undefined}
-              focusStyle={
-                isUnderline
-                  ? { bc: "$accentGradientStart", bbw: 2 }
-                  : isGlass
-                    ? GLASS_FOCUS_STYLE
-                    : undefined
-              }
-              bg={isUnderline ? undefined : bg ?? (isGlass ? "$glassBg" : undefined)}
-              br={isUnderline ? undefined : br ?? (isGlass ? "$control" : undefined)}
-              borderWidth={isUnderline ? undefined : borderWidth ?? 1}
-              {...inputProps}
-              ref={(node: TamaguiElement | null) => {
-                const textInputNode = node as TextInput | null;
-                field.ref(textInputNode);
-                if (typeof ref === "function") ref(textInputNode);
-                else if (ref) (ref as { current: TextInput | null }).current = textInputNode;
-              }}
-              value={field.value as string}
-              onChangeText={(text) => {
-                if (fieldState.error) {
-                  formContext?.clearErrors(name);
-                }
-                onValueChange?.(text);
-                field.onChange(text);
-              }}
-              onBlur={field.onBlur}
-              borderColor={
-                fieldState.error
-                  ? "$statusDanger"
-                  : isUnderline
-                    ? "transparent"
-                    : borderColor ?? (isGlass ? "$glassBorder" : "$borderColor")
-              }
-            />
-            {rightElement}
-          </XStack>
-          {!hideError && fieldState.error && (
-            <Text color="$statusDanger" fontSize="$2">
-              {fieldState.error.message}
-            </Text>
-          )}
-        </YStack>
-      )}
+      render={({ field, fieldState }) => {
+        const value = (field.value as string) ?? "";
+        const nearLimit =
+          maxLength !== undefined && value.length >= maxLength - Math.max(3, Math.ceil(maxLength * 0.15));
+
+        return (
+          <YStack width="100%" gap={6}>
+            <InputShell
+              variant={shellVariant}
+              size={inputSize}
+              state={fieldState.error ? "error" : focused ? "focus" : "default"}
+              multiline={multiline ?? undefined}
+              disabled={Boolean(disabled)}
+            >
+              {leftElement}
+              <Input
+                f={1}
+                unstyled
+                h={multiline ? undefined : "100%"}
+                minHeight={multiline ? 66 : undefined}
+                fontSize={multiline ? 15 : 16}
+                color="$color"
+                placeholderTextColor="$placeholderColor"
+                multiline={multiline}
+                maxLength={maxLength}
+                disabled={disabled}
+                textAlignVertical={multiline ? "top" : undefined}
+                {...inputProps}
+                ref={(node: TamaguiElement | null) => {
+                  const textInputNode = node as TextInput | null;
+                  field.ref(textInputNode);
+                  if (typeof ref === "function") ref(textInputNode);
+                  else if (ref) (ref as { current: TextInput | null }).current = textInputNode;
+                }}
+                value={value}
+                onChangeText={(text) => {
+                  if (fieldState.error) {
+                    formContext?.clearErrors(name);
+                  }
+                  onValueChange?.(text);
+                  field.onChange(text);
+                }}
+                onFocus={() => setFocused(true)}
+                onBlur={() => {
+                  setFocused(false);
+                  field.onBlur();
+                }}
+              />
+              {rightElement}
+              {showCounter && maxLength !== undefined && multiline && (
+                <Text
+                  als="flex-end"
+                  mt="auto"
+                  pt={8}
+                  fontSize={10.5}
+                  color={nearLimit ? "#FCD34D" : "$iconMuted"}
+                >
+                  {value.length}/{maxLength}
+                </Text>
+              )}
+            </InputShell>
+            {!hideError && fieldState.error && (
+              <Text color="#FCA5A5" fontSize={11.5}>
+                {fieldState.error.message}
+              </Text>
+            )}
+          </YStack>
+        );
+      }}
     />
   );
 }

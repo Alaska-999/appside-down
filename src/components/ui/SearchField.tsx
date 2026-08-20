@@ -1,9 +1,10 @@
-import { controlHeight } from "@/tamagui.config";
+import { InputShell } from "@/src/components/ui/InputShell";
 import { Search, X } from "@tamagui/lucide-icons";
+import { useState } from "react";
 import { Pressable } from "react-native";
-import { Input, XStack, XStackProps } from "tamagui";
+import { Input, YStackProps } from "tamagui";
 
-interface SearchFieldProps extends XStackProps {
+interface SearchFieldProps extends YStackProps {
   value: string;
   onChangeText: (value: string) => void;
   placeholder?: string;
@@ -17,19 +18,11 @@ export function SearchField({
   showClear = true,
   ...rest
 }: SearchFieldProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
-    <XStack
-      bg="$glassBg"
-      br={999}
-      px={19}
-      h={controlHeight.md}
-      ai="center"
-      gap={9}
-      borderWidth={1}
-      borderColor="$glassBorder"
-      {...rest}
-    >
-      <Search size={20} color="$colorSecondary" opacity={0.7} />
+    <InputShell state={focused ? "focus" : "default"} {...rest}>
+      <Search size={18} color="#6E8496" />
       <Input
         f={1}
         h="100%"
@@ -38,15 +31,17 @@ export function SearchField({
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         color="$color"
-        placeholderTextColor="$colorSecondary"
-        fontSize={16}
+        placeholderTextColor="$placeholderColor"
+        fontSize={15}
       />
       {showClear && value.length > 0 && (
         <Pressable hitSlop={13} onPress={() => onChangeText("")}>
-          <X size={20} color="$colorMuted" />
+          <X size={20} color="#8FA8B8" />
         </Pressable>
       )}
-    </XStack>
+    </InputShell>
   );
 }

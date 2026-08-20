@@ -8,9 +8,14 @@ import {
   BackgroundPreset,
   BgDebugMode,
 } from "@/src/components/ui/ScreenBackground";
+import { FormInput } from "@/src/components/common/FormInput";
+import { CodeInput } from "@/src/components/ui/CodeInput";
+import { SearchField } from "@/src/components/ui/SearchField";
+import { SelectField } from "@/src/components/ui/SelectField";
 import { TYPE } from "@/src/constants/type";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,6 +31,54 @@ const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
   { preset: "auth" },
   { preset: "finish" },
 ];
+
+function FieldsDemo() {
+  const { control, setError } = useForm({
+    defaultValues: { name: "", bio: "", email: "broken@", code: "", off: "off" },
+  });
+  const [search, setSearch] = useState("");
+  const [folder, setFolder] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError("email", { message: "Enter a valid email" });
+  }, [setError]);
+
+  return (
+    <>
+      <YStack gap={10}>
+        <Label>Поля · well 52 · фокус/помилка</Label>
+        <FormInput control={control} name="name" placeholder="Module name" />
+        <FormInput control={control} name="email" placeholder="Email" />
+        <FormInput control={control} name="off" disabled />
+        <FormInput
+          control={control}
+          name="bio"
+          placeholder="Description"
+          multiline
+          maxLength={200}
+          showCounter
+        />
+      </YStack>
+
+      <YStack gap={10}>
+        <Label>glass · underline · select · search</Label>
+        <FormInput control={control} name="name" variant="glass" placeholder="Glass field" />
+        <FormInput control={control} name="name" variant="underline" placeholder="Underline field" />
+        <SelectField
+          value={folder}
+          placeholder="Folder"
+          onPress={() => setFolder(folder ? null : "Biology")}
+        />
+        <SearchField value={search} onChangeText={setSearch} placeholder="Search modules..." />
+      </YStack>
+
+      <YStack gap={10}>
+        <Label>CodeInput · 46×56 · курсор блимає</Label>
+        <CodeInput control={control} name="code" length={6} />
+      </YStack>
+    </>
+  );
+}
 
 function Label(props: { children: string }) {
   return (
@@ -291,6 +344,8 @@ export default function Showcase() {
             <AppFab icon={<Plus size={26} color="#0D1117" strokeWidth={1.6} />} />
           </XStack>
         </YStack>
+
+        <FieldsDemo />
 
         <YStack gap={10}>
           <Label>skeleton</Label>
