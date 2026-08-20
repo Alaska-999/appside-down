@@ -1,51 +1,40 @@
-import { TEXT } from "@/src/constants/typography";
+import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
-import { Pressable } from "react-native";
+import { ReactNode, useEffect, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Text, useTheme, XStack } from "tamagui";
+import { Text, XStack } from "tamagui";
 
 interface SegmentedControlProps {
   options: string[];
   selected: number;
   onChange: (index: number) => void;
-  size?: "small" | "medium";
+  renderIcon?: (index: number, active: boolean) => ReactNode;
 }
+
+const PADDING = 3;
+const GAP = 3;
 
 export function SegmentedControl({
   options,
   selected,
   onChange,
-  size = "medium",
+  renderIcon,
 }: SegmentedControlProps) {
-  const theme = useTheme();
   const [internalSelected, setInternalSelected] = useState(selected);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
     setInternalSelected(selected);
   }, [selected]);
-  const gradientColors = [
-    theme.accentGradientStart.get(),
-    theme.accentGradientEnd.get(),
-  ] as const;
-  const pillGlow = "rgba(45,212,191,0.5)";
-  const [containerWidth, setContainerWidth] = useState(0);
-
-  const isSmall = size === "small";
-  const PADDING = isSmall ? 2 : 3;
-  const GAP = isSmall ? 2 : 3;
-  const py = isSmall ? "$1.5" : "$2";
-  const containerBr = isSmall ? 10 : 14;
-  const pillBr = isSmall ? 8 : 11;
 
   const tabWidth =
     containerWidth > 0
-      ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) /
-        options.length
+      ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) / options.length
       : 0;
 
   const translateX = useSharedValue(0);
@@ -56,7 +45,7 @@ export function SegmentedControl({
         duration: 200,
       });
     }
-  }, [internalSelected, tabWidth]);
+  }, [internalSelected, tabWidth, translateX]);
 
   const pillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -64,16 +53,18 @@ export function SegmentedControl({
 
   return (
     <XStack
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br={containerBr}
+      br={16}
       p={PADDING}
       gap={GAP}
-      mb="$3"
       position="relative"
+      overflow="hidden"
+      bg="rgba(4,7,10,0.5)"
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
+      <View
+        pointerEvents="none"
+        style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, backgroundColor: "rgba(0,0,0,0.3)" }}
+      />
       {containerWidth > 0 && (
         <Animated.View
           style={[
@@ -83,45 +74,56 @@ export function SegmentedControl({
               left: PADDING,
               width: tabWidth,
               bottom: PADDING,
-              borderRadius: pillBr,
+              borderRadius: 13,
               overflow: "hidden",
-              shadowColor: pillGlow,
-              shadowOpacity: 0.5,
-              shadowRadius: 6,
-              elevation: 3,
+              shadowColor: "rgba(45,212,191,1)",
+              shadowOffset: { width: 0, height: 0 },
+              shadowRadius: 9,
+              shadowOpacity: 0.55,
             },
             pillStyle,
           ]}
         >
           <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
+            colors={["#2DD4BF", "#A3E635"]}
+            start={{ x: 0, y: 0.4 }}
+            end={{ x: 1, y: 0.6 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <LinearGradient
+            colors={["rgba(2,60,44,0)", "rgba(2,60,44,0.4)"]}
+            start={{ x: 0.5, y: 0.35 }}
+            end={{ x: 0.5, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
           />
         </Animated.View>
       )}
 
-      {options.map((option, i) => (
-        <Pressable
-          key={option}
-          onPress={() => {
-            setInternalSelected(i);
-            onChange(i);
-          }}
-          style={{ flex: 1 }}
-        >
-          <XStack py={py} jc="center" ai="center">
-            <Text
-              fontSize={TEXT.cardMeta}
-              fontWeight="700"
-              color={internalSelected === i ? "$onAccentText" : "$colorMuted"}
-            >
-              {option}
-            </Text>
-          </XStack>
-        </Pressable>
-      ))}
+      {options.map((option, i) => {
+        const active = internalSelected === i;
+        return (
+          <Pressable
+            key={option}
+            onPress={() => {
+              hapticTap();
+              setInternalSelected(i);
+              onChange(i);
+            }}
+            style={{ flex: 1 }}
+          >
+            <XStack py={11} px={8} jc="center" ai="center" gap={7}>
+              {renderIcon?.(i, active)}
+              <Text
+                fontSize={13.5}
+                fontWeight="600"
+                color={active ? "#0D1117" : "#8FA8B8"}
+              >
+                {option}
+              </Text>
+            </XStack>
+          </Pressable>
+        );
+      })}
     </XStack>
   );
 }

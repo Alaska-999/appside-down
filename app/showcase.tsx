@@ -9,6 +9,10 @@ import {
   BgDebugMode,
 } from "@/src/components/ui/ScreenBackground";
 import { FormInput } from "@/src/components/common/FormInput";
+import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { Toggle } from "@/src/components/common/Toggle";
+import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
+import { FilterChip } from "@/src/components/ui/FilterChip";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { SelectField } from "@/src/components/ui/SelectField";
@@ -31,6 +35,78 @@ const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
   { preset: "auth" },
   { preset: "finish" },
 ];
+
+function ControlsDemo() {
+  const [tg1, setTg1] = useState(true);
+  const [tg2, setTg2] = useState(false);
+  const [cb, setCb] = useState(true);
+  const [radio, setRadio] = useState(0);
+  const [seg, setSeg] = useState(0);
+  const [chipOn, setChipOn] = useState(true);
+
+  return (
+    <>
+      <YStack gap={10}>
+        <Label>Toggle lg 52 · md 46 · sm 40 · disabled</Label>
+        <XStack gap={20} ai="center">
+          <Toggle value={tg1} onToggle={() => setTg1(!tg1)} />
+          <Toggle value={tg2} onToggle={() => setTg2(!tg2)} size="md" />
+          <Toggle value={tg2} onToggle={() => setTg2(!tg2)} size="sm" />
+          <Toggle value onToggle={() => {}} disabled />
+        </XStack>
+      </YStack>
+
+      <YStack gap={4}>
+        <Label>Checkbox · Radio · lg 30 / md 26 / sm 22</Label>
+        <XStack gap={16} ai="center" py={4}>
+          <Checkbox checked size="lg" onToggle={() => {}} />
+          <Checkbox checked size="md" onToggle={() => {}} />
+          <Checkbox checked size="sm" onToggle={() => {}} />
+          <Radio selected size="lg" onSelect={() => {}} />
+          <Radio selected size="md" onSelect={() => {}} />
+          <Radio selected size="sm" onSelect={() => {}} />
+        </XStack>
+        <OptionRow
+          control={<Checkbox checked={cb} onToggle={() => setCb(!cb)} />}
+          label="Shuffle cards"
+          onPress={() => setCb(!cb)}
+        />
+        <OptionRow
+          control={<Radio selected={radio === 0} onSelect={() => setRadio(0)} />}
+          label="Term first"
+          onPress={() => setRadio(0)}
+        />
+        <OptionRow
+          control={<Radio selected={radio === 1} onSelect={() => setRadio(1)} />}
+          label="Definition first"
+          onPress={() => setRadio(1)}
+        />
+      </YStack>
+
+      <YStack gap={10}>
+        <Label>Segmented · градієнтна таблетка + скрим</Label>
+        <SegmentedControl
+          options={["Folders", "Modules", "All"]}
+          selected={seg}
+          onChange={setSeg}
+        />
+      </YStack>
+
+      <YStack gap={10}>
+        <Label>Chips h36 · default / on / solid</Label>
+        <XStack gap={8} flexWrap="wrap">
+          <FilterChip label="Biology" onPress={() => {}} />
+          <FilterChip
+            label="Starred"
+            variant={chipOn ? "on" : "default"}
+            onPress={() => setChipOn(!chipOn)}
+          />
+          <FilterChip label="All" variant="solid" onPress={() => {}} />
+        </XStack>
+      </YStack>
+    </>
+  );
+}
 
 function FieldsDemo() {
   const { control, setError } = useForm({
@@ -344,6 +420,8 @@ export default function Showcase() {
             <AppFab icon={<Plus size={26} color="#0D1117" strokeWidth={1.6} />} />
           </XStack>
         </YStack>
+
+        <ControlsDemo />
 
         <FieldsDemo />
 
