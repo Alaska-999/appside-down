@@ -215,7 +215,7 @@ export default function AddModules() {
                     </Badge>
                   ) : (
                     <IconButton
-                      size="$2"
+                      size={36}
                       icon={<Plus size="$1" color="$color" />}
                       onPress={() => toggleModule(item.id)}
                     />

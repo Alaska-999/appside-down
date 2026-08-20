@@ -1,6 +1,7 @@
+import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { AppFab, IconButton } from "@/src/components/ui/IconButton";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import {
   BackgroundMesh,
@@ -13,7 +14,7 @@ import { useState } from "react";
 import { Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Search, Settings2, X } from "lucide-react-native";
+import { Plus, Search, Settings2, X } from "lucide-react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
@@ -236,6 +237,58 @@ export default function Showcase() {
             <AppCard f={1} size="lg" variant="glow" locked gap={6}>
               <Text {...TYPE.card} color="$color">locked</Text>
             </AppCard>
+          </XStack>
+        </YStack>
+
+        <YStack gap={10}>
+          <Label>Кнопки · 9 варіантів</Label>
+          <AppButton variant="primary">Primary</AppButton>
+          <AppButton variant="soft">Soft</AppButton>
+          <XStack gap={10}>
+            <YStack f={1}><AppButton variant="secondary">Secondary</AppButton></YStack>
+            <YStack f={1}><AppButton variant="outline">Outline</AppButton></YStack>
+          </XStack>
+          <XStack gap={10}>
+            <YStack f={1}><AppButton variant="ghost">Ghost</AppButton></YStack>
+            <YStack f={1}><AppButton variant="danger">Delete</AppButton></YStack>
+          </XStack>
+          <XStack gap={10}>
+            <YStack f={1}><AppButton variant="glass">Glass</AppButton></YStack>
+            <YStack f={1}><AppButton variant="neon">Neon</AppButton></YStack>
+          </XStack>
+          <AppButton variant="liquid">Liquid</AppButton>
+        </YStack>
+
+        <YStack gap={10}>
+          <Label>Розміри · ефекти · стани</Label>
+          <XStack gap={10} ai="center">
+            <AppButton variant="primary" size="sm">sm 42</AppButton>
+            <YStack f={1}><AppButton variant="primary" size="lg">lg 60</AppButton></YStack>
+          </XStack>
+          <AppButton variant="primary" sheen>Continue · sheen</AppButton>
+          <AppButton variant="secondary" sheen="dark">Sheen dark</AppButton>
+          <AppButton variant="secondary" flood>Flood · затисни</AppButton>
+          <AppButton variant="primary" split={<Text fontSize={16} color="$limeLight">→</Text>}>
+            Split
+          </AppButton>
+          <XStack gap={10}>
+            <YStack f={1}><AppButton variant="primary" loading>Loading</AppButton></YStack>
+            <YStack f={1}><AppButton variant="primary" disabled>Disabled</AppButton></YStack>
+          </XStack>
+        </YStack>
+
+        <YStack gap={10}>
+          <Label>IconButton 48 · acc · FAB 62</Label>
+          <XStack gap={16} ai="center">
+            <IconButton
+              variant="glass"
+              icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            />
+            <IconButton
+              variant="acc"
+              icon={<Plus size={22} color="#0D1117" strokeWidth={2.1} />}
+            />
+            <AppFab icon={<Plus size={26} color="#0D1117" strokeWidth={1.6} />} />
           </XStack>
         </YStack>
 

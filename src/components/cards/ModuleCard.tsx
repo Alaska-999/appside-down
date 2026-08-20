@@ -84,8 +84,8 @@ export function ModuleCard({
 
         {!trailing && removeButton && onRemoveButtonPress && (
           <IconButton
-            size="$2"
-            icon={<X size="$1" color="$colorlfd" />}
+            size={36}
+            icon={<X size="$1" color="$colorMuted" />}
             onPress={onRemoveButtonPress}
           />
         )}

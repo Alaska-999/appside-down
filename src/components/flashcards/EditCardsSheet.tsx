@@ -219,7 +219,7 @@ export function EditCardsSheet({
         leftAction={
           <IconButton
             variant="glass"
-            size="$2"
+            size={36}
             icon={<X size={16} color="$colorSecondary" />}
             onPress={() => onOpenChange(false)}
           />
