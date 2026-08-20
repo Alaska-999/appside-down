@@ -1,6 +1,6 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { BookOpen, House, PlusCircle } from "@tamagui/lucide-icons";
+import { BookOpen, House, PlusCircle } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { ComponentType, useState } from "react";
@@ -10,56 +10,51 @@ import { useTheme, YStack } from "tamagui";
 export const TAB_BAR_HEIGHT = 68;
 export const TAB_BAR_CLEARANCE_GAP = 16;
 
-function TabIcon(Icon: ComponentType<{ size?: number; color?: string }>) {
-  return function RenderTabIcon({
-    focused,
-    color,
-  }: {
-    focused: boolean;
-    color: string;
-  }) {
-    const theme = useTheme();
-
+function TabIcon(
+  Icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>,
+) {
+  return function RenderTabIcon({ focused }: { focused: boolean }) {
     if (!focused) {
       return (
         <YStack
-          width={26}
-          height={26}
-          br={9}
+          width={30}
+          height={30}
+          br={10}
           bg="rgba(255,255,255,0.08)"
           ai="center"
           jc="center"
         >
-          <Icon size={18} color={color} />
+          <Icon size={20} color="#8FA8B8" strokeWidth={1.9} />
         </YStack>
       );
     }
 
     return (
       <YStack
-        shadowColor="$glowSoft"
-        shadowOpacity={0.1}
-        shadowRadius={20}
+        w={30}
+        h={30}
+        br={10}
+        overflow="hidden"
+        ai="center"
+        jc="center"
+        shadowColor="rgba(45,212,191,1)"
+        shadowOpacity={0.8}
+        shadowRadius={9}
         shadowOffset={{ width: 0, height: 0 }}
-        elevation={1}
       >
         <LinearGradient
-          colors={[
-            theme.accentGradientStart.get(),
-            theme.accentGradientEnd.get(),
-          ]}
+          colors={["#2DD4BF", "#A3E635"]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1.3, y: 1.3 }}
+          end={{ x: 1, y: 1 }}
           style={{
-            width: 26,
-            height: 26,
-            borderRadius: 9,
-            alignItems: "center",
-            justifyContent: "center",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
           }}
-        >
-          <Icon size={18} color="white" />
-        </LinearGradient>
+        />
+        <Icon size={20} color="#0D1117" strokeWidth={2.1} />
       </YStack>
     );
   };
@@ -79,24 +74,23 @@ export default function TabsLayout() {
             position: "absolute",
             left: 22,
             right: 22,
-            bottom: insets.bottom,
+            bottom: Math.max(insets.bottom, 14),
             height: TAB_BAR_HEIGHT,
             backgroundColor: "transparent",
             borderTopWidth: 0,
             elevation: 10,
             shadowColor: "#000",
-            shadowOpacity: 0.3,
-            shadowRadius: 16,
-            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.6,
+            shadowRadius: 17,
+            shadowOffset: { width: 0, height: 14 },
           },
           tabBarBackground: () => (
             <LiquidGlass
               intensity={70}
               borderRadius={22}
               borderWidth={1}
-              borderColor={theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)"}
+              borderColor={theme.glassBorder.get()}
               backgroundColor={theme.tabBarBg.get()}
-              style={{ marginLeft: 5, marginRight: 5 }}
             />
           ),
           tabBarItemStyle: {

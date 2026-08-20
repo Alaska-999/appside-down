@@ -8,6 +8,7 @@ import {
 } from "@/src/components/ui/GlowSurface";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { LinearGradient } from "expo-linear-gradient";
+import { Check } from "lucide-react-native";
 import { ReactNode, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -170,9 +171,7 @@ function SelectedRing({ radius }: { radius: number }) {
           end={{ x: 0.76, y: 0.64 }}
           style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
         >
-          <Text fontSize={13} fontWeight="800" color="#06231F">
-            ✓
-          </Text>
+          <Check size={14} color="#06231F" strokeWidth={3} />
         </LinearGradient>
       </View>
     </>

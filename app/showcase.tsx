@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Plus, Search, Settings2, X } from "lucide-react-native";
+import { ArrowRight, Plus, Search, Settings2, X } from "lucide-react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
@@ -401,7 +401,10 @@ export default function Showcase() {
           <AppButton variant="primary" sheen>Continue · sheen</AppButton>
           <AppButton variant="secondary" sheen="dark">Sheen dark</AppButton>
           <AppButton variant="secondary" flood>Flood · затисни</AppButton>
-          <AppButton variant="primary" split={<Text fontSize={16} color="$limeLight">→</Text>}>
+          <AppButton
+            variant="primary"
+            split={<ArrowRight size={16} color="#BEF264" strokeWidth={2.2} />}
+          >
             Split
           </AppButton>
           <XStack gap={10}>
@@ -540,7 +543,7 @@ export default function Showcase() {
           <XStack gap={16} ai="center">
             <YStack w={44} h={44} br={22} bg="$surfaceGlassFaint" jc="center" ai="center">
               <GradientBorder radius={22} preset="lens" />
-              <Text {...TYPE.micro} color="$color">✕</Text>
+              <X size={18} color="#EAF7FF" strokeWidth={1.9} />
             </YStack>
             <Text {...TYPE.meta} color="$colorMuted">
               44×44, кант 1px по колу

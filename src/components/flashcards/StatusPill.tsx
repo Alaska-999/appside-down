@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from "lucide-react-native";
 import { Text, XStack } from "tamagui";
 
 const MOCKUP_SCALE_FINISH = 390 / 265;
@@ -35,12 +36,11 @@ export function StatusPill({ tone, kind = "moon", count, label, arrow }: StatusP
   if (kind === "hint") {
     const styles = HINT_STYLES[tone];
     const text = label ?? (tone === "known" ? "know it" : "learning");
-    const content =
-      arrow === "left" ? `← ${text}` : arrow === "right" ? `${text} →` : text;
 
     return (
       <XStack
         ai="center"
+        gap={6}
         br={999}
         px={12 * MOCKUP_SCALE_CORE}
         py={7 * MOCKUP_SCALE_CORE}
@@ -48,9 +48,15 @@ export function StatusPill({ tone, kind = "moon", count, label, arrow }: StatusP
         borderWidth={1}
         borderColor={styles.border}
       >
+        {arrow === "left" && (
+          <ArrowLeft size={15} color={styles.color} strokeWidth={2.2} />
+        )}
         <Text fontSize={11 * MOCKUP_SCALE_CORE} fontWeight="700" color={styles.color}>
-          {content}
+          {text}
         </Text>
+        {arrow === "right" && (
+          <ArrowRight size={15} color={styles.color} strokeWidth={2.2} />
+        )}
       </XStack>
     );
   }
