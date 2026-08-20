@@ -14,7 +14,7 @@ Components are plain functions with **constant style tables**, NOT tamagui `styl
 1. Local union types: `type XVariant = "a" | "b"`, `type XSize = "sm" | "md" | "lg"` (or `tone`).
 2. Tables: `const VARIANT_STYLES: Record<XVariant, Partial<Props>>`, `SIZE_STYLES`, `TONE_STYLES`.
 3. Component spreads the table into a tamagui stack, then `{...rest}` last (escape hatch).
-4. Colors only via `$`-theme tokens (`bg="$glassBg"`); gradients via `useTheme()` + `theme.x.get()` (expo-linear-gradient can't read `$`-tokens). Lucide icon `color` also can't resolve custom theme tokens (renders black) — always pass `theme.x.get()` to icons.
+4. Colors only via `$`-theme tokens (`bg="$glassBg"`); gradients via `useTheme()` + `theme.x.get()` (expo-linear-gradient can't read `$`-tokens). Lucide icon `color` can't resolve custom theme tokens AND `theme.x.get()` also failed here (renders black either way) — icons take palette hex literals (`#6E8496` iconMuted, `#8FA8B8` muted, `#EAF7FF` on-glass).
 5. Call sites pass MODES (`variant`, `size`, `tone`, and for elements-v1 also `glow 0…4` / `vivid 0…4`), never style props (bg/height/shadow). If a screen needs a new look, add a mode to the element — elements-v1: «Картки — одна сім'я, різні механіки — не окремі компоненти».
 
 Canonical examples: `AppButton` (`src/components/ui/Button.tsx` — 8 variants, gradient vs flat split), `AppCard` (`ui/Card.tsx` — variants delegate to `GlowSurface` presets), `Badge` (`ui/Badge.tsx` — the shortest tone-table reference).
