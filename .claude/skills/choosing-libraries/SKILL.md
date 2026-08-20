@@ -17,7 +17,8 @@ This app runs Expo SDK 54 / RN 0.81.5 (New Arch) / Reanimated 4.1.1 with **workl
 | Error/empty state | `src/components/ui/StateCard.tsx` |
 | Background sync indicator | `src/components/ui/SyncingPill.tsx` |
 | Aurora background | `src/components/ui/AuroraBeams.tsx`, `AuroraGlow.tsx` |
-| Buttons with loading spinner | `AppButton` `loading` prop |
+| Buttons with loading spinner | `AppButton` (`src/components/ui/Button.tsx`) `loading` prop |
+| Liquid glass / blur surfaces | `src/components/ui/LiquidGlass.tsx` (single expo-blur entry point) + Skia for lens effects — NOT @callstack/liquid-glass |
 | OTP input | `src/components/ui/CodeInput.tsx` |
 
 The user explicitly rejected adding a second UI kit (gluestack, NativeBase) or a shimmer wrapper on top of Tamagui. Suggesting moti/skeleton libs to "upgrade" the in-house Skeleton counts as a violation, not an improvement.
@@ -26,14 +27,14 @@ The user explicitly rejected adding a second UI kit (gluestack, NativeBase) or a
 
 | Library | Verdict | Why |
 |---|---|---|
-| @gorhom/bottom-sheet 5.x | ✅ approved candidate | JS-only, works in Expo Go, reanimated 4 OK. Migrate inside `Sheet.tsx`/`GlassSheet.tsx`, keep their props API |
-| react-native-reanimated-carousel 5.x | ✅ approved candidate | peer-deps match exactly; replaces hand-rolled flashcard carousel |
-| @shopify/react-native-skia | ✅ only via `npx expo install` | SDK 54 bundles 2.2.12; anything newer needs worklets ≥0.7 → breaks. Never `npm i` latest |
+| @gorhom/bottom-sheet 5.x | ✅ approved candidate (not yet installed) | JS-only, works in Expo Go, reanimated 4 OK. Migrate inside `Sheet.tsx`/`GlassSheet.tsx`, keep their props API |
+| react-native-reanimated-carousel 5.x | ✅ INSTALLED (^5.1.1) | used in `app/module/[id]/index.tsx` |
+| @shopify/react-native-skia | ✅ INSTALLED (2.2.12) | only bump via `npx expo install`; anything newer needs worklets ≥0.7 → breaks. Never `npm i` latest |
 | react-native-fast-confetti | ⚠️ only v1.1.2 | v2.x needs worklets ≥0.7 → breaks on this stack |
 | react-native-confetti-cannon | ❌ | unmaintained since 2021 |
 | react-native-skeleton-placeholder | ❌ | needs react-native-linear-gradient (non-Expo) + masked-view ^0.2.8 conflict; MaskedView also collapses on f={1} here |
 | moti | ❌ for skeletons | in-house Skeleton is the chosen convention; moti tested on reanimated 3 only |
-| @callstack/liquid-glass | ❌ for now | needs dev build + iOS 26, no Android; revisit if project leaves Expo Go |
+| @callstack/liquid-glass | ❌ for now | needs dev build + iOS 26, no Android; the elements-v1 liquid-glass look is implemented in-house (`LiquidGlass.tsx` blur + Skia lens per mockup recipe), revisit only if project leaves Expo Go |
 
 ## Checklist before proposing any new library
 

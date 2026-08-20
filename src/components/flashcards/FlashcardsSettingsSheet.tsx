@@ -93,7 +93,7 @@ export function FlashcardsSettingsSheet({
         <YStack gap="$2">
           <Text
             fontSize="$3"
-            color="$auroraMuted"
+            color="$colorMuted"
             fontWeight="600"
             tt="uppercase"
             px="$1"

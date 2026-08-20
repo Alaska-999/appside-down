@@ -16,21 +16,28 @@ Before trusting any exact value from a token or component named in your own memo
 
 ## Design-system principle (non-negotiable)
 
-Every new visual pattern becomes a reusable, token-driven component (`src/components/ui/`, `src/components/cards/`) — never a one-off hardcoded style on a single screen. Before adding a new color/spacing/radius value, check whether `tamagui.config.ts` already has a token for it; if not and the value will recur, add the token there rather than inlining it.
+Every new visual pattern becomes a reusable, token-driven component (`src/components/ui/`, `src/components/cards/`) — never a one-off hardcoded style on a single screen. Before adding a new color/spacing/radius value, check whether `tamagui.config.ts` already has a token for it; if not and the value will recur, add the token there rather than inlining it. New COLOR tokens require explicit user approval — the elements-v1 palette is closed.
+
+**Elements with modes:** components take `variant`/`size`/`tone` plus the elements-v1 light scales `glow 0…4` and `vivid 0…4` as modes (constant tables `VARIANT_STYLES`/`SIZE_STYLES` — this repo's convention, not tamagui `styled()` variants), never style props like bg/height/shadow from call sites. A new visual pattern is a new mode on an existing element, not a new file — elements-v1: «Картки — одна сім'я, різні механіки — не окремі компоненти».
+
+No code comments — don't add any, remove ones you touch.
 
 ## Mobile ergonomics (mandatory on every screen you touch)
+
+Follow `.claude/skills/mobile-ux-fundamentals/SKILL.md` in full. Highlights:
 
 - Safe area via `useSafeAreaInsets()` or structural padding — never hardcoded constants guessing at notch/home-indicator height.
 - Touch targets ≥44×44dp; use `hitSlop` for visually smaller icon triggers.
 - Keyboard avoidance on any input-heavy screen/sheet (this codebase already has an established pattern from the Phase 0 keyboard-UX fix — follow it, don't reinvent).
+- Press feedback + hapticTap on every tappable; skeleton over spinner; errors under the field; one primary CTA per screen; `useReducedMotion()` fallbacks.
 
 ## Known project-specific traps (learned the hard way in this codebase — don't repeat)
 
-- **Real blur (`expo-blur`) on a flat, non-scrolling background is a visual no-op** and was the root cause of a "muddy/broken" redesign attempt. Reserve `BlurView` for surfaces where content actually scrolls underneath (e.g. `ScreenHeader`). Glass tiles use semi-transparent bg + thin border + glow shadow instead — no blur.
+- **Glass works only over a gradient.** Blur/liquid-glass over solid black is a visual no-op (this killed one redesign attempt). elements-v1's own diagnosis of the current tab bar: `LiquidGlass` is there, but `tabBarBg rgba(26,40,52,.92)` + intensity 25 hides the glass — the fill over a BlurView must stay ≤ ~0.7 alpha or the blur is invisible. All blur goes through the single entry point `src/components/ui/LiquidGlass.tsx`.
 - **Reanimated's `Animated.View` cannot take a resolved Tamagui theme object** (`theme.token.get()`) inside its style — causes `Invalid color value: [object Object]`. Use `useThemeName()` + literal color strings computed outside the animated style instead.
 - **`MaskedView` wrapping a `f={1}`-flexed full-width element can collapse to zero size** and disappear. Mask only the specific text portion that needs the gradient, not a flex-grown container.
-- **Mockup px values are NOT 1:1 with RN points.** This app's browser mockups render inside a shrunk phone-frame illustration (`.ph { width: 290px }` in `docs/superpowers/mockups/home-palette-v1.html`) — a real device is ~390pt wide. Always multiply a mockup's raw CSS px by `MOCKUP_SCALE ≈ 1.35` (documented in `tamagui.config.ts` above the `space`/`radius` tokens) before treating it as an RN point value. **Before "correcting" any existing size value back toward a mockup's raw CSS number, stop and check whether the existing value is already the mockup value × 1.35** — a plausible-looking existing number that doesn't match the mockup 1:1 is not automatically a bug; it may be the correctly-scaled value, and reverting it to raw mockup px will make things visibly smaller/wrong on a real device. This exact mistake happened once (2026-07-19) and had to be rolled back — don't repeat it.
-- **Confirm which mockup file is actually current before reading it.** This project has had multiple draft mockup files for the same screen at different times (`home-bento-v7.html` was an earlier/different draft, later deleted by the user, superseded entirely by `home-palette-v1.html`'s `.v-aurora` block for both layout AND palette). If a file referenced in your task prompt or old memory doesn't exist at the expected path, that's a signal to stop and ask which file is actually authoritative — don't fall back to a stray copy found elsewhere (e.g. `.superpowers/brainstorm/*/content/`) without confirming it's still the approved one, and don't silently proceed on assumptions/memory of "known-correct values" when the actual mockup file you were told to read is missing.
+- **Scale: elements-v1 values are 1:1 (1 px = 1 pt).** `docs/superpowers/mockups/elements-v1.html` renders a 393×852 frame — copy its CSS px straight to RN points, no multiplication. There is NO `MOCKUP_SCALE` in `tamagui.config.ts`. The local `MOCKUP_SCALE = 390/N` constants inside pre-elements components (`SyncingPill`, `AuroraGlow`, `ProgressRing`, `AuthHeading`, `CodeInput`, `StatusPill`, `OrbitProgress`, etc.) were correct for the historical shrunk-frame mockups only — never apply them to elements-v1 values, and remove them when reworking each component to the new design.
+- **The single authoritative mockup is `elements-v1.html`.** Do not read other files in `mockups/` (they are kept for the user's version comparison, not as sources). If a task references a mockup that doesn't exist or contradicts elements-v1, stop and ask which is authoritative.
 - Check `tsc --noEmit` stays clean after every change — this repo has no automated test suite, so type-checking is the only automated correctness signal available; say so plainly rather than claiming "verified" when you mean "type-checks."
 
 ## Workflow you operate inside

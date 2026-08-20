@@ -90,8 +90,8 @@ export function AppSplash() {
       {/* Підказка перемикання (для тестування) */}
       <View style={styles.badge}>
         <Text style={styles.badgeText}>
-          {variantIndex + 1}/{SPLASH_VARIANTS.length}: {currentVariant} (Тап
-          для зміни)
+          {variantIndex + 1}/{SPLASH_VARIANTS.length}: {currentVariant} (Тап для
+          зміни)
         </Text>
       </View>
     </Pressable>
@@ -132,7 +132,7 @@ const SPLASH_FLASH_THRESHOLD = 300;
 const SPLASH_HOLD_DURATION = 3000;
 // Прев'ю мешу: залишаємо true, поки триває підбір варіантів на девайсі.
 // Поверни false, щоб знову увімкнути реальний стек (TamaguiProvider/Stack нижче).
-const SPLASH_PREVIEW = true;
+const SPLASH_PREVIEW = false;
 
 export default function RootLayout() {
   const { token, isHydrated } = useAuthStore();

@@ -211,6 +211,7 @@ export default function Home() {
                 fontWeight="800"
                 color="$color"
                 lineHeight={39}
+                onLongPress={() => router.push("/showcase")}
               >
                 Hi,
               </Text>

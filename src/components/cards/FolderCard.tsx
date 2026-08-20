@@ -75,7 +75,7 @@ export function FolderCard({ folder, index = 0, onPress }: FolderCardProps) {
           <Text fontSize={TEXT.cardTitle} fontWeight="700" color="$color">
             {folder.name}
           </Text>
-          <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
+          <Text fontSize={TEXT.cardMeta} color="$colorMuted">
             {moduleCount} module{moduleCount !== 1 ? "s" : ""}
           </Text>
         </YStack>

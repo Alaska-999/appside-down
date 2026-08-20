@@ -62,17 +62,17 @@ export function ModuleCard({
             )}
           </XStack>
           <XStack ai="center" gap="$1.5" flexWrap="wrap">
-            <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
+            <Text fontSize={TEXT.cardMeta} color="$colorMuted">
               {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
             </Text>
             <Dot />
-            <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
+            <Text fontSize={TEXT.cardMeta} color="$colorMuted">
               {module.isPublic ? "Public" : "Private"}
             </Text>
             {module.isPublic && (module.author?.username || module.authorUsername) && (
               <>
                 <Dot />
-                <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
+                <Text fontSize={TEXT.cardMeta} color="$colorMuted">
                   {module.author?.username ?? module.authorUsername}
                 </Text>
               </>
