@@ -1,4 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { IconButton } from "@/src/components/ui/IconButton";
 import {
   BackgroundMesh,
   BackgroundPreset,
@@ -9,6 +10,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Search, Settings2, X } from "lucide-react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
@@ -134,6 +136,27 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$color">
               Liquid border
             </Text>
+          </YStack>
+        </YStack>
+
+        <YStack gap={10}>
+          <Label>liquid лінза 44 · тільки над градієнтом</Label>
+          <YStack h={140} br={23} overflow="hidden">
+            <BackgroundMesh preset="module" />
+            <XStack f={1} ai="center" jc="center" gap={16}>
+              <IconButton
+                variant="liquidGlass"
+                icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              />
+              <IconButton
+                variant="liquidGlass"
+                icon={<Settings2 size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              />
+              <IconButton
+                variant="liquidGlass"
+                icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              />
+            </XStack>
           </YStack>
         </YStack>
 

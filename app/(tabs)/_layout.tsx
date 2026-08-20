@@ -91,7 +91,7 @@ export default function TabsLayout() {
           },
           tabBarBackground: () => (
             <LiquidGlass
-              intensity={25}
+              intensity={70}
               borderRadius={22}
               borderWidth={1}
               borderColor={theme.glassBorder.get() || "rgba(255, 255, 255, 0.1)"}

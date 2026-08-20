@@ -1,8 +1,9 @@
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { ReactElement } from "react";
 import { View } from "react-native";
-import { Button, ButtonProps } from "tamagui";
+import { Button, ButtonProps, YStack, YStackProps } from "tamagui";
 
 type IconButtonVariant = "glass" | "liquidGlass" | "badge" | "danger";
 
@@ -45,24 +46,80 @@ export function IconButton({
 
   if (variant === "liquidGlass") {
     return (
-      <View style={{ borderRadius: 999, overflow: "hidden" }}>
-        <LiquidGlass
-          intensity={50}
-          borderRadius={999}
-          borderWidth={1}
-          borderColor="rgba(220, 255, 245, 0.15)"
-          backgroundColor="rgba(19, 21, 32, 0.3)"
-        />
-        <Button
-          circular
-          size={size}
-          icon={icon}
-          onPress={handlePress}
-          pressStyle={{ scale: 0.92 }}
-          bg="transparent"
-          {...rest}
-        />
-      </View>
+      <YStack
+        w={44}
+        h={44}
+        br={22}
+        ai="center"
+        jc="center"
+        onPress={handlePress}
+        pressStyle={{ scale: 0.9 }}
+        accessibilityRole="button"
+        shadowColor="#000"
+        shadowOffset={{ width: 0, height: 3 }}
+        shadowRadius={5}
+        shadowOpacity={0.5}
+        {...(rest as YStackProps)}
+      >
+        <YStack
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          br={22}
+          overflow="hidden"
+          bg="$surfaceGlassFaint"
+        >
+          <LiquidGlass intensity={20} tint="default" borderRadius={22} />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255,255,255,0.06)",
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 8,
+              right: 8,
+              height: 1,
+              backgroundColor: "rgba(255,255,255,0.34)",
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 8,
+              right: 8,
+              height: 1,
+              backgroundColor: "rgba(120,220,255,0.16)",
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 8,
+              bottom: 8,
+              width: 1,
+              backgroundColor: "rgba(255,190,220,0.1)",
+            }}
+          />
+        </YStack>
+        <GradientBorder radius={22} preset="lens" />
+        {icon}
+      </YStack>
     );
   }
 
