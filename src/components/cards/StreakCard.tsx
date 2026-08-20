@@ -1,4 +1,3 @@
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
 import { Text, useTheme, XStack, YStack } from "tamagui";
@@ -25,16 +24,7 @@ export function StreakCard({
   const inactiveDotColor = "rgba(255,255,255,0.3)";
 
   return (
-    <GlowSurface
-      glow
-      br="$card"
-      glowColor="$glowHero"
-      glowRadius={40}
-      glowOffset={{ width: 0, height: 19 }}
-      elevation={10}
-      overflow="hidden"
-      pos="relative"
-    >
+    <YStack br="$card" overflow="hidden" pos="relative">
       <LinearGradient
         colors={gradientColors}
         locations={[0, 0.6, 1]}
@@ -74,6 +64,6 @@ export function StreakCard({
           ))}
         </XStack>
       </YStack>
-    </GlowSurface>
+    </YStack>
   );
 }

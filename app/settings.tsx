@@ -4,7 +4,6 @@ import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Toggle } from "@/src/components/common/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { GlassSheet } from "@/src/components/ui/GlassSheet";
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -156,9 +155,7 @@ export default function SettingsScreen() {
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$4" gap="$5" pt="$2" pb="$8">
-          <GlowSurface
-            glow
-            glowOpacity={0.1}
+          <YStack
             bg="$glassBg"
             borderWidth={1}
             borderColor="$glassBorder"
@@ -178,7 +175,7 @@ export default function SettingsScreen() {
                 {user?.email ?? ""}
               </Text>
             </YStack>
-          </GlowSurface>
+          </YStack>
 
           <GlassCard>
             <SettingsRow

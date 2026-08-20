@@ -44,7 +44,7 @@ interface SkeletonProps extends Omit<YStackProps, "width" | "height"> {
 export function Skeleton({
   width = "100%",
   height = 14,
-  borderRadius = 21.84,
+  borderRadius = 8,
   ...rest
 }: SkeletonProps) {
   const progress = useShimmerProgress();
@@ -58,7 +58,7 @@ export function Skeleton({
       width={width as YStackProps["width"]}
       height={height}
       br={borderRadius}
-      bg="$glassBg"
+      bg="$glassBgStrong"
       overflow="hidden"
       pos="relative"
       {...rest}
@@ -71,7 +71,7 @@ export function Skeleton({
         ]}
       >
         <LinearGradient
-          colors={["transparent", "rgba(220,255,245,0.07)", "transparent"]}
+          colors={["transparent", "rgba(94,234,212,0.16)", "transparent"]}
           start={SHIMMER_GRADIENT_START}
           end={SHIMMER_GRADIENT_END}
           style={StyleSheet.absoluteFillObject}

@@ -1,102 +1,245 @@
-import { LinearGradient } from "@tamagui/linear-gradient";
-import { YStack, YStackProps } from "tamagui";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  BlurMask,
+  Canvas,
+  Circle,
+  Group,
+  RadialGradient,
+  RoundedRect,
+  vec,
+} from "@shopify/react-native-skia";
+import { ReactNode, useState } from "react";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { YStack, YStackProps, useTheme } from "tamagui";
+
+export type GlowTone = "mint" | "teal" | "lime" | "indigo";
+export type LightLevel = 0 | 1 | 2 | 3 | 4;
+
+const GLOW_LAMP_ALPHA: Record<LightLevel, number> = {
+  0: 0,
+  1: 0.14,
+  2: 0.26,
+  3: 0.42,
+  4: 0.62,
+};
+
+const VIVID_SATURATE: Record<LightLevel, number> = {
+  0: 0.15,
+  1: 0.55,
+  2: 1,
+  3: 1.6,
+  4: 2.4,
+};
+
+type Rgb = [number, number, number];
+
+const TONES: Record<
+  GlowTone,
+  { lamp: Rgb; border: Rgb; lampAlpha: number; borderAlpha: number }
+> = {
+  mint: { lamp: [45, 212, 191], border: [94, 234, 212], lampAlpha: 0.22, borderAlpha: 0.48 },
+  teal: { lamp: [13, 148, 136], border: [45, 212, 191], lampAlpha: 0.3, borderAlpha: 0.4 },
+  lime: { lamp: [163, 230, 53], border: [190, 242, 100], lampAlpha: 0.2, borderAlpha: 0.48 },
+  indigo: { lamp: [99, 102, 241], border: [99, 102, 241], lampAlpha: 0.2, borderAlpha: 0.42 },
+};
+
+function saturateRgb([r, g, b]: Rgb, s: number): Rgb {
+  const lum = 0.213 * r + 0.715 * g + 0.072 * b;
+  const mix = (c: number) => Math.max(0, Math.min(255, Math.round(lum + (c - lum) * s)));
+  return [mix(r), mix(g), mix(b)];
+}
+
+export function toneRgba(rgb: Rgb, alpha: number, sat = 1): string {
+  const [r, g, b] = sat === 1 ? rgb : saturateRgb(rgb, sat);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function useMeasure() {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSize((prev) => (prev.w === width && prev.h === height ? prev : { w: width, h: height }));
+  };
+  return { size, onLayout };
+}
+
+export function Lamp({ color, edge = 0.56 }: { color: string; edge?: number }) {
+  const { size, onLayout } = useMeasure();
+  const rx = 1.28 * size.w;
+  const ry = 0.96 * size.h;
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
+      {size.w > 0 && (
+        <Canvas style={StyleSheet.absoluteFill}>
+          <Group
+            transform={[
+              { translateX: 0.08 * size.w },
+              { translateY: -0.1 * size.h },
+              { scaleY: ry / rx },
+            ]}
+          >
+            <Circle cx={0} cy={0} r={rx}>
+              <RadialGradient
+                c={vec(0, 0)}
+                r={rx}
+                colors={[color, color.replace(/,[\d.\s]+\)$/, ",0)")]}
+                positions={[0, edge]}
+              />
+            </Circle>
+          </Group>
+        </Canvas>
+      )}
+    </View>
+  );
+}
+
+export function InnerBloom({
+  color,
+  radius,
+  spread = 20,
+  blur = 15,
+}: {
+  color: string;
+  radius: number;
+  spread?: number;
+  blur?: number;
+}) {
+  const { size, onLayout } = useMeasure();
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
+      {size.w > 0 && (
+        <Canvas style={StyleSheet.absoluteFill}>
+          <RoundedRect
+            x={-spread / 2}
+            y={-spread / 2}
+            width={size.w + spread}
+            height={size.h + spread}
+            r={radius}
+            style="stroke"
+            strokeWidth={spread}
+            color={color}
+          >
+            <BlurMask blur={blur} style="normal" />
+          </RoundedRect>
+        </Canvas>
+      )}
+    </View>
+  );
+}
 
 export interface GlowSurfaceProps extends YStackProps {
-  glow?: boolean;
-  glowRadius?: number;
-  glowOpacity?: number;
-  glowOffset?: { width: number; height: number };
-  glowColor?: YStackProps["shadowColor"];
-  insetHighlight?: boolean;
-  insetHighlightColor?: string;
+  radius?: number;
+  tone?: GlowTone;
+  lamp?: boolean;
+  glow?: LightLevel;
+  vivid?: LightLevel;
+  fill?: string;
+  blurIntensity?: number;
+  liquidGlass?: boolean;
+  overlay?: ReactNode;
+  borderAngle?: number;
+  borderColors?: string[];
+  borderPositions?: number[];
+  underlay?: ReactNode;
+  children?: ReactNode;
 }
 
 export function GlowSurface({
+  radius = 23,
+  tone = "mint",
+  lamp = false,
   glow,
-  br,
-  bg,
+  vivid = 2,
+  fill = "$surfaceCard",
+  blurIntensity = 40,
+  liquidGlass = false,
+  overlay,
+  borderAngle,
+  borderColors,
+  borderPositions,
+  underlay,
   children,
-  glowRadius = 20,
-  glowOpacity = 0.07,
-  glowOffset = { width: 0, height: 0 },
-  glowColor = "$glowSoft",
-  insetHighlight = false,
-  insetHighlightColor = "rgba(255, 255, 255, 0.12)",
   fd,
   ai,
   jc,
   gap,
   flexWrap,
+  p,
+  px,
+  py,
+  pt,
+  pb,
   ...rest
 }: GlowSurfaceProps) {
+  const theme = useTheme();
+  const t = TONES[tone];
+  const sat = VIVID_SATURATE[vivid];
+
+  const lampAlpha = glow !== undefined ? GLOW_LAMP_ALPHA[glow] : lamp ? t.lampAlpha : 0;
+  const borderAlpha =
+    glow !== undefined ? GLOW_LAMP_ALPHA[glow] * 2.1 : lamp ? t.borderAlpha : 0;
+
+  const fillColor = fill.startsWith("$")
+    ? theme[fill.slice(1) as keyof typeof theme]?.get?.() ?? fill
+    : fill;
+
+  const resolvedBorderColors =
+    borderColors ??
+    (borderAlpha > 0
+      ? [
+          toneRgba(t.border, Math.min(borderAlpha, 1), sat),
+          toneRgba(t.border, Math.min(borderAlpha, 1) * 0.14, sat),
+          "rgba(220,255,245,0.03)",
+        ]
+      : undefined);
+  const resolvedBorderPositions = borderPositions ?? (resolvedBorderColors ? [0, 0.46, 1] : undefined);
+  const resolvedBorderAngle = borderAngle ?? (borderAlpha > 0 ? 138 : undefined);
+
   return (
-    <YStack br={br} pos="relative" overflow="visible" {...rest}>
-      {glow && (
-        <YStack
-          pos="absolute"
-          t={0}
-          l={0}
-          r={0}
-          b={0}
-          br={br}
-          bg="$background"
-          shadowColor={glowColor}
-          shadowOpacity={glowOpacity}
-          shadowRadius={glowRadius}
-          shadowOffset={glowOffset}
-          elevation={0}
-          zIndex={-1}
+    <YStack pos="relative" br={radius} {...rest}>
+      <YStack pos="absolute" t={0} l={0} r={0} b={0} br={radius} overflow="hidden">
+        {blurIntensity > 0 || liquidGlass ? (
+          <LiquidGlass
+            intensity={blurIntensity}
+            tint="default"
+            liquid={liquidGlass}
+            borderRadius={radius}
+            backgroundColor={fillColor}
+          />
+        ) : (
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: fillColor }]} />
+        )}
+        {lampAlpha > 0 && <Lamp color={toneRgba(t.lamp, lampAlpha, sat)} />}
+        {underlay}
+      </YStack>
+      {resolvedBorderColors ? (
+        <GradientBorder
+          radius={radius}
+          colors={resolvedBorderColors}
+          positions={resolvedBorderPositions}
+          angle={resolvedBorderAngle}
         />
+      ) : (
+        <GradientBorder radius={radius} preset="surf" />
       )}
-
-      {bg ? (
-        <YStack
-          pos="absolute"
-          t={0}
-          l={0}
-          r={0}
-          b={0}
-          br={br}
-          bg={bg}
-          zIndex={0}
-        />
-      ) : null}
-
-      {insetHighlight ? (
-        <LinearGradient
-          colors={[insetHighlightColor, "rgba(255, 255, 255, 0)"]}
-          start={[0, 0]}
-          end={[0, 1]}
-          pos="absolute"
-          t={0}
-          l={0}
-          r={0}
-          h={12}
-          btlr={br}
-          btrr={br}
-          pointerEvents="none"
-          zIndex={1}
-        />
-      ) : null}
-
-      {insetHighlight ? (
-        <YStack
-          pos="absolute"
-          t={0}
-          l={0}
-          r={0}
-          b={0}
-          br={br}
-          borderWidth={1}
-          borderColor="$glassBorder"
-          pointerEvents="none"
-          zIndex={2}
-        />
-      ) : null}
-
-      <YStack f={1} zIndex={3} fd={fd} ai={ai} jc={jc} gap={gap} flexWrap={flexWrap}>
+      <YStack
+        f={1}
+        zIndex={2}
+        fd={fd}
+        ai={ai}
+        jc={jc}
+        gap={gap}
+        flexWrap={flexWrap}
+        p={p}
+        px={px}
+        py={py}
+        pt={pt}
+        pb={pb}
+      >
         {children}
       </YStack>
+      {overlay}
     </YStack>
   );
 }

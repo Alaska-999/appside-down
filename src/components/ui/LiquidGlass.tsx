@@ -1,9 +1,11 @@
 import { BlurView } from "expo-blur";
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 
 interface LiquidGlassProps {
   intensity?: number;
   tint?: "light" | "dark" | "default";
+  liquid?: boolean;
   borderRadius?: number;
   borderWidth?: number;
   borderColor?: string;
@@ -14,12 +16,33 @@ interface LiquidGlassProps {
 export function LiquidGlass({
   intensity = 25,
   tint = "dark",
+  liquid = false,
   borderRadius = 0,
   borderWidth = 0,
   borderColor,
   backgroundColor,
   style,
 }: LiquidGlassProps) {
+  if (liquid && isLiquidGlassAvailable()) {
+    return (
+      <GlassView
+        glassEffectStyle="clear"
+        colorScheme="dark"
+        tintColor={backgroundColor}
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            borderRadius,
+            overflow: "hidden",
+            borderWidth,
+            borderColor,
+          },
+          style,
+        ]}
+      />
+    );
+  }
+
   return (
     <BlurView
       intensity={intensity}
