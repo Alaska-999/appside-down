@@ -1,16 +1,19 @@
+import {
+  Canvas,
+  Circle,
+  Group,
+  SweepGradient,
+  vec,
+} from "@shopify/react-native-skia";
 import { useEffect } from "react";
-import Animated, {
+import { StyleSheet } from "react-native";
+import {
   Easing,
-  useAnimatedProps,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle } from "react-native-svg";
-import { Text, useTheme, View } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+import { Text, View } from "tamagui";
 
 interface ProgressRingProps {
   progress: number;
@@ -19,84 +22,61 @@ interface ProgressRingProps {
   label?: string;
   labelFontSize?: number;
   caption?: string;
-  color?: string;
   animated?: boolean;
+  duration?: number;
 }
+
+const TRACK = "rgba(220,255,245,0.12)";
+const HOLE = "#0E1618";
 
 export function ProgressRing({
   progress,
-  size = 64,
-  strokeWidth = 8,
+  size = 62,
+  strokeWidth = 5,
   label,
-  labelFontSize = 13,
+  labelFontSize = 15,
   caption,
-  color,
   animated = false,
+  duration = 1700,
 }: ProgressRingProps) {
-  const theme = useTheme();
-  const ringColor = color ?? theme.accentGradientEnd.get();
-  const trackColor = "rgba(255,255,255,0.14)";
-  const holeColor = theme.backgroundStrong.get();
-
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
   const clamped = Math.min(Math.max(progress, 0), 1);
+  const center = size / 2;
 
   const animatedProgress = useSharedValue(animated ? 0 : clamped);
 
   useEffect(() => {
     animatedProgress.value = withTiming(clamped, {
-      duration: animated ? 900 : 0,
-      easing: Easing.out(Easing.cubic),
+      duration: animated ? duration : 0,
+      easing: Easing.bezier(0.2, 0.8, 0.3, 1),
     });
-  }, [clamped, animated]);
+  }, [clamped, animated, duration, animatedProgress]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference * (1 - animatedProgress.value),
-  }));
+  const positions = useDerivedValue(() => {
+    const p = Math.max(animatedProgress.value, 0.0001);
+    return [0, p, p, 1];
+  });
 
   return (
-    <View
-      width={size}
-      height={size}
-      ai="center"
-      jc="center"
-      shadowColor={theme.accentGradientStart.get()}
-      shadowOpacity={0.4}
-      shadowRadius={15}
-      shadowOffset={{ width: 0, height: 0 }}
-    >
-      <Svg width={size} height={size} style={{ position: "absolute" }}>
-        <Circle cx={size / 2} cy={size / 2} r={radius} fill={holeColor} />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={trackColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-        />
-        <AnimatedCircle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={ringColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={circumference}
-          animatedProps={animatedProps}
-          strokeLinecap="butt"
-          rotation={-90}
-          origin={`${size / 2}, ${size / 2}`}
-        />
-      </Svg>
+    <View width={size} height={size} ai="center" jc="center">
+      <Canvas style={[StyleSheet.absoluteFill]}>
+        <Group transform={[{ rotate: -Math.PI / 2 }]} origin={vec(center, center)}>
+          <Circle cx={center} cy={center} r={center}>
+            <SweepGradient
+              c={vec(center, center)}
+              colors={["#A3E635", "#2DD4BF", TRACK, TRACK]}
+              positions={positions}
+            />
+          </Circle>
+        </Group>
+        <Circle cx={center} cy={center} r={center - strokeWidth} color={HOLE} />
+      </Canvas>
       {label && (
         <Text fontSize={labelFontSize} fontWeight="800" color="$color">
           {label}
         </Text>
       )}
       {caption && (
-        <Text fontSize={9.5 * MOCKUP_SCALE} color="$colorMuted" mt={-2}>
+        <Text fontSize={11} color="$colorMuted" mt={-2}>
           {caption}
         </Text>
       )}

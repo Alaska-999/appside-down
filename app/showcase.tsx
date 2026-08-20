@@ -13,6 +13,10 @@ import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { Toggle } from "@/src/components/common/Toggle";
 import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
 import { FilterChip } from "@/src/components/ui/FilterChip";
+import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
+import { ProgressBar } from "@/src/components/ui/ProgressBar";
+import { ProgressRing } from "@/src/components/ui/ProgressRing";
+import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { SelectField } from "@/src/components/ui/SelectField";
@@ -419,6 +423,38 @@ export default function Showcase() {
             />
             <AppFab icon={<Plus size={26} color="#0D1117" strokeWidth={1.6} />} />
           </XStack>
+        </YStack>
+
+        <YStack gap={10}>
+          <Label>Прогреси · bar 8 · ring 62 · underline 2 · число</Label>
+          <AppCard size="lg" variant="surface" gap={14}>
+            <ProgressBar known={58} learning={84} total={200} />
+            <XStack ai="center" gap={16}>
+              <ProgressRing progress={0.64} label="64%" animated />
+              <YStack f={1} gap={4}>
+                <XStack ai="flex-end" gap={4}>
+                  <AnimatedNumber
+                    to={64}
+                    suffix="%"
+                    style={{ fontSize: 30, fontWeight: "800", fontFamily: "Sora_800ExtraBold" }}
+                  />
+                </XStack>
+                <Text {...TYPE.meta} color="$colorMuted">
+                  число добігає разом з дугою
+                </Text>
+              </YStack>
+            </XStack>
+          </AppCard>
+          <YStack h={74} br={23} bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+            <GradientBorder radius={23} preset="surf" />
+            <Text {...TYPE.card} color="$color">Рядок з underline 29%</Text>
+            <ProgressUnderline progress={0.29} />
+          </YStack>
+          <YStack h={74} br={23} bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+            <GradientBorder radius={23} preset="surf" />
+            <Text {...TYPE.card} color="$color">Dim-варіант 62%</Text>
+            <ProgressUnderline progress={0.62} dim />
+          </YStack>
         </YStack>
 
         <ControlsDemo />
