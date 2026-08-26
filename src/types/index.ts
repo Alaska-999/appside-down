@@ -56,6 +56,13 @@ export interface Folder {
     moduleIds?: string[];
 }
 
+export interface ModuleProgress {
+    known: number;
+    learning: number;
+    unstudied: number;
+    total: number;
+}
+
 export interface Module {
     id: string;
     userId: string;
@@ -68,6 +75,9 @@ export interface Module {
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
+    known?: number;
+    total?: number;
+    progress?: ModuleProgress;
     flashcards?: Flashcard[];
     user?: {
         id: string;

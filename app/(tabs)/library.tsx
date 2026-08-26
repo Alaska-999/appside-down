@@ -1,36 +1,50 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { FolderCard } from "@/src/components/cards/FolderCard";
+import { FolderCard, FolderCardModule } from "@/src/components/cards/FolderCard";
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import {
-  FadeTabPanes,
-  useFadeTabs,
-} from "@/src/components/ui/FadeTabPanes";
+import { FadeTabPanes, useFadeTabs } from "@/src/components/ui/FadeTabPanes";
+import { IconButton } from "@/src/components/ui/IconButton";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
-import { AppSheet } from "@/src/components/ui/Sheet";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
-import { TEXT } from "@/src/constants/typography";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { screenGutter, topPaddingBoost } from "@/tamagui.config";
-import { AlertTriangle, AlignJustify, Check } from "@tamagui/lucide-icons";
+import {
+  AlertTriangle,
+  ArrowDownAZ,
+  ArrowDownUp,
+  Clock,
+  Search,
+  Star,
+} from "lucide-react-native";
 import { router, useFocusEffect } from "expo-router";
-import { memo, useCallback, useMemo, useState } from "react";
-import { FlatList, Pressable, RefreshControl } from "react-native";
+import { ComponentType, memo, useCallback, useMemo, useState } from "react";
+import { FlatList, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
 
-const SORT_OPTIONS: { key: SortOption; label: string }[] = [
-  { key: "date", label: "Date added" },
-  { key: "az", label: "A–Z" },
-  { key: "favs", label: "Favorites" },
+const SORT_OPTIONS: {
+  key: SortOption;
+  label: string;
+  icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
+}[] = [
+  { key: "date", label: "Date added", icon: Clock },
+  { key: "az", label: "A–Z", icon: ArrowDownAZ },
+  { key: "favs", label: "Favorites", icon: Star },
 ];
+
+type FolderModulesState = {
+  items: FolderCardModule[];
+  loading: boolean;
+};
 
 function LoadMoreFooter({ visible }: { visible: boolean }) {
   if (!visible) return null;
@@ -41,49 +55,22 @@ function LoadMoreFooter({ visible }: { visible: boolean }) {
   );
 }
 
-function LibrarySkeletonRow() {
+function LibrarySkeletonList({ height }: { height: number }) {
   return (
-    <XStack height={83} px={screenGutter} py={17} ai="center" gap={16} mb={10}>
-      <Skeleton width={40} height={40} borderRadius={13} />
-      <YStack f={1} gap={6}>
-        <Skeleton height={TEXT.cardTitle} width="70%" />
-        <Skeleton height={TEXT.cardMeta} width="45%" />
-      </YStack>
-    </XStack>
-  );
-}
-
-function LibrarySkeletonList() {
-  return (
-    <YStack pt={16}>
-      <LibrarySkeletonRow />
-      <LibrarySkeletonRow />
-      <LibrarySkeletonRow />
+    <YStack pt={4} gap={11}>
+      <Skeleton height={height} borderRadius={23} />
+      <Skeleton height={height} borderRadius={23} />
+      <Skeleton height={height} borderRadius={23} />
     </YStack>
   );
 }
 
-const MemoFolderCard = memo(
-  FolderCard,
-  (prev, next) => prev.folder === next.folder && prev.index === next.index,
-);
 const MemoModuleCard = memo(
   ModuleCard,
   (prev, next) => prev.module === next.module,
 );
 
 const LIST_STYLE = { flex: 1 } as const;
-
-const LIST_CONTENT_STYLE = {
-  paddingHorizontal: screenGutter,
-  gap: 10,
-};
-
-const getRowLayout = (_: unknown, index: number) => ({
-  length: 83,
-  offset: 93 * index,
-  index,
-});
 
 const keyById = (item: { id: string }) => item.id;
 
@@ -98,6 +85,9 @@ const FoldersPane = memo(function FoldersPane({
   retry,
   search,
   bottomPadding,
+  expandedId,
+  folderModules,
+  onToggle,
 }: {
   items: Folder[];
   loading: boolean;
@@ -109,23 +99,46 @@ const FoldersPane = memo(function FoldersPane({
   retry: () => void;
   search: string;
   bottomPadding: number;
+  expandedId: string | null;
+  folderModules: Record<string, FolderModulesState>;
+  onToggle: (folder: Folder) => void;
 }) {
   const theme = useTheme();
   const contentContainerStyle = useMemo(
-    () => ({ ...LIST_CONTENT_STYLE, paddingBottom: bottomPadding }),
+    () => ({ paddingHorizontal: screenGutter, gap: 13, paddingBottom: bottomPadding }),
     [bottomPadding],
   );
+
   const renderFolder = useCallback(
-    ({ item, index }: { item: Folder; index: number }) => (
-      <MemoFolderCard
-        folder={item}
-        index={index}
-        onPress={() =>
-          router.push({ pathname: "/folder/[id]", params: { id: item.id } })
-        }
-      />
-    ),
-    [],
+    ({ item, index }: { item: Folder; index: number }) => {
+      const state = folderModules[item.id];
+      return (
+        <FolderCard
+          folder={item}
+          index={index}
+          expanded={expandedId === item.id}
+          modules={state?.items}
+          modulesLoading={state?.loading}
+          onToggle={() => onToggle(item)}
+          onPress={() =>
+            router.push({ pathname: "/folder/[id]", params: { id: item.id } })
+          }
+          onModulePress={(moduleId) =>
+            router.push({ pathname: "/module/[id]", params: { id: moduleId } })
+          }
+          onAddModule={() =>
+            router.push({
+              pathname: "/folder/add-modules",
+              params: { folderId: item.id },
+            })
+          }
+          onSettings={() =>
+            router.push({ pathname: "/folder/[id]", params: { id: item.id } })
+          }
+        />
+      );
+    },
+    [expandedId, folderModules, onToggle],
   );
 
   return (
@@ -136,15 +149,18 @@ const FoldersPane = memo(function FoldersPane({
       showsVerticalScrollIndicator={false}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
-      initialNumToRender={4}
-      getItemLayout={getRowLayout}
+      initialNumToRender={5}
       contentContainerStyle={contentContainerStyle}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.accentGradientStart.get()} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refresh}
+          tintColor={theme.accentGradientStart.get()}
+        />
       }
       ListEmptyComponent={
         initialLoading ? (
-          <LibrarySkeletonList />
+          <LibrarySkeletonList height={92} />
         ) : error ? (
           <StateCard
             tone="error"
@@ -160,9 +176,7 @@ const FoldersPane = memo(function FoldersPane({
           </Text>
         )
       }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
+      ListFooterComponent={<LoadMoreFooter visible={loading && !initialLoading} />}
       renderItem={renderFolder}
     />
   );
@@ -195,7 +209,7 @@ const ModulesPane = memo(function ModulesPane({
 }) {
   const theme = useTheme();
   const contentContainerStyle = useMemo(
-    () => ({ ...LIST_CONTENT_STYLE, paddingBottom: bottomPadding }),
+    () => ({ paddingHorizontal: screenGutter, gap: 11, paddingBottom: bottomPadding }),
     [bottomPadding],
   );
   const renderModule = useCallback(
@@ -218,15 +232,18 @@ const ModulesPane = memo(function ModulesPane({
       showsVerticalScrollIndicator={false}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
-      initialNumToRender={4}
-      getItemLayout={getRowLayout}
+      initialNumToRender={6}
       contentContainerStyle={contentContainerStyle}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.accentGradientStart.get()} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refresh}
+          tintColor={theme.accentGradientStart.get()}
+        />
       }
       ListEmptyComponent={
         initialLoading ? (
-          <LibrarySkeletonList />
+          <LibrarySkeletonList height={74} />
         ) : error ? (
           <StateCard
             tone="error"
@@ -246,9 +263,7 @@ const ModulesPane = memo(function ModulesPane({
           </Text>
         )
       }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
+      ListFooterComponent={<LoadMoreFooter visible={loading && !initialLoading} />}
       renderItem={renderModule}
     />
   );
@@ -258,13 +273,19 @@ export default function Library() {
   const insets = useSafeAreaInsets();
   const tabs = useFadeTabs(0);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search.trim());
+  const [searchOpen, setSearchOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [folderModules, setFolderModules] = useState<
+    Record<string, FolderModulesState>
+  >({});
   const tabBarClearance = TAB_BAR_HEIGHT + insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const fetchModulesPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20", sort: sortOrder });
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
       `${API_BASE_URL}/modules?${params.toString()}`,
@@ -275,6 +296,8 @@ export default function Library() {
       data: page.data.map((m: any) => ({
         ...m,
         itemsCount: m._count?.flashcards ?? 0,
+        known: m.progress?.known ?? 0,
+        total: m.progress?.total ?? 0,
         folderIds: (m.folders ?? []).map((f: { id: string }) => f.id),
       })),
       nextCursor: page.nextCursor,
@@ -283,12 +306,12 @@ export default function Library() {
 
   const modulesList = usePaginatedCursorList<Module>(
     fetchModulesPage,
-    `${search}|${sortOrder}`,
+    `${debouncedSearch}|${sortOrder}`,
   );
 
   const fetchFoldersPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20" });
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
       `${API_BASE_URL}/folders?${params.toString()}`,
@@ -297,53 +320,104 @@ export default function Library() {
     return res.json();
   };
 
-  const foldersList = usePaginatedCursorList<Folder>(fetchFoldersPage, search);
+  const foldersList = usePaginatedCursorList<Folder>(fetchFoldersPage, debouncedSearch);
 
   useFocusEffect(
     useCallback(() => {
-      modulesList.refresh();
-      foldersList.refresh();
-    }, [modulesList.refresh, foldersList.refresh]),
+      modulesList.reload();
+      foldersList.reload();
+      setFolderModules({});
+    }, [modulesList.reload, foldersList.reload]),
   );
 
-  const currentSortLabel =
-    SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
+  const loadFolderModules = useCallback(async (folderId: string) => {
+    setFolderModules((prev) => ({
+      ...prev,
+      [folderId]: { items: prev[folderId]?.items ?? [], loading: true },
+    }));
+    try {
+      const res = await protectedFetch(`${API_BASE_URL}/folders/${folderId}`);
+      if (!res.ok) throw new Error(`Folder error: ${res.status}`);
+      const data = await res.json();
+      const items: FolderCardModule[] = (data.modules ?? []).map((m: any) => ({
+        id: m.id,
+        name: m.name,
+        itemsCount: m._count?.flashcards ?? 0,
+        isFavorite: m.isFavorite,
+      }));
+      setFolderModules((prev) => ({
+        ...prev,
+        [folderId]: { items, loading: false },
+      }));
+    } catch (err) {
+      console.error("[Library] folder modules error:", err);
+      setFolderModules((prev) => ({
+        ...prev,
+        [folderId]: { items: prev[folderId]?.items ?? [], loading: false },
+      }));
+    }
+  }, []);
+
+  const toggleFolder = useCallback(
+    (folder: Folder) => {
+      setExpandedId((current) => (current === folder.id ? null : folder.id));
+      if (expandedId !== folder.id && !folderModules[folder.id]?.items.length) {
+        loadFolderModules(folder.id);
+      }
+    },
+    [expandedId, folderModules, loadFolderModules],
+  );
+
+  const toggleSearch = () => {
+    setSearchOpen((open) => {
+      if (open) setSearch("");
+      return !open;
+    });
+  };
 
   return (
-    <ScreenBackground>
-      <YStack f={1} gap="$3" pt={insets.top + topPaddingBoost}>
-        <YStack px="$screenX" gap="$3">
-          <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
-            Library
-          </Text>
-
-          <SegmentedControl
-            options={["Folders", "Modules"]}
-            selected={tabs.index}
-            onChange={tabs.onChange}
-          />
-
-          <XStack gap="$2" ai="center">
-            <SearchField value={search} onChangeText={setSearch} f={1} />
-
-            <Pressable onPress={() => setSortSheetOpen(true)}>
-              <XStack
-                bg="$glassBg"
-                br={999}
-                px={14}
-                py={14}
-                ai="center"
-                gap={7}
-                borderWidth={1}
-                borderColor="$glassBorder"
-              >
-                <AlignJustify size={16} color="$color" />
-                <Text fontSize={TEXT.pill} fontWeight="600" color="$color">
-                  {currentSortLabel}
-                </Text>
-              </XStack>
-            </Pressable>
+    <ScreenBackground preset="home">
+      <YStack f={1} pt={insets.top + topPaddingBoost}>
+        <YStack px="$screenX">
+          <XStack ai="center" jc="space-between" gap={12}>
+            <Text fontSize={31} fontWeight="800" letterSpacing={-0.62} color="$color">
+              Library
+            </Text>
+            <XStack gap={8}>
+              <IconButton
+                variant="liquidGlass"
+                icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                onPress={toggleSearch}
+                accessibilityLabel="Search library"
+              />
+              <IconButton
+                variant="liquidGlass"
+                icon={<ArrowDownUp size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                onPress={() => setSortSheetOpen(true)}
+                accessibilityLabel="Sort library"
+              />
+            </XStack>
           </XStack>
+
+          {searchOpen && (
+            <YStack pt={14}>
+              <SearchField
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search your library"
+                autoFocus
+              />
+            </YStack>
+          )}
+
+          <YStack pt={14}>
+            <SegmentedControl
+              options={["Folders", "Modules"]}
+              selected={tabs.index}
+              onChange={tabs.onChange}
+            />
+          </YStack>
+          <YStack h={22} />
         </YStack>
 
         <FadeTabPanes controller={tabs}>
@@ -356,8 +430,11 @@ export default function Library() {
             loadMore={foldersList.loadMore}
             refresh={foldersList.refresh}
             retry={foldersList.retry}
-            search={search}
+            search={debouncedSearch}
             bottomPadding={tabBarClearance}
+            expandedId={expandedId}
+            folderModules={folderModules}
+            onToggle={toggleFolder}
           />
           <ModulesPane
             items={modulesList.items}
@@ -368,49 +445,30 @@ export default function Library() {
             loadMore={modulesList.loadMore}
             refresh={modulesList.refresh}
             retry={modulesList.retry}
-            search={search}
+            search={debouncedSearch}
             sortOrder={sortOrder}
             bottomPadding={tabBarClearance}
           />
         </FadeTabPanes>
       </YStack>
 
-      <AppSheet
-        open={sortSheetOpen}
-        onOpenChange={setSortSheetOpen}
-        title="Sort by"
-      >
-        <YStack gap="$2" p="$4">
+      <AppSheet open={sortSheetOpen} onOpenChange={setSortSheetOpen} title="Sort by">
+        <SheetRows>
           {SORT_OPTIONS.map((option) =>
             tabs.index === 0 && option.key === "favs" ? null : (
-              <Pressable
+              <SheetRow
                 key={option.key}
+                icon={option.icon}
+                label={option.label}
+                selected={sortOrder === option.key}
                 onPress={() => {
                   setSortOrder(option.key);
                   setSortSheetOpen(false);
                 }}
-              >
-                <XStack
-                  bg={
-                    sortOrder === option.key ? "$glassBgStrong" : "transparent"
-                  }
-                  br={19}
-                  px={19}
-                  py={16}
-                  ai="center"
-                  jc="space-between"
-                >
-                  <Text fontSize="$5" fontWeight="600" color="$color">
-                    {option.label}
-                  </Text>
-                  {sortOrder === option.key && (
-                    <Check size={18} color="$accentGradientStart" />
-                  )}
-                </XStack>
-              </Pressable>
+              />
             ),
           )}
-        </YStack>
+        </SheetRows>
       </AppSheet>
     </ScreenBackground>
   );

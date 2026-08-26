@@ -11,6 +11,7 @@ import { TEXT } from "@/src/constants/typography";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter, topPaddingBoost } from "@/tamagui.config";
 import { AlertTriangle, Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { FlatList } from "react-native";
@@ -47,6 +48,7 @@ export default function AddModules() {
   }>();
   const [modules, setModules] = useState<ModuleItem[]>([]);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,7 +127,7 @@ export default function AddModules() {
   };
 
   const filtered = modules.filter((m) =>
-    m.name.toLowerCase().includes(search.toLowerCase()),
+    m.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
   const title = folderName ? `Add to ${folderName}` : "Add Materials";

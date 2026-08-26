@@ -4,6 +4,7 @@ import {
   GlowSurfaceProps,
   GlowTone,
   InnerBloom,
+  LAMP_ROW,
   LightLevel,
 } from "@/src/components/ui/GlowSurface";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
@@ -34,7 +35,9 @@ type CardVariant =
   | "liquid"
   | "solid"
   | "soft"
-  | "flat";
+  | "flat"
+  | "row"
+  | "rowGold";
 
 type CardSize = "sm" | "md" | "lg";
 
@@ -46,6 +49,7 @@ interface CardProps extends YStackProps {
   vivid?: LightLevel;
   selected?: boolean;
   locked?: boolean;
+  pressed?: boolean;
   stack?: boolean;
   accentBorder?: boolean;
   lit?: number;
@@ -60,11 +64,44 @@ const SIZE_STYLES: Record<CardSize, { px: number; py: number; br: number }> = {
   lg: { px: 19, py: 19, br: 23 },
 };
 
+const ROW_BORDER = {
+  borderAngle: 140,
+  borderColors: [
+    "rgba(220,255,245,0.24)",
+    "rgba(220,255,245,0.05)",
+    "rgba(220,255,245,0.02)",
+  ],
+  borderPositions: [0, 0.48, 1],
+};
+
+const ROW_LAMP_IDLE = 0.2;
+const ROW_LAMP_PRESSED = 0.32;
+
 const SURFACE_VARIANTS: Record<
-  "surface" | "glass" | "liquid" | "well" | "progressLit" | "sweep" | "media",
+  | "surface"
+  | "glass"
+  | "liquid"
+  | "well"
+  | "progressLit"
+  | "sweep"
+  | "media"
+  | "row"
+  | "rowGold",
   Partial<GlowSurfaceProps>
 > = {
   surface: {},
+  row: {
+    fill: "rgba(20,28,34,0.55)",
+    blurIntensity: 45,
+    lampGeometry: LAMP_ROW,
+    ...ROW_BORDER,
+  },
+  rowGold: {
+    fill: "rgba(20,28,22,0.6)",
+    blurIntensity: 45,
+    lampGeometry: LAMP_ROW,
+    ...ROW_BORDER,
+  },
   glass: {
     fill: "rgba(220,255,245,0.06)",
     blurIntensity: 65,
@@ -187,6 +224,7 @@ export function AppCard(props: CardProps) {
     vivid,
     selected,
     locked,
+    pressed,
     stack,
     accentBorder,
     lit = 0.62,
@@ -274,8 +312,25 @@ export function AppCard(props: CardProps) {
           ? "glow"
           : "surface"
         : variant;
-    const surfaceProps =
-      surfaceKey === "glow" ? {} : SURFACE_VARIANTS[surfaceKey as keyof typeof SURFACE_VARIANTS];
+    const isRow = variant === "row" || variant === "rowGold";
+    const surfaceProps = {
+      ...(surfaceKey === "glow"
+        ? {}
+        : SURFACE_VARIANTS[surfaceKey as keyof typeof SURFACE_VARIANTS]),
+      ...(isRow
+        ? {
+            lampAlpha: pressed ? ROW_LAMP_PRESSED : ROW_LAMP_IDLE,
+            fill:
+              variant === "rowGold"
+                ? pressed
+                  ? "rgba(20,28,22,0.65)"
+                  : "rgba(20,28,22,0.6)"
+                : pressed
+                  ? "rgba(20,28,34,0.6)"
+                  : "rgba(20,28,34,0.55)",
+          }
+        : null),
+    };
 
     const underlay =
       variant === "liquid" ? (

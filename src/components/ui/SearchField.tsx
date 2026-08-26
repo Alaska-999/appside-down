@@ -9,6 +9,7 @@ interface SearchFieldProps extends YStackProps {
   onChangeText: (value: string) => void;
   placeholder?: string;
   showClear?: boolean;
+  autoFocus?: boolean;
 }
 
 export function SearchField({
@@ -16,6 +17,7 @@ export function SearchField({
   onChangeText,
   placeholder = "Search...",
   showClear = true,
+  autoFocus,
   ...rest
 }: SearchFieldProps) {
   const [focused, setFocused] = useState(false);
@@ -29,6 +31,7 @@ export function SearchField({
         unstyled
         p={0}
         placeholder={placeholder}
+        autoFocus={autoFocus}
         value={value}
         onChangeText={onChangeText}
         onFocus={() => setFocused(true)}

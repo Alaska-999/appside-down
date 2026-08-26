@@ -7,8 +7,16 @@ import {
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import {
+  Easing,
+  useDerivedValue,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 export type GradientBorderPreset =
   | "surf"
@@ -115,6 +123,7 @@ type GradientBorderProps = {
   colors?: string[];
   positions?: number[];
   sweep?: boolean;
+  spinDuration?: number;
 };
 
 function toCorners(radius: number | CornerRadii): CornerRadii {
@@ -145,8 +154,26 @@ export function GradientBorder({
   colors,
   positions,
   sweep = false,
+  spinDuration,
 }: GradientBorderProps) {
   const [size, setSize] = useState({ w: 0, h: 0 });
+  const reducedMotion = useReducedMotion();
+  const spin = useSharedValue(0);
+  const spinning = sweep && !!spinDuration && !reducedMotion;
+
+  useEffect(() => {
+    if (!spinning) return;
+    spin.value = 0;
+    spin.value = withRepeat(
+      withTiming(360, { duration: spinDuration, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, [spinning, spinDuration, spin]);
+
+  const spinTransform = useDerivedValue(() => [
+    { rotate: (spin.value * Math.PI) / 180 },
+  ]);
   const presetDef = PRESETS[preset];
   const resolvedAngle = angle ?? presetDef.angle;
   const resolvedColors = colors ?? presetDef.colors;
@@ -194,22 +221,26 @@ export function GradientBorder({
     <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
       {path && (
         <Canvas style={StyleSheet.absoluteFill}>
-          <Path path={path}>
-            {sweep ? (
+          {sweep ? (
+            <Path path={path}>
               <SweepGradient
                 c={vec(size.w / 2, size.h / 2)}
                 colors={resolvedColors}
                 positions={resolvedPositions}
+                origin={vec(size.w / 2, size.h / 2)}
+                transform={spinning ? spinTransform : undefined}
               />
-            ) : (
+            </Path>
+          ) : (
+            <Path path={path}>
               <LinearGradient
                 start={line.start}
                 end={line.end}
                 colors={resolvedColors}
                 positions={resolvedPositions}
               />
-            )}
-          </Path>
+            </Path>
+          )}
         </Canvas>
       )}
     </View>

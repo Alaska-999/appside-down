@@ -1,7 +1,7 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
-import { ChevronRight } from "lucide-react-native";
+import { Check, ChevronRight } from "lucide-react-native";
 import { Children, ComponentType, ReactNode, useEffect } from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
@@ -136,6 +136,7 @@ interface SheetRowProps {
   subtitle?: string;
   danger?: boolean;
   chevron?: boolean;
+  selected?: boolean;
   onPress?: () => void;
 }
 
@@ -146,6 +147,7 @@ export function SheetRow({
   subtitle,
   danger,
   chevron,
+  selected,
   onPress,
 }: SheetRowProps) {
   const labelColor = danger ? "#FCA5A5" : "$color";
@@ -176,6 +178,7 @@ export function SheetRow({
           {hint}
         </Text>
       )}
+      {selected && <Check size={18} color="#5EEAD4" strokeWidth={2.4} />}
       {chevron && <ChevronRight size={16} color="#5A6B7A" strokeWidth={2} />}
     </XStack>
   );

@@ -111,7 +111,7 @@ export function SegmentedControl({
             }}
             style={{ flex: 1 }}
           >
-            <XStack py={11} px={8} jc="center" ai="center" gap={7}>
+            <XStack py={10} px={8} jc="center" ai="center" gap={7}>
               {renderIcon?.(i, active)}
               <Text
                 fontSize={13.5}

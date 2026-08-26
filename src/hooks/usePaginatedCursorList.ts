@@ -27,12 +27,14 @@ export function usePaginatedCursorList<T>(
   const fetchPageRef = useRef(fetchPage);
   fetchPageRef.current = fetchPage;
 
-  const load = useCallback(async (cursor: string | null, isRefresh = false) => {
+  const load = useCallback(async (cursor: string | null, isRefresh = false, silent = false) => {
     const requestId = ++requestIdRef.current;
     lastCursorRef.current = cursor;
     isLoadingRef.current = true;
 
-    if (isRefresh) {
+    if (silent) {
+      isLoadingRef.current = true;
+    } else if (isRefresh) {
       setRefreshing(true);
     } else if (!cursor) {
       setInitialLoading(true);
@@ -56,9 +58,11 @@ export function usePaginatedCursorList<T>(
       setError(true);
     } finally {
       if (requestId === requestIdRef.current) {
-        setLoading(false);
-        setInitialLoading(false);
-        setRefreshing(false);
+        if (!silent) {
+          setLoading(false);
+          setInitialLoading(false);
+          setRefreshing(false);
+        }
         isLoadingRef.current = false;
       }
     }
@@ -87,6 +91,10 @@ export function usePaginatedCursorList<T>(
     load(null, true);
   }, [load]);
 
+  const reload = useCallback(() => {
+    load(null, false, true);
+  }, [load]);
+
   const retry = useCallback(() => {
     load(lastCursorRef.current);
   }, [load]);
@@ -101,5 +109,6 @@ export function usePaginatedCursorList<T>(
     retry,
     hasMore: nextCursor !== null,
     refresh,
+    reload,
   };
 }

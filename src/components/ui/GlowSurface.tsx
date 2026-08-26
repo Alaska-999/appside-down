@@ -64,18 +64,31 @@ function useMeasure() {
   return { size, onLayout };
 }
 
-export function Lamp({ color, edge = 0.56 }: { color: string; edge?: number }) {
+export type LampGeometry = { rx: number; ry: number; cx: number; cy: number };
+
+const LAMP_CARD: LampGeometry = { rx: 1.28, ry: 0.96, cx: 0.08, cy: -0.1 };
+export const LAMP_ROW: LampGeometry = { rx: 1.2, ry: 0.92, cx: 0.06, cy: -0.12 };
+
+export function Lamp({
+  color,
+  edge = 0.56,
+  geometry = LAMP_CARD,
+}: {
+  color: string;
+  edge?: number;
+  geometry?: LampGeometry;
+}) {
   const { size, onLayout } = useMeasure();
-  const rx = 1.28 * size.w;
-  const ry = 0.96 * size.h;
+  const rx = geometry.rx * size.w;
+  const ry = geometry.ry * size.h;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
       {size.w > 0 && (
         <Canvas style={StyleSheet.absoluteFill}>
           <Group
             transform={[
-              { translateX: 0.08 * size.w },
-              { translateY: -0.1 * size.h },
+              { translateX: geometry.cx * size.w },
+              { translateY: geometry.cy * size.h },
               { scaleY: ry / rx },
             ]}
           >
@@ -132,6 +145,8 @@ export interface GlowSurfaceProps extends YStackProps {
   radius?: number;
   tone?: GlowTone;
   lamp?: boolean;
+  lampAlpha?: number;
+  lampGeometry?: LampGeometry;
   glow?: LightLevel;
   vivid?: LightLevel;
   fill?: string;
@@ -149,6 +164,8 @@ export function GlowSurface({
   radius = 23,
   tone = "mint",
   lamp = false,
+  lampAlpha: lampAlphaOverride,
+  lampGeometry,
   glow,
   vivid = 2,
   fill = "$surfaceCard",
@@ -176,9 +193,17 @@ export function GlowSurface({
   const t = TONES[tone];
   const sat = VIVID_SATURATE[vivid];
 
-  const lampAlpha = glow !== undefined ? GLOW_LAMP_ALPHA[glow] : lamp ? t.lampAlpha : 0;
+  const lampAlpha =
+    lampAlphaOverride ??
+    (glow !== undefined ? GLOW_LAMP_ALPHA[glow] : lamp ? t.lampAlpha : 0);
   const borderAlpha =
-    glow !== undefined ? GLOW_LAMP_ALPHA[glow] * 2.1 : lamp ? t.borderAlpha : 0;
+    lampAlphaOverride !== undefined
+      ? 0
+      : glow !== undefined
+        ? GLOW_LAMP_ALPHA[glow] * 2.1
+        : lamp
+          ? t.borderAlpha
+          : 0;
 
   const fillColor = fill.startsWith("$")
     ? theme[fill.slice(1) as keyof typeof theme]?.get?.() ?? fill
@@ -210,7 +235,9 @@ export function GlowSurface({
         ) : (
           <View style={[StyleSheet.absoluteFillObject, { backgroundColor: fillColor }]} />
         )}
-        {lampAlpha > 0 && <Lamp color={toneRgba(t.lamp, lampAlpha, sat)} />}
+        {lampAlpha > 0 && (
+          <Lamp color={toneRgba(t.lamp, lampAlpha, sat)} geometry={lampGeometry} />
+        )}
         {underlay}
       </YStack>
       {resolvedBorderColors ? (

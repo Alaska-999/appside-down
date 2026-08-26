@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { FlashcardSm } from "@/src/components/flashcards/Flashcard-sm";
-import { ScreenAtmosphere } from "@/src/components/ui/ScreenAtmosphere";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { Badge } from "@/src/components/ui/Badge";
 import { AppButton } from "@/src/components/ui/Button";
@@ -41,7 +41,13 @@ import {
 } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import {
+  Alert,
+  InteractionManager,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import { SharedValue } from "react-native-reanimated";
 import { Carousel } from "react-native-reanimated-carousel";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -83,6 +89,7 @@ export default function ModuleScreen() {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const initGame = useGameStore((state) => state.initGame);
@@ -95,7 +102,8 @@ export default function ModuleScreen() {
   const isDeletedAuthor = !moduleData?.author && !!moduleData?.authorUsername;
 
   useEffect(() => {
-    fetchData();
+    const task = InteractionManager.runAfterInteractions(() => fetchData());
+    return () => task.cancel();
   }, [id]);
 
   const getActionButtons = (id: string) => [
@@ -262,6 +270,7 @@ export default function ModuleScreen() {
 
   const openEditSheet = () => {
     setMenuSheetOpen(false);
+    setEditSheetMounted(true);
     setTimeout(() => setEditSheetOpen(true), 300);
   };
 
@@ -348,9 +357,8 @@ export default function ModuleScreen() {
 
   return (
     <YStack f={1} bg="$background">
+      <BackgroundMesh preset="module" />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <ScreenAtmosphere />
-
         <YStack pb="$10" gap="$6">
           <XStack px="$screenX" pt={insets.top + 10 + topPaddingBoost} jc="space-between" ai="center">
             <IconButton
@@ -679,6 +687,7 @@ export default function ModuleScreen() {
         </YStack>
       </AppSheet>
 
+      {editSheetMounted && (
       <EditCardsSheet
         open={editSheetOpen}
         onOpenChange={setEditSheetOpen}
@@ -693,6 +702,7 @@ export default function ModuleScreen() {
         moduleDescription={moduleData?.description ?? ""}
         moduleIsPublic={moduleData?.isPublic ?? false}
       />
+      )}
 
       <AppSheet
         open={sortSheetOpen}
