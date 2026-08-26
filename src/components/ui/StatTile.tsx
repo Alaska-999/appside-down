@@ -1,5 +1,22 @@
 import { GlowSurface, LAMP_TILE } from "@/src/components/ui/GlowSurface";
+import { View } from "react-native";
 import { Text } from "tamagui";
+
+function TopHighlight() {
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 9,
+        right: 9,
+        height: 1,
+        backgroundColor: "rgba(255,255,255,0.3)",
+      }}
+    />
+  );
+}
 
 export type StatTone = "known" | "learning" | "new";
 
@@ -64,6 +81,7 @@ export function StatTile({
       shadowOffset={{ width: 0, height: 4 }}
       shadowRadius={7}
       shadowOpacity={0.8}
+      underlay={<TopHighlight />}
       {...TILE_BORDER}
     >
       <Text

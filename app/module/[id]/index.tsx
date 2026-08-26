@@ -22,13 +22,13 @@ import { topPaddingBoost } from "@/tamagui.config";
 import {
   AlertTriangle,
   ArrowDownUp,
-  ArrowLeftRight,
   BookmarkPlus,
+  Captions,
+  Columns2,
   ChevronLeft,
   Clock,
   FileText,
   GraduationCap,
-  Layers,
   Lock,
   MoreHorizontal,
   Pencil,
@@ -54,9 +54,9 @@ const SORT_OPTIONS: {
 ];
 
 const MODE_TILES = [
-  { key: "flashcards", label: "Flashcards", hint: "Flip and recall", icon: Layers, live: true },
+  { key: "flashcards", label: "Flashcards", hint: "Flip and recall", icon: Captions, live: true },
   { key: "test", label: "Test", hint: "Quiz yourself", icon: FileText, live: false },
-  { key: "match", label: "Match", hint: "Pair up", icon: ArrowLeftRight, live: false },
+  { key: "match", label: "Match", hint: "Pair up", icon: Columns2, live: false },
   { key: "learn", label: "Learn", hint: "Spaced repetition", icon: GraduationCap, live: false },
 ];
 

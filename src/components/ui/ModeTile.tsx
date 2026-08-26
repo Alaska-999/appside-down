@@ -16,6 +16,39 @@ const TILE_BORDER = {
   borderPositions: [0, 0.44, 1],
 };
 
+function EdgeHighlights({ live }: { live?: boolean }) {
+  return (
+    <>
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 10,
+          right: 10,
+          height: 1,
+          backgroundColor: live
+            ? "rgba(255,255,255,0.42)"
+            : "rgba(255,255,255,0.32)",
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 10,
+          right: 10,
+          height: 1,
+          backgroundColor: live
+            ? "rgba(120,220,255,0.2)"
+            : "rgba(120,220,255,0.16)",
+        }}
+      />
+    </>
+  );
+}
+
 function SoonPill() {
   return (
     <XStack
@@ -68,8 +101,9 @@ export function ModeTile({
         blurIntensity={30}
         shadowColor={live ? "rgba(94,234,212,1)" : "#000"}
         shadowOffset={{ width: 0, height: live ? 0 : 4 }}
-        shadowRadius={live ? 13 : 7}
-        shadowOpacity={live ? 0.55 : 0.8}
+        shadowRadius={7}
+        shadowOpacity={live ? 0.45 : 0.8}
+        underlay={<EdgeHighlights live={live} />}
         {...TILE_BORDER}
       >
         <Icon size={22} color={live ? "#5EEAD4" : "#8FA8B8"} strokeWidth={1.9} />
