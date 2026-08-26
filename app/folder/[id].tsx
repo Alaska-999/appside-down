@@ -4,7 +4,7 @@ import { FormInput } from "@/src/components/common/FormInput";
 import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
 import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
 import { AppButton } from "@/src/components/ui/Button";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -529,7 +529,7 @@ export default function FolderScreen() {
       </ScrollView>
 
       {/* Edit folder sheet */}
-      <GlassSheet
+      <AppSheet
         open={editOpen}
         onOpenChange={setEditOpen}
         title="Edit Folder"
@@ -560,10 +560,10 @@ export default function FolderScreen() {
             Save
           </AppButton>
         </KeyboardAwareScrollView>
-      </GlassSheet>
+      </AppSheet>
 
       {/* Add tag sheet */}
-      <GlassSheet
+      <AppSheet
         open={showTagInput}
         onOpenChange={(open: boolean) => {
           setShowTagInput(open);
@@ -590,7 +590,7 @@ export default function FolderScreen() {
 
           <AppButton onPress={handleAddTag}>Add</AppButton>
         </KeyboardAwareScrollView>
-      </GlassSheet>
+      </AppSheet>
     </YStack>
   );
 }

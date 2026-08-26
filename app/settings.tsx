@@ -3,7 +3,7 @@ import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { Toggle } from "@/src/components/common/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -253,7 +253,7 @@ export default function SettingsScreen() {
         </YStack>
       </ScrollView>
 
-      <GlassSheet
+      <AppSheet
         open={deleteSheetOpen}
         onOpenChange={(open: boolean) => {
           setDeleteSheetOpen(open);
@@ -318,7 +318,7 @@ export default function SettingsScreen() {
             </XStack>
           </YStack>
         </KeyboardAwareScrollView>
-      </GlassSheet>
+      </AppSheet>
     </YStack>
   );
 }

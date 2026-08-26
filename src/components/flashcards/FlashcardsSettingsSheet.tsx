@@ -1,7 +1,7 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { Toggle } from "@/src/components/common/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { useGameStore } from "@/src/store/useGameStore";
 import { RotateCcw } from "lucide-react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -25,11 +25,10 @@ export function FlashcardsSettingsSheet({
   };
 
   return (
-    <GlassSheet
+    <AppSheet
       open={open}
       onOpenChange={onOpenChange}
       title="Settings"
-      snapPoints={[65]}
     >
       <YStack gap="$4">
         <YStack gap="$2">
@@ -121,6 +120,6 @@ export function FlashcardsSettingsSheet({
           </Text>
         </AppButton>
       </YStack>
-    </GlassSheet>
+    </AppSheet>
   );
 }

@@ -20,6 +20,8 @@ import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { SelectField } from "@/src/components/ui/SelectField";
+import { AppSheet, SheetCrossfade, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { AppToast } from "@/src/components/ui/Toast";
 import { TYPE } from "@/src/constants/type";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -27,7 +29,16 @@ import { useForm } from "react-hook-form";
 import { Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowRight, Plus, Search, Settings2, X } from "lucide-react-native";
+import {
+  ArrowRight,
+  FileText,
+  Pencil,
+  Plus,
+  Search,
+  Settings2,
+  Trash2,
+  X,
+} from "lucide-react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
@@ -118,6 +129,7 @@ function FieldsDemo() {
   });
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     setError("email", { message: "Enter a valid email" });
@@ -147,7 +159,23 @@ function FieldsDemo() {
         <SelectField
           value={folder}
           placeholder="Folder"
-          onPress={() => setFolder(folder ? null : "Biology")}
+          options={[
+            { label: "Biology", value: "Biology" },
+            { label: "Chemistry", value: "Chemistry" },
+            { label: "No folder", value: "" },
+          ]}
+          onChange={setFolder}
+        />
+        <SelectField
+          multiple
+          value={tags}
+          placeholder="Tags"
+          options={[
+            { label: "Exam", value: "exam" },
+            { label: "Hard", value: "hard" },
+            { label: "Favorite", value: "favorite" },
+          ]}
+          onChange={setTags}
         />
         <SearchField value={search} onChangeText={setSearch} placeholder="Search modules..." />
       </YStack>
@@ -156,6 +184,76 @@ function FieldsDemo() {
         <Label>CodeInput · 46×56 · курсор блимає</Label>
         <CodeInput control={control} name="code" length={6} />
       </YStack>
+    </>
+  );
+}
+
+function SheetsDemo() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sheetView, setSheetView] = useState<"menu" | "confirm">("menu");
+  const [toastOpen, setToastOpen] = useState(false);
+
+  return (
+    <>
+      <YStack gap={10}>
+        <Label>Шит · rows · меню → підтвердження (crossfade 200мс)</Label>
+        <AppButton
+          variant="secondary"
+          onPress={() => {
+            setSheetView("menu");
+            setMenuOpen(true);
+          }}
+        >
+          Відкрити меню ⋯
+        </AppButton>
+        <AppButton variant="secondary" onPress={() => setToastOpen(true)}>
+          Показати тост
+        </AppButton>
+        <YStack h={140} br={20} bg="$surfaceCard" ai="center" jc="center" overflow="hidden">
+          <Text {...TYPE.meta} color="$colorMuted">
+            тост з’явиться тут знизу
+          </Text>
+          <AppToast
+            open={toastOpen}
+            message="Session expired"
+            description="Log in again to continue"
+            onDismiss={() => setToastOpen(false)}
+          />
+        </YStack>
+      </YStack>
+
+      <AppSheet
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        title={sheetView === "menu" ? "Module" : "Delete module"}
+      >
+        <SheetCrossfade activeKey={sheetView}>
+          {sheetView === "menu" ? (
+            <SheetRows>
+              <SheetRow icon={Pencil} label="Edit module" onPress={() => {}} />
+              <SheetRow icon={FileText} label="Edit cards" hint="200" onPress={() => {}} />
+              <SheetRow
+                icon={Trash2}
+                label="Delete module"
+                danger
+                onPress={() => setSheetView("confirm")}
+              />
+            </SheetRows>
+          ) : (
+            <YStack gap={14}>
+              <Text {...TYPE.body} color="$colorMuted">
+                This will permanently delete the module and all its cards.
+              </Text>
+              <AppButton variant="danger" onPress={() => setMenuOpen(false)}>
+                Delete module
+              </AppButton>
+              <AppButton variant="ghost" onPress={() => setSheetView("menu")}>
+                Cancel
+              </AppButton>
+            </YStack>
+          )}
+        </SheetCrossfade>
+      </AppSheet>
     </>
   );
 }
@@ -463,6 +561,8 @@ export default function Showcase() {
         <ControlsDemo />
 
         <FieldsDemo />
+
+        <SheetsDemo />
 
         <YStack gap={10}>
           <Label>skeleton</Label>

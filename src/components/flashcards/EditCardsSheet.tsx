@@ -2,7 +2,7 @@ import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { AppButton } from "@/src/components/ui/Button";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { Flashcard } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -211,7 +211,7 @@ export function EditCardsSheet({
 
   return (
     <FormProvider {...form}>
-      <GlassSheet
+      <AppSheet
         open={open}
         onOpenChange={onOpenChange}
         title="Edit module"
@@ -386,7 +386,7 @@ export function EditCardsSheet({
             </AppButton>
           </YStack>
         </KeyboardAwareScrollView>
-      </GlassSheet>
+      </AppSheet>
     </FormProvider>
   );
 }

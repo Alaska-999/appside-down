@@ -1,6 +1,7 @@
 import { BlurView } from "expo-blur";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { Fragment } from "react";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 interface LiquidGlassProps {
   intensity?: number;
@@ -44,20 +45,31 @@ export function LiquidGlass({
   }
 
   return (
-    <BlurView
-      intensity={intensity}
-      tint={tint}
-      style={[
-        StyleSheet.absoluteFillObject,
-        {
-          borderRadius,
-          overflow: "hidden",
-          borderWidth,
-          borderColor,
-          backgroundColor,
-        },
-        style,
-      ]}
-    />
+    <Fragment>
+      <BlurView
+        intensity={intensity}
+        tint={tint}
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            borderRadius,
+            overflow: "hidden",
+            borderWidth,
+            borderColor,
+          },
+          style,
+        ]}
+      />
+      {backgroundColor && (
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFillObject,
+            { borderRadius, overflow: "hidden", backgroundColor },
+            style,
+          ]}
+        />
+      )}
+    </Fragment>
   );
 }

@@ -1,5 +1,5 @@
 import { AppCard } from "@/src/components/ui/Card";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { ChevronRight, FilePlus, Folder } from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Href, useRouter } from "expo-router";
@@ -40,7 +40,7 @@ export function CreateActionSheet({
   ];
 
   return (
-    <GlassSheet open={open} onOpenChange={onOpenChange} title="Create New">
+    <AppSheet open={open} onOpenChange={onOpenChange} title="Create New">
       <YStack gap={14}>
         {actions.map((action) => (
           <Pressable key={action.key} onPress={action.onPress}>
@@ -72,6 +72,6 @@ export function CreateActionSheet({
           </Pressable>
         ))}
       </YStack>
-    </GlassSheet>
+    </AppSheet>
   );
 }

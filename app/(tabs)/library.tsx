@@ -377,8 +377,6 @@ export default function Library() {
         open={sortSheetOpen}
         onOpenChange={setSortSheetOpen}
         title="Sort by"
-        snapPoints={[30]}
-        plain
       >
         <YStack gap="$2" p="$4">
           {SORT_OPTIONS.map((option) =>

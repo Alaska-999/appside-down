@@ -18,7 +18,15 @@ export type GradientBorderPreset =
   | "glowIndigo"
   | "liquid"
   | "lens"
-  | "well";
+  | "well"
+  | "sheet";
+
+export type CornerRadii = {
+  topLeft: number;
+  topRight: number;
+  bottomRight: number;
+  bottomLeft: number;
+};
 
 const PRESETS: Record<
   GradientBorderPreset,
@@ -92,10 +100,15 @@ const PRESETS: Record<
     colors: ["rgba(0,0,0,0.5)", "rgba(220,255,245,0.11)"],
     positions: [0, 1],
   },
+  sheet: {
+    angle: 180,
+    colors: ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.03)", "rgba(255,255,255,0)"],
+    positions: [0, 0.4, 1],
+  },
 };
 
 type GradientBorderProps = {
-  radius: number;
+  radius: number | CornerRadii;
   width?: number;
   preset?: GradientBorderPreset;
   angle?: number;
@@ -103,6 +116,13 @@ type GradientBorderProps = {
   positions?: number[];
   sweep?: boolean;
 };
+
+function toCorners(radius: number | CornerRadii): CornerRadii {
+  if (typeof radius === "number") {
+    return { topLeft: radius, topRight: radius, bottomRight: radius, bottomLeft: radius };
+  }
+  return radius;
+}
 
 export function gradientLine(angle: number, w: number, h: number) {
   const rad = (angle * Math.PI) / 180;
@@ -134,17 +154,28 @@ export function GradientBorder({
 
   const path = useMemo(() => {
     if (size.w <= 0 || size.h <= 0) return null;
+    const outer = toCorners(radius);
+    const inner: CornerRadii = {
+      topLeft: Math.max(outer.topLeft - width, 0),
+      topRight: Math.max(outer.topRight - width, 0),
+      bottomRight: Math.max(outer.bottomRight - width, 0),
+      bottomLeft: Math.max(outer.bottomLeft - width, 0),
+    };
     const ring = Skia.Path.Make();
-    ring.addRRect(
-      Skia.RRectXY(Skia.XYWHRect(0, 0, size.w, size.h), radius, radius),
-    );
-    ring.addRRect(
-      Skia.RRectXY(
-        Skia.XYWHRect(width, width, size.w - width * 2, size.h - width * 2),
-        Math.max(radius - width, 0),
-        Math.max(radius - width, 0),
-      ),
-    );
+    ring.addRRect({
+      rect: Skia.XYWHRect(0, 0, size.w, size.h),
+      topLeft: vec(outer.topLeft, outer.topLeft),
+      topRight: vec(outer.topRight, outer.topRight),
+      bottomRight: vec(outer.bottomRight, outer.bottomRight),
+      bottomLeft: vec(outer.bottomLeft, outer.bottomLeft),
+    });
+    ring.addRRect({
+      rect: Skia.XYWHRect(width, width, size.w - width * 2, size.h - width * 2),
+      topLeft: vec(inner.topLeft, inner.topLeft),
+      topRight: vec(inner.topRight, inner.topRight),
+      bottomRight: vec(inner.bottomRight, inner.bottomRight),
+      bottomLeft: vec(inner.bottomLeft, inner.bottomLeft),
+    });
     ring.setFillType(FillType.EvenOdd);
     return ring;
   }, [size.w, size.h, radius, width]);

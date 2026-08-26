@@ -6,7 +6,7 @@ import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { Badge } from "@/src/components/ui/Badge";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -654,11 +654,10 @@ export default function ModuleScreen() {
         </YStack>
       </ScrollView>
 
-      <GlassSheet
+      <AppSheet
         open={menuSheetOpen}
         onOpenChange={setMenuSheetOpen}
         title="Module"
-        snapPoints={[25]}
       >
         <YStack gap="$3">
           <AppButton
@@ -676,7 +675,7 @@ export default function ModuleScreen() {
             Delete module
           </AppButton>
         </YStack>
-      </GlassSheet>
+      </AppSheet>
 
       <EditCardsSheet
         open={editSheetOpen}
@@ -693,11 +692,10 @@ export default function ModuleScreen() {
         moduleIsPublic={moduleData?.isPublic ?? false}
       />
 
-      <GlassSheet
+      <AppSheet
         open={sortSheetOpen}
         onOpenChange={setSortSheetOpen}
         title="Sort by"
-        snapPoints={[25]}
       >
         <YStack gap="$2">
           {(["original", "alphabetical"] as SortOrder[]).map((option) => (
@@ -725,7 +723,7 @@ export default function ModuleScreen() {
             </Pressable>
           ))}
         </YStack>
-      </GlassSheet>
+      </AppSheet>
     </YStack>
   );
 }
