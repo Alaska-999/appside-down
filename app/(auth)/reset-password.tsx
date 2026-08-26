@@ -1,24 +1,28 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
 import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { ChevronLeft, Eye, EyeOff, Lock } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { Alert, Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 290;
+function formatCooldown(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
 
 export default function ResetPassword() {
   const insets = useSafeAreaInsets();
@@ -110,11 +114,11 @@ export default function ResetPassword() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams intensity={1.3} />
+        <BackgroundMesh preset="auth" animated />
         <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
           <IconButton
             variant="liquidGlass"
-            icon={<ChevronLeft size="$1" color="$color" />}
+            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
             onPress={() => router.back()}
           />
         </YStack>
@@ -125,130 +129,126 @@ export default function ResetPassword() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
-            paddingHorizontal: 18 * MOCKUP_SCALE,
-            paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 16,
+            paddingHorizontal: 20,
+            paddingTop: insets.top + 62,
+            paddingBottom: insets.bottom + 22,
           }}
         >
           <AuthHeading
-            titlePrefix="Reset"
+            title="Reset"
             titleHighlight="password"
             subtitle={
               <>
                 Code sent to{" "}
-                <Text color="$color" fontWeight="600">
+                <Text color="#DCEBF2" fontWeight="600">
                   {email}
                 </Text>
               </>
             }
           />
 
-          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
+          <YStack width="100%" gap={14}>
             <CodeInput
               control={control}
               name="code"
+              size="lg"
               autoFocus
               onComplete={() => newPasswordRef.current?.focus()}
             />
+
+            <Pressable
+              onPress={resendCode}
+              disabled={resendCooldown > 0 || isResending}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Text fontSize={12.5} color="#5A6B7A" textAlign="center">
+                {isResending ? (
+                  "Sending..."
+                ) : resendCooldown > 0 ? (
+                  <>
+                    Resend in{" "}
+                    <Text fontSize={12.5} color="#7F97A6" fontWeight="600">
+                      {formatCooldown(resendCooldown)}
+                    </Text>
+                  </>
+                ) : (
+                  "Resend code"
+                )}
+              </Text>
+            </Pressable>
+
             <FormInput
               ref={newPasswordRef}
               control={control}
               name="newPassword"
+              label="New password"
               placeholder="New password"
-              variant="glass"
+              leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
               secureTextEntry={!showNewPassword}
               textContentType="newPassword"
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
               rightElement={
-                <Button
-                  pos="absolute"
-                  right="$2"
-                  size="$3"
-                  chromeless
-                  circular
-                  onPress={() => setShowNewPassword(!showNewPassword)}
-                  icon={
-                    showNewPassword ? (
-                      <EyeOff size="$1" color="$colorSecondary" />
-                    ) : (
-                      <Eye size="$1" color="$colorSecondary" />
-                    )
-                  }
-                />
+                <Pressable onPress={() => setShowNewPassword((prev) => !prev)} hitSlop={8}>
+                  {showNewPassword ? (
+                    <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
+                  ) : (
+                    <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
+                  )}
+                </Pressable>
               }
             />
             <FormInput
               ref={confirmPasswordRef}
               control={control}
               name="confirmPassword"
-              placeholder="Confirm new password"
-              variant="glass"
+              label="Confirm new password"
+              placeholder="Repeat it"
+              leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
               secureTextEntry={!showConfirmPassword}
               textContentType="newPassword"
               returnKeyType="done"
               onSubmitEditing={() => handleSubmit(onSubmit)()}
               rightElement={
-                <Button
-                  pos="absolute"
-                  right="$2"
-                  size="$3"
-                  chromeless
-                  circular
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  icon={
-                    showConfirmPassword ? (
-                      <EyeOff size="$1" color="$colorSecondary" />
-                    ) : (
-                      <Eye size="$1" color="$colorSecondary" />
-                    )
-                  }
-                />
+                <Pressable onPress={() => setShowConfirmPassword((prev) => !prev)} hitSlop={8}>
+                  {showConfirmPassword ? (
+                    <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
+                  ) : (
+                    <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
+                  )}
+                </Pressable>
               }
             />
-
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize={12.5 * MOCKUP_SCALE}
-                textAlign="center"
-              >
-                {serverError}
-              </Text>
-            )}
-
-            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
-              <AppButton
-                size="lg"
-                variant="soft"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-              >
-                {isSubmitting ? "Resetting..." : "Reset password"}
-              </AppButton>
-
-              <Pressable
-                onPress={resendCode}
-                disabled={resendCooldown > 0 || isResending}
-                hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-              >
-                <Text
-                  color="$colorSecondary"
-                  fontSize={12.5 * MOCKUP_SCALE}
-                  textAlign="center"
-                  opacity={resendCooldown > 0 || isResending ? 0.5 : 1}
-                >
-                  {isResending
-                    ? "Sending..."
-                    : resendCooldown > 0
-                      ? `Resend code in ${resendCooldown}s`
-                      : "Resend code"}
-                </Text>
-              </Pressable>
-            </YStack>
           </YStack>
+
+          {serverError && (
+            <Text color="#FCA5A5" fontSize={12.5} textAlign="center" mt={10}>
+              {serverError}
+            </Text>
+          )}
+
+          <YStack width="100%" mt={20}>
+            <AppButton
+              variant="primary"
+              size="lg"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+            >
+              {isSubmitting ? "Resetting" : "Reset password"}
+            </AppButton>
+          </YStack>
+
+          <YStack f={1} minHeight={22} />
+
+          <Pressable
+            onPress={() => router.push("/login")}
+            hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+          >
+            <Text fontSize={13.5} color="$mintLight" fontWeight="700" textAlign="center">
+              Back to log in
+            </Text>
+          </Pressable>
         </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>

@@ -102,8 +102,8 @@ export function FlashcardsComplete({
       </YStack>
 
       <YStack alignItems="center" mt={12 * MOCKUP_SCALE} gap={2}>
-        <GradientText fontSize={50 * MOCKUP_SCALE} fontWeight="800" lineHeight={50 * MOCKUP_SCALE}>
-          {Math.round(pct * 100)}%
+        <GradientText fontSize={50 * MOCKUP_SCALE}>
+          {`${Math.round(pct * 100)}%`}
         </GradientText>
         <Text fontSize={11 * MOCKUP_SCALE} color="$colorMuted" mt={3 * MOCKUP_SCALE}>
           of orbit travelled

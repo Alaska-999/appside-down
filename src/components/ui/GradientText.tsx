@@ -1,26 +1,39 @@
-import MaskedView from "@react-native-masked-view/masked-view";
-import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode } from "react";
-import { Text, TextProps, useTheme } from "tamagui";
+import { Sora_800ExtraBold } from "@expo-google-fonts/sora";
+import {
+  Canvas,
+  LinearGradient,
+  Text as SkiaText,
+  useFont,
+  vec,
+} from "@shopify/react-native-skia";
 
-interface GradientTextProps extends TextProps {
-  children: ReactNode;
+interface GradientTextProps {
+  children: string;
+  fontSize: number;
+  colors?: string[];
 }
 
-export function GradientText({ children, ...textProps }: GradientTextProps) {
-  const theme = useTheme();
+export function GradientText({
+  children,
+  fontSize,
+  colors = ["#5EEAD4", "#BEF264"],
+}: GradientTextProps) {
+  const font = useFont(Sora_800ExtraBold, fontSize);
+
+  if (!font) {
+    return null;
+  }
+
+  const width = font.getTextWidth(children);
+  const metrics = font.getMetrics();
+  const height = metrics.descent - metrics.ascent;
+  const baseline = -metrics.ascent;
 
   return (
-    <MaskedView maskElement={<Text {...textProps}>{children}</Text>}>
-      <LinearGradient
-        colors={[theme.gradientTextStart.get(), theme.gradientTextEnd.get()]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <Text {...textProps} opacity={0}>
-          {children}
-        </Text>
-      </LinearGradient>
-    </MaskedView>
+    <Canvas style={{ width, height }}>
+      <SkiaText text={children} x={0} y={baseline} font={font}>
+        <LinearGradient start={vec(0, 0)} end={vec(width, 0)} colors={colors} />
+      </SkiaText>
+    </Canvas>
   );
 }

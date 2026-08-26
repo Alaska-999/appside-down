@@ -1,21 +1,23 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
 } from "@/src/validation/auth";
+import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
+import { ChevronLeft, Mail } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
 
 export default function ForgotPassword() {
   const insets = useSafeAreaInsets();
@@ -64,7 +66,14 @@ export default function ForgotPassword() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams intensity={1.3} />
+        <BackgroundMesh preset="auth" animated />
+        <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
+          <IconButton
+            variant="liquidGlass"
+            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            onPress={() => router.back()}
+          />
+        </YStack>
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
@@ -72,70 +81,61 @@ export default function ForgotPassword() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
-            paddingHorizontal: 18 * MOCKUP_SCALE,
-            paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 16,
+            paddingHorizontal: 20,
+            paddingTop: insets.top + 62,
+            paddingBottom: insets.bottom + 22,
           }}
         >
           <AuthHeading
-            titlePrefix="Forgot"
+            title="Forgot"
             titleHighlight="password?"
-            subtitle="Enter your email and we'll send you a reset code"
+            subtitle="Enter your email and we'll send you a 6-digit code"
           />
 
-          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
+          <YStack width="100%" gap={14}>
             <FormInput
               control={control}
               name="email"
+              label="Email"
               placeholder="Email"
-              variant="glass"
+              leftElement={<Mail size={19} color="#5A6B7A" strokeWidth={1.9} />}
               textContentType="emailAddress"
               autoCapitalize="none"
               keyboardType="email-address"
               returnKeyType="done"
               onSubmitEditing={() => handleSubmit(onSubmit)()}
             />
-
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize={12.5 * MOCKUP_SCALE}
-                textAlign="center"
-              >
-                {serverError}
-              </Text>
-            )}
-
-            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
-              <AppButton
-                size="lg"
-                variant="soft"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-              >
-                {isSubmitting ? "Sending..." : "Send code"}
-              </AppButton>
-
-              <AppButton
-                size="lg"
-                variant="glass"
-                onPress={() => router.push("/login")}
-              >
-                Back to login
-              </AppButton>
-            </YStack>
           </YStack>
+
+          {serverError && (
+            <Text color="#FCA5A5" fontSize={12.5} textAlign="center" mt={10}>
+              {serverError}
+            </Text>
+          )}
+
+          <YStack width="100%" mt={20}>
+            <AppButton
+              variant="primary"
+              size="lg"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+            >
+              {isSubmitting ? "Sending" : "Send code"}
+            </AppButton>
+          </YStack>
+
+          <YStack f={1} minHeight={22} />
+
+          <Pressable
+            onPress={() => router.push("/login")}
+            hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+          >
+            <Text fontSize={13.5} color="$mintLight" fontWeight="700" textAlign="center">
+              Back to log in
+            </Text>
+          </Pressable>
         </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
   );
 }
-// | "primary"
-// | "soft"
-// | "hero"
-// | "secondary"
-// | "outline"
-// | "ghost"
-// | "danger"
-// | "glass";

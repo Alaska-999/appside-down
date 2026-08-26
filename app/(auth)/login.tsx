@@ -1,30 +1,29 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { AppToast } from "@/src/components/ui/Toast";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "@tamagui/lucide-icons";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
+import { Text, YStack } from "tamagui";
 
 export default function Login() {
   const insets = useSafeAreaInsets();
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
 
   const setAuth = useAuthStore((state) => state.setAuth);
   const sessionExpired = useAuthStore((state) => state.sessionExpired);
@@ -38,18 +37,16 @@ export default function Login() {
   const {
     control,
     handleSubmit,
+    setError,
     formState: { isSubmitting },
   } = form;
   const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
+    if (sessionExpired) setToastOpen(true);
+  }, [sessionExpired]);
 
   const onSubmit = async ({ email, password }: LoginForm) => {
-    setServerError(null);
-
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -60,7 +57,7 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        setServerError(data.message || "Login failed");
+        setError("password", { message: data.message || "Wrong email or password" });
         return;
       }
 
@@ -90,14 +87,14 @@ export default function Login() {
       router.replace("/");
     } catch (error) {
       console.error("Network error:", error);
-      setServerError("Connection problem. Please try again");
+      setError("password", { message: "Connection problem. Please try again" });
     }
   };
 
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams intensity={1.3} />
+        <BackgroundMesh preset="auth" animated />
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
@@ -105,124 +102,88 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
-            paddingHorizontal: 18 * MOCKUP_SCALE,
-            paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 16,
+            paddingHorizontal: 20,
+            paddingTop: insets.top + 34,
+            paddingBottom: insets.bottom + 22,
           }}
         >
           <AuthHeading
-            titlePrefix="Welcome"
+            title="Welcome"
             titleHighlight="back"
             subtitle="Log in to keep your streak alive"
           />
 
-          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
-            {sessionExpired && (
-              <YStack
-                width="100%"
-                bg="$mintGlassBg"
-                borderWidth={1}
-                borderColor="$mintGlassBorder"
-                br={16 * MOCKUP_SCALE}
-                px={13 * MOCKUP_SCALE}
-                py={11 * MOCKUP_SCALE}
-              >
-                <Text
-                  color="#c9e8e0"
-                  fontSize={12 * MOCKUP_SCALE}
-                  lineHeight={12 * MOCKUP_SCALE * 1.45}
-                  textAlign="center"
-                >
-                  Your session has expired. Please log in again.
-                </Text>
-              </YStack>
-            )}
-
+          <YStack width="100%" gap={14}>
             <FormInput
               control={control}
               name="email"
+              label="Email"
               placeholder="Email"
-              variant="glass"
+              leftElement={<Mail size={19} color="#5A6B7A" strokeWidth={1.9} />}
               textContentType="emailAddress"
               autoCapitalize="none"
               keyboardType="email-address"
               returnKeyType="next"
               blurOnSubmit={false}
-              inputSize="lg"
               onSubmitEditing={() => passwordRef.current?.focus()}
             />
-            <FormInput
-              ref={passwordRef}
-              control={control}
-              name="password"
-              placeholder="Password"
-              variant="glass"
-              secureTextEntry={!showPassword}
-              textContentType="password"
-              returnKeyType="done"
-              onSubmitEditing={() => handleSubmit(onSubmit)()}
-              rightElement={
-                <Button
-                  pos="absolute"
-                  right="$2"
-                  size="$3"
-                  chromeless
-                  circular
-                  onPress={() => setShowPassword(!showPassword)}
-                  icon={
-                    showPassword ? (
-                      <EyeOff size="$1" color="$colorSecondary" />
-                    ) : (
-                      <Eye size="$1" color="$colorSecondary" />
-                    )
-                  }
-                />
-              }
-            />
 
-            <Link href="/forgot-password" asChild>
-              <Pressable hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}>
-                <Text
-                  color="$mint"
-                  fontSize={12.5 * MOCKUP_SCALE}
-                  fontWeight="600"
-                  textAlign="right"
-                  mt={2 * MOCKUP_SCALE}
-                >
+            <YStack>
+              <FormInput
+                ref={passwordRef}
+                control={control}
+                name="password"
+                label="Password"
+                placeholder="Password"
+                leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
+                secureTextEntry={!showPassword}
+                textContentType="password"
+                returnKeyType="done"
+                onSubmitEditing={() => handleSubmit(onSubmit)()}
+                rightElement={
+                  <Pressable onPress={() => setShowPassword((prev) => !prev)} hitSlop={8}>
+                    {showPassword ? (
+                      <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
+                    ) : (
+                      <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
+                    )}
+                  </Pressable>
+                }
+              />
+              <Pressable
+                onPress={() => router.push("/forgot-password")}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                style={{ alignSelf: "flex-end", marginTop: 10 }}
+              >
+                <Text color="$mintLight" fontSize={12.5} fontWeight="600">
                   Forgot password?
                 </Text>
               </Pressable>
-            </Link>
-
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize={12.5 * MOCKUP_SCALE}
-                textAlign="center"
-              >
-                {serverError}
-              </Text>
-            )}
-
-            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
-              <AppButton
-                variant="soft"
-                size="lg"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-              >
-                {isSubmitting ? "Logging in..." : "Log in"}
-              </AppButton>
-
-              <AuthSwitchLink
-                href="/signup"
-                prompt="New here?"
-                action="Create account"
-              />
             </YStack>
           </YStack>
+
+          <YStack width="100%" mt={20}>
+            <AppButton
+              variant="primary"
+              size="lg"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+            >
+              {isSubmitting ? "Logging in" : "Log in"}
+            </AppButton>
+          </YStack>
+
+          <YStack f={1} minHeight={22} />
+
+          <AuthSwitchLink href="/signup" prompt="New here?" action="Create an account" />
         </KeyboardAwareScrollView>
+
+        <AppToast
+          open={toastOpen}
+          message="Session expired"
+          description="Log in again to continue"
+          onDismiss={() => setToastOpen(false)}
+        />
       </YStack>
     </FormProvider>
   );

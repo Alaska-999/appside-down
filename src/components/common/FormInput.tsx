@@ -3,6 +3,7 @@ import {
   InputShellSize,
   InputShellVariant,
 } from "@/src/components/ui/InputShell";
+import { AlertCircle } from "lucide-react-native";
 import { forwardRef, ReactNode, Ref, useState } from "react";
 import type { TextInput } from "react-native";
 import {
@@ -12,7 +13,7 @@ import {
   Path,
   useFormContext,
 } from "react-hook-form";
-import { Input, InputProps, TamaguiElement, Text, YStack } from "tamagui";
+import { Input, InputProps, TamaguiElement, Text, XStack, YStack } from "tamagui";
 
 type FormInputVariant = InputShellVariant | "bordered";
 type FormInputSize = InputShellSize;
@@ -20,6 +21,7 @@ type FormInputSize = InputShellSize;
 type FormInputProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
+  label?: string;
   leftElement?: ReactNode;
   rightElement?: ReactNode;
   variant?: FormInputVariant;
@@ -33,6 +35,7 @@ function FormInputInner<T extends FieldValues>(
   {
     control,
     name,
+    label,
     leftElement,
     rightElement,
     variant = "well",
@@ -62,6 +65,17 @@ function FormInputInner<T extends FieldValues>(
 
         return (
           <YStack width="100%" gap={6}>
+            {label && (
+              <Text
+                fontSize={11}
+                fontWeight="700"
+                letterSpacing={0.55}
+                textTransform="uppercase"
+                color="#7F97A6"
+              >
+                {label}
+              </Text>
+            )}
             <InputShell
               variant={shellVariant}
               size={inputSize}
@@ -117,9 +131,12 @@ function FormInputInner<T extends FieldValues>(
               )}
             </InputShell>
             {!hideError && fieldState.error && (
-              <Text color="#FCA5A5" fontSize={11.5}>
-                {fieldState.error.message}
-              </Text>
+              <XStack ai="center" gap={6}>
+                <AlertCircle size={13} color="#FCA5A5" strokeWidth={2.2} />
+                <Text color="#FCA5A5" fontSize={11.5}>
+                  {fieldState.error.message}
+                </Text>
+              </XStack>
             )}
           </YStack>
         );

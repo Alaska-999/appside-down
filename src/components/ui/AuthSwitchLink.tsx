@@ -3,8 +3,6 @@ import { Link } from "expo-router";
 import { Pressable } from "react-native";
 import { Text } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 290;
-
 interface AuthSwitchLinkProps {
   href: Href;
   prompt: string;
@@ -15,13 +13,9 @@ export function AuthSwitchLink({ href, prompt, action }: AuthSwitchLinkProps) {
   return (
     <Link href={href} asChild>
       <Pressable hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}>
-        <Text
-          color="$colorSecondary"
-          fontSize={12.5 * MOCKUP_SCALE}
-          textAlign="center"
-        >
+        <Text fontSize={13.5} color="#7F97A6" textAlign="center">
           {prompt}{" "}
-          <Text color="$lime" fontWeight="700">
+          <Text color="$mintLight" fontWeight="700">
             {action}
           </Text>
         </Text>

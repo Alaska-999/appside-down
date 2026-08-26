@@ -217,7 +217,7 @@ export default function Home() {
                 Hi,
               </Text>
               <XStack ai="center" flexWrap="wrap">
-                <GradientText fontSize={35} fontWeight="800" lineHeight={39}>
+                <GradientText fontSize={35}>
                   {user?.username ?? "there"}
                 </GradientText>
                 <Text fontSize={35} fontWeight="800" lineHeight={39}>

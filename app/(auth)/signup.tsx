@@ -1,24 +1,26 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import { PasswordStrengthMeter } from "@/src/components/common/PasswordStrengthMeter";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
+import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
+import { ChevronLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import type { TextInput } from "react-native";
+import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
+import { Text, YStack } from "tamagui";
 
 export default function Signup() {
   const insets = useSafeAreaInsets();
@@ -38,6 +40,7 @@ export default function Signup() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
+  const password = useWatch({ control, name: "password" });
 
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -97,7 +100,14 @@ export default function Signup() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <AuroraBeams intensity={1.3} />
+        <BackgroundMesh preset="auth" animated />
+        <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
+          <IconButton
+            variant="liquidGlass"
+            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            onPress={() => router.back()}
+          />
+        </YStack>
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={40}
@@ -105,24 +115,24 @@ export default function Signup() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            justifyContent: "center",
-            paddingHorizontal: 18 * MOCKUP_SCALE,
-            paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 16,
+            paddingHorizontal: 20,
+            paddingTop: insets.top + 62,
+            paddingBottom: insets.bottom + 22,
           }}
         >
           <AuthHeading
-            titlePrefix="Create"
-            titleHighlight="account"
+            title="Create"
+            titleHighlight="an account"
             subtitle="Flashcards, streaks and progress — all yours"
           />
 
-          <YStack width="100%" gap={10 * MOCKUP_SCALE} mt={22 * MOCKUP_SCALE}>
+          <YStack width="100%" gap={14}>
             <FormInput
               control={control}
               name="email"
+              label="Email"
               placeholder="Email"
-              variant="glass"
+              leftElement={<Mail size={19} color="#5A6B7A" strokeWidth={1.9} />}
               textContentType="emailAddress"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -134,70 +144,65 @@ export default function Signup() {
               ref={usernameRef}
               control={control}
               name="username"
+              label="Username"
               placeholder="Username"
-              variant="glass"
+              leftElement={<User size={19} color="#5A6B7A" strokeWidth={1.9} />}
               textContentType="username"
               autoCapitalize="none"
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={() => passwordRef.current?.focus()}
             />
-            <FormInput
-              ref={passwordRef}
-              control={control}
-              name="password"
-              placeholder="Password"
-              variant="glass"
-              secureTextEntry={!showPassword}
-              textContentType="newPassword"
-              returnKeyType="done"
-              onSubmitEditing={() => handleSubmit(onSubmit)()}
-              rightElement={
-                <Button
-                  pos="absolute"
-                  right="$2"
-                  size="$3"
-                  chromeless
-                  circular
-                  onPress={() => setShowPassword(!showPassword)}
-                  icon={
-                    showPassword ? (
-                      <EyeOff size="$1" color="$colorSecondary" />
+            <YStack>
+              <FormInput
+                ref={passwordRef}
+                control={control}
+                name="password"
+                label="Password"
+                placeholder="Password"
+                leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
+                secureTextEntry={!showPassword}
+                textContentType="newPassword"
+                returnKeyType="done"
+                onSubmitEditing={() => handleSubmit(onSubmit)()}
+                rightElement={
+                  <Pressable onPress={() => setShowPassword((prev) => !prev)} hitSlop={8}>
+                    {showPassword ? (
+                      <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
                     ) : (
-                      <Eye size="$1" color="$colorSecondary" />
-                    )
-                  }
-                />
-              }
-            />
-
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize={12.5 * MOCKUP_SCALE}
-                textAlign="center"
-              >
-                {serverError}
-              </Text>
-            )}
-
-            <YStack gap={10 * MOCKUP_SCALE} mt={10 * MOCKUP_SCALE}>
-              <AppButton
-                size="lg"
-                variant="soft"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-              >
-                {isSubmitting ? "Signing up..." : "Sign up"}
-              </AppButton>
-
-              <AuthSwitchLink
-                href="/login"
-                prompt="Already have an account?"
-                action="Log in"
+                      <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
+                    )}
+                  </Pressable>
+                }
               />
+              <PasswordStrengthMeter password={password ?? ""} />
             </YStack>
           </YStack>
+
+          {serverError && (
+            <Text color="#FCA5A5" fontSize={12.5} textAlign="center" mt={10}>
+              {serverError}
+            </Text>
+          )}
+
+          <YStack width="100%" mt={20}>
+            <AppButton
+              variant="primary"
+              size="lg"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+            >
+              {isSubmitting ? "Creating account" : "Create account"}
+            </AppButton>
+          </YStack>
+
+          <YStack f={1} minHeight={22} />
+
+          <AuthSwitchLink
+            href="/login"
+            prompt="Already have an account?"
+            action="Log in"
+          />
         </KeyboardAwareScrollView>
       </YStack>
     </FormProvider>
