@@ -12,6 +12,7 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { topPaddingBoost } from "@/tamagui.config";
 import {
+  AlertTriangle,
   BookOpen,
   ChevronLeft,
   Pencil,
@@ -309,7 +310,8 @@ export default function FolderScreen() {
           </XStack>
           <YStack f={1} jc="center">
             <StateCard
-              variant="error"
+              tone="error"
+              icon={AlertTriangle}
               title="Couldn't load folder"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
               buttonLabel="Retry"
@@ -494,8 +496,8 @@ export default function FolderScreen() {
 
             {visibleModules.length === 0 ? (
               <StateCard
-                variant="empty"
-                icon={<BookOpen size={24} color="$color" />}
+                tone="empty"
+                icon={BookOpen}
                 title="This folder is empty"
                 subtitle="Add your first module to get going"
                 buttonLabel="Add study materials"

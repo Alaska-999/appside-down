@@ -10,7 +10,7 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { TEXT } from "@/src/constants/typography";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter, topPaddingBoost } from "@/tamagui.config";
-import { Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
+import { AlertTriangle, Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { FlatList } from "react-native";
@@ -176,7 +176,8 @@ export default function AddModules() {
         ) : error ? (
           <YStack px="$screenX" pt={16}>
             <StateCard
-              variant="error"
+              tone="error"
+              icon={AlertTriangle}
               title="Couldn't load modules"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
               buttonLabel="Retry"

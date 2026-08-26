@@ -18,6 +18,7 @@ import { cardSideText } from "@/src/utils/cardText";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { topPaddingBoost } from "@/tamagui.config";
 import {
+  AlertTriangle,
   AlignJustify,
   ArrowLeftRight,
   BookmarkPlus,
@@ -384,7 +385,8 @@ export default function ModuleScreen() {
           {error && !loading && (
             <YStack px="$screenX" mt="$4">
               <StateCard
-                variant="error"
+                tone="error"
+                icon={AlertTriangle}
                 title="Couldn't load module"
                 subtitle="Looks like a connection hiccup. Your data is safe — try again."
                 buttonLabel="Retry"
@@ -575,8 +577,8 @@ export default function ModuleScreen() {
 
                 {sortedFlashcards.length === 0 ? (
                   <StateCard
-                    variant="empty"
-                    icon={<Sparkles size={24} color="$color" />}
+                    tone="empty"
+                    icon={Sparkles}
                     title="No cards yet"
                     subtitle="This module doesn't have any flashcards yet"
                     buttonLabel={isOwner ? "Add cards" : undefined}

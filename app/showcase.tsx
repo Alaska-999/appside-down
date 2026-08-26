@@ -21,8 +21,10 @@ import { CodeInput } from "@/src/components/ui/CodeInput";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { SelectField } from "@/src/components/ui/SelectField";
 import { AppSheet, SheetCrossfade, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
 import { TYPE } from "@/src/constants/type";
+import { useDelayedLoading } from "@/src/hooks/useDelayedLoading";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -30,13 +32,17 @@ import { Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import {
+  AlertTriangle,
   ArrowRight,
   FileText,
+  FileX,
   Pencil,
   Plus,
+  RotateCcw,
   Search,
   Settings2,
   Trash2,
+  WifiOff,
   X,
 } from "lucide-react-native";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
@@ -254,6 +260,90 @@ function SheetsDemo() {
           )}
         </SheetCrossfade>
       </AppSheet>
+    </>
+  );
+}
+
+function StatesDemo() {
+  const [loading, setLoading] = useState(false);
+  const showSkeleton = useDelayedLoading(loading, 250);
+
+  return (
+    <>
+      <YStack gap={10}>
+        <Label>Стани · disc 96 liquid + halo</Label>
+        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+          <StateCard
+            tone="error"
+            icon={WifiOff}
+            title="No connection"
+            subtitle="Check your Wi-Fi or mobile data and try again."
+            buttonLabel="Try again"
+            buttonIcon={<RotateCcw size={18} color="#0D1117" strokeWidth={2.2} />}
+            onButtonPress={() => {}}
+          />
+        </YStack>
+        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+          <StateCard
+            tone="warn"
+            icon={FileX}
+            title="This module is gone"
+            subtitle="It was deleted or its owner made it private."
+            buttonLabel="Back to library"
+            onButtonPress={() => {}}
+          />
+        </YStack>
+        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+          <StateCard
+            tone="error"
+            icon={AlertTriangle}
+            title="Something broke on our side"
+            subtitle="Not your fault. Give it a second and try again."
+            buttonLabel="Try again"
+            buttonIcon={<RotateCcw size={18} color="#0D1117" strokeWidth={2.2} />}
+            onButtonPress={() => {}}
+          />
+        </YStack>
+        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+          <StateCard
+            tone="empty"
+            icon={Search}
+            title="Nothing found"
+            subtitle={
+              <Text fontSize={13.5} color="#7F97A6" textAlign="center" lineHeight={21.6}>
+                No modules match <Text color="#DCEBF2" fontWeight="700">“mitochondira”</Text>. Check the
+                spelling — or make it yourself.
+              </Text>
+            }
+            buttonLabel="Create a module"
+            onButtonPress={() => {}}
+          />
+        </YStack>
+      </YStack>
+
+      <YStack gap={10}>
+        <Label>Skeleton states-мода · useDelayedLoading 250мс</Label>
+        <AppButton variant="secondary" onPress={() => setLoading((prev) => !prev)}>
+          {loading ? "Зупинити завантаження" : "Імітувати завантаження"}
+        </AppButton>
+        <YStack h={54} br={16} overflow="hidden">
+          {showSkeleton ? (
+            <Skeleton variant="states" height={54} borderRadius={16} />
+          ) : (
+            <XStack
+              h={54}
+              br={16}
+              bg="$surfaceCard"
+              ai="center"
+              px={16}
+            >
+              <Text {...TYPE.body} color="$colorMuted">
+                {loading ? "завантажується (ще менше 250мс, скелетон не показуємо)" : "кеш показано одразу"}
+              </Text>
+            </XStack>
+          )}
+        </YStack>
+      </YStack>
     </>
   );
 }
@@ -563,6 +653,8 @@ export default function Showcase() {
         <FieldsDemo />
 
         <SheetsDemo />
+
+        <StatesDemo />
 
         <YStack gap={10}>
           <Label>skeleton</Label>

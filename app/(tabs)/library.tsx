@@ -17,7 +17,7 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { screenGutter, topPaddingBoost } from "@/tamagui.config";
-import { AlignJustify, Check } from "@tamagui/lucide-icons";
+import { AlertTriangle, AlignJustify, Check } from "@tamagui/lucide-icons";
 import { router, useFocusEffect } from "expo-router";
 import { memo, useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, RefreshControl } from "react-native";
@@ -147,7 +147,8 @@ const FoldersPane = memo(function FoldersPane({
           <LibrarySkeletonList />
         ) : error ? (
           <StateCard
-            variant="error"
+            tone="error"
+            icon={AlertTriangle}
             title="Couldn't load folders"
             subtitle="Looks like a connection hiccup. Your data is safe — try again."
             buttonLabel="Retry"
@@ -228,7 +229,8 @@ const ModulesPane = memo(function ModulesPane({
           <LibrarySkeletonList />
         ) : error ? (
           <StateCard
-            variant="error"
+            tone="error"
+            icon={AlertTriangle}
             title="Couldn't load modules"
             subtitle="Looks like a connection hiccup. Your data is safe — try again."
             buttonLabel="Retry"

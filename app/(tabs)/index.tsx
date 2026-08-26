@@ -11,6 +11,7 @@ import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { AlertTriangle } from "@tamagui/lucide-icons";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -291,7 +292,8 @@ export default function Home() {
                   </XStack>
                 ) : error && !stats ? (
                   <StateCard
-                    variant="error"
+                    tone="error"
+                    icon={AlertTriangle}
                     title="Couldn't load your stats"
                     subtitle="Looks like a connection hiccup. Your data is safe — try again."
                     buttonLabel="Retry"
