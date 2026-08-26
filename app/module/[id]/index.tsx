@@ -178,7 +178,7 @@ export default function ModuleScreen() {
       setModuleData({
         ...rawModule,
         itemsCount: rawModule._count?.flashcards ?? 0,
-        folderIds: rawModule.folderId ? [rawModule.folderId] : [],
+        folderIds: (rawModule.folders ?? []).map((f: { id: string }) => f.id),
         tags: rawModule.tags ?? [],
         user: rawModule.user ?? null,
         author: rawModule.author ?? null,

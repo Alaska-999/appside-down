@@ -275,7 +275,7 @@ export default function Library() {
       data: page.data.map((m: any) => ({
         ...m,
         itemsCount: m._count?.flashcards ?? 0,
-        folderIds: m.folderId ? [m.folderId] : [],
+        folderIds: (m.folders ?? []).map((f: { id: string }) => f.id),
       })),
       nextCursor: page.nextCursor,
     };

@@ -24,7 +24,8 @@ export function GradientText({
     return null;
   }
 
-  const width = font.getTextWidth(children);
+  const advanceWidth = font.getTextWidth(children);
+  const width = advanceWidth + 6;
   const metrics = font.getMetrics();
   const height = metrics.descent - metrics.ascent;
   const baseline = -metrics.ascent;
@@ -32,7 +33,7 @@ export function GradientText({
   return (
     <Canvas style={{ width, height }}>
       <SkiaText text={children} x={0} y={baseline} font={font}>
-        <LinearGradient start={vec(0, 0)} end={vec(width, 0)} colors={colors} />
+        <LinearGradient start={vec(0, 0)} end={vec(advanceWidth, 0)} colors={colors} />
       </SkiaText>
     </Canvas>
   );

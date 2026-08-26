@@ -1,25 +1,26 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { StreakCard } from "@/src/components/cards/StreakCard";
-import { AvatarRing } from "@/src/components/ui/AvatarRing";
+import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
-import { Chip } from "@/src/components/ui/Chip";
+import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
-import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { GlowTone } from "@/src/components/ui/GlowSurface";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
-import { AlertTriangle } from "@tamagui/lucide-icons";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { screenGutter, topPaddingBoost } from "@/tamagui.config";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
+import { AlertTriangle, Layers, Sparkles } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable, RefreshControl } from "react-native";
+import { FlatList, Pressable, RefreshControl, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
@@ -54,9 +55,18 @@ type Stats = {
   continueLearning: ContinueLearningEntry[];
 };
 
-const CHIP_GRADIENTS: [string, string][] = [
-  ["#2dd4bf", "#a3e635"],
-  ["#4338ca", "#65a30d"],
+const RECENT_TONES: GlowTone[] = ["mint", "teal", "lime"];
+const RECENT_MONOGRAM_GRADIENTS: [string, string][] = [
+  ["#5EEAD4", "#2DD4BF"],
+  ["#2DD4BF", "#0D9488"],
+  ["#BEF264", "#A3E635"],
+  ["#5EEAD4", "#0D9488"],
+];
+const DISCOVER_COVERS: [string, string][] = [
+  ["#1BA88F", "#08090C"],
+  ["#65A30D", "#08090C"],
+  ["#0D9488", "#08090C"],
+  ["#4338CA", "#08090C"],
 ];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
@@ -67,7 +77,7 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         router.push({ pathname: "/module/[id]", params: { id: module.id } })
       }
     >
-      <AppCard variant="soft" size="md" gap="$0.5">
+      <AppCard variant="surface" size="md" gap="$0.5">
         <Text fontSize={17} fontWeight="700" color="$color">
           {module.name}
         </Text>
@@ -78,6 +88,31 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         </Text>
       </AppCard>
     </Pressable>
+  );
+}
+
+function SectionHeader({
+  title,
+  onSeeAll,
+  px,
+}: {
+  title: string;
+  onSeeAll?: () => void;
+  px?: number;
+}) {
+  return (
+    <XStack ai="baseline" jc="space-between" px={px}>
+      <Text fontSize={17} fontWeight="700" letterSpacing={-0.17} color="$color">
+        {title}
+      </Text>
+      {onSeeAll && (
+        <Pressable onPress={onSeeAll} hitSlop={10}>
+          <Text fontSize={12.5} fontWeight="600" color="$mintLight">
+            See all →
+          </Text>
+        </Pressable>
+      )}
+    </XStack>
   );
 }
 
@@ -118,7 +153,7 @@ export default function Home() {
         protectedFetch(`${API_BASE_URL}/modules/stats`),
         protectedFetch(`${API_BASE_URL}/modules?limit=6`),
         protectedFetch(
-          `${API_BASE_URL}/modules/public?limit=6&excludeOwn=true`,
+          `${API_BASE_URL}/modules/public?limit=5&excludeOwn=true`,
         ),
       ]);
       if (!statsRes.ok) throw new Error(`Stats error: ${statsRes.status}`);
@@ -202,25 +237,24 @@ export default function Home() {
   };
 
   return (
-    <ScreenBackground>
-      <YStack f={1} gap="$section" pt={insets.top + topPaddingBoost}>
+    <YStack f={1} bg="$background">
+      <BackgroundMesh preset="home" />
+      <YStack f={1} pt={insets.top + topPaddingBoost} gap="$section">
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
             <YStack f={1}>
               <Text
-                fontSize={35}
-                fontWeight="800"
-                color="$color"
-                lineHeight={39}
+                fontSize={14}
+                color="$colorMuted"
                 onLongPress={() => router.push("/showcase")}
               >
-                Hi,
+                Welcome back,
               </Text>
               <XStack ai="center" flexWrap="wrap">
-                <GradientText fontSize={35}>
+                <GradientText fontSize={31}>
                   {user?.username ?? "there"}
                 </GradientText>
-                <Text fontSize={35} fontWeight="800" lineHeight={39}>
+                <Text fontSize={31} fontWeight="800" lineHeight={35}>
                   {" "}
                   👋
                 </Text>
@@ -235,7 +269,7 @@ export default function Home() {
           <SearchField
             value={search}
             onChangeText={setSearch}
-            placeholder="Search public modules..."
+            placeholder="Search public modules"
           />
         </YStack>
 
@@ -279,17 +313,9 @@ export default function Home() {
             }
           >
             <YStack px="$screenX" gap="$section" pb={tabBarClearance}>
-              <YStack gap={12}>
-                <StreakCard
-                  currentStreak={user?.streak?.currentStreak ?? 0}
-                  todayIndex={todayIndex}
-                />
-
+              <YStack gap={14}>
                 {loading && !stats ? (
-                  <XStack gap={12}>
-                    <Skeleton f={1} height={156} borderRadius={23} />
-                    <Skeleton f={1} height={156} borderRadius={23} />
-                  </XStack>
+                  <Skeleton height={186} borderRadius={23} />
                 ) : error && !stats ? (
                   <StateCard
                     tone="error"
@@ -299,69 +325,106 @@ export default function Home() {
                     buttonLabel="Retry"
                     onButtonPress={() => fetchData()}
                   />
-                ) : (
-                  <XStack gap={12}>
-                    {featuredModule && featuredStats ? (
-                      <Pressable
-                        style={{ flex: 1 }}
-                        onPress={() => openModule(featuredModule.id)}
-                      >
-                        <AppCard
-                          variant="glass"
-                          size="lg"
-                          f={1}
-                          gap={9}
-                          ai="flex-start"
-                        >
-                          <ProgressRing
-                            progress={featuredStats.progress}
-                            label={`${Math.round(featuredStats.progress * 100)}%`}
-                          />
-                          <Text
-                            fontSize={14}
-                            fontWeight="700"
-                            color="$color"
-                            numberOfLines={2}
-                            ellipsizeMode="tail"
-                            mt={6}
-                          >
-                            Continue: {featuredModule.name}
-                          </Text>
-                          <Text fontSize={14} color="$colorSecondary">
-                            {featuredStats.known}/{featuredStats.total} terms
-                          </Text>
-                        </AppCard>
-                      </Pressable>
-                    ) : null}
-
-                    <AppCard
-                      variant="glass"
-                      size="lg"
-                      f={1}
-                      gap="$1"
-                      ai="flex-start"
+                ) : featuredModule && featuredStats ? (
+                  <AppCard variant="progressLit" size="lg" lit={featuredStats.progress} minHeight={186}>
+                    <Text
+                      fontSize={11}
+                      fontWeight="700"
+                      letterSpacing={1.1}
+                      textTransform="uppercase"
+                      color="$limeLight"
+                      mb={7}
                     >
-                      <Text fontSize={31} fontWeight="900" color="$color">
-                        {stats?.totalModules ?? 0}
-                      </Text>
-                      <SectionTitle tone="onGlass">Total modules</SectionTitle>
-                      <Text
-                        fontSize={31}
-                        fontWeight="900"
-                        color="$accentGradientStart"
-                        mt={12}
-                      >
-                        {stats?.cardsLearned ?? 0}
-                      </Text>
-                      <SectionTitle tone="onGlass">Cards learned</SectionTitle>
-                    </AppCard>
-                  </XStack>
-                )}
+                      Continue
+                    </Text>
+                    <Text
+                      fontSize={22}
+                      fontWeight="800"
+                      letterSpacing={-0.22}
+                      lineHeight={25.5}
+                      color="$color"
+                      numberOfLines={2}
+                    >
+                      {featuredModule.name}
+                    </Text>
+                    <Text fontSize={13} color="rgba(220,255,245,0.7)" mt={5}>
+                      {featuredStats.known} of {featuredStats.total} cards learned
+                    </Text>
+                    <XStack ai="flex-end" jc="space-between" gap={12} mt="auto">
+                      <YStack f={1}>
+                        <AppButton
+                          variant="primary"
+                          size="md"
+                          sheen
+                          onPress={() => openModule(featuredModule.id)}
+                        >
+                          Continue
+                        </AppButton>
+                      </YStack>
+                      <ProgressRing
+                        progress={featuredStats.progress}
+                        label={`${Math.round(featuredStats.progress * 100)}%`}
+                      />
+                    </XStack>
+                  </AppCard>
+                ) : null}
+
+                <StreakCard
+                  currentStreak={user?.streak?.currentStreak ?? 0}
+                  todayIndex={todayIndex}
+                />
+
+                <XStack gap={10}>
+                  <AppCard
+                    variant="glow"
+                    tone="teal"
+                    f={1}
+                    minHeight={104}
+                    px={16}
+                    py={16}
+                    jc="flex-end"
+                    pos="relative"
+                  >
+                    <YStack pos="absolute" t={14} r={14}>
+                      <Layers size={15} color="rgba(255,255,255,0.5)" strokeWidth={1.9} />
+                    </YStack>
+                    <Text fontSize={28} fontWeight="900" letterSpacing={-0.56} color="$color">
+                      {stats?.totalModules ?? 0}
+                    </Text>
+                    <Text fontSize={11.5} color="$colorMuted" fontWeight="500" mt={5}>
+                      modules
+                    </Text>
+                  </AppCard>
+                  <AppCard
+                    variant="glow"
+                    tone="lime"
+                    f={1}
+                    minHeight={104}
+                    px={16}
+                    py={16}
+                    jc="flex-end"
+                    pos="relative"
+                  >
+                    <YStack pos="absolute" t={14} r={14}>
+                      <Sparkles size={15} color="rgba(255,255,255,0.5)" strokeWidth={1.9} />
+                    </YStack>
+                    <Text fontSize={28} fontWeight="900" letterSpacing={-0.56} color="$color">
+                      {stats?.cardsLearned ?? 0}
+                    </Text>
+                    <Text fontSize={11.5} color="$colorMuted" fontWeight="500" mt={5}>
+                      cards learned
+                    </Text>
+                  </AppCard>
+                </XStack>
               </YStack>
 
               {recentModules.length > 0 && (
                 <YStack gap={14} mx={-screenGutter}>
-                  <SectionTitle px={screenGutter}>Recent</SectionTitle>
+                  <SectionHeader
+                    title="Recent"
+                    onSeeAll={() => router.push("/library")}
+                    px={screenGutter}
+                  />
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -373,17 +436,50 @@ export default function Home() {
                     {recentModules.map((m, i) => {
                       const count = m._count?.flashcards ?? 0;
                       return (
-                        <Chip
-                          key={m.id}
-                          size="lg"
-                          monogram={m.name.slice(0, 1).toUpperCase()}
-                          title={m.name}
-                          meta={`${count} card${count !== 1 ? "s" : ""}`}
-                          gradientColors={
-                            CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]
-                          }
-                          onPress={() => openModule(m.id)}
-                        />
+                        <Pressable key={m.id} onPress={() => openModule(m.id)}>
+                          <AppCard
+                            variant="glow"
+                            tone={RECENT_TONES[i % RECENT_TONES.length]}
+                            width={142}
+                            height={132}
+                            px={15}
+                            py={15}
+                            jc="space-between"
+                          >
+                            <LinearGradient
+                              colors={
+                                RECENT_MONOGRAM_GRADIENTS[i % RECENT_MONOGRAM_GRADIENTS.length]
+                              }
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 1, y: 1 }}
+                              style={{
+                                width: 38,
+                                height: 38,
+                                borderRadius: 12,
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Text fontSize={15} fontWeight="800" color="#06231F">
+                                {m.name.slice(0, 1).toUpperCase()}
+                              </Text>
+                            </LinearGradient>
+                            <YStack>
+                              <Text
+                                fontSize={14}
+                                fontWeight="700"
+                                lineHeight={17.5}
+                                color="$color"
+                                numberOfLines={2}
+                              >
+                                {m.name}
+                              </Text>
+                              <Text fontSize={11} color="$colorMuted" mt={4}>
+                                {count} card{count !== 1 ? "s" : ""}
+                              </Text>
+                            </YStack>
+                          </AppCard>
+                        </Pressable>
                       );
                     })}
                   </ScrollView>
@@ -392,11 +488,56 @@ export default function Home() {
 
               {discoverModules.length > 0 && (
                 <YStack gap={14}>
-                  <SectionTitle>Discover</SectionTitle>
-                  <YStack gap={14}>
-                    {discoverModules.map((m) => (
-                      <PublicModuleRow key={m.id} module={m} />
-                    ))}
+                  <SectionHeader
+                    title="Discover"
+                    onSeeAll={() => router.push("/library")}
+                  />
+                  <YStack gap={11}>
+                    {discoverModules.map((m, i) => {
+                      const count = m._count?.flashcards ?? 0;
+                      const author = m.author?.username ?? m.authorUsername;
+                      return (
+                        <Pressable key={m.id} onPress={() => openModule(m.id)}>
+                          <YStack pos="relative">
+                            <AppCard
+                              variant="media"
+                              minHeight={122}
+                              cover={
+                                <LinearGradient
+                                  colors={DISCOVER_COVERS[i % DISCOVER_COVERS.length]}
+                                  start={{ x: 0.2, y: 0 }}
+                                  end={{ x: 0.8, y: 1 }}
+                                  style={StyleSheet.absoluteFillObject}
+                                />
+                              }
+                            >
+                              <Text fontSize={16} fontWeight="700" letterSpacing={-0.16} color="$color">
+                                {m.name}
+                              </Text>
+                              {author && (
+                                <Text fontSize={11.5} color="rgba(220,255,245,0.72)" mt={3}>
+                                  @{author}
+                                </Text>
+                              )}
+                            </AppCard>
+                            <YStack pos="absolute" t={13} r={13}>
+                              <XStack
+                                bg="rgba(8,9,12,0.55)"
+                                borderWidth={1}
+                                borderColor="rgba(255,255,255,0.18)"
+                                br={999}
+                                px={9}
+                                py={3}
+                              >
+                                <Text fontSize={10.5} color="#EFFDF8" fontWeight="600">
+                                  {count} cards
+                                </Text>
+                              </XStack>
+                            </YStack>
+                          </YStack>
+                        </Pressable>
+                      );
+                    })}
                   </YStack>
                 </YStack>
               )}
@@ -404,6 +545,6 @@ export default function Home() {
           </ScrollView>
         )}
       </YStack>
-    </ScreenBackground>
+    </YStack>
   );
 }

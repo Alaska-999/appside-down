@@ -1,8 +1,10 @@
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LinearGradient } from "expo-linear-gradient";
-import { View } from "react-native";
-import { Text, useTheme, XStack, YStack } from "tamagui";
+import { Check } from "lucide-react-native";
+import { StyleSheet } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
 
-const DEFAULT_DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const DEFAULT_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 interface StreakCardProps {
   currentStreak: number;
@@ -15,55 +17,61 @@ export function StreakCard({
   todayIndex,
   dayLabels = DEFAULT_DAY_LABELS,
 }: StreakCardProps) {
-  const theme = useTheme();
-  const gradientColors = [
-    theme.gradientHeroStart.get(),
-    theme.gradientHeroMid.get(),
-    theme.gradientHeroEnd.get(),
-  ] as const;
-  const inactiveDotColor = "rgba(255,255,255,0.3)";
-
   return (
-    <YStack br="$card" overflow="hidden" pos="relative">
-      <LinearGradient
-        colors={gradientColors}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0.35 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <LinearGradient
-        colors={["rgba(255,255,255,0.13)", "rgba(255,255,255,0)"]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0.55, y: 0.75 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <YStack p="$cardPad" gap="$1.5">
-        <XStack ai="center" gap="$2.5">
-          <Text fontSize={36}>🔥</Text>
-          <Text fontSize={36} fontWeight="900" color="white">
-            {currentStreak}
-          </Text>
-        </XStack>
-        <Text fontSize={15} fontWeight="600" color="rgba(255,255,255,0.85)">
-          day streak{currentStreak === 0 ? " · keep going" : ""}
+    <YStack br="$card" overflow="hidden" pos="relative" bg="$surfaceCard" p={16} px={17}>
+      <GradientBorder radius={23} preset="surf" />
+
+      <XStack ai="baseline" gap={6} mb={15}>
+        <Text fontSize={26} fontWeight="900" letterSpacing={-0.5} color="$color">
+          {currentStreak}
         </Text>
-        <XStack gap={5} mt={9}>
-          {dayLabels.map((label, i) => (
-            <View
-              key={`${label}-${i}`}
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: 4,
-                backgroundColor: i < todayIndex ? "white" : inactiveDotColor,
-                borderWidth: i === todayIndex ? 1.5 : 0,
-                borderColor: "white",
-              }}
-            />
-          ))}
-        </XStack>
-      </YStack>
+        <Text fontSize={12.5} fontWeight="600" color="$colorMuted">
+          day streak
+        </Text>
+      </XStack>
+
+      <XStack jc="space-between">
+        {dayLabels.map((label, i) => {
+          const isNow = i === todayIndex;
+          const isOn = i < todayIndex && i >= todayIndex - currentStreak;
+
+          return (
+            <YStack key={`${label}-${i}`} ai="center" gap={6}>
+              <YStack
+                width={28}
+                height={28}
+                br={10}
+                ai="center"
+                jc="center"
+                overflow="hidden"
+                pos="relative"
+                bg={isOn ? undefined : isNow ? "rgba(45,212,191,0.14)" : "rgba(220,255,245,0.06)"}
+                borderWidth={isNow ? 1.5 : isOn ? 0 : 1}
+                borderColor={isNow ? "rgba(94,234,212,0.9)" : "rgba(220,255,245,0.09)"}
+                shadowColor="rgba(45,212,191,1)"
+                shadowOffset={{ width: 0, height: 0 }}
+                shadowRadius={isOn ? 7 : isNow ? 8 : 0}
+                shadowOpacity={isOn ? 0.8 : isNow ? 0.7 : 0}
+              >
+                {isOn && (
+                  <>
+                    <LinearGradient
+                      colors={["#2DD4BF", "#A3E635"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={StyleSheet.absoluteFillObject}
+                    />
+                    <Check size={14} color="#06231F" strokeWidth={2.8} />
+                  </>
+                )}
+              </YStack>
+              <Text fontSize={10} fontWeight="600" color={isNow ? "$mintLight" : "#6E8496"}>
+                {label}
+              </Text>
+            </YStack>
+          );
+        })}
+      </XStack>
     </YStack>
   );
 }
