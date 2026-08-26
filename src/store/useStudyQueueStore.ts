@@ -24,6 +24,8 @@ interface StudyQueueState {
 const FLUSH_THRESHOLD = 10;
 const MAX_BATCH = 100;
 
+let inFlight: Promise<void> | null = null;
+
 export const useStudyQueueStore = create<StudyQueueState>()(
   persist(
     (set, get) => ({
@@ -40,23 +42,30 @@ export const useStudyQueueStore = create<StudyQueueState>()(
       },
 
       flush: async () => {
-        if (get().flushing || get().events.length === 0) return;
-        set({ flushing: true });
-        try {
-          while (get().events.length > 0) {
-            const batch = get().events.slice(0, MAX_BATCH);
-            const res = await protectedFetch(
-              `${API_BASE_URL}/study/events`,
-              { method: "POST", body: JSON.stringify({ events: batch }) },
-            );
-            if (!res.ok) throw new Error(`Error: ${res.status}`);
-            set((state) => ({ events: state.events.slice(batch.length) }));
+        if (inFlight) return inFlight;
+        if (get().events.length === 0) return;
+        const run = async () => {
+          set({ flushing: true });
+          try {
+            while (get().events.length > 0) {
+              const batch = get().events.slice(0, MAX_BATCH);
+              const res = await protectedFetch(`${API_BASE_URL}/study/events`, {
+                method: "POST",
+                body: JSON.stringify({ events: batch }),
+              });
+              if (!res.ok) throw new Error(`Error: ${res.status}`);
+              set((state) => ({ events: state.events.slice(batch.length) }));
+            }
+          } catch (err) {
+            console.error("[StudyQueue] flush error:", err);
+          } finally {
+            set({ flushing: false });
           }
-        } catch (err) {
-          console.error("[StudyQueue] flush error:", err);
-        } finally {
-          set({ flushing: false });
-        }
+        };
+        inFlight = run().finally(() => {
+          inFlight = null;
+        });
+        return inFlight;
       },
 
       clear: () => set({ events: [] }),

@@ -118,13 +118,13 @@ function FormInputInner<T extends FieldValues>(
                 }}
               />
               {rightElement}
-              {showCounter && maxLength !== undefined && multiline && (
+              {showCounter && maxLength !== undefined && (
                 <Text
-                  als="flex-end"
-                  mt="auto"
-                  pt={8}
-                  fontSize={10.5}
-                  color={nearLimit ? "#FCD34D" : "$iconMuted"}
+                  als={multiline ? "flex-end" : undefined}
+                  mt={multiline ? "auto" : undefined}
+                  pt={multiline ? 8 : undefined}
+                  fontSize={multiline ? 10.5 : 11.5}
+                  color={nearLimit ? "#FCD34D" : "#5A6B7A"}
                 >
                   {value.length}/{maxLength}
                 </Text>

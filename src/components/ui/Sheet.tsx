@@ -203,7 +203,7 @@ export function SheetRows({ children }: { children: ReactNode }) {
   const items = Children.toArray(children);
 
   return (
-    <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.045)">
+    <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.085)">
       {items.map((child, index) => (
         <View key={index}>
           {index > 0 && (

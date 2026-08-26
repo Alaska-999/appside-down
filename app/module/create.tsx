@@ -1,32 +1,47 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { CardEditor } from "@/src/components/flashcards/CardEditor";
+import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { FormInput } from "@/src/components/common/FormInput";
-import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
-import { AppButton } from "@/src/components/ui/Button";
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { AddPill } from "@/src/components/ui/AddPill";
+import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { PickRow } from "@/src/components/ui/PickRow";
+import { SavePill } from "@/src/components/ui/SavePill";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { AppToast } from "@/src/components/ui/Toast";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
+import { topPaddingBoost } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Folder, Globe, Lock, X } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
+
+type FolderOption = { id: string; name: string };
+
+const VISIBILITY_ICONS = [Lock, Globe];
 
 export default function ModuleCreate() {
   const insets = useSafeAreaInsets();
   const [serverError, setServerError] = useState<string | null>(null);
-  const { returnFolderId } = useLocalSearchParams<{
-    returnFolderId?: string;
-  }>();
+  const [folders, setFolders] = useState<FolderOption[]>([]);
+  const [folderSheetOpen, setFolderSheetOpen] = useState(false);
+  const { returnFolderId } = useLocalSearchParams<{ returnFolderId?: string }>();
 
   const form = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
     defaultValues: {
       name: "",
       description: "",
+      folderId: returnFolderId,
+      isPublic: false,
       flashcards: [
         { term: "", definition: "" },
         { term: "", definition: "" },
@@ -38,20 +53,25 @@ export default function ModuleCreate() {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = form;
+
+  const name = useWatch({ control, name: "name" });
+  const folderId = useWatch({ control, name: "folderId" });
+  const isPublic = useWatch({ control, name: "isPublic" });
 
   const flashcardsError =
     errors.flashcards?.root?.message ??
     (errors.flashcards as { message?: string } | undefined)?.message;
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: "flashcards",
   });
 
-  const termRefs = useRef<Array<TextInput | null>>([]);
-  const definitionRefs = useRef<Array<TextInput | null>>([]);
+  const termRefs = useRef<(TextInput | null)[]>([]);
+  const definitionRefs = useRef<(TextInput | null)[]>([]);
   const prevFieldsLength = useRef(fields.length);
 
   useEffect(() => {
@@ -61,53 +81,57 @@ export default function ModuleCreate() {
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
 
-  const focusTerm = (index: number) => termRefs.current[index]?.focus();
-  const focusDefinition = (index: number) =>
-    definitionRefs.current[index]?.focus();
+  useEffect(() => {
+    const loadFolders = async () => {
+      try {
+        const res = await protectedFetch(`${API_BASE_URL}/folders?limit=50`);
+        if (!res.ok) return;
+        const page = await res.json();
+        setFolders(
+          (page.data ?? []).map((f: FolderOption) => ({ id: f.id, name: f.name })),
+        );
+      } catch (err) {
+        console.error("[ModuleCreate] folders error:", err);
+      }
+    };
+    loadFolders();
+  }, []);
 
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
     return () => subscription.unsubscribe();
   }, [form]);
 
+  const focusTerm = (index: number) => termRefs.current[index]?.focus();
+  const focusDefinition = (index: number) =>
+    definitionRefs.current[index]?.focus();
+
+  const selectedFolder = folders.find((f) => f.id === folderId);
+
   const onSubmit = async (data: ModuleForm) => {
     setServerError(null);
-
-    const module = {
-      name: data.name,
-      description: data.description,
-      flashcards: data.flashcards.filter(
-        (card) => card.term || card.definition,
-      ),
-    };
-
     try {
-      const response = await protectedFetch(
-        `${API_BASE_URL}/modules`,
-        {
-          method: "POST",
-          body: JSON.stringify(module),
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to create module");
-      }
+      const response = await protectedFetch(`${API_BASE_URL}/modules`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          isPublic: data.isPublic,
+          folderId: data.folderId,
+          flashcards: data.flashcards.filter(
+            (card) => card.term || card.definition,
+          ),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create module");
       const newModule = await response.json();
-      if (returnFolderId) {
-        await protectedFetch(
-          `${API_BASE_URL}/folders/${returnFolderId}/modules`,
-          {
-            method: "POST",
-            body: JSON.stringify({ moduleId: newModule.id }),
-          },
-        );
-        router.back();
-      } else {
+
+      if (returnFolderId) router.back();
+      else
         router.replace({
           pathname: "/module/[id]",
           params: { id: newModule.id },
         });
-      }
     } catch (error) {
       console.error(error);
       setServerError("Failed to create module. Please try again");
@@ -117,14 +141,7 @@ export default function ModuleCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeader
-            variant="create"
-            onCreate={() => {
-              if (!isSubmitting) handleSubmit(onSubmit)();
-            }}
-          />
-        </YStack>
+        <BackgroundMesh preset="form" />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
@@ -132,54 +149,101 @@ export default function ModuleCreate() {
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
-            paddingTop: 100,
+            paddingTop: insets.top + topPaddingBoost,
             paddingBottom: insets.bottom + 40,
-            paddingHorizontal: 0,
           }}
         >
-          <YStack width="100%" px="$screenX">
-            <Text
-              color="$color"
-              fontSize={26}
-              fontWeight="800"
-              textAlign="center"
-              mb={24}
-            >
-              New Module
-            </Text>
+          <YStack px="$screenX">
+            <XStack ai="center" gap={10} mb={18}>
+              <IconButton
+                variant="liquidGlass"
+                icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                onPress={() => router.back()}
+                accessibilityLabel="Close"
+              />
+              <Text f={1} fontSize={19} fontWeight="800" color="$color">
+                New module
+              </Text>
+              <SavePill
+                enabled={!!name?.trim()}
+                loading={isSubmitting}
+                onPress={() => handleSubmit(onSubmit)()}
+              />
+            </XStack>
 
-            <YStack mb={14}>
+            <YStack mb={18}>
+              <FieldLabel label="Name" />
               <FormInput
                 control={control}
                 name="name"
-                placeholder="Untitled Module"
-                variant="glass"
-                inputSize="md"
+                placeholder="Untitled module"
+                maxLength={60}
+                showCounter
               />
             </YStack>
 
-            <YStack mb={24}>
+            <YStack mb={18}>
+              <FieldLabel label="Description" hint="optional" />
               <FormInput
                 control={control}
                 name="description"
-                placeholder="Description (optional)"
-                variant="glass"
-                inputSize="md"
+                placeholder="What is this module about?"
+                maxLength={300}
+                multiline
               />
             </YStack>
 
-            <SectionTitle>FLASHCARDS</SectionTitle>
+            <YStack mb={18}>
+              <FieldLabel label="Folder" hint="optional" />
+              <PickRow
+                icon={Folder}
+                value={selectedFolder?.name}
+                placeholder="No folder"
+                onPress={() => setFolderSheetOpen(true)}
+              />
+            </YStack>
 
-            <YStack gap={16} mt={11}>
-              {fields.map((field, index) => (
-                <FlashcardEditItem
-                  key={field.id}
+            <YStack mb={18}>
+              <FieldLabel label="Visibility" />
+              <SegmentedControl
+                options={["Private", "Public"]}
+                selected={isPublic ? 1 : 0}
+                onChange={(index) => setValue("isPublic", index === 1)}
+                renderIcon={(index, active) => {
+                  const Icon = VISIBILITY_ICONS[index];
+                  return (
+                    <Icon
+                      size={16}
+                      strokeWidth={1.9}
+                      color={active ? "#0D1117" : "#8FA8B8"}
+                    />
+                  );
+                }}
+              />
+            </YStack>
+
+            <XStack ai="center" jc="space-between" mt={4} mb={11}>
+              <Text fontSize={16} fontWeight="700" color="$color">
+                Cards
+              </Text>
+              <Text fontSize={12.5} color="#8FA8B8">
+                {fields.length}
+              </Text>
+            </XStack>
+
+            <SortableCardList
+              ids={fields.map((field) => field.id)}
+              onMove={move}
+              renderItem={({ index, dragGesture, dragging }) => (
+                <CardEditor
                   control={control}
                   termName={`flashcards.${index}.term`}
                   definitionName={`flashcards.${index}.definition`}
                   index={index}
                   onRemove={remove}
-                  showRemove={fields.length > 1}
+                  canRemove={fields.length > 2}
+                  dragGesture={dragGesture}
+                  dragging={dragging}
                   termRef={(node) => {
                     termRefs.current[index] = node;
                   }}
@@ -188,44 +252,63 @@ export default function ModuleCreate() {
                   }}
                   onSubmitTerm={() => focusDefinition(index)}
                   onSubmitDefinition={() => {
-                    if (index + 1 < fields.length) {
-                      focusTerm(index + 1);
-                    } else {
-                      append({ term: "", definition: "" });
-                    }
+                    if (index + 1 < fields.length) focusTerm(index + 1);
+                    else append({ term: "", definition: "" });
                   }}
                 />
-              ))}
-            </YStack>
+              )}
+            />
 
             {flashcardsError && (
-              <Text color="$statusDanger" fontSize="$2" mt="$2">
+              <Text color="#FCA5A5" fontSize={11.5} mt={8}>
                 {flashcardsError}
               </Text>
             )}
 
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize="$3"
-                textAlign="center"
-                mt="$2"
-              >
-                {serverError}
-              </Text>
-            )}
-
-            <YStack mt={22}>
-              <AppButton
-                variant="outline"
-                size="lg"
+            <YStack mt={16}>
+              <AddPill
+                label="Add card"
                 onPress={() => append({ term: "", definition: "" })}
-              >
-                + Add Card
-              </AppButton>
+              />
             </YStack>
           </YStack>
         </KeyboardAwareScrollView>
+
+        <AppToast
+          open={!!serverError}
+          message={serverError ?? ""}
+          onDismiss={() => setServerError(null)}
+        />
+
+        <AppSheet
+          open={folderSheetOpen}
+          onOpenChange={setFolderSheetOpen}
+          title="Folder"
+        >
+          <SheetRows>
+            <SheetRow
+              icon={Folder}
+              label="No folder"
+              selected={!folderId}
+              onPress={() => {
+                setValue("folderId", undefined);
+                setFolderSheetOpen(false);
+              }}
+            />
+            {folders.map((folder) => (
+              <SheetRow
+                key={folder.id}
+                icon={Folder}
+                label={folder.name}
+                selected={folderId === folder.id}
+                onPress={() => {
+                  setValue("folderId", folder.id);
+                  setFolderSheetOpen(false);
+                }}
+              />
+            ))}
+          </SheetRows>
+        </AppSheet>
       </YStack>
     </FormProvider>
   );

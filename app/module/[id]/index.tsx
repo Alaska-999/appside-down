@@ -14,6 +14,7 @@ import { StatTile } from "@/src/components/ui/StatTile";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
+import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
@@ -36,8 +37,8 @@ import {
   Star,
   Trash2,
 } from "lucide-react-native";
-import { router, useLocalSearchParams } from "expo-router";
-import { ComponentType, useEffect, useMemo, useState } from "react";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
 import { Alert, InteractionManager, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, XStack, YStack } from "tamagui";
@@ -191,15 +192,22 @@ export default function ModuleScreen() {
     moduleData?.author?.username ?? moduleData?.authorUsername ?? undefined;
   const isDeletedAuthor = !moduleData?.author && !!moduleData?.authorUsername;
 
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => fetchData());
-    return () => task.cancel();
-  }, [id]);
+  const loadedRef = useRef(false);
 
-  const fetchData = async () => {
-    setLoading(true);
+  useFocusEffect(
+    useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() =>
+        fetchData(loadedRef.current),
+      );
+      return () => task.cancel();
+    }, [id]),
+  );
+
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
+      await useStudyQueueStore.getState().flush();
       const [moduleRes, flashcardsRes] = await Promise.all([
         protectedFetch(`${API_BASE_URL}/modules/${id}`, { method: "GET" }),
         protectedFetch(`${API_BASE_URL}/flashcards/module/${id}`, {
@@ -223,11 +231,12 @@ export default function ModuleScreen() {
         author: rawModule.author ?? null,
       });
       setFlashcards(flashcardsData);
+      loadedRef.current = true;
     } catch (err) {
       console.error("[ModuleScreen] fetch error:", err);
-      setError("Failed to load module");
+      if (!silent) setError("Failed to load module");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -410,7 +419,7 @@ export default function ModuleScreen() {
                     <Star
                       size={22}
                       strokeWidth={1.9}
-                      color="#BEF264"
+                      color={moduleData.isFavorite ? "#BEF264" : "#EAF7FF"}
                       fill={
                         moduleData.isFavorite
                           ? "rgba(190,242,100,0.22)"
@@ -449,7 +458,7 @@ export default function ModuleScreen() {
                 title="Couldn't load module"
                 subtitle="Looks like a connection hiccup. Your data is safe — try again."
                 buttonLabel="Retry"
-                onButtonPress={fetchData}
+                onButtonPress={() => fetchData()}
               />
             </YStack>
           )}

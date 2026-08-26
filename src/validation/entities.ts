@@ -12,6 +12,8 @@ export const moduleSchema = z
       .min(1, "Name is required")
       .max(60, "Max 60 characters"),
     description: z.string().trim().max(300, "Max 300 characters"),
+    folderId: z.string().optional(),
+    isPublic: z.boolean(),
     flashcards: z.array(
       z.object({
         term: z.string().trim().max(200, "Max 200 characters"),
