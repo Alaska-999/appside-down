@@ -13,7 +13,7 @@ import { ReactNode, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { YStack, YStackProps, useTheme } from "tamagui";
 
-export type GlowTone = "mint" | "teal" | "lime" | "indigo";
+export type GlowTone = "mint" | "teal" | "lime" | "indigo" | "neutral";
 export type LightLevel = 0 | 1 | 2 | 3 | 4;
 
 const GLOW_LAMP_ALPHA: Record<LightLevel, number> = {
@@ -42,6 +42,7 @@ const TONES: Record<
   teal: { lamp: [13, 148, 136], border: [45, 212, 191], lampAlpha: 0.3, borderAlpha: 0.4 },
   lime: { lamp: [163, 230, 53], border: [190, 242, 100], lampAlpha: 0.2, borderAlpha: 0.48 },
   indigo: { lamp: [99, 102, 241], border: [99, 102, 241], lampAlpha: 0.2, borderAlpha: 0.42 },
+  neutral: { lamp: [220, 255, 245], border: [220, 255, 245], lampAlpha: 0.1, borderAlpha: 0.24 },
 };
 
 function saturateRgb([r, g, b]: Rgb, s: number): Rgb {
@@ -68,6 +69,7 @@ export type LampGeometry = { rx: number; ry: number; cx: number; cy: number };
 
 const LAMP_CARD: LampGeometry = { rx: 1.28, ry: 0.96, cx: 0.08, cy: -0.1 };
 export const LAMP_ROW: LampGeometry = { rx: 1.2, ry: 0.92, cx: 0.06, cy: -0.12 };
+export const LAMP_TILE: LampGeometry = { rx: 1.2, ry: 1.3, cx: 0.12, cy: -0.2 };
 
 export function Lamp({
   color,
@@ -147,6 +149,7 @@ export interface GlowSurfaceProps extends YStackProps {
   lamp?: boolean;
   lampAlpha?: number;
   lampGeometry?: LampGeometry;
+  lampEdge?: number;
   glow?: LightLevel;
   vivid?: LightLevel;
   fill?: string;
@@ -166,6 +169,7 @@ export function GlowSurface({
   lamp = false,
   lampAlpha: lampAlphaOverride,
   lampGeometry,
+  lampEdge,
   glow,
   vivid = 2,
   fill = "$surfaceCard",
@@ -236,7 +240,11 @@ export function GlowSurface({
           <View style={[StyleSheet.absoluteFillObject, { backgroundColor: fillColor }]} />
         )}
         {lampAlpha > 0 && (
-          <Lamp color={toneRgba(t.lamp, lampAlpha, sat)} geometry={lampGeometry} />
+          <Lamp
+            color={toneRgba(t.lamp, lampAlpha, sat)}
+            geometry={lampGeometry}
+            edge={lampEdge}
+          />
         )}
         {underlay}
       </YStack>
