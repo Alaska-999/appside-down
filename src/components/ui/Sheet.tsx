@@ -13,7 +13,12 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Sheet, Text, XStack, YStack } from "tamagui";
 
-const SHEET_RADIUS = { topLeft: 35, topRight: 35, bottomRight: 0, bottomLeft: 0 };
+const SHEET_RADIUS = {
+  topLeft: 35,
+  topRight: 35,
+  bottomRight: 0,
+  bottomLeft: 0,
+};
 
 interface AppSheetProps {
   open: boolean;
@@ -46,8 +51,9 @@ export function AppSheet({
       snapPoints={fitContent ? ["fit"] : snapPoints}
       snapPointsMode={fitContent ? "fit" : "percent"}
       dismissOnSnapToBottom
+      moveOnKeyboardChange
     >
-      <Sheet.Overlay bg="rgba(3,5,8,0.5)" />
+      <Sheet.Overlay bg="rgba(3,5,8,0.35)" />
 
       <Sheet.Frame
         bg="transparent"
@@ -59,33 +65,23 @@ export function AppSheet({
         overflow="hidden"
         pos="relative"
       >
-        <LiquidGlass intensity={45} backgroundColor="rgba(12,22,24,0.4)" />
+        <LiquidGlass intensity={55} backgroundColor="rgba(23, 31, 39, 0.3)" />
+
         <View
           pointerEvents="none"
           style={{
             position: "absolute",
             top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(255,255,255,0.035)",
-          }}
-        />
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 16,
-            right: 16,
+            left: 18,
+            right: 18,
             height: 1,
-            backgroundColor: "rgba(255,255,255,0.3)",
+            backgroundColor: "rgba(255, 255, 255, 0.2)",
           }}
         />
         <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
 
         <Sheet.Handle
-          bg="rgba(220,255,245,0.35)"
+          bg="rgba(229, 251, 245, 0.4)"
           w={54}
           h={5}
           br={4}
@@ -96,10 +92,22 @@ export function AppSheet({
         />
 
         {hasHeaderActions ? (
-          <XStack ai="center" jc="space-between" mb={18} pos="relative" zIndex={1}>
+          <XStack
+            ai="center"
+            jc="space-between"
+            mb={18}
+            pos="relative"
+            zIndex={1}
+          >
             {leftAction ?? <YStack width={40} />}
             {title ? (
-              <Text f={1} color="$color" fontSize={19} fontWeight="800" textAlign="center">
+              <Text
+                f={1}
+                color="$color"
+                fontSize={19}
+                fontWeight="800"
+                textAlign="center"
+              >
                 {title}
               </Text>
             ) : (
@@ -151,7 +159,7 @@ export function SheetRow({
   onPress,
 }: SheetRowProps) {
   const labelColor = danger ? "#FCA5A5" : "$color";
-  const iconColor = danger ? "#FCA5A5" : "#B7CEDA";
+  const iconColor = danger ? "#FCA5A5" : "rgb(213, 225, 234)";
 
   const row = (pressed: boolean) => (
     <XStack
@@ -160,7 +168,7 @@ export function SheetRow({
       px={17}
       py={16}
       minHeight={44}
-      bg={pressed ? "rgba(220,255,245,0.06)" : "transparent"}
+      bg={pressed ? "rgba(220,255,245,0.06)" : "rgba(38, 43, 49, 0.4)"}
     >
       <Icon size={21} color={iconColor} strokeWidth={1.9} />
       <YStack f={1} gap={2}>
@@ -209,7 +217,6 @@ export function SheetRows({ children }: { children: ReactNode }) {
           {index > 0 && (
             <View
               style={{
-                marginLeft: 52,
                 height: 1,
                 backgroundColor: "rgba(220,255,245,0.09)",
               }}
