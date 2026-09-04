@@ -133,7 +133,7 @@ function FormInputInner<T extends FieldValues>(
             {!hideError && fieldState.error && (
               <XStack ai="center" gap={6}>
                 <AlertCircle size={13} color="#FCA5A5" strokeWidth={2.2} />
-                <Text color="#FCA5A5" fontSize={11.5}>
+                <Text color="$dangerText" fontSize={11.5}>
                   {fieldState.error.message}
                 </Text>
               </XStack>

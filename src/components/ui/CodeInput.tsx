@@ -30,7 +30,7 @@ const CELL_TEXT: Record<CodeCellState, string> = {
   empty: "$color",
   on: "$color",
   cur: "$color",
-  bad: "#FCA5A5",
+  bad: "$dangerText",
   good: "#BEF264",
 };
 
@@ -179,7 +179,7 @@ export function CodeInput<T extends FieldValues>({
               />
             </YStack>
             {fieldState.error && (
-              <Text color="#FCA5A5" fontSize={11.5} textAlign="center">
+              <Text color="$dangerText" fontSize={11.5} textAlign="center">
                 {fieldState.error.message}
               </Text>
             )}

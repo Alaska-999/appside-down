@@ -1,17 +1,25 @@
 import { API_BASE_URL } from "@/src/api/config";
+import { Toggle } from "@/src/components/common/Toggle";
+import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
-import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { ModeTile } from "@/src/components/ui/ModeTile";
 import { ProgressSplitBar } from "@/src/components/ui/ProgressSplitBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import {
+  AppSheet,
+  SheetCrossfade,
+  SheetRow,
+  SheetRows,
+} from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StatTile } from "@/src/components/ui/StatTile";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { AppToast } from "@/src/components/ui/Toast";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
@@ -19,15 +27,17 @@ import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
   ArrowDownUp,
   BookmarkPlus,
   Captions,
-  Columns2,
   ChevronLeft,
   Clock,
+  Columns2,
   FileText,
+  Globe,
   GraduationCap,
   Lock,
   MoreHorizontal,
@@ -36,10 +46,8 @@ import {
   Star,
   Trash2,
 } from "lucide-react-native";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
 import { Alert, InteractionManager, Pressable, ScrollView } from "react-native";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, XStack, YStack } from "tamagui";
 
 type SortOrder = "original" | "alphabetical";
@@ -54,10 +62,34 @@ const SORT_OPTIONS: {
 ];
 
 const MODE_TILES = [
-  { key: "flashcards", label: "Flashcards", hint: "Flip and recall", icon: Captions, live: true },
-  { key: "test", label: "Test", hint: "Quiz yourself", icon: FileText, live: false },
-  { key: "match", label: "Match", hint: "Pair up", icon: Columns2, live: false },
-  { key: "learn", label: "Learn", hint: "Spaced repetition", icon: GraduationCap, live: false },
+  {
+    key: "flashcards",
+    label: "Flashcards",
+    hint: "Flip and recall",
+    icon: Captions,
+    live: true,
+  },
+  {
+    key: "test",
+    label: "Test",
+    hint: "Quiz yourself",
+    icon: FileText,
+    live: false,
+  },
+  {
+    key: "match",
+    label: "Match",
+    hint: "Pair up",
+    icon: Columns2,
+    live: false,
+  },
+  {
+    key: "learn",
+    label: "Learn",
+    hint: "Spaced repetition",
+    icon: GraduationCap,
+    live: false,
+  },
 ];
 
 function ModuleSkeleton() {
@@ -125,7 +157,9 @@ function CardsHeader({
             br={17}
             ai="center"
             jc="center"
-            bg={starredOnly ? "rgba(163,230,53,0.16)" : "rgba(220,255,245,0.05)"}
+            bg={
+              starredOnly ? "rgba(163,230,53,0.16)" : "rgba(220,255,245,0.05)"
+            }
             borderWidth={1}
             borderColor={
               starredOnly ? "rgba(190,242,100,0.42)" : "rgba(220,255,245,0.11)"
@@ -178,6 +212,9 @@ export default function ModuleScreen() {
   const [starredOnly, setStarredOnly] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
+  const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -242,7 +279,9 @@ export default function ModuleScreen() {
   const progress = useMemo(() => {
     if (moduleData?.progress) return moduleData.progress;
     const known = flashcards.filter((c) => c.status === "KNOWN").length;
-    const learning = flashcards.filter((c) => c.status === "STILL_LEARNING").length;
+    const learning = flashcards.filter(
+      (c) => c.status === "STILL_LEARNING",
+    ).length;
     return {
       known,
       learning,
@@ -254,7 +293,9 @@ export default function ModuleScreen() {
   const starredCount = flashcards.filter((c) => c.isStarred).length;
 
   const visibleCards = useMemo(() => {
-    const base = starredOnly ? flashcards.filter((c) => c.isStarred) : flashcards;
+    const base = starredOnly
+      ? flashcards.filter((c) => c.isStarred)
+      : flashcards;
     if (sortOrder === "alphabetical") {
       return [...base].sort((a, b) => a.term.localeCompare(b.term));
     }
@@ -277,10 +318,13 @@ export default function ModuleScreen() {
       prev.map((c) => (c.id === card.id ? { ...c, isStarred: newValue } : c)),
     );
     try {
-      const res = await protectedFetch(`${API_BASE_URL}/flashcards/${card.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isStarred: newValue }),
-      });
+      const res = await protectedFetch(
+        `${API_BASE_URL}/flashcards/${card.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ isStarred: newValue }),
+        },
+      );
       if (!res.ok) throw new Error(`Error: ${res.status}`);
     } catch (err) {
       console.error("[ModuleScreen] star error:", err);
@@ -304,7 +348,9 @@ export default function ModuleScreen() {
       if (!res.ok) throw new Error(`Error: ${res.status}`);
     } catch (err) {
       console.error("[ModuleScreen] favorite error:", err);
-      setModuleData((prev) => (prev ? { ...prev, isFavorite: !newValue } : prev));
+      setModuleData((prev) =>
+        prev ? { ...prev, isFavorite: !newValue } : prev,
+      );
     }
   };
 
@@ -317,7 +363,10 @@ export default function ModuleScreen() {
       });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const newModule = await res.json();
-      router.replace({ pathname: "/module/[id]", params: { id: newModule.id } });
+      router.replace({
+        pathname: "/module/[id]",
+        params: { id: newModule.id },
+      });
     } catch (err) {
       console.error("[ModuleScreen] save error:", err);
       Alert.alert("Error", "Failed to save module");
@@ -354,34 +403,43 @@ export default function ModuleScreen() {
     );
   };
 
-  const handleDeleteModule = () => {
-    setMenuSheetOpen(false);
-    setTimeout(() => {
-      Alert.alert(
-        "Delete module",
-        "This will permanently delete the module and all its cards.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Delete",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                const res = await protectedFetch(
-                  `${API_BASE_URL}/modules/${id}`,
-                  { method: "DELETE" },
-                );
-                if (!res.ok) throw new Error(`Error: ${res.status}`);
-                router.back();
-              } catch (err) {
-                console.error("[ModuleScreen] delete error:", err);
-                Alert.alert("Error", "Failed to delete module");
-              }
-            },
-          },
-        ],
-      );
-    }, 300);
+  const closeMenu = (open: boolean) => {
+    setMenuSheetOpen(open);
+    if (!open) setMenuView("menu");
+  };
+
+  const handleTogglePublic = async () => {
+    if (!moduleData) return;
+    const next = !moduleData.isPublic;
+    setModuleData({ ...moduleData, isPublic: next });
+    try {
+      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isPublic: next }),
+      });
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+    } catch (err) {
+      console.error("[ModuleScreen] visibility error:", err);
+      setModuleData((prev) => (prev ? { ...prev, isPublic: !next } : prev));
+      setToast("Couldn't change visibility. Try again");
+    }
+  };
+
+  const handleDeleteModule = async () => {
+    setDeleting(true);
+    try {
+      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      setMenuSheetOpen(false);
+      router.back();
+    } catch (err) {
+      console.error("[ModuleScreen] delete error:", err);
+      setToast("Couldn't delete the module. Try again");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const startFlashcards = () => {
@@ -398,12 +456,7 @@ export default function ModuleScreen() {
       <BackgroundMesh preset="module" />
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack pb={screen.bottom}>
-          <XStack
-            px="$screenX"
-            pt={screen.top}
-            jc="space-between"
-            ai="center"
-          >
+          <XStack px="$screenX" pt={screen.top} jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
               icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
@@ -434,7 +487,11 @@ export default function ModuleScreen() {
                 <IconButton
                   variant="liquidGlass"
                   icon={
-                    <MoreHorizontal size={22} color="#EAF7FF" strokeWidth={1.9} />
+                    <MoreHorizontal
+                      size={22}
+                      color="#EAF7FF"
+                      strokeWidth={1.9}
+                    />
                   }
                   onPress={() => setMenuSheetOpen(true)}
                   accessibilityLabel="Module menu"
@@ -526,13 +583,21 @@ export default function ModuleScreen() {
                     total={progress.total}
                   />
                   <XStack gap={9} mt={12}>
-                    <StatTile tone="known" value={progress.known} label="Known" />
+                    <StatTile
+                      tone="known"
+                      value={progress.known}
+                      label="Known"
+                    />
                     <StatTile
                       tone="learning"
                       value={progress.learning}
                       label="Learning"
                     />
-                    <StatTile tone="new" value={progress.unstudied} label="New" />
+                    <StatTile
+                      tone="new"
+                      value={progress.unstudied}
+                      label="New"
+                    />
                   </XStack>
                 </YStack>
 
@@ -635,22 +700,76 @@ export default function ModuleScreen() {
         </YStack>
       </ScrollView>
 
-      <AppSheet open={menuSheetOpen} onOpenChange={setMenuSheetOpen} title="Module">
-        <SheetRows>
-          <SheetRow
-            icon={Pencil}
-            label="Edit module"
-            chevron
-            onPress={openEditSheet}
-          />
-          <SheetRow
-            icon={Trash2}
-            label="Delete module"
-            danger
-            onPress={handleDeleteModule}
-          />
-        </SheetRows>
+      <AppSheet
+        open={menuSheetOpen}
+        onOpenChange={closeMenu}
+        title={
+          menuView === "menu"
+            ? (moduleData?.name ?? "Module")
+            : "Delete this module?"
+        }
+        subtitle={
+          menuView === "confirm"
+            ? `${flashcards.length} cards will be deleted too.\nThis can't be undone.`
+            : undefined
+        }
+      >
+        <SheetCrossfade activeKey={menuView}>
+          {menuView === "menu" ? (
+            <SheetRows>
+              <SheetRow
+                icon={Pencil}
+                label="Edit module"
+                onPress={openEditSheet}
+              />
+              <SheetRow
+                icon={Captions}
+                label="Edit cards"
+                hint={String(flashcards.length)}
+                onPress={openEditSheet}
+              />
+              <SheetRow
+                icon={Globe}
+                label="Public"
+                right={
+                  <Toggle
+                    size="md"
+                    value={moduleData?.isPublic ?? false}
+                    onToggle={handleTogglePublic}
+                  />
+                }
+                onPress={handleTogglePublic}
+              />
+              <SheetRow
+                icon={Trash2}
+                label="Delete module"
+                danger
+                onPress={() => setMenuView("confirm")}
+              />
+            </SheetRows>
+          ) : (
+            <YStack gap={10}>
+              <AppButton
+                variant="danger"
+                icon={<Trash2 size={19} color="#FCA5A5" strokeWidth={1.9} />}
+                loading={deleting}
+                onPress={handleDeleteModule}
+              >
+                Delete module
+              </AppButton>
+              <AppButton variant="ghost" onPress={() => setMenuView("menu")}>
+                Cancel
+              </AppButton>
+            </YStack>
+          )}
+        </SheetCrossfade>
       </AppSheet>
+
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
 
       {editSheetMounted && (
         <EditCardsSheet
@@ -669,7 +788,11 @@ export default function ModuleScreen() {
         />
       )}
 
-      <AppSheet open={sortSheetOpen} onOpenChange={setSortSheetOpen} title="Sort by">
+      <AppSheet
+        open={sortSheetOpen}
+        onOpenChange={setSortSheetOpen}
+        title="Sort by"
+      >
         <SheetRows>
           {SORT_OPTIONS.map((option) => (
             <SheetRow

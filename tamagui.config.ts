@@ -12,6 +12,7 @@ const tokens = createTokens({
 
         mint: '#2DD4BF',
         mintLight: '#5EEAD4',
+        roseSoft: '#FCA5A5',
         teal: '#0D9488',
         lime: '#A3E635',
         limeLight: '#BEF264',
@@ -149,7 +150,7 @@ const appConfig = createTamagui({
             surfaceGlass: 'rgba(220,255,245,0.06)',
             surfaceGlassFaint: 'rgba(220,255,245,0.03)',
             tabBarBg: 'rgba(14,26,28,0.62)',
-            sheetBg: 'rgba(19,27,32,0.5)',
+            sheetBg: 'rgba(20,27,34,0.4)',
 
             glassBg: 'rgba(220,255,245,0.06)',
             glassBgSubtle: 'rgba(220,255,245,0.03)',
@@ -167,6 +168,7 @@ const appConfig = createTamagui({
 
             statusSuccess: '#10B981',
             statusDanger: '#EF4444',
+            dangerText: tokens.color.roseSoft,
             statusWarning: tokens.color.amber,
             statusInfo: tokens.color.blue,
         },

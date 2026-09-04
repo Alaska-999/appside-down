@@ -103,7 +103,7 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     bg: "rgba(239,68,68,0.13)",
     borderAngle: 150,
     borderColors: ["rgba(239,68,68,0.55)", "rgba(239,68,68,0.14)"],
-    textColor: "#FCA5A5",
+    textColor: "$roseSoft",
   },
   glass: {
     bg: "rgba(45,212,191,0.12)",
@@ -279,11 +279,14 @@ export function AppButton({
     >
       {({ pressed }) => {
         const floodActive = Boolean(flood) && pressed && !isBlocked;
-        const textColor = floodActive
-          ? "#0D1117"
-          : pressed && spec.pressedTextColor
-            ? spec.pressedTextColor
-            : spec.textColor;
+        const textColor =
+          variant === "danger"
+            ? "$roseSoft"
+            : floodActive
+              ? "#0D1117"
+              : pressed && spec.pressedTextColor
+                ? spec.pressedTextColor
+                : spec.textColor;
         const shadowProps =
           spec.shadow && !disabled
             ? {

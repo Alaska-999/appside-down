@@ -2,7 +2,7 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronRight } from "lucide-react-native";
-import { Children, ComponentType, ReactNode, useEffect } from "react";
+import { Children, ComponentType, ReactNode, createContext, useContext, useEffect } from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Sheet, Text, XStack, YStack } from "tamagui";
+import { Sheet, Text, useTheme, XStack, YStack } from "tamagui";
 
 const SHEET_RADIUS = {
   topLeft: 35,
@@ -24,6 +24,7 @@ interface AppSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title?: string;
+  subtitle?: string;
   snapPoints?: number[];
   leftAction?: ReactNode;
   rightAction?: ReactNode;
@@ -34,12 +35,14 @@ export function AppSheet({
   open,
   onOpenChange,
   title,
+  subtitle,
   snapPoints,
   leftAction,
   rightAction,
   children,
 }: AppSheetProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
   const hasHeaderActions = Boolean(leftAction || rightAction);
   const fitContent = !snapPoints;
 
@@ -53,7 +56,7 @@ export function AppSheet({
       dismissOnSnapToBottom
       moveOnKeyboardChange
     >
-      <Sheet.Overlay bg="rgba(3,5,8,0.35)" />
+      <Sheet.Overlay bg="rgba(3,5,8,0.5)" />
 
       <Sheet.Frame
         bg="transparent"
@@ -65,7 +68,8 @@ export function AppSheet({
         overflow="hidden"
         pos="relative"
       >
-        <LiquidGlass intensity={55} backgroundColor="rgba(23, 31, 39, 0.3)" />
+        {/* rgba(20, 27, 34, 0.3) */}
+        <LiquidGlass intensity={45} backgroundColor={theme.sheetBg.get()} />
 
         <View
           pointerEvents="none"
@@ -75,7 +79,7 @@ export function AppSheet({
             left: 18,
             right: 18,
             height: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backgroundColor: "rgba(255, 255, 255, 0.15)",
           }}
         />
         <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
@@ -121,13 +125,26 @@ export function AppSheet({
             fontSize={19}
             fontWeight="800"
             textAlign="center"
-            mb={18}
+            mb={subtitle ? 6 : 18}
             pos="relative"
             zIndex={1}
           >
             {title}
           </Text>
         ) : null}
+        {subtitle && (
+          <Text
+            color="#8FA8B8"
+            fontSize={12.5}
+            lineHeight={19}
+            textAlign="center"
+            mb={18}
+            pos="relative"
+            zIndex={1}
+          >
+            {subtitle}
+          </Text>
+        )}
 
         <YStack f={1} pos="relative" zIndex={1}>
           {children}
@@ -137,6 +154,13 @@ export function AppSheet({
   );
 }
 
+const ROW_BG = {
+  dense: "rgba(5, 13, 21, 0.38)",
+  light: "rgba(28, 33, 38, 0.35)",
+} as const;
+
+const SheetRowsContext = createContext<{ dense: boolean }>({ dense: false });
+
 interface SheetRowProps {
   icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   label: string;
@@ -145,6 +169,7 @@ interface SheetRowProps {
   danger?: boolean;
   chevron?: boolean;
   selected?: boolean;
+  right?: ReactNode;
   onPress?: () => void;
 }
 
@@ -156,9 +181,11 @@ export function SheetRow({
   danger,
   chevron,
   selected,
+  right,
   onPress,
 }: SheetRowProps) {
-  const labelColor = danger ? "#FCA5A5" : "$color";
+  const { dense } = useContext(SheetRowsContext);
+  const labelColor = danger ? "$roseSoft" : "$color";
   const iconColor = danger ? "#FCA5A5" : "rgb(213, 225, 234)";
 
   const row = (pressed: boolean) => (
@@ -168,7 +195,7 @@ export function SheetRow({
       px={17}
       py={16}
       minHeight={44}
-      bg={pressed ? "rgba(220,255,245,0.06)" : "rgba(38, 43, 49, 0.4)"}
+      bg={pressed ? "$glassBg" : dense ? ROW_BG.dense : ROW_BG.light}
     >
       <Icon size={21} color={iconColor} strokeWidth={1.9} />
       <YStack f={1} gap={2}>
@@ -187,6 +214,7 @@ export function SheetRow({
         </Text>
       )}
       {selected && <Check size={18} color="#5EEAD4" strokeWidth={2.4} />}
+      {right}
       {chevron && <ChevronRight size={16} color="#5A6B7A" strokeWidth={2} />}
     </XStack>
   );
@@ -209,23 +237,26 @@ export function SheetRow({
 
 export function SheetRows({ children }: { children: ReactNode }) {
   const items = Children.toArray(children);
+  const dense = items.length > 2;
 
   return (
-    <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.085)">
-      {items.map((child, index) => (
-        <View key={index}>
-          {index > 0 && (
-            <View
-              style={{
-                height: 1,
-                backgroundColor: "rgba(220,255,245,0.09)",
-              }}
-            />
-          )}
-          {child}
-        </View>
-      ))}
-    </YStack>
+    <SheetRowsContext.Provider value={{ dense }}>
+      <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.085)">
+        {items.map((child, index) => (
+          <View key={index}>
+            {index > 0 && (
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: "rgba(220,255,245,0.09)",
+                }}
+              />
+            )}
+            {child}
+          </View>
+        ))}
+      </YStack>
+    </SheetRowsContext.Provider>
   );
 }
 

@@ -259,7 +259,7 @@ export default function ModuleCreate() {
             />
 
             {flashcardsError && (
-              <Text color="#FCA5A5" fontSize={11.5} mt={8}>
+              <Text color="$dangerText" fontSize={11.5} mt={8}>
                 {flashcardsError}
               </Text>
             )}
