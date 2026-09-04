@@ -98,7 +98,7 @@ export function StateCard({
             colors={["rgba(255,255,255,0.22)", "rgba(255,255,255,0)"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 0.6 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
           <Icon size={40} color={TONE_ICON_COLOR[tone]} strokeWidth={1.7} />
         </YStack>

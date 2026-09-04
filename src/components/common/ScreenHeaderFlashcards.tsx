@@ -2,7 +2,7 @@ import { IconButton } from "@/src/components/ui/IconButton";
 import { X } from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, View, XStack, YStack } from "tamagui";
 
 const MOCKUP_SCALE = 390 / 235;
@@ -22,7 +22,7 @@ export function ScreenHeaderFlashcards({
   onClose?: () => void;
 }) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
 
   const totalCount = Number(total);
   const filledCount = Math.min(totalCount, Math.max(0, Number(progress) + 1));
@@ -33,7 +33,7 @@ export function ScreenHeaderFlashcards({
         ai="center"
         p="$4"
         pb={0}
-        pt={insets.top}
+        pt={screen.top}
         justifyContent="space-between"
       >
         <IconButton

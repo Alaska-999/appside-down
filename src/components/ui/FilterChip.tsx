@@ -80,7 +80,7 @@ export function FilterChip({
             colors={["#2DD4BF", "#A3E635"]}
             start={{ x: 0, y: 0.4 }}
             end={{ x: 1, y: 0.6 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
         )}
         {icon}

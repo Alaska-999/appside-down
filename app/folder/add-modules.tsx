@@ -9,13 +9,13 @@ import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { TEXT } from "@/src/constants/typography";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { screenGutter, topPaddingBoost } from "@/tamagui.config";
+import { screenGutter } from "@/tamagui.config";
 import { AlertTriangle, Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { FlatList } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, View, XStack, YStack } from "tamagui";
 
 function AddModulesSkeletonRow() {
@@ -41,7 +41,7 @@ function mapModule(raw: any): ModuleItem {
 }
 
 export default function AddModules() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const { folderId, folderName } = useLocalSearchParams<{
     folderId: string;
     folderName?: string;
@@ -136,7 +136,7 @@ export default function AddModules() {
     <YStack f={1} bg="$background">
       <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
 
-      <YStack f={1} pt={insets.top + 10 + topPaddingBoost}>
+      <YStack f={1} pt={screen.top}>
         <XStack
           px="$screenX"
           mb={19}
@@ -194,7 +194,7 @@ export default function AddModules() {
             contentContainerStyle={{
               paddingHorizontal: screenGutter,
               paddingTop: 16,
-              paddingBottom: 100,
+              paddingBottom: screen.bottom + (selectedIds.length > 0 ? 96 : 0),
               gap: 12,
             }}
             ListEmptyComponent={
@@ -255,7 +255,7 @@ export default function AddModules() {
           right={0}
           pt={19}
           px="$section"
-          pb={Math.max(insets.bottom + 16, 32)}
+          pb={Math.max(screen.insets.bottom + 16, 32)}
           bg="rgba(19,21,32,0.92)"
           btw={1}
           borderColor="$glassBorder"

@@ -31,7 +31,7 @@ export function LiquidGlass({
         colorScheme="dark"
         tintColor={backgroundColor}
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             borderRadius,
             overflow: "hidden",
@@ -50,7 +50,7 @@ export function LiquidGlass({
         intensity={intensity}
         tint={tint}
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             borderRadius,
             overflow: "hidden",
@@ -64,7 +64,7 @@ export function LiquidGlass({
         <View
           pointerEvents="none"
           style={[
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             { borderRadius, overflow: "hidden", backgroundColor },
             style,
           ]}

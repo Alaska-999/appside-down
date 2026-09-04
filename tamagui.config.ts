@@ -1,6 +1,6 @@
 import { createAnimations } from '@tamagui/animations-react-native'
-import { config } from '@tamagui/config/v3'
 import { createGenericFont } from '@tamagui/config'
+import { config } from '@tamagui/config/v3'
 import { createTamagui, createTokens } from 'tamagui'
 
 
@@ -52,7 +52,7 @@ export const controlHeight = {
 
 export const screenGutter = 16
 
-export const topPaddingBoost = 4
+export const topPaddingBoost = 10
 
 export const elevation = {
     sm: { shadowRadius: 12, shadowOpacity: 0.06 },
@@ -148,7 +148,7 @@ const appConfig = createTamagui({
             surfaceWell: 'rgba(4,7,10,0.5)',
             surfaceGlass: 'rgba(220,255,245,0.06)',
             surfaceGlassFaint: 'rgba(220,255,245,0.03)',
-            tabBarBg: 'rgba(14,26,28,0.75)',
+            tabBarBg: 'rgba(14,26,28,0.62)',
             sheetBg: 'rgba(19,27,32,0.5)',
 
             glassBg: 'rgba(220,255,245,0.06)',

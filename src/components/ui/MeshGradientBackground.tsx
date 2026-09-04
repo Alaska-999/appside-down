@@ -529,7 +529,7 @@ export function MeshGradientBackground({ variant = "mesh-dark" }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "#11141F",
   },
 });

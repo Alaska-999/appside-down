@@ -1,8 +1,8 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { BookOpen, House, PlusCircle } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
+import { BookOpen, House, PlusCircle } from "lucide-react-native";
 import { ComponentType, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme, YStack } from "tamagui";
@@ -72,21 +72,21 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarStyle: {
             position: "absolute",
-            left: 22,
-            right: 22,
+            start: 19,
+            end: 19,
             bottom: Math.max(insets.bottom, 14),
             height: TAB_BAR_HEIGHT,
             backgroundColor: "transparent",
             borderTopWidth: 0,
             elevation: 10,
             shadowColor: "#000",
-            shadowOpacity: 0.6,
+            shadowOpacity: 0.4,
             shadowRadius: 17,
             shadowOffset: { width: 0, height: 14 },
           },
           tabBarBackground: () => (
             <LiquidGlass
-              intensity={70}
+              intensity={40}
               borderRadius={22}
               borderWidth={1}
               borderColor={theme.glassBorder.get()}

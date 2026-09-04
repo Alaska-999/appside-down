@@ -14,7 +14,7 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
-import { screenGutter, topPaddingBoost } from "@/tamagui.config";
+import { screenGutter } from "@/tamagui.config";
 import {
   AlertTriangle,
   ArrowDownAZ,
@@ -26,7 +26,7 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import { ComponentType, memo, useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
@@ -270,7 +270,7 @@ const ModulesPane = memo(function ModulesPane({
 });
 
 export default function Library() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const tabs = useFadeTabs(0);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search.trim());
@@ -281,7 +281,7 @@ export default function Library() {
   const [folderModules, setFolderModules] = useState<
     Record<string, FolderModulesState>
   >({});
-  const tabBarClearance = TAB_BAR_HEIGHT + insets.bottom + TAB_BAR_CLEARANCE_GAP;
+  const tabBarClearance = TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const fetchModulesPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20", sort: sortOrder });
@@ -377,7 +377,7 @@ export default function Library() {
 
   return (
     <ScreenBackground preset="home">
-      <YStack f={1} pt={insets.top + topPaddingBoost}>
+      <YStack f={1} pt={screen.top}>
         <YStack px="$screenX">
           <XStack ai="center" jc="space-between" gap={12}>
             <Text fontSize={31} fontWeight="800" letterSpacing={-0.62} color="$color">

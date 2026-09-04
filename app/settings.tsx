@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Toggle } from "@/src/components/common/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet } from "@/src/components/ui/Sheet";
@@ -81,6 +82,7 @@ function SettingsRow({
 }
 
 export default function SettingsScreen() {
+  const screen = useScreenInsets();
   const { user } = useAuthStore();
   const {
     soundEffectsEnabled,
@@ -154,7 +156,7 @@ export default function SettingsScreen() {
       <ScreenHeader title="Settings" />
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <YStack px="$4" gap="$5" pt="$2" pb="$8">
+        <YStack px="$4" gap="$5" pt="$2" pb={screen.bottom}>
           <YStack
             bg="$glassBg"
             borderWidth={1}

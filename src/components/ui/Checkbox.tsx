@@ -71,7 +71,7 @@ export function Checkbox({
               colors={["#2DD4BF", "#A3E635"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
-              style={StyleSheet.absoluteFillObject}
+              style={StyleSheet.absoluteFill}
             />
             <Check size={s.check} color="#0D1117" strokeWidth={3} />
           </>
@@ -140,7 +140,7 @@ export function Radio({
               colors={["#2DD4BF", "#A3E635"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
-              style={StyleSheet.absoluteFillObject}
+              style={StyleSheet.absoluteFill}
             />
           </View>
         )}

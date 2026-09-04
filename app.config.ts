@@ -1,16 +1,17 @@
-import { ExpoConfig } from "expo/config";
-import appJson from "./app.json";
+import { ConfigContext, ExpoConfig } from "expo/config";
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
-const baseConfig = appJson.expo as unknown as ExpoConfig;
-
-const config: ExpoConfig = {
-  ...baseConfig,
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
+  name: config.name ?? "appside-down",
+  slug: config.slug ?? "appside-down",
   extra: {
-    ...baseConfig.extra,
-    apiUrl,
+    ...config.extra,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL,
   },
-};
-
-export default config;
+  plugins: [
+    ...(config.plugins || []),
+    "expo-image",
+    "expo-status-bar",
+    "expo-asset"
+  ],
+});

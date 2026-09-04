@@ -88,13 +88,13 @@ export function SegmentedControl({
             colors={["#2DD4BF", "#A3E635"]}
             start={{ x: 0, y: 0.4 }}
             end={{ x: 1, y: 0.6 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
           <LinearGradient
             colors={["rgba(2,60,44,0)", "rgba(2,60,44,0.4)"]}
             start={{ x: 0.5, y: 0.35 }}
             end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
         </Animated.View>
       )}

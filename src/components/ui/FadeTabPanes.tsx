@@ -51,7 +51,7 @@ function Pane({
   }));
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFillObject, style]}>
+    <Animated.View style={[StyleSheet.absoluteFill, style]}>
       {children}
     </Animated.View>
   );

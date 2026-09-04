@@ -1,9 +1,8 @@
 import { IconButton } from "@/src/components/ui/IconButton";
-import { topPaddingBoost } from "@/tamagui.config";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { ReactNode } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Button, Text, XStack } from "tamagui";
 
 type ScreenHeaderVariant = "default" | "create";
@@ -22,7 +21,7 @@ export function ScreenHeader({
   onCreate,
 }: ScreenHeaderProps) {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
 
   if (variant === "create") {
     return (
@@ -31,7 +30,7 @@ export function ScreenHeader({
         ai="center"
         width="100%"
         px="$screenX"
-        pt={insets.top + 10}
+        pt={screen.top}
         bg="$background"
       >
         <Button
@@ -55,7 +54,7 @@ export function ScreenHeader({
   }
 
   return (
-    <XStack ai="center" p="$4" pt={insets.top + topPaddingBoost} bg="$background">
+    <XStack ai="center" p="$4" pt={screen.top} bg="$background">
       <IconButton
         variant="liquidGlass"
         icon={<ChevronLeft size="$1" color="$color" />}

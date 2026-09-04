@@ -100,7 +100,7 @@ export function Skeleton({
           colors={["transparent", variantStyle.shimmerColor, "transparent"]}
           start={SHIMMER_GRADIENT_START}
           end={SHIMMER_GRADIENT_END}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
       </Animated.View>
     </YStack>

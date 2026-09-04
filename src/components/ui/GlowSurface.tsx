@@ -237,7 +237,7 @@ export function GlowSurface({
             backgroundColor={fillColor}
           />
         ) : (
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: fillColor }]} />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: fillColor }]} />
         )}
         {lampAlpha > 0 && (
           <Lamp

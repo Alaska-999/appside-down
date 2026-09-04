@@ -171,7 +171,7 @@ function SweepBand({ animate }: { animate: boolean }) {
         locations={[0.34, 0.47, 0.54, 0.66]}
         start={{ x: 0, y: 0.4 }}
         end={{ x: 1, y: 0.6 }}
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
       />
     </Animated.View>
   );
@@ -262,7 +262,7 @@ export function AppCard(props: CardProps) {
           colors={["#5EEAD4", "#A3E635"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.85, y: 0.85 }}
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
         <GradientBorder
           radius={sizeStyle.br}
@@ -354,7 +354,7 @@ export function AppCard(props: CardProps) {
             locations={[0, 0.44, 1]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
         </View>
       ) : variant === "well" ? (
@@ -381,7 +381,7 @@ export function AppCard(props: CardProps) {
             locations={[0.24, 0.62, 1]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
             pointerEvents="none"
           />
         </>

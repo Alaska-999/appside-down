@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { AppButton } from "@/src/components/ui/Button";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
@@ -19,6 +20,7 @@ import { Text, YStack } from "tamagui";
 const MOCKUP_SCALE = 390 / 290;
 
 export default function ChangePasswordScreen() {
+  const screen = useScreenInsets();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<ChangePasswordForm>({
@@ -77,7 +79,7 @@ export default function ChangePasswordScreen() {
           bottomOffset={40}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: screen.bottom }}
         >
           <YStack gap={10 * MOCKUP_SCALE} onPress={Keyboard.dismiss}>
             <FormInput

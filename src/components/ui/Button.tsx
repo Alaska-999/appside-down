@@ -176,7 +176,7 @@ function Sheen({ dark, height }: { dark: boolean; height: number }) {
         }
         start={{ x: 0, y: 0.4 }}
         end={{ x: 1, y: 0.6 }}
-        style={StyleSheet.absoluteFillObject}
+        style={StyleSheet.absoluteFill}
       />
     </Animated.View>
   );
@@ -219,7 +219,7 @@ function Flood({ pressed }: { pressed: boolean }) {
         locations={[0, 0.58, 0.72]}
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 0.5, y: 1 }}
-        style={[StyleSheet.absoluteFillObject, { borderRadius: 140 }]}
+        style={[StyleSheet.absoluteFill, { borderRadius: 140 }]}
       />
     </Animated.View>
   );
@@ -320,7 +320,7 @@ export function AppButton({
                   colors={spec.gradient}
                   start={{ x: 0, y: 0.4 }}
                   end={{ x: 1, y: 0.6 }}
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                 />
               )}
               {!spec.gradient && (spec.blurIntensity || spec.liquidGlass) && (
@@ -334,7 +334,7 @@ export function AppButton({
               )}
               {!spec.gradient && !spec.blurIntensity && !spec.liquidGlass && spec.bg && (
                 <View
-                  style={[StyleSheet.absoluteFillObject, { backgroundColor: spec.bg }]}
+                  style={[StyleSheet.absoluteFill, { backgroundColor: spec.bg }]}
                 />
               )}
               {spec.gloss && (
@@ -343,7 +343,7 @@ export function AppButton({
                   locations={[0, 0.52]}
                   start={{ x: 0.5, y: 0 }}
                   end={{ x: 0.5, y: 1 }}
-                  style={[StyleSheet.absoluteFillObject, { margin: 1, borderRadius: radius }]}
+                  style={[StyleSheet.absoluteFill, { margin: 1, borderRadius: radius }]}
                   pointerEvents="none"
                 />
               )}

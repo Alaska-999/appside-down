@@ -19,7 +19,6 @@ import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { topPaddingBoost } from "@/tamagui.config";
 import {
   AlertTriangle,
   ArrowDownUp,
@@ -40,7 +39,7 @@ import {
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
 import { Alert, InteractionManager, Pressable, ScrollView } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, XStack, YStack } from "tamagui";
 
 type SortOrder = "original" | "alphabetical";
@@ -169,7 +168,7 @@ function CardsHeader({
 }
 
 export default function ModuleScreen() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [moduleData, setModuleData] = useState<Module | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -398,10 +397,10 @@ export default function ModuleScreen() {
     <YStack f={1} bg="$background">
       <BackgroundMesh preset="module" />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack pb={140}>
+        <YStack pb={screen.bottom}>
           <XStack
             px="$screenX"
-            pt={insets.top + 10 + topPaddingBoost}
+            pt={screen.top}
             jc="space-between"
             ai="center"
           >

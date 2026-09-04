@@ -159,7 +159,7 @@ export function InputShell({
               colors={["#2DD4BF", "#A3E635"]}
               start={{ x: 0, y: 0.5 }}
               end={{ x: 1, y: 0.5 }}
-              style={StyleSheet.absoluteFillObject}
+              style={StyleSheet.absoluteFill}
             />
           </View>
         ) : (
@@ -200,7 +200,7 @@ export function InputShell({
         ) : (
           <>
             <View
-              style={[StyleSheet.absoluteFillObject, { backgroundColor: state === "focus" ? "rgba(8,16,20,0.55)" : "rgba(4,7,10,0.5)" }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: state === "focus" ? "rgba(8,16,20,0.55)" : "rgba(4,7,10,0.5)" }]}
             />
             <LinearGradient
               colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0)"]}

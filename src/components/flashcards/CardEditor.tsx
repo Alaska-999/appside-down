@@ -45,7 +45,7 @@ function CardField<T extends FieldValues>({
           >
             <View
               style={[
-                StyleSheet.absoluteFillObject,
+                StyleSheet.absoluteFill,
                 { backgroundColor: "rgba(4,8,10,0.5)" },
               ]}
             />

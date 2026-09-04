@@ -16,13 +16,13 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
-import { screenGutter, topPaddingBoost } from "@/tamagui.config";
+import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { AlertTriangle, Layers, Sparkles } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { FlatList, Pressable, RefreshControl, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 type PublicModuleResult = {
@@ -118,10 +118,10 @@ function SectionHeader({
 }
 
 export default function Home() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const theme = useTheme();
   const mint = theme.accentGradientStart.get();
-  const tabBarClearance = TAB_BAR_HEIGHT + insets.bottom + TAB_BAR_CLEARANCE_GAP;
+  const tabBarClearance = TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -235,7 +235,7 @@ export default function Home() {
   return (
     <YStack f={1} bg="$background">
       <BackgroundMesh preset="home" />
-      <YStack f={1} pt={insets.top + topPaddingBoost} gap="$section">
+      <YStack f={1} pt={screen.top} gap="$section">
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
             <YStack f={1}>
@@ -503,7 +503,7 @@ export default function Home() {
                                   colors={DISCOVER_COVERS[i % DISCOVER_COVERS.length]}
                                   start={{ x: 0.2, y: 0 }}
                                   end={{ x: 0.8, y: 1 }}
-                                  style={StyleSheet.absoluteFillObject}
+                                  style={StyleSheet.absoluteFill}
                                 />
                               }
                             >

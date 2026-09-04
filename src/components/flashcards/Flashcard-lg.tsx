@@ -166,7 +166,7 @@ export function FlashcardLg({
         <View style={styles.gestureArea}>
           <Animated.View
             style={[
-              StyleSheet.absoluteFillObject,
+              StyleSheet.absoluteFill,
               styles.backgroundCard,
               backgroundCardStyle,
             ]}
@@ -180,17 +180,17 @@ export function FlashcardLg({
 
       <Animated.View
         pointerEvents="box-none"
-        style={[StyleSheet.absoluteFillObject, cardAnimatedStyle]}
+        style={[StyleSheet.absoluteFill, cardAnimatedStyle]}
       >
         <Animated.View
           pointerEvents={isFront ? "box-none" : "none"}
-          style={[StyleSheet.absoluteFillObject, frontAnimatedStyle]}
+          style={[StyleSheet.absoluteFill, frontAnimatedStyle]}
         >
           {iconsRow}
         </Animated.View>
         <Animated.View
           pointerEvents={isFront ? "none" : "box-none"}
-          style={[StyleSheet.absoluteFillObject, backAnimatedStyle]}
+          style={[StyleSheet.absoluteFill, backAnimatedStyle]}
         >
           {iconsRow}
         </Animated.View>

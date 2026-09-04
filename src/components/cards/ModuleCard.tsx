@@ -82,7 +82,7 @@ function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
             colors={["#2DD4BF", "#A3E635"]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
         )}
       </View>

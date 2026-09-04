@@ -10,7 +10,6 @@ import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { topPaddingBoost } from "@/tamagui.config";
 import {
   AlertTriangle,
   BookOpen,
@@ -26,7 +25,7 @@ import { useCallback, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Alert, Image, Pressable, ScrollView } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, useTheme, XStack, YStack } from "tamagui";
 
 type FolderModule = {
@@ -61,7 +60,7 @@ function mapModule(raw: any): FolderModule {
 
 export default function FolderScreen() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [folder, setFolder] = useState<FolderDetail | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -264,8 +263,8 @@ export default function FolderScreen() {
       <YStack f={1} bg="$background">
         <ScrollView showsVerticalScrollIndicator={false}>
           <AuroraGlow />
-          <YStack px="$screenX" gap="$6" pb="$8">
-            <YStack gap="$3" pt={insets.top + 10 + topPaddingBoost}>
+          <YStack px="$screenX" gap="$6" pb={screen.bottom}>
+            <YStack gap="$3" pt={screen.top}>
               <XStack jc="space-between" ai="center">
                 <IconButton
                   variant="liquidGlass"
@@ -300,7 +299,7 @@ export default function FolderScreen() {
     return (
       <YStack f={1} bg="$background">
         <AuroraGlow />
-        <YStack f={1} px="$screenX" gap="$3" pt={insets.top + 10 + topPaddingBoost}>
+        <YStack f={1} px="$screenX" gap="$3" pt={screen.top}>
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
@@ -329,8 +328,8 @@ export default function FolderScreen() {
     <YStack f={1} bg="$background">
       <ScrollView showsVerticalScrollIndicator={false}>
         <AuroraGlow />
-        <YStack px="$screenX" gap="$6" pb="$8">
-          <YStack gap="$3" pt={insets.top + 10 + topPaddingBoost}>
+        <YStack px="$screenX" gap="$6" pb={screen.bottom}>
+          <YStack gap="$3" pt={screen.top}>
             <XStack jc="space-between" ai="center">
               <IconButton
                 variant="liquidGlass"

@@ -166,7 +166,7 @@ export function IconButton({
                   colors={["#2DD4BF", "#A3E635"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0.9, y: 0.9 }}
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                 />
               ) : (
                 <LiquidGlass
@@ -280,7 +280,7 @@ export function AppFab({
             colors={["#5EEAD4", "#A3E635"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.9, y: 0.9 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
           <YStack zIndex={2}>{icon}</YStack>
         </YStack>

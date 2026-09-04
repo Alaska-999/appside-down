@@ -59,7 +59,7 @@ export function StreakCard({
                       colors={["#2DD4BF", "#A3E635"]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
-                      style={StyleSheet.absoluteFillObject}
+                      style={StyleSheet.absoluteFill}
                     />
                     <Check size={14} color="#06231F" strokeWidth={2.8} />
                   </>

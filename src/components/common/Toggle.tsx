@@ -120,7 +120,7 @@ export function Toggle({
       >
         <Animated.View
           style={[
-            StyleSheet.absoluteFillObject,
+            StyleSheet.absoluteFill,
             { borderRadius: s.height / 2, overflow: "hidden" },
             gradientStyle,
           ]}
@@ -129,7 +129,7 @@ export function Toggle({
             colors={s.gradient}
             start={{ x: 0, y: 0.4 }}
             end={{ x: 1, y: 0.6 }}
-            style={StyleSheet.absoluteFillObject}
+            style={StyleSheet.absoluteFill}
           />
         </Animated.View>
         <Animated.View

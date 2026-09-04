@@ -13,7 +13,6 @@ import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { AppToast } from "@/src/components/ui/Toast";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
-import { topPaddingBoost } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Folder, Globe, Lock, X } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,7 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, XStack, YStack } from "tamagui";
 
 type FolderOption = { id: string; name: string };
@@ -29,7 +28,7 @@ type FolderOption = { id: string; name: string };
 const VISIBILITY_ICONS = [Lock, Globe];
 
 export default function ModuleCreate() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const [serverError, setServerError] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
@@ -149,8 +148,8 @@ export default function ModuleCreate() {
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
-            paddingTop: insets.top + topPaddingBoost,
-            paddingBottom: insets.bottom + 40,
+            paddingTop: screen.top,
+            paddingBottom: screen.bottom + 16,
           }}
         >
           <YStack px="$screenX">
