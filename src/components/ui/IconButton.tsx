@@ -64,7 +64,7 @@ const LEGACY_VARIANT_STYLES: Record<
   },
 };
 
-const PRESS_EASING = Easing.bezier(0.2, 0.4, 0.25, 1);
+const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
 
 export function IconButton({
   icon,
@@ -175,12 +175,12 @@ export function IconButton({
         onPressIn={() => {
           pressScale.value = reduced
             ? 0.92
-            : withTiming(0.92, { duration: 170, easing: PRESS_EASING });
+            : withTiming(0.92, { duration: 130, easing: PRESS_EASING });
         }}
         onPressOut={() => {
           pressScale.value = reduced
             ? 1
-            : withTiming(1, { duration: 170, easing: PRESS_EASING });
+            : withTiming(1, { duration: 240, easing: PRESS_EASING });
         }}
         hitSlop={Math.max(0, (44 - resolvedSize) / 2)}
       >
@@ -326,12 +326,12 @@ export function AppFab({
         onPressIn={() => {
           fabPressScale.value = reduced
             ? 0.9
-            : withTiming(0.9, { duration: 170, easing: PRESS_EASING });
+            : withTiming(0.9, { duration: 130, easing: PRESS_EASING });
         }}
         onPressOut={() => {
           fabPressScale.value = reduced
             ? 1
-            : withTiming(1, { duration: 170, easing: PRESS_EASING });
+            : withTiming(1, { duration: 240, easing: PRESS_EASING });
         }}
       >
         <Animated.View style={fabPressStyle}>

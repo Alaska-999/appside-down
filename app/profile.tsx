@@ -1,62 +1,52 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { StreakCard } from "@/src/components/cards/StreakCard";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { GlowSurface } from "@/src/components/ui/GlowSurface";
+import { ICON_MUTED_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { BellRing, ChevronRight, Settings } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
-
-function GlassCard({ children }: { children: ReactNode }) {
-  return (
-    <YStack
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br="$cardSoft"
-      overflow="hidden"
-    >
-      {children}
-    </YStack>
-  );
-}
 
 function AccountRow({
   icon,
   label,
   onPress,
   disabled,
-  isLast,
+  isFirst,
   right,
 }: {
   icon: ReactNode;
   label: string;
   onPress?: () => void;
   disabled?: boolean;
-  isLast?: boolean;
+  isFirst?: boolean;
   right?: ReactNode;
 }) {
   const content = (
-    <XStack
-      ai="center"
-      jc="space-between"
-      px={18}
-      py={14}
-      opacity={disabled ? 0.45 : 1}
-      borderBottomWidth={isLast ? 0 : 1}
-      borderColor="$glassBorderSubtle"
-    >
-      <XStack ai="center" gap="$3">
-        {icon}
-        <Text fontSize={16} fontWeight="600" color="$color">
-          {label}
-        </Text>
-      </XStack>
+    <XStack ai="center" gap={13} px={17} py={15} pos="relative" opacity={disabled ? 0.45 : 1}>
+      {!isFirst && (
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 48,
+            right: 0,
+            top: 0,
+            height: 1,
+            backgroundColor: "rgba(220,255,245,0.09)",
+          }}
+        />
+      )}
+      {icon}
+      <Text f={1} fontSize={16} fontWeight="600" color="$color">
+        {label}
+      </Text>
       {right ??
         (onPress && !disabled && (
-          <ChevronRight size={16} color="$colorMuted" />
+          <ChevronRight size={16} color={ICON_SUBTLE} />
         ))}
     </XStack>
   );
@@ -76,7 +66,7 @@ export default function ProfileScreen() {
     <YStack f={1} bg="$background">
       <ScreenHeader title="Profile" />
 
-      <YStack f={1} px="$screenX" gap="$5" pt="$2">
+      <YStack f={1} px="$screenX" gap="$7" pt="$2">
         <YStack ai="center" mt="$2" mb="$1">
           <UserAvatar
             avatarUrl={user?.avatarUrl}
@@ -94,30 +84,52 @@ export default function ProfileScreen() {
         <StreakCard
           currentStreak={user?.streak?.currentStreak ?? 0}
           todayIndex={todayIndex}
+          glow
         />
 
         <YStack gap="$2">
-          <SectionTitle tone="eyebrow" px="$1">
+          <Text
+            fontSize={11}
+            fontWeight="700"
+            letterSpacing={0.99}
+            textTransform="uppercase"
+            color="$colorMuted"
+            px={4}
+          >
             Account
-          </SectionTitle>
-          <GlassCard>
+          </Text>
+          <GlowSurface
+            radius={20}
+            fill="$surfaceCard"
+            blurIntensity={0}
+            lampAlpha={0.16}
+            borderAngle={138}
+            borderColors={[
+              "rgba(94,234,212,0.36)",
+              "rgba(94,234,212,0.05)",
+              "rgba(220,255,245,0.03)",
+            ]}
+            borderPositions={[0, 0.46, 1]}
+            p={0}
+            overflow="hidden"
+          >
             <AccountRow
-              icon={<Settings size={18} color="$colorSecondary" />}
+              icon={<Settings size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />}
               label="Settings"
               onPress={() => router.push("/settings")}
+              isFirst
             />
             <AccountRow
-              icon={<BellRing size={18} color="$colorSecondary" />}
+              icon={<BellRing size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />}
               label="Activity"
               disabled
-              isLast
               right={
                 <Text fontSize={14} color="$colorMuted">
                   soon
                 </Text>
               }
             />
-          </GlassCard>
+          </GlowSurface>
         </YStack>
       </YStack>
     </YStack>

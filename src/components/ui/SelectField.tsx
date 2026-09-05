@@ -131,12 +131,12 @@ export function SelectField({
         onPressIn={() => {
           triggerPressScale.value = reduced
             ? 0.985
-            : withTiming(0.985, { duration: 170, easing: EASE });
+            : withTiming(0.985, { duration: 130, easing: EASE });
         }}
         onPressOut={() => {
           triggerPressScale.value = reduced
             ? 1
-            : withTiming(1, { duration: 170, easing: EASE });
+            : withTiming(1, { duration: 240, easing: EASE });
         }}
       >
         <Animated.View style={triggerPressStyle}>

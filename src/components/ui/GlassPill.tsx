@@ -126,7 +126,7 @@ export function GlassPill({
       accessibilityLabel={label}
       accessibilityState={{ disabled: !active }}
       als={t.centerSelf ? "center" : undefined}
-      transition="quick"
+      transition="press"
       pressStyle={active ? { scale: 0.95 } : undefined}
       onPress={() => {
         if (!active) return;

@@ -20,7 +20,7 @@ const tokens = createTokens({
         heroLime: '#65A30D',
         indigo: '#4338CA',
         indigoAccent: '#6366F1',
-        text: '#EFFDF8',
+        text: '#e9f5f0',
         textMuted: '#8FA8B8',
         nearBlack: '#0D1117',
         base: '#08090C',

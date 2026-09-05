@@ -1,6 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_ACCENT } from "@/src/constants/iconColors";
+import { ICON_MINT_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Plus } from "lucide-react-native";
 import { ReactNode } from "react";
@@ -26,11 +26,11 @@ const CHIP_STYLES: Record<
     textColor: "$mutedLight",
     fill: "rgba(220,255,245,0.05)",
     borderColors: [
-      "rgba(255,255,255,0.35)",
+      "rgba(255,255,255,0.5)",
       "rgba(255,255,255,0.04)",
-      "rgba(150,220,255,0.15)",
+      "rgba(150,220,255,0.24)",
     ],
-    borderPositions: [0, 0.46, 1],
+    borderPositions: [0, 0.44, 1],
     glow: false,
   },
   on: {
@@ -46,13 +46,13 @@ const CHIP_STYLES: Record<
   },
   add: {
     textColor: "$mintLight",
-    fill: "rgba(45,212,191,0.1)",
+    fill: "rgba(45,212,191,0.12)",
     borderColors: [
-      "rgba(255,255,255,0.44)",
+      "rgba(255,255,255,0.5)",
       "rgba(255,255,255,0.04)",
-      "rgba(150,220,255,0.2)",
+      "rgba(150,220,255,0.24)",
     ],
-    borderPositions: [0, 0.46, 1],
+    borderPositions: [0, 0.44, 1],
     glow: false,
   },
 };
@@ -92,7 +92,7 @@ export function TagChip({
     >
       <YStack
         h={CHIP_HEIGHT}
-        px={13}
+        px={14}
         br={CHIP_RADIUS}
         pos="relative"
         jc="center"
@@ -138,7 +138,7 @@ export function TagChip({
         />
         <XStack ai="center" gap={label ? 7 : 0} zIndex={2}>
           {variant === "add" && (
-            <Plus size={14} color={ICON_ACCENT} strokeWidth={2.3} />
+            <Plus size={13} color={ICON_MINT_LIGHT} strokeWidth={2.4} />
           )}
           {leading}
           {!!label && (

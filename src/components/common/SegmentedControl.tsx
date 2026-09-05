@@ -100,7 +100,7 @@ export function SegmentedControl({
               shadowColor: "rgba(45,212,191,1)",
               shadowOffset: { width: 0, height: 0 },
               shadowRadius: t.glass ? 6 : 4,
-              shadowOpacity: t.glow,
+              shadowOpacity: t.glass ? 0 : 0.45,
             },
             pillStyle,
           ]}

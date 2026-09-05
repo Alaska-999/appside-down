@@ -293,7 +293,7 @@ export function SheetRow({
       minHeight={44}
       bg={ROW_BG[rowTone]}
       opacity={disabled ? 0.5 : 1}
-      transition="quick"
+      transition="press"
       {...(pressable && {
         onPress: () => {
           hapticTap();

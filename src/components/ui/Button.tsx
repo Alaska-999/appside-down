@@ -98,11 +98,12 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
       opacity: 0.55,
     },
   },
+
   secondary: {
-    bg: "rgba(196, 233, 229, 0.03)",
-    blurIntensity: 40,
-    borderAngle: 150,
-    borderColors: ["rgba(220,255,245,0.28)", "rgba(220,255,245,0.06)"],
+    bg: "rgba(227, 241, 246, 0.04)",
+    blurIntensity: 12,
+    borderAngle: 135,
+    borderColors: ["rgba(227, 241, 246, 0.35)", "rgba(94, 234, 212, 0.1)"],
     textColor: "$color",
   },
   outline: {
@@ -113,11 +114,11 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   },
   ghost: {
     textColor: "$colorMuted",
-    pressedTextColor: "$color",
-    pressedBg: "rgba(220,255,245,0.05)",
+    pressedTextColor: "$iconMuted",
+    pressedBg: "rgba(220,255,245,0.03)",
   },
   danger: {
-    bg: "rgba(239,68,68,0.17)",
+    bg: "rgba(239,68,68,0.18)",
     borderAngle: 150,
     borderColors: ["rgba(239,68,68,0.6)", "rgba(239,68,68,0.16)"],
     textColor: "$roseSoft",
@@ -236,8 +237,8 @@ function Flood({ pressed }: { pressed: boolean }) {
 
   useEffect(() => {
     scale.value = withTiming(pressed ? 1 : 0, {
-      duration: pressed ? 450 : 200,
-      easing: Easing.bezier(0.2, 0.8, 0.3, 1),
+      duration: pressed ? 500 : 200,
+      easing: Easing.bezier(0.2, 0.7, 0.2, 1),
     });
   }, [pressed, scale]);
 
@@ -335,13 +336,13 @@ export function AppButton({
         if (isBlocked) return;
         pressScale.value = reduced
           ? 0.965
-          : withTiming(0.965, { duration: 170, easing: PRESS_EASING });
+          : withTiming(0.965, { duration: 130, easing: PRESS_EASING });
       }}
       onPressOut={() => {
         if (isBlocked) return;
         pressScale.value = reduced
           ? 1
-          : withTiming(1, { duration: 170, easing: PRESS_EASING });
+          : withTiming(1, { duration: 240, easing: PRESS_EASING });
       }}
     >
       {({ pressed }) => {

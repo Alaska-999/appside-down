@@ -2,10 +2,11 @@ import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { AppCard } from "@/src/components/ui/Card";
+import { GlowTone } from "@/src/components/ui/GlowSurface";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet } from "@/src/components/ui/Sheet";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { AppToast } from "@/src/components/ui/Toast";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -14,22 +15,46 @@ import { controlHeight } from "@/tamagui.config";
 import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { ReactNode, useState } from "react";
+import { Children, ReactNode, useState } from "react";
 import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
-function GlassCard({ children }: { children: ReactNode }) {
+function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <YStack
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br="$cardSoft"
-      overflow="hidden"
+    <Text
+      fontSize={11}
+      fontWeight="700"
+      letterSpacing={0.99}
+      textTransform="uppercase"
+      color="$colorMuted"
+      px="$1"
     >
       {children}
-    </YStack>
+    </Text>
+  );
+}
+
+function Rows({ tone, children }: { tone: GlowTone; children: ReactNode }) {
+  const items = Children.toArray(children);
+  return (
+    <AppCard variant="glow" tone={tone} px={0} py={0}>
+      {items.map((child, index) => (
+        <YStack key={index} pos="relative">
+          {index > 0 && (
+            <YStack
+              pos="absolute"
+              t={0}
+              l={48}
+              r={0}
+              h={1}
+              bg="rgba(220,255,245,0.09)"
+            />
+          )}
+          {child}
+        </YStack>
+      ))}
+    </AppCard>
   );
 }
 
@@ -38,26 +63,16 @@ function SettingsRow({
   value,
   onPress,
   disabled,
-  isLast,
   right,
 }: {
   label: string;
   value?: string;
   onPress?: () => void;
   disabled?: boolean;
-  isLast?: boolean;
   right?: ReactNode;
 }) {
   const content = (
-    <XStack
-      ai="center"
-      jc="space-between"
-      px={18}
-      py={14}
-      opacity={disabled ? 0.45 : 1}
-      borderBottomWidth={isLast ? 0 : 1}
-      borderColor="$glassBorderSubtle"
-    >
+    <XStack ai="center" jc="space-between" px={17} py={14} opacity={disabled ? 0.45 : 1}>
       <YStack f={1} gap="$1">
         <Text fontSize={16} fontWeight="600" color="$color">
           {label}
@@ -70,7 +85,7 @@ function SettingsRow({
       </YStack>
       {right ??
         (onPress && !disabled && (
-          <ChevronRight size={16} color="$colorMuted" />
+          <ChevronRight size={16} color="$mutedDim" />
         ))}
     </XStack>
   );
@@ -159,45 +174,35 @@ export default function SettingsScreen() {
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$4" gap="$5" pt="$2" pb={screen.bottom}>
-          <YStack
-            bg="$glassBg"
-            borderWidth={1}
-            borderColor="$glassBorder"
-            br="$cardSoft"
-            px={18}
-            py={18}
-            fd="row"
-            ai="center"
-            gap={16}
-          >
-            <AvatarPicker size={76} onError={setToast} />
-            <YStack f={1}>
-              <Text fontSize={19} fontWeight="800" color="$color">
-                {user?.username ?? "Unknown"}
-              </Text>
-              <Text fontSize={14} color="$colorMuted" mt={3}>
-                {user?.email ?? ""}
-              </Text>
-            </YStack>
-          </YStack>
+          <AppCard variant="glow" tone="mint" px={16} py={16}>
+            <XStack ai="center" gap={14}>
+              <AvatarPicker size={66} onError={setToast} />
+              <YStack f={1}>
+                <Text fontSize={17} fontWeight="800" color="$color">
+                  {user?.username ?? "Unknown"}
+                </Text>
+                <Text fontSize={13} color="$colorMuted" mt={2}>
+                  {user?.email ?? ""}
+                </Text>
+              </YStack>
+            </XStack>
+          </AppCard>
 
-          <GlassCard>
+          <Rows tone="mint">
             <SettingsRow
               label="Create password"
-              isLast
               onPress={() => router.push("/change-password")}
             />
-          </GlassCard>
+          </Rows>
 
           <YStack gap="$2">
-            <SectionTitle tone="eyebrow" px="$1">
-              Preferences
-            </SectionTitle>
-            <GlassCard>
+            <Eyebrow>Preferences</Eyebrow>
+            <Rows tone="lime">
               <SettingsRow
                 label="Push notifications"
                 right={
                   <Toggle
+                    size="md"
                     value={pushNotificationsEnabled}
                     onToggle={togglePushNotifications}
                   />
@@ -207,6 +212,7 @@ export default function SettingsScreen() {
                 label="Sound effects"
                 right={
                   <Toggle
+                    size="md"
                     value={soundEffectsEnabled}
                     onToggle={toggleSoundEffects}
                   />
@@ -214,33 +220,30 @@ export default function SettingsScreen() {
               />
               <SettingsRow
                 label="Haptic feedback"
-                isLast
                 right={
                   <Toggle
+                    size="md"
                     value={hapticFeedbackEnabled}
                     onToggle={toggleHapticFeedback}
                   />
                 }
               />
-            </GlassCard>
+            </Rows>
           </YStack>
 
           <YStack gap="$2">
-            <SectionTitle tone="eyebrow" px="$1">
-              About
-            </SectionTitle>
-            <GlassCard>
+            <Eyebrow>About</Eyebrow>
+            <Rows tone="indigo">
               <SettingsRow label="Privacy policy" disabled />
               <SettingsRow label="Terms of service" disabled />
               <SettingsRow
                 label="Version"
                 value={Constants.expoConfig?.version ?? "unknown"}
-                isLast
               />
-            </GlassCard>
+            </Rows>
           </YStack>
 
-          <YStack gap="$3">
+          <YStack gap={9}>
             <AppButton
               variant="secondary"
               icon={<LogOut size={18} color="$statusDanger" />}

@@ -1,8 +1,3 @@
-import {
-  ICON_ACCENT,
-  ICON_LIME_LIGHT,
-  ICON_ON_GLASS,
-} from "@/src/constants/iconColors";
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
@@ -13,6 +8,11 @@ import {
   BackgroundMesh,
   BackgroundPreset,
 } from "@/src/components/ui/ScreenBackground";
+import {
+  ICON_ACCENT,
+  ICON_LIME_LIGHT,
+  ICON_ON_GLASS,
+} from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useRouter } from "expo-router";
@@ -162,7 +162,7 @@ export function FlashcardsComplete({
             <>
               <AppButton
                 variant="primary"
-                size="lg"
+                size="md"
                 onPress={() => restart(true)}
               >
                 Practise {stillLearning} cards
@@ -176,7 +176,7 @@ export function FlashcardsComplete({
               </AppButton>
               <AppButton
                 variant="ghost"
-                size="sm"
+                size="md"
                 onPress={() => router.back()}
               >
                 Back to module

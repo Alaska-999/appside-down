@@ -1,6 +1,7 @@
 import {
   ICON_ACCENT,
   ICON_DANGER,
+  ICON_MINT_LIGHT,
   ICON_MUTED_LIGHT,
 } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
@@ -16,7 +17,7 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
           {index > 0 && (
             <View
               style={{
-                marginLeft: 16,
+                marginLeft: 52,
                 height: 1,
                 backgroundColor: "rgba(220,255,245,0.09)",
               }}
@@ -28,6 +29,8 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
     </YStack>
   );
 }
+
+const ACTION_SIZE = 36;
 
 const ICON_ACTION_TONE = {
   neutral: {
@@ -70,8 +73,8 @@ export function FolderEditIconAction({
       }}
     >
       <YStack
-        w={36}
-        h={36}
+        w={ACTION_SIZE}
+        h={ACTION_SIZE}
         br={12}
         ai="center"
         jc="center"
@@ -95,7 +98,7 @@ export function FolderTagEditRow({
   actions: ReactNode;
 }) {
   return (
-    <XStack ai="center" gap={12} px={16} py={14}>
+    <XStack ai="center" gap={12} px={16} h={52}>
       <Text
         fontSize={15}
         fontWeight="600"
@@ -181,8 +184,8 @@ export function FolderAddRow({
         onPress();
       }}
     >
-      <XStack ai="center" gap={10} px={16} py={15}>
-        <Icon size={19} color={ICON_ACCENT} strokeWidth={2.2} />
+      <XStack ai="center" gap={10} px={16} h={52}>
+        <Icon size={19} color={ICON_MINT_LIGHT} strokeWidth={2.2} />
         <Text fontSize={15} fontWeight="600" color="$mintLight">
           {label}
         </Text>

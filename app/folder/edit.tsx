@@ -25,7 +25,7 @@ import { ArrowUpFromLine, Plus, Tags, Trash2 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 type FolderTag = { id: string; name: string };
 
@@ -314,31 +314,29 @@ export default function FolderEditScreen() {
           />
 
           {loading || !folder ? (
-            <YStack gap={22}>
-              <XStack ai="center" gap={14}>
-                <Skeleton width={72} height={72} borderRadius={22} />
-                <YStack f={1}>
-                  <Skeleton height={60} borderRadius={18} />
-                </YStack>
-              </XStack>
+            <YStack gap={18}>
+              <YStack ai="center" pt={14} pb={6}>
+                <Skeleton width={96} height={96} borderRadius={28} />
+              </YStack>
+              <Skeleton height={52} borderRadius={16} />
               <Skeleton height={160} borderRadius="$cardSoft" />
             </YStack>
           ) : (
-            <YStack gap={22}>
-              <XStack ai="center" gap={14}>
+            <YStack gap={18}>
+              <YStack ai="center" pt={14} pb={6}>
                 <FolderCover imageUri={coverUri} onChange={setCoverUri} />
-                <YStack f={1}>
-                  <FormInput
-                    control={form.control}
-                    name="name"
-                    placeholder="Folder name"
-                    inputSize="lg"
-                    textRole="title"
-                    maxLength={40}
-                    showCounter
-                  />
-                </YStack>
-              </XStack>
+              </YStack>
+
+              <YStack>
+                <FieldLabel label="Name" />
+                <FormInput
+                  control={form.control}
+                  name="name"
+                  placeholder="Untitled folder"
+                  maxLength={40}
+                  showCounter
+                />
+              </YStack>
 
               <YStack>
                 <FieldLabel label="Tags" />

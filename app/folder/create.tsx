@@ -5,8 +5,8 @@ import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
-import { AppSheet } from "@/src/components/ui/Sheet";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -17,7 +17,7 @@ import { router, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export default function FolderCreate() {
   const screen = useScreenInsets();
@@ -27,9 +27,7 @@ export default function FolderCreate() {
   const [discardOpen, setDiscardOpen] = useState(false);
   const navigation = useNavigation();
   const allowLeaveRef = useRef(false);
-  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(
-    null,
-  );
+  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(null);
 
   const form = useForm<FolderForm>({
     resolver: zodResolver(folderSchema),
@@ -113,22 +111,22 @@ export default function FolderCreate() {
               onSave={() => handleSubmit(onSubmit)()}
             />
 
-            <YStack gap={22}>
-              <XStack ai="center" gap={14}>
-                <FolderCover imageUri={coverUri} onChange={setCoverUri} />
-                <YStack f={1}>
-                  <FormInput
-                    control={control}
-                    name="name"
-                    placeholder="Folder name"
-                    inputSize="lg"
-                    textRole="title"
-                    maxLength={40}
-                    showCounter
-                    autoFocus
-                  />
-                </YStack>
-              </XStack>
+            <YStack ai="center" pt={14} pb={24}>
+              <FolderCover imageUri={coverUri} onChange={setCoverUri} />
+            </YStack>
+
+            <YStack gap={18}>
+              <YStack>
+                <FieldLabel label="Name" />
+                <FormInput
+                  control={control}
+                  name="name"
+                  placeholder="Untitled folder"
+                  maxLength={40}
+                  showCounter
+                  autoFocus
+                />
+              </YStack>
 
               <YStack>
                 <FieldLabel label="Tags" hint="optional" />
@@ -163,7 +161,6 @@ export default function FolderCreate() {
           }}
           title="Discard this folder?"
           subtitle="This can't be undone."
-          blur="strong"
         >
           <YStack gap={10}>
             <AppButton variant="danger" onPress={confirmDiscard}>

@@ -3,6 +3,7 @@ export const ICON_MUTED = "#8FA8B8";
 export const ICON_SUBTLE = "#5A6B7A";
 export const ICON_ACCENT = "#B7CEDA";
 export const ICON_MINT = "#2DD4BF";
+export const ICON_MINT_LIGHT = "#5EEAD4";
 export const ICON_TEAL = "#0D9488";
 export const ICON_LIME = "#A3E635";
 export const ICON_LIME_LIGHT = "#BEF264";

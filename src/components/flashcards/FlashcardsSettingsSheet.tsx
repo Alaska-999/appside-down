@@ -5,7 +5,7 @@ import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Layers, RotateCcw, Shuffle, Volume2 } from "lucide-react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;
@@ -110,14 +110,16 @@ export function FlashcardsSettingsSheet({
           />
         </YStack>
 
-        <AppButton
-          variant="danger"
-          size="md"
-          icon={<RotateCcw size={20} color={ICON_DANGER} strokeWidth={2} />}
-          onPress={handleRestart}
-        >
-          Restart game
-        </AppButton>
+        <View bg="rgba(0, 0, 0, 0.1)" br={"50%"}>
+          <AppButton
+            variant="danger"
+            size="md"
+            icon={<RotateCcw size={20} color={ICON_DANGER} strokeWidth={2} />}
+            onPress={handleRestart}
+          >
+            Restart game
+          </AppButton>
+        </View>
       </YStack>
     </AppSheet>
   );

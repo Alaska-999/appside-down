@@ -169,7 +169,7 @@ export function TagEditor({
               value={renameValue}
               color="$color"
               error={error}
-              py={10}
+              py={15}
               selectTextOnFocus
               onChange={onChangeValue(setRenameValue)}
               onCommit={commitRename}
