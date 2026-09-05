@@ -1,9 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  FOCUS_BORDER,
-  FocusRing,
-  useFocusProgress,
-} from "@/src/components/ui/InputShell";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
@@ -18,11 +14,33 @@ import { Input, Text, XStack, YStack } from "tamagui";
 const CARD_RADIUS = 20;
 const CARD_BORDER = {
   colors: [
-    "rgba(255,255,255,0.4)",
-    "rgba(255,255,255,0.04)",
-    "rgba(150,220,255,0.18)",
+    "rgba(255, 255, 255, 0.45)",
+    "rgba(218, 248, 244, 0.15)",
+    "rgba(182, 247, 239, 0.04)",
+    "rgba(150, 243, 255, 0.12)",
   ],
-  positions: [0, 0.46, 1],
+  positions: [0, 0.3, 0.8, 1],
+};
+
+const FIELD_STYLES = {
+  term: {
+    py: 8,
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "500" as const,
+    color: "$text",
+    opacity: 1,
+    multiline: false,
+  },
+  definition: {
+    py: 10,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "400" as const,
+    color: "$text",
+    opacity: 0.84,
+    multiline: true,
+  },
 };
 
 function CardField<T extends FieldValues>({
@@ -44,7 +62,7 @@ function CardField<T extends FieldValues>({
   role: "term" | "definition";
   onFocusChange: (focused: boolean) => void;
 }) {
-  const term = role === "term";
+  const f = FIELD_STYLES[role];
   return (
     <Controller
       control={control}
@@ -53,13 +71,22 @@ function CardField<T extends FieldValues>({
         <Input
           unstyled
           px={0}
-          py={term ? 4 : 8}
-          fontSize={term ? 18 : 16}
-          fontWeight={term ? "500" : "400"}
-          color={term ? "$text" : "#99b3c4"}
+          py={f.py}
+          fontSize={f.fontSize}
+          fontWeight={f.fontWeight}
+          style={{ lineHeight: f.lineHeight }}
+          color={f.color}
+          opacity={f.opacity}
           placeholder={placeholder}
           placeholderTextColor={"$mutedDim" as never}
+          selectionColor="$mintLight"
+          cursorColor="$mintLight"
+          multiline={f.multiline}
+          scrollEnabled={false}
+          textAlignVertical="top"
+          submitBehavior={f.multiline ? "blurAndSubmit" : "submit"}
           returnKeyType={returnKeyType}
+          autoCapitalize="sentences"
           onSubmitEditing={onSubmitEditing}
           ref={inputRef as never}
           value={(field.value as string) ?? ""}
@@ -132,11 +159,7 @@ export function CardEditor<T extends FieldValues>({
         br={CARD_RADIUS}
         overflow="hidden"
       >
-        <LiquidGlass
-          intensity={30}
-          borderRadius={CARD_RADIUS}
-          backgroundColor="rgba(220,255,245,0.04)"
-        />
+        <LiquidGlass intensity={25} borderRadius={CARD_RADIUS} />
         <View
           pointerEvents="none"
           style={{
@@ -145,15 +168,15 @@ export function CardEditor<T extends FieldValues>({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: "rgba(255,255,255,0.26)",
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
           }}
         />
       </YStack>
       <GradientBorder
         radius={CARD_RADIUS}
-        angle={lit ? 180 : 160}
-        colors={lit ? FOCUS_BORDER.colors : CARD_BORDER.colors}
-        positions={lit ? FOCUS_BORDER.positions : CARD_BORDER.positions}
+        angle={160}
+        colors={CARD_BORDER.colors}
+        positions={CARD_BORDER.positions}
       />
       <FocusRing radius={CARD_RADIUS} progress={focusProgress} />
 
@@ -213,9 +236,9 @@ export function CardEditor<T extends FieldValues>({
         />
         <LinearGradient
           pointerEvents="none"
-          colors={["rgba(220,255,245,0.2)", "rgba(227, 248, 242, 0.05)"]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
+          colors={["rgba(243, 255, 251, 0.09)", "rgba(188, 252, 234, 0.3)"]}
+          start={{ x: 1, y: 0.5 }}
+          end={{ x: 0, y: 0.5 }}
           style={{ height: 1, marginTop: 6 }}
         />
         <CardField

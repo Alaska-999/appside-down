@@ -117,7 +117,9 @@ function FormInputInner<T extends FieldValues>(
                 f={1}
                 unstyled
                 h={multiline ? undefined : "100%"}
-                minHeight={multiline ? 66 : undefined}
+                minHeight={
+                  multiline ? (variant === "plain" ? 50 : 66) : undefined
+                }
                 fontSize={multiline ? 15 : text.fontSize}
                 fontWeight={text.fontWeight}
                 color="$color"

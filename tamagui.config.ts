@@ -120,10 +120,18 @@ const appConfig = createTamagui({
             stiffness: 50,
         },
         quick: {
-            damping: 20,
-            mass: 1.2,
-            stiffness: 250,
+            type: 'spring',
+            damping: 100,
+            mass: 1,
+            stiffness: 500,
         },
+        fade: {
+            type: 'timing',
+            duration: 40,
+        },
+        simple: {
+            stiffness: 20,
+        }
     }),
     themes: {
         dark: {
@@ -142,7 +150,7 @@ const appConfig = createTamagui({
 
             borderColor: 'rgba(220,255,245,0.13)',
             hairline: 'rgba(220,255,245,0.08)',
-            placeholderColor: tokens.color.mutedDim,
+            placeholderColor: tokens.color.textMuted,
 
             accentGradientStart: tokens.color.mint,
             accentGradientEnd: tokens.color.lime,

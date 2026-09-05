@@ -13,9 +13,11 @@ import {
 } from "react-native-reanimated";
 
 const CARD_KEYBOARD_GAP = 30;
-const KEYBOARD_TAIL = KEYBOARD_BAR_HEIGHT + CARD_KEYBOARD_GAP;
 
-export function useKeyboardCardLift() {
+export function useKeyboardCardLift({
+  bottomInset = 0,
+}: { bottomInset?: number } = {}) {
+  const keyboardTail = KEYBOARD_BAR_HEIGHT + bottomInset + CARD_KEYBOARD_GAP;
   const scrollRef = useRef<KeyboardAwareScrollViewRef & ScrollView>(null);
   const scrollInnerRef = useRef<View>(null as unknown as View);
   const viewportHeight = useRef(0);
@@ -28,7 +30,7 @@ export function useKeyboardCardLift() {
   const spacerStyle = useAnimatedStyle(() => ({
     height:
       armed.value *
-      (-keyboardOffset.value + keyboardProgress.value * KEYBOARD_TAIL),
+      (-keyboardOffset.value + keyboardProgress.value * keyboardTail),
   }));
 
   const settleCard = (card: View) => {
@@ -40,6 +42,7 @@ export function useKeyboardCardLift() {
         viewportHeight.current -
         keyboardHeight.current -
         KEYBOARD_BAR_HEIGHT -
+        bottomInset -
         CARD_KEYBOARD_GAP;
       scroll.scrollTo({ y: Math.max(0, y + h - visibleBottom), animated: true });
     });

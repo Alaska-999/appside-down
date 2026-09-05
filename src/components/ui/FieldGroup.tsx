@@ -2,8 +2,6 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import {
   FocusRing,
   useFocusProgress,
-  WELL_BORDERS,
-  WELL_BOTTOM_LINE,
   WellInsetShadow,
 } from "@/src/components/ui/InputShell";
 import { Children, createContext, ReactNode, useState } from "react";
@@ -11,7 +9,18 @@ import { StyleSheet, View } from "react-native";
 import { YStack } from "tamagui";
 
 const GROUP_RADIUS = 20;
-const DIVIDER = "rgba(220,255,245,0.1)";
+const GROUP_BG = "rgba(4,8,10,0.5)";
+const GROUP_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.6)" };
+const GROUP_BOTTOM_LINE = "rgba(220,255,245,0.05)";
+const GROUP_BORDER = {
+  colors: [
+    "rgba(0,0,0,0.1)",
+    "rgba(140,161,159,0.14)",
+    "rgba(163,187,180,0.18)",
+  ],
+  positions: [0, 0.8, 1],
+};
+const DIVIDER = "rgba(220,255,245,0.12)";
 
 export const FieldGroupContext = createContext<
   ((focused: boolean) => void) | null
@@ -25,7 +34,6 @@ export function FieldGroup({ children }: { children: ReactNode }) {
     setFocusCount((n) => Math.max(0, n + (next ? 1 : -1)));
 
   const focusProgress = useFocusProgress(focused);
-  const border = WELL_BORDERS[focused ? "focus" : "default"];
 
   return (
     <FieldGroupContext.Provider value={onFocusChange}>
@@ -40,16 +48,9 @@ export function FieldGroup({ children }: { children: ReactNode }) {
           overflow="hidden"
         >
           <View
-            style={[
-              StyleSheet.absoluteFill,
-              {
-                backgroundColor: focused
-                  ? "rgba(4,8,10,0.7)"
-                  : "rgba(4,8,10,0.5)",
-              },
-            ]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: GROUP_BG }]}
           />
-          <WellInsetShadow radius={GROUP_RADIUS} />
+          <WellInsetShadow radius={GROUP_RADIUS} shadow={GROUP_INSET_SHADOW} />
           <View
             pointerEvents="none"
             style={{
@@ -58,15 +59,15 @@ export function FieldGroup({ children }: { children: ReactNode }) {
               left: 0,
               right: 0,
               height: 1,
-              backgroundColor: WELL_BOTTOM_LINE,
+              backgroundColor: GROUP_BOTTOM_LINE,
             }}
           />
         </YStack>
         <GradientBorder
           radius={GROUP_RADIUS}
           angle={180}
-          colors={border.colors}
-          positions={border.positions}
+          colors={GROUP_BORDER.colors}
+          positions={GROUP_BORDER.positions}
         />
         <FocusRing radius={GROUP_RADIUS} progress={focusProgress} />
         <YStack zIndex={2}>

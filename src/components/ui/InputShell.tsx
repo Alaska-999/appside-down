@@ -1,5 +1,12 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  FOCUS_BORDER,
+  FOCUS_GLOW,
+  FOCUS_HIGHLIGHT,
+  FOCUS_RING,
+  FOCUS_TIMING,
+} from "@/src/constants/focus";
 import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { controlHeight } from "@/tamagui.config";
 import {
@@ -14,7 +21,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import Animated, {
-  Easing,
   SharedValue,
   useAnimatedStyle,
   useReducedMotion,
@@ -25,9 +31,14 @@ import { YStack, YStackProps } from "tamagui";
 
 const GLOW_PAD = 20;
 const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.55)" };
-export const WELL_BOTTOM_LINE = "rgba(220,255,245,0.05)";
 
-export function WellInsetShadow({ radius }: { radius: number }) {
+export function WellInsetShadow({
+  radius,
+  shadow = WELL_INSET_SHADOW,
+}: {
+  radius: number;
+  shadow?: { dy: number; blur: number; color: string };
+}) {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -52,9 +63,9 @@ export function WellInsetShadow({ radius }: { radius: number }) {
           >
             <Shadow
               dx={0}
-              dy={WELL_INSET_SHADOW.dy}
-              blur={WELL_INSET_SHADOW.blur}
-              color={WELL_INSET_SHADOW.color}
+              dy={shadow.dy}
+              blur={shadow.blur}
+              color={shadow.color}
               inner
               shadowOnly
             />
@@ -64,19 +75,6 @@ export function WellInsetShadow({ radius }: { radius: number }) {
     </View>
   );
 }
-export const FOCUS_BORDER = {
-  colors: [
-    "rgba(65, 237, 237, 0.6)",
-    "rgba(175, 246, 234, 0.4)",
-    "rgba(82, 227, 172, 0.55)",
-  ],
-  positions: [0, 0.5, 1],
-};
-const FOCUS_GLOW = { color: "rgba(45, 212, 190, 0.4)", blur: 6, width: 3.5 };
-const FOCUS_RING = { width: 1.4, color: "rgba(94,234,212,0.4)" };
-const FOCUS_IN_MS = 260;
-const FOCUS_OUT_MS = 180;
-const FOCUS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
 
 export function useFocusProgress(focused: boolean) {
   const reduced = useReducedMotion();
@@ -87,8 +85,8 @@ export function useFocusProgress(focused: boolean) {
         ? 1
         : 0
       : withTiming(focused ? 1 : 0, {
-          duration: focused ? FOCUS_IN_MS : FOCUS_OUT_MS,
-          easing: FOCUS_EASING,
+          duration: focused ? FOCUS_TIMING.inMs : FOCUS_TIMING.outMs,
+          easing: FOCUS_TIMING.easing,
         });
   }, [focused, reduced, progress]);
   return progress;
@@ -121,17 +119,40 @@ export function FocusRing({
       </Animated.View>
       <Animated.View
         pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { zIndex: 3 }, ringStyle]}
+      >
+        <GradientBorder
+          radius={radius}
+          angle={FOCUS_BORDER.angle}
+          colors={FOCUS_BORDER.colors}
+          positions={FOCUS_BORDER.positions}
+        />
+      </Animated.View>
+      <Animated.View
+        pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
           {
             borderRadius: radius,
             borderWidth: FOCUS_RING.width,
             borderColor: FOCUS_RING.color,
+            overflow: "hidden",
             zIndex: 3,
           },
           ringStyle,
         ]}
-      />
+      >
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: radius / 2,
+            right: radius / 2,
+            height: 1,
+            backgroundColor: FOCUS_HIGHLIGHT,
+          }}
+        />
+      </Animated.View>
     </>
   );
 }
@@ -228,7 +249,14 @@ export const WELL_BORDERS: Record<
     ],
     positions: [0, 0.8, 1],
   },
-  focus: FOCUS_BORDER,
+  focus: {
+    colors: [
+      "rgba(0, 0, 0, 0.1)",
+      "rgba(140, 161, 159, 0.14)",
+      "rgba(163, 187, 180, 0.18)",
+    ],
+    positions: [0, 0.8, 1],
+  },
   error: {
     colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"],
     positions: [0, 1],
@@ -239,17 +267,21 @@ export const WELL_BORDERS: Record<
   },
 };
 
-const RINGS: Record<
-  Exclude<InputShellState, "default" | "focus">,
-  { width: number; color: string }
-> = {
-  error: { width: 1.4, color: "rgba(239,68,68,0.75)" },
-  good: { width: 1.3, color: "rgba(163,230,53,0.55)" },
-};
-
 type InputShellLayoutProps = Pick<
   YStackProps,
-  "mt" | "mb" | "ml" | "mr" | "f" | "flex" | "w" | "h" | "ai" | "als" | "pos" | "zIndex" | "testID"
+  | "mt"
+  | "mb"
+  | "ml"
+  | "mr"
+  | "f"
+  | "flex"
+  | "w"
+  | "h"
+  | "ai"
+  | "als"
+  | "pos"
+  | "zIndex"
+  | "testID"
 >;
 
 interface InputShellProps extends InputShellLayoutProps {
@@ -271,7 +303,6 @@ export function InputShell({
   ...rest
 }: InputShellProps) {
   const s = INPUT_SIZE_STYLES[size];
-  const ring = state === "error" || state === "good" ? RINGS[state] : null;
   const focusProgress = useFocusProgress(state === "focus" && !disabled);
   const underlineStyle = useAnimatedStyle(() => ({
     opacity: focusProgress.value,
@@ -336,7 +367,7 @@ export function InputShell({
     return (
       <YStack
         h={multiline ? undefined : s.height}
-        minHeight={multiline ? 112 : undefined}
+        minHeight={multiline ? 80 : undefined}
         fd={multiline ? "column" : "row"}
         ai={multiline ? "stretch" : "center"}
         px={s.px}
@@ -382,22 +413,11 @@ export function InputShell({
                 StyleSheet.absoluteFill,
                 {
                   backgroundColor:
-                    state === "focus" ? "rgba(4,8,10,.6)" : "rgba(4,8,10,.55)",
+                    state === "focus" ? "rgba(4,8,10,0.65)" : "rgba(4,8,10,.5)",
                 },
               ]}
             />
             <WellInsetShadow radius={s.radius} />
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 1,
-                backgroundColor: WELL_BOTTOM_LINE,
-              }}
-            />
           </>
         )}
       </YStack>
@@ -419,20 +439,6 @@ export function InputShell({
       {!disabled && <FocusRing radius={s.radius} progress={focusProgress} />}
       {state === "error" && !disabled && (
         <OuterGlow radius={s.radius} color="rgba(239,68,68,0.4)" />
-      )}
-      {ring && (
-        <View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              borderRadius: s.radius,
-              borderWidth: ring.width,
-              borderColor: ring.color,
-              zIndex: 3,
-            },
-          ]}
-        />
       )}
       <YStack
         f={1}

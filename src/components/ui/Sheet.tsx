@@ -3,6 +3,7 @@ import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
   ICON_ACCENT,
   ICON_DANGER,
+  ICON_MUTED_LIGHT,
   ICON_SUBTLE,
 } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
@@ -16,7 +17,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { Keyboard, Pressable, View } from "react-native";
+import { Keyboard, View } from "react-native";
 import { useKeyboardState } from "react-native-keyboard-controller";
 import Animated, {
   useAnimatedStyle,
@@ -26,6 +27,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Sheet, Text, useTheme, XStack, YStack } from "tamagui";
+import { Lamp } from "./GlowSurface";
 
 const SHEET_SKIRT_HEIGHT = 600;
 
@@ -89,7 +91,7 @@ export function AppSheet({
       dismissOnSnapToBottom
       moveOnKeyboardChange={!growWithKeyboard}
     >
-      <Sheet.Overlay bg="rgba(3,5,8,0.5)" />
+      <Sheet.Overlay bg="rgba(3,5,8,0.42)" />
 
       <Sheet.Frame
         bg="transparent"
@@ -105,7 +107,8 @@ export function AppSheet({
         }}
         onTouchMove={(e) => {
           if (keepKeyboard) return;
-          if (e.nativeEvent.pageY - touchStartY.current > 12) Keyboard.dismiss();
+          if (e.nativeEvent.pageY - touchStartY.current > 12)
+            Keyboard.dismiss();
         }}
       >
         <View
@@ -139,15 +142,17 @@ export function AppSheet({
             intensity={SHEET_BLUR[blur]}
             backgroundColor={theme.sheetBg.get()}
           />
+
+          <Lamp color="rgba(137, 230, 213, 0.2)" edge={0.4} />
           <View
             pointerEvents="none"
             style={{
               position: "absolute",
               top: 0,
-              left: 18,
-              right: 18,
+              left: 32,
+              right: 32,
               height: 1,
-              backgroundColor: "rgba(255, 255, 255, 0.18)",
+              backgroundColor: "rgba(255, 255, 255, 0.25)",
             }}
           />
           <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
@@ -228,12 +233,22 @@ export function AppSheet({
   );
 }
 
-const ROW_BG = {
-  dense: "rgba(5, 13, 21, 0.38)",
-  light: "rgba(28, 33, 38, 0.35)",
-} as const;
+type SheetRowTone = "light" | "dark" | "surface";
 
-const SheetRowsContext = createContext<{ dense: boolean }>({ dense: false });
+const ROW_BG: Record<SheetRowTone, string> = {
+  dark: "rgba(5, 13, 21, 0.38)",
+  light: "rgba(31, 40, 44, 0.75)",
+  surface: "rgba(133, 155, 152, 0.07)",
+};
+const ROW_PRESSED_BG: Record<SheetRowTone, string> = {
+  dark: "rgba(4, 10, 16, 0.73)",
+  light: "rgba(44, 50, 50, 0.3)",
+  surface: "rgba(46, 66, 63, 0.06)",
+};
+
+const SheetRowsContext = createContext<{ tone: SheetRowTone }>({
+  tone: "light",
+});
 
 interface SheetRowProps {
   icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
@@ -244,6 +259,7 @@ interface SheetRowProps {
   chevron?: boolean;
   selected?: boolean;
   right?: ReactNode;
+  tone?: SheetRowTone;
   onPress?: () => void;
 }
 
@@ -256,20 +272,35 @@ export function SheetRow({
   chevron,
   selected,
   right,
+  tone,
   onPress,
 }: SheetRowProps) {
-  const { dense } = useContext(SheetRowsContext);
+  const rows = useContext(SheetRowsContext);
+  const rowTone = tone ?? rows.tone;
   const labelColor = danger ? "$roseSoft" : "$color";
-  const iconColor = danger ? ICON_DANGER : "rgb(213, 225, 234)";
+  const iconColor = danger ? ICON_DANGER : ICON_MUTED_LIGHT;
 
-  const row = (pressed: boolean) => (
+  const pressable = !!onPress;
+
+  return (
     <XStack
       ai="center"
       gap={14}
       px={17}
       py={16}
       minHeight={44}
-      bg={pressed ? "$glassBg" : dense ? ROW_BG.dense : ROW_BG.light}
+      bg={ROW_BG[rowTone]}
+      transition="quick"
+      {...(pressable && {
+        onPress: () => {
+          hapticTap();
+          onPress();
+        },
+
+        pressStyle: { bg: ROW_PRESSED_BG[rowTone] },
+        accessibilityRole: "button" as const,
+        accessibilityLabel: label,
+      })}
     >
       <Icon size={21} color={iconColor} strokeWidth={1.9} />
       <YStack f={1} gap={2}>
@@ -283,46 +314,39 @@ export function SheetRow({
         )}
       </YStack>
       {hint && (
-        <Text fontSize={12} color="$placeholderColor" fontWeight="500">
+        <Text fontSize={12} color="$mutedDim" fontWeight="500">
           {hint}
         </Text>
       )}
       {selected && <Check size={18} color={ICON_ACCENT} strokeWidth={2.4} />}
       {right}
-      {chevron && <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />}
+      {chevron && (
+        <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />
+      )}
     </XStack>
-  );
-
-  if (!onPress) return row(false);
-
-  return (
-    <Pressable
-      onPress={() => {
-        hapticTap();
-        onPress();
-      }}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      {({ pressed }) => row(pressed)}
-    </Pressable>
   );
 }
 
-export function SheetRows({ children }: { children: ReactNode }) {
+export function SheetRows({
+  children,
+  tone,
+}: {
+  children: ReactNode;
+  tone?: SheetRowTone;
+}) {
   const items = Children.toArray(children);
-  const dense = items.length > 2;
+  const rowsTone = tone ?? (items.length > 2 ? "dark" : "light");
 
   return (
-    <SheetRowsContext.Provider value={{ dense }}>
-      <YStack br="$cardSoft" overflow="hidden" bg="rgba(220,255,245,0.085)">
+    <SheetRowsContext.Provider value={{ tone: rowsTone }}>
+      <YStack br="$cardSoft" overflow="hidden">
         {items.map((child, index) => (
           <View key={index}>
             {index > 0 && (
               <View
                 style={{
                   height: 1,
-                  backgroundColor: "rgba(220,255,245,0.09)",
+                  backgroundColor: "rgba(220,255,245,0.12)",
                 }}
               />
             )}

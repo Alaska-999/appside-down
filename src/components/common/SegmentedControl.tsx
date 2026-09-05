@@ -1,9 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  FOCUS_BORDER,
-  FocusRing,
-  useFocusProgress,
-} from "@/src/components/ui/InputShell";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -127,12 +123,7 @@ export function SegmentedControl({
                   backgroundColor: "rgba(255,255,255,0.34)",
                 }}
               />
-              <GradientBorder
-                radius={13}
-                angle={180}
-                colors={FOCUS_BORDER.colors}
-                positions={FOCUS_BORDER.positions}
-              />
+              <GradientBorder radius={13} preset="lens" />
               <FocusRing radius={13} progress={glowProgress} />
             </>
           ) : (

@@ -1,8 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  WELL_BOTTOM_LINE,
-  WellInsetShadow,
-} from "@/src/components/ui/InputShell";
+import { WellInsetShadow } from "@/src/components/ui/InputShell";
 import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
@@ -52,17 +49,6 @@ export function PickRow({
             ]}
           />
           <WellInsetShadow radius={ROW_RADIUS} />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 1,
-              backgroundColor: WELL_BOTTOM_LINE,
-            }}
-          />
         </YStack>
         <GradientBorder radius={ROW_RADIUS} preset="well" />
         <XStack ai="center" gap={11} px={16} zIndex={2}>

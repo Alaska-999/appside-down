@@ -1,11 +1,14 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
+import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
-import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { AddPill } from "@/src/components/ui/AddPill";
 import { FieldGroup } from "@/src/components/ui/FieldGroup";
-import { KeyboardBar } from "@/src/components/ui/KeyboardBar";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -27,14 +30,33 @@ import {
   useWatch,
 } from "react-hook-form";
 import { Platform, TextInput, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import Animated from "react-native-reanimated";
+import {
+  KeyboardAwareScrollView,
+  useReanimatedKeyboardAnimation,
+} from "react-native-keyboard-controller";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
 
 type FolderOption = { id: string; name: string };
 
+const STICKY_ADD_HEIGHT = 46;
+const STICKY_ADD_KEYBOARD_GAP = 10;
+const STICKY_ADD_CLEARANCE = STICKY_ADD_HEIGHT + 20;
+
 export default function ModuleCreate() {
   const screen = useScreenInsets();
+  const { height: keyboardOffset, progress: keyboardProgress } =
+    useReanimatedKeyboardAnimation();
+  const stickyAddStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY:
+          keyboardOffset.value -
+          keyboardProgress.value *
+            (KEYBOARD_BAR_HEIGHT + STICKY_ADD_KEYBOARD_GAP - screen.bottom),
+      },
+    ],
+  }));
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const { returnFolderId } = useLocalSearchParams<{
@@ -84,7 +106,9 @@ export default function ModuleCreate() {
     spacerStyle,
     liftCard,
     releaseCard,
-  } = useKeyboardCardLift();
+  } = useKeyboardCardLift({
+    bottomInset: STICKY_ADD_HEIGHT + STICKY_ADD_KEYBOARD_GAP,
+  });
 
   const termRefs = useRef<(TextInput | null)[]>([]);
   const definitionRefs = useRef<(TextInput | null)[]>([]);
@@ -157,10 +181,7 @@ export default function ModuleCreate() {
       <YStack f={1} bg="$background">
         <BackgroundMesh preset="formBright" />
 
-        <View
-          style={{ flex: 1 }}
-          onLayout={onViewportLayout}
-        >
+        <View style={{ flex: 1 }} onLayout={onViewportLayout}>
           <KeyboardAwareScrollView
             ref={scrollRef}
             innerViewRef={scrollInnerRef}
@@ -170,7 +191,7 @@ export default function ModuleCreate() {
             keyboardShouldPersistTaps="always"
             contentContainerStyle={{
               paddingTop: screen.top,
-              paddingBottom: screen.bottom,
+              paddingBottom: screen.bottom + STICKY_ADD_CLEARANCE,
             }}
           >
             <YStack px="$screenX">
@@ -213,7 +234,7 @@ export default function ModuleCreate() {
               </YStack>
 
               <YStack mb={22}>
-                <SheetRows>
+                <SheetRows tone="surface">
                   <SheetRow
                     icon={Folder}
                     label="Folder"
@@ -279,19 +300,31 @@ export default function ModuleCreate() {
                   {flashcardsError}
                 </Text>
               )}
-
-              <YStack mt={16}>
-                <AddPill
-                  label="Add card"
-                  onPress={() => append({ term: "", definition: "" })}
-                />
-              </YStack>
             </YStack>
             <Animated.View style={spacerStyle} />
           </KeyboardAwareScrollView>
         </View>
 
         <StatusBarScrim />
+
+        <Animated.View
+          pointerEvents="box-none"
+          style={[
+            {
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: screen.bottom,
+              alignItems: "center",
+            },
+            stickyAddStyle,
+          ]}
+        >
+          <AddPill
+            label="Add card"
+            onPress={() => append({ term: "", definition: "" })}
+          />
+        </Animated.View>
 
         <KeyboardBar />
 

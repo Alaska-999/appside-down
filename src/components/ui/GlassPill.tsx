@@ -3,7 +3,7 @@ import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Spinner, Text, XStack, YStack } from "tamagui";
 
 export type GlassPillTone = "accent" | "save";
@@ -76,8 +76,24 @@ interface SizeStyle {
 }
 
 const SIZE_STYLES: Record<GlassPillSize, SizeStyle> = {
-  lg: { height: 42, px: 18, gap: 9, fontSize: 13.5, fontWeight: "600", iconSize: 16, iconStroke: 2.1 },
-  md: { height: 40, px: 17, gap: 8, fontSize: 14, fontWeight: "700", iconSize: 17, iconStroke: 2.3 },
+  lg: {
+    height: 46,
+    px: 24,
+    gap: 7,
+    fontSize: 14,
+    fontWeight: "600",
+    iconSize: 17,
+    iconStroke: 2.6,
+  },
+  md: {
+    height: 40,
+    px: 17,
+    gap: 8,
+    fontSize: 14,
+    fontWeight: "700",
+    iconSize: 17,
+    iconStroke: 2.3,
+  },
 };
 
 interface GlassPillProps {
@@ -105,19 +121,18 @@ export function GlassPill({
   const radius = s.height / 2;
 
   return (
-    <Pressable
+    <YStack
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: !active }}
+      als={t.centerSelf ? "center" : undefined}
+      transition="quick"
+      pressStyle={active ? { scale: 0.95 } : undefined}
       onPress={() => {
         if (!active) return;
         hapticTap();
         onPress();
       }}
-      style={({ pressed }) => ({
-        transform: [{ scale: pressed && active ? 0.965 : 1 }],
-        ...(t.centerSelf ? { alignSelf: "center" as const } : null),
-      })}
     >
       <YStack
         h={s.height}
@@ -134,7 +149,15 @@ export function GlassPill({
             }
           : null)}
       >
-        <YStack pos="absolute" t={0} l={0} r={0} b={0} br={radius} overflow="hidden">
+        <YStack
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          br={radius}
+          overflow="hidden"
+        >
           <LiquidGlass
             intensity={t.glassIntensity}
             borderRadius={radius}
@@ -183,6 +206,6 @@ export function GlassPill({
           </Text>
         </XStack>
       </YStack>
-    </Pressable>
+    </YStack>
   );
 }
