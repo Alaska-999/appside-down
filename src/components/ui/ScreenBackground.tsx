@@ -275,11 +275,11 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           positions: [0, 0.44, 1],
         },
         beam: {
-          angle: 108,
+          angle: 106,
           colors: [
             "rgba(94,234,212,0)",
             "rgba(94,234,212,0.62)",
-            "rgba(190,242,100,0.5)",
+            "rgba(190,242,100,0.55)",
             "rgba(190,242,100,0)",
           ],
           positions: [0.2, 0.38, 0.52, 0.72],
@@ -289,7 +289,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         layers: [
           {
-            blur: 40,
+            blur: 42,
             blobs: [
               {
                 cx: 0.5 * w,
@@ -302,7 +302,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
             ],
           },
         ],
-        grain: 0.06,
+        grain: 0.05,
       };
     case "auth":
       return {

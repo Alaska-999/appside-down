@@ -77,8 +77,14 @@ export default function ModuleCreate() {
     name: "flashcards",
   });
 
-  const { scrollRef, scrollInnerRef, onViewportLayout, spacerStyle, liftCard } =
-    useKeyboardCardLift();
+  const {
+    scrollRef,
+    scrollInnerRef,
+    onViewportLayout,
+    spacerStyle,
+    liftCard,
+    releaseCard,
+  } = useKeyboardCardLift();
 
   const termRefs = useRef<(TextInput | null)[]>([]);
   const definitionRefs = useRef<(TextInput | null)[]>([]);
@@ -197,6 +203,7 @@ export default function ModuleCreate() {
                     name="name"
                     variant="plain"
                     placeholder="Module name"
+                    onFocus={releaseCard}
                     maxLength={60}
                     showCounter
                     hideError
@@ -206,6 +213,7 @@ export default function ModuleCreate() {
                     name="description"
                     variant="plain"
                     placeholder="Description (optional)"
+                    onFocus={releaseCard}
                     maxLength={300}
                     multiline
                     hideError

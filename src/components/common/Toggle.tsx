@@ -72,8 +72,16 @@ export function Toggle({
   }, [value, progress]);
 
   const trackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], [s.offTrack, "rgba(0,0,0,0)"]),
-    borderColor: interpolateColor(progress.value, [0, 1], [s.trackBorder, "rgba(0,0,0,0)"]),
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [s.offTrack, "rgba(0,0,0,0)"],
+    ),
+    borderColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [s.trackBorder, "rgba(0,0,0,0)"],
+    ),
     shadowOpacity: progress.value * 0.75,
   }));
 
@@ -83,7 +91,11 @@ export function Toggle({
 
   const thumbStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: progress.value * s.travel }],
-    backgroundColor: interpolateColor(progress.value, [0, 1], [s.offThumb, s.onThumb]),
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [s.offThumb, s.onThumb],
+    ),
   }));
 
   const handlePress = () => {
@@ -111,9 +123,9 @@ export function Toggle({
             borderWidth: 1,
             justifyContent: "center",
             overflow: "visible",
-            shadowColor: "rgba(45,212,191,1)",
+            shadowColor: "rgba(45,212,191,0.8)",
             shadowOffset: { width: 0, height: 0 },
-            shadowRadius: 8,
+            shadowRadius: 6,
           },
           trackStyle,
         ]}

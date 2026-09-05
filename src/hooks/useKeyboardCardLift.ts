@@ -6,7 +6,11 @@ import {
   useKeyboardHandler,
   useReanimatedKeyboardAnimation,
 } from "react-native-keyboard-controller";
-import { runOnJS, useAnimatedStyle } from "react-native-reanimated";
+import {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const CARD_KEYBOARD_GAP = 30;
 const KEYBOARD_TAIL = KEYBOARD_BAR_HEIGHT + CARD_KEYBOARD_GAP;
@@ -17,11 +21,14 @@ export function useKeyboardCardLift() {
   const viewportHeight = useRef(0);
   const pendingCard = useRef<View | null>(null);
   const keyboardHeight = useRef(0);
+  const armed = useSharedValue(0);
 
   const { height: keyboardOffset, progress: keyboardProgress } =
     useReanimatedKeyboardAnimation();
   const spacerStyle = useAnimatedStyle(() => ({
-    height: -keyboardOffset.value + keyboardProgress.value * KEYBOARD_TAIL,
+    height:
+      armed.value *
+      (-keyboardOffset.value + keyboardProgress.value * KEYBOARD_TAIL),
   }));
 
   const settleCard = (card: View) => {
@@ -41,12 +48,19 @@ export function useKeyboardCardLift() {
   const liftCard = (card: View | null) => {
     if (!card) return;
     pendingCard.current = card;
+    armed.value = 1;
     if (keyboardHeight.current > 0) settleCard(card);
+  };
+
+  const releaseCard = () => {
+    pendingCard.current = null;
+    armed.value = 0;
   };
 
   const onKeyboardSettled = (height: number) => {
     keyboardHeight.current = height;
-    if (height > 0 && pendingCard.current) settleCard(pendingCard.current);
+    if (height === 0) releaseCard();
+    else if (pendingCard.current) settleCard(pendingCard.current);
   };
 
   useKeyboardHandler(
@@ -63,5 +77,12 @@ export function useKeyboardCardLift() {
     viewportHeight.current = e.nativeEvent.layout.height;
   };
 
-  return { scrollRef, scrollInnerRef, onViewportLayout, spacerStyle, liftCard };
+  return {
+    scrollRef,
+    scrollInnerRef,
+    onViewportLayout,
+    spacerStyle,
+    liftCard,
+    releaseCard,
+  };
 }

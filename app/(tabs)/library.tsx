@@ -447,6 +447,7 @@ export default function Library() {
               options={["Folders", "Modules"]}
               selected={tabs.index}
               onChange={tabs.onChange}
+              tone="glass"
             />
           </YStack>
           <YStack h={22} />

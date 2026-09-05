@@ -100,7 +100,6 @@ export function EditCardsSheet({
       const inner = scrollInnerRef.current;
       if (!card || !scroll || !inner) return;
       card.measureLayout(inner, (_x, y) => {
-        console.log("[EditCardsSheet] liftCard", { y });
         scroll.scrollTo({ y: Math.max(0, y - CARD_TOP_GAP), animated: true });
       });
     };

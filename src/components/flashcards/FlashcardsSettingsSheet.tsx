@@ -5,7 +5,7 @@ import { AppSheet } from "@/src/components/ui/Sheet";
 import { useGameStore } from "@/src/store/useGameStore";
 import { RotateCcw } from "lucide-react-native";
 import { ReactNode } from "react";
-import { View, Text, XStack, YStack } from "tamagui";
+import { Text, View, XStack, YStack } from "tamagui";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;
@@ -39,7 +39,14 @@ function SettingsRow({
 
 function RowDivider() {
   return (
-    <View pos="absolute" top={0} left={16} right={0} height={1} bg="rgba(220,255,245,0.08)" />
+    <View
+      pos="absolute"
+      top={0}
+      left={16}
+      right={0}
+      height={1}
+      bg="rgba(220,255,245,0.08)"
+    />
   );
 }
 
@@ -52,7 +59,13 @@ function SoonBadge() {
       borderWidth={1}
       borderColor="rgba(220,255,245,0.18)"
     >
-      <Text fontSize={9.5} fontWeight="800" letterSpacing={0.76} tt="uppercase" color="$colorMuted">
+      <Text
+        fontSize={9.5}
+        fontWeight="800"
+        letterSpacing={0.76}
+        tt="uppercase"
+        color="$colorMuted"
+      >
         soon
       </Text>
     </XStack>
@@ -75,7 +88,13 @@ export function FlashcardsSettingsSheet({
   return (
     <AppSheet open={open} onOpenChange={onOpenChange} title="Settings">
       <YStack gap={12}>
-        <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.05)" borderWidth={1} borderColor="rgba(220,255,245,0.1)">
+        <YStack
+          br={20}
+          overflow="hidden"
+          bg="rgba(220,255,245,0.05)"
+          borderWidth={1}
+          borderColor="rgba(220,255,245,0.1)"
+        >
           <SettingsRow
             label="Shuffle cards"
             right={
@@ -94,14 +113,20 @@ export function FlashcardsSettingsSheet({
                 <Toggle
                   size="md"
                   value={settings.sortByPiles}
-                  onToggle={() => updateSettings({ sortByPiles: !settings.sortByPiles })}
+                  onToggle={() =>
+                    updateSettings({ sortByPiles: !settings.sortByPiles })
+                  }
                 />
               }
             />
           </View>
           <View pos="relative">
             <RowDivider />
-            <SettingsRow label="Text to speech" disabled right={<SoonBadge />} />
+            <SettingsRow
+              label="Text to speech"
+              disabled
+              right={<SoonBadge />}
+            />
           </View>
         </YStack>
 
@@ -124,6 +149,7 @@ export function FlashcardsSettingsSheet({
                 cardOrientation: i === 0 ? "term_first" : "definition_first",
               })
             }
+            tone="glass"
           />
         </YStack>
 

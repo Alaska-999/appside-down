@@ -101,14 +101,14 @@ export default function FolderCreate() {
           }}
         >
           <YStack px="$screenX">
-            <XStack ai="center" gap={10}>
+            <XStack ai="center" gap={14} mb={18}>
               <IconButton
                 variant="liquidGlass"
                 icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
                 onPress={() => router.back()}
                 accessibilityLabel="Close"
               />
-              <Text f={1} fontSize={19} fontWeight="800" color="$color">
+              <Text f={1} fontSize={20} fontWeight="800" color="$color">
                 New folder
               </Text>
               <SavePill

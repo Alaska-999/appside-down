@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   stamp: {
     position: "absolute",
-    // top: 60,
+    top: 40,
     zIndex: 6,
     borderRadius: 14,
     paddingHorizontal: 16,
