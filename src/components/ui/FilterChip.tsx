@@ -2,7 +2,7 @@ import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Text, XStack } from "tamagui";
 
 type FilterChipVariant = "default" | "on" | "solid";
@@ -43,7 +43,17 @@ export function FilterChip({
   const s = CHIP_STYLES[variant];
 
   return (
-    <Pressable
+    <XStack
+      h={36}
+      px={14}
+      br={999}
+      ai="center"
+      gap={6}
+      overflow="hidden"
+      bg={s.bg}
+      borderWidth={variant === "solid" ? 0 : 1}
+      borderColor={s.borderColor}
+      hitSlop={4}
       onPress={
         onPress
           ? () => {
@@ -52,43 +62,30 @@ export function FilterChip({
             }
           : undefined
       }
-      hitSlop={4}
-      style={({ pressed }) => ({
-        transform: [{ scale: pressed && onPress ? 0.97 : 1 }],
-      })}
+      {...(onPress
+        ? { pressStyle: { scale: 0.97 }, transition: "press" }
+        : null)}
+      {...(variant !== "default"
+        ? {
+            shadowColor: "rgba(45,212,191,1)",
+            shadowOffset: { width: 0, height: 0 },
+            shadowRadius: 8,
+            shadowOpacity: 0.55,
+          }
+        : null)}
     >
-      <XStack
-        h={36}
-        px={14}
-        br={999}
-        ai="center"
-        gap={6}
-        overflow="hidden"
-        bg={s.bg}
-        borderWidth={variant === "solid" ? 0 : 1}
-        borderColor={s.borderColor}
-        {...(variant !== "default"
-          ? {
-              shadowColor: "rgba(45,212,191,1)",
-              shadowOffset: { width: 0, height: 0 },
-              shadowRadius: 8,
-              shadowOpacity: 0.55,
-            }
-          : null)}
-      >
-        {variant === "solid" && (
-          <LinearGradient
-            colors={[ICON_MINT, ICON_LIME]}
-            start={{ x: 0, y: 0.4 }}
-            end={{ x: 1, y: 0.6 }}
-            style={StyleSheet.absoluteFill}
-          />
-        )}
-        {icon}
-        <Text fontSize={13} fontWeight={s.fontWeight} color={s.textColor}>
-          {label}
-        </Text>
-      </XStack>
-    </Pressable>
+      {variant === "solid" && (
+        <LinearGradient
+          colors={[ICON_MINT, ICON_LIME]}
+          start={{ x: 0, y: 0.4 }}
+          end={{ x: 1, y: 0.6 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      {icon}
+      <Text fontSize={13} fontWeight={s.fontWeight} color={s.textColor}>
+        {label}
+      </Text>
+    </XStack>
   );
 }

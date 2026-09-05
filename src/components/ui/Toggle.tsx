@@ -13,6 +13,7 @@ import { Pressable, StyleSheet } from "react-native";
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -75,11 +76,16 @@ export function Toggle({
   accessibilityLabel?: string;
 }) {
   const s = SIZE_STYLES[size];
+  const reduced = useReducedMotion();
   const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(value ? 1 : 0, { duration: 220 });
-  }, [value, progress]);
+    progress.value = reduced
+      ? value
+        ? 1
+        : 0
+      : withTiming(value ? 1 : 0, { duration: 220 });
+  }, [value, progress, reduced]);
 
   const trackStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(

@@ -4,7 +4,7 @@ import { ICON_ACCENT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Plus } from "lucide-react-native";
 import { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type TagChipVariant = "default" | "on" | "add";
@@ -74,7 +74,7 @@ export function TagChip({
   const countColor = variant === "on" ? "$textMuted" : "$mutedDim";
 
   return (
-    <Pressable
+    <YStack
       accessibilityRole="button"
       accessibilityLabel={label || (variant === "add" ? "Add tag" : undefined)}
       hitSlop={5}
@@ -86,9 +86,9 @@ export function TagChip({
             }
           : undefined
       }
-      style={({ pressed }) => ({
-        transform: [{ scale: pressed && onPress ? 0.97 : 1 }],
-      })}
+      {...(onPress
+        ? { pressStyle: { scale: 0.985 }, transition: "press" }
+        : null)}
     >
       <YStack
         h={CHIP_HEIGHT}
@@ -153,6 +153,6 @@ export function TagChip({
           )}
         </XStack>
       </YStack>
-    </Pressable>
+    </YStack>
   );
 }

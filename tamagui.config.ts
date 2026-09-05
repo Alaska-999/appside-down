@@ -1,6 +1,7 @@
 import { createAnimations } from '@tamagui/animations-react-native'
 import { createGenericFont } from '@tamagui/config'
 import { config } from '@tamagui/config/v3'
+import { Easing } from 'react-native-reanimated'
 import { createTamagui, createTokens } from 'tamagui'
 
 
@@ -128,6 +129,11 @@ const appConfig = createTamagui({
         fade: {
             type: 'timing',
             duration: 40,
+        },
+        press: {
+            type: 'timing',
+            duration: 170,
+            easing: Easing.bezier(0.2, 0.8, 0.3, 1).factory(),
         },
         simple: {
             stiffness: 20,

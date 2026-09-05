@@ -64,6 +64,8 @@ const LEGACY_VARIANT_STYLES: Record<
   },
 };
 
+const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
+
 export function IconButton({
   icon,
   variant = "glass",
@@ -71,6 +73,12 @@ export function IconButton({
   onPress,
   ...rest
 }: IconButtonProps) {
+  const reduced = useReducedMotion();
+  const pressScale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+  }));
+
   const handlePress = () => {
     hapticTap();
     onPress?.();
@@ -88,6 +96,7 @@ export function IconButton({
         jc="center"
         onPress={handlePress}
         pressStyle={{ scale: 0.9 }}
+        transition="press"
         accessibilityRole="button"
         shadowColor="#000"
         shadowOffset={{ width: 0, height: 3 }}
@@ -163,68 +172,77 @@ export function IconButton({
     return (
       <Pressable
         onPress={handlePress}
+        onPressIn={() => {
+          pressScale.value = reduced
+            ? 0.92
+            : withTiming(0.92, { duration: 170, easing: PRESS_EASING });
+        }}
+        onPressOut={() => {
+          pressScale.value = reduced
+            ? 1
+            : withTiming(1, { duration: 170, easing: PRESS_EASING });
+        }}
         hitSlop={Math.max(0, (44 - resolvedSize) / 2)}
-        style={({ pressed }) => ({
-          transform: [{ scale: pressed ? 0.95 : 1 }],
-        })}
       >
         {({ pressed }) => (
-          <YStack
-            w={resolvedSize}
-            h={resolvedSize}
-            br={radius}
-            ai="center"
-            jc="center"
-            pos="relative"
-            {...(variant === "acc"
-              ? {
-                  shadowColor: "rgba(45,212,191,1)",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowRadius: 8,
-                  shadowOpacity: 0.5,
-                }
-              : null)}
-            {...(rest as YStackProps)}
-          >
+          <Animated.View style={pressStyle}>
             <YStack
-              pos="absolute"
-              t={0}
-              l={0}
-              r={0}
-              b={0}
+              w={resolvedSize}
+              h={resolvedSize}
               br={radius}
-              overflow="hidden"
-            >
-              {variant === "acc" ? (
-                <LinearGradient
-                  colors={[ICON_MINT, ICON_LIME]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0.9, y: 0.9 }}
-                  style={StyleSheet.absoluteFill}
-                />
-              ) : (
-                <LiquidGlass
-                  intensity={40}
-                  tint="default"
-                  borderRadius={radius}
-                  backgroundColor={
-                    pressed
-                      ? "rgba(220,255,245,0.13)"
-                      : "rgba(220,255,245,0.07)"
+              ai="center"
+              jc="center"
+              pos="relative"
+              {...(variant === "acc"
+                ? {
+                    shadowColor: "rgba(45,212,191,1)",
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowRadius: 8,
+                    shadowOpacity: 0.5,
                   }
+                : null)}
+              {...(rest as YStackProps)}
+            >
+              <YStack
+                pos="absolute"
+                t={0}
+                l={0}
+                r={0}
+                b={0}
+                br={radius}
+                overflow="hidden"
+              >
+                {variant === "acc" ? (
+                  <LinearGradient
+                    colors={[ICON_MINT, ICON_LIME]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0.9, y: 0.9 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                ) : (
+                  <LiquidGlass
+                    intensity={40}
+                    tint="default"
+                    borderRadius={radius}
+                    backgroundColor={
+                      pressed
+                        ? "rgba(220,255,245,0.13)"
+                        : "rgba(220,255,245,0.07)"
+                    }
+                  />
+                )}
+              </YStack>
+              {variant === "glass" && (
+                <GradientBorder
+                  radius={radius}
+                  angle={150}
+                  colors={["rgba(220,255,245,0.34)", "rgba(220,255,245,0.04)"]}
+                  positions={[0, 1]}
                 />
               )}
+              <YStack zIndex={2}>{icon}</YStack>
             </YStack>
-            {variant === "glass" && (
-              <GradientBorder
-                radius={radius}
-                angle={150}
-                colors={["rgba(220,255,245,0.34)", "rgba(220,255,245,0.04)"]}
-                positions={[0, 1]}
-              />
-            )}
-            <YStack zIndex={2}>{icon}</YStack>
-          </YStack>
+          </Animated.View>
         )}
       </Pressable>
     );
@@ -237,6 +255,7 @@ export function IconButton({
       icon={icon}
       onPress={handlePress}
       pressStyle={{ scale: 0.92 }}
+      transition="press"
       {...LEGACY_VARIANT_STYLES[variant]}
       {...rest}
     />
@@ -255,7 +274,10 @@ export function AppFab({
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
   const runHalo = halo && !reduced;
-
+  const fabPressScale = useSharedValue(1);
+  const fabPressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: fabPressScale.value }],
+  }));
   useEffect(() => {
     if (runHalo) {
       pulse.value = withRepeat(
@@ -301,31 +323,40 @@ export function AppFab({
       )}
       <Pressable
         onPress={handlePress}
-        style={({ pressed }) => ({
-          transform: [{ scale: pressed ? 0.9 : 1 }],
-        })}
+        onPressIn={() => {
+          fabPressScale.value = reduced
+            ? 0.9
+            : withTiming(0.9, { duration: 170, easing: PRESS_EASING });
+        }}
+        onPressOut={() => {
+          fabPressScale.value = reduced
+            ? 1
+            : withTiming(1, { duration: 170, easing: PRESS_EASING });
+        }}
       >
-        <YStack
-          w={62}
-          h={62}
-          m={3}
-          br={31}
-          ai="center"
-          jc="center"
-          overflow="hidden"
-          shadowColor="rgba(94,234,212,1)"
-          shadowOffset={{ width: 0, height: 8 }}
-          shadowRadius={15}
-          shadowOpacity={0.7}
-        >
-          <LinearGradient
-            colors={[ICON_ACCENT, ICON_LIME]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0.9, y: 0.9 }}
-            style={StyleSheet.absoluteFill}
-          />
-          <YStack zIndex={2}>{icon}</YStack>
-        </YStack>
+        <Animated.View style={fabPressStyle}>
+          <YStack
+            w={62}
+            h={62}
+            m={3}
+            br={31}
+            ai="center"
+            jc="center"
+            overflow="hidden"
+            shadowColor="rgba(94,234,212,1)"
+            shadowOffset={{ width: 0, height: 8 }}
+            shadowRadius={15}
+            shadowOpacity={0.7}
+          >
+            <LinearGradient
+              colors={[ICON_ACCENT, ICON_LIME]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.9, y: 0.9 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <YStack zIndex={2}>{icon}</YStack>
+          </YStack>
+        </Animated.View>
       </Pressable>
     </View>
   );

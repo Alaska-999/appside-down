@@ -2,7 +2,7 @@ import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { ICON_ACCENT, ICON_MUTED } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 const TILE_RADIUS = 20;
@@ -84,14 +84,10 @@ export function ModeTile({
   live?: boolean;
   onPress?: () => void;
 }) {
-  const tile = (pressed: boolean) => (
-    <View
-      style={{
-        flex: 1,
-        opacity: live ? 1 : 0.46,
-        transform: [{ scale: pressed && live ? 0.97 : 1 }],
-      }}
-    >
+  const pressable = live && !!onPress;
+
+  const tile = (
+    <View style={{ flex: 1, opacity: live ? 1 : 0.46 }}>
       <GlowSurface
         f={1}
         radius={TILE_RADIUS}
@@ -105,6 +101,18 @@ export function ModeTile({
         shadowRadius={7}
         shadowOpacity={live ? 0.45 : 0.8}
         underlay={<EdgeHighlights live={live} />}
+        accessibilityRole={pressable ? "button" : undefined}
+        accessibilityLabel={pressable ? label : undefined}
+        {...(pressable
+          ? {
+              onPress: () => {
+                hapticTap();
+                onPress!();
+              },
+              pressStyle: { scale: 0.97 },
+              transition: "press",
+            }
+          : null)}
         {...TILE_BORDER}
       >
         <Icon size={22} color={live ? ICON_ACCENT : ICON_MUTED} strokeWidth={1.9} />
@@ -121,25 +129,9 @@ export function ModeTile({
     </View>
   );
 
-  if (!live || !onPress) {
-    return (
-      <YStack f={1} accessibilityLabel={`${label} — coming soon`}>
-        {tile(false)}
-      </YStack>
-    );
-  }
-
   return (
-    <Pressable
-      style={{ flex: 1 }}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={() => {
-        hapticTap();
-        onPress();
-      }}
-    >
-      {({ pressed }) => tile(pressed)}
-    </Pressable>
+    <YStack f={1} accessibilityLabel={!live ? `${label} — coming soon` : undefined}>
+      {tile}
+    </YStack>
   );
 }

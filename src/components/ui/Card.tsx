@@ -299,7 +299,9 @@ export function AppCard(props: CardProps) {
     : {};
   const stateProps: Partial<YStackProps> = {
     ...(locked ? { opacity: 0.42 } : null),
-    ...(onPress ? { onPress, pressStyle: { scale: 0.982 } } : null),
+    ...(onPress
+      ? { onPress, pressStyle: { scale: 0.982 }, transition: "press" }
+      : null),
   };
 
   let card: ReactNode;
@@ -525,7 +527,9 @@ export function AppCard(props: CardProps) {
         {...surfaceProps}
         {...liquidShadow}
         {...accentBorderProps}
-        {...(onPress ? { onPress, pressStyle: { scale: 0.982 } } : null)}
+        {...(onPress
+          ? { onPress, pressStyle: { scale: 0.982 }, transition: "press" }
+          : null)}
         {...rest}
       >
         {variant === "media" ? <YStack p={18}>{children}</YStack> : children}

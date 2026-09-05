@@ -4,7 +4,7 @@ import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
 import { ComponentType } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 const ROW_HEIGHT = 52;
@@ -24,16 +24,21 @@ export function PickRow({
   const filled = !!value;
 
   return (
-    <Pressable
+    <YStack
+      h={ROW_HEIGHT}
+      br={ROW_RADIUS}
+      pos="relative"
+      jc="center"
       accessibilityRole="button"
       accessibilityLabel={value ?? placeholder}
       onPress={() => {
         hapticTap();
         onPress();
       }}
+      pressStyle={{ scale: 0.978 }}
+      transition="press"
     >
-      <YStack h={ROW_HEIGHT} br={ROW_RADIUS} pos="relative" jc="center">
-        <YStack
+      <YStack
           pos="absolute"
           t={0}
           l={0}
@@ -63,7 +68,6 @@ export function PickRow({
           </Text>
           <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />
         </XStack>
-      </YStack>
-    </Pressable>
+    </YStack>
   );
 }

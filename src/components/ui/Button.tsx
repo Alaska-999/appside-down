@@ -45,6 +45,7 @@ const SIZE_STYLES: Record<
 };
 
 const MIN_TAP_TARGET = 44;
+const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
 
 type VariantSpec = {
   bg?: string;
@@ -308,6 +309,11 @@ export function AppButton({
   const spec = VARIANT_STYLES[variant];
   const isBlocked = disabled || loading;
   const verticalHitSlop = Math.max(0, (MIN_TAP_TARGET - height) / 2);
+  const reduced = useReducedMotion();
+  const pressScale = useSharedValue(1);
+  const pressAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+  }));
 
   const resolveColor = (c: string) =>
     c.startsWith("$")
@@ -325,9 +331,18 @@ export function AppButton({
       onPress={handlePress}
       disabled={isBlocked}
       hitSlop={{ top: verticalHitSlop, bottom: verticalHitSlop }}
-      style={({ pressed }) => ({
-        transform: [{ scale: pressed && !isBlocked ? 0.965 : 1 }],
-      })}
+      onPressIn={() => {
+        if (isBlocked) return;
+        pressScale.value = reduced
+          ? 0.965
+          : withTiming(0.965, { duration: 170, easing: PRESS_EASING });
+      }}
+      onPressOut={() => {
+        if (isBlocked) return;
+        pressScale.value = reduced
+          ? 1
+          : withTiming(1, { duration: 170, easing: PRESS_EASING });
+      }}
     >
       {({ pressed }) => {
         const floodActive = Boolean(flood) && pressed && !isBlocked;
@@ -350,6 +365,7 @@ export function AppButton({
             : null;
 
         return (
+          <Animated.View style={pressAnimStyle}>
           <YStack
             br={radius}
             opacity={disabled ? 0.34 : 1}
@@ -484,6 +500,7 @@ export function AppButton({
               />
             )}
           </YStack>
+          </Animated.View>
         );
       }}
     </Pressable>

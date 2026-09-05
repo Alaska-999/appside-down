@@ -56,6 +56,10 @@ export function SelectField({
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const progress = useSharedValue(0);
+  const triggerPressScale = useSharedValue(1);
+  const triggerPressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: triggerPressScale.value }],
+  }));
 
   const selectedValues = multiple ? (value as string[] | undefined) ?? [] : [];
   const isSelected = (optionValue: string) =>
@@ -124,25 +128,34 @@ export function SelectField({
           if (open) closeMenu();
           else openMenu();
         }}
-        style={({ pressed }) => ({
-          transform: [{ scale: pressed ? 0.985 : 1 }],
-        })}
+        onPressIn={() => {
+          triggerPressScale.value = reduced
+            ? 0.985
+            : withTiming(0.985, { duration: 170, easing: EASE });
+        }}
+        onPressOut={() => {
+          triggerPressScale.value = reduced
+            ? 1
+            : withTiming(1, { duration: 170, easing: EASE });
+        }}
       >
-        <InputShell size={size} disabled={disabled} state={open ? "focus" : "default"}>
-          <Text
-            f={1}
-            numberOfLines={1}
-            fontSize={16}
-            color={triggerLabel ? "$color" : "$placeholderColor"}
-          >
-            {triggerLabel || placeholder}
-          </Text>
-          <ChevronDown
-            size={18}
-            color="#6E8496"
-            style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
-          />
-        </InputShell>
+        <Animated.View style={triggerPressStyle}>
+          <InputShell size={size} disabled={disabled} state={open ? "focus" : "default"}>
+            <Text
+              f={1}
+              numberOfLines={1}
+              fontSize={16}
+              color={triggerLabel ? "$color" : "$placeholderColor"}
+            >
+              {triggerLabel || placeholder}
+            </Text>
+            <ChevronDown
+              size={18}
+              color="#6E8496"
+              style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
+            />
+          </InputShell>
+        </Animated.View>
       </Pressable>
 
       {mounted && (
@@ -181,20 +194,21 @@ export function SelectField({
                     {index > 0 && (
                       <View style={{ height: 1, backgroundColor: "rgba(220,255,245,0.06)" }} />
                     )}
-                    <Pressable onPress={() => handleSelect(option.value)}>
-                      <XStack
-                        ai="center"
-                        jc="space-between"
-                        px={16}
-                        py={12}
-                        bg={selected ? "rgba(163,230,53,0.08)" : "transparent"}
-                      >
-                        <Text fontSize={14.5} color={selected ? "$limeLight" : "$color"}>
-                          {option.label}
-                        </Text>
-                        {selected && <Check size={16} color={ICON_LIME_LIGHT} />}
-                      </XStack>
-                    </Pressable>
+                    <XStack
+                      ai="center"
+                      jc="space-between"
+                      px={16}
+                      py={12}
+                      bg={selected ? "rgba(163,230,53,0.08)" : "transparent"}
+                      onPress={() => handleSelect(option.value)}
+                      pressStyle={{ bg: "rgba(220,255,245,0.08)" }}
+                      transition="press"
+                    >
+                      <Text fontSize={14.5} color={selected ? "$limeLight" : "$color"}>
+                        {option.label}
+                      </Text>
+                      {selected && <Check size={16} color={ICON_LIME_LIGHT} />}
+                    </XStack>
                   </View>
                 );
               })}
