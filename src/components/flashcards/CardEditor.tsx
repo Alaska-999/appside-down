@@ -1,11 +1,15 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import {
+  WELL_BOTTOM_LINE,
+  WellInsetShadow,
+} from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { GripHorizontal, Trash2 } from "lucide-react-native";
 import { Ref, useState } from "react";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { GestureDetector, GestureType } from "react-native-gesture-handler";
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Input, Text, XStack, YStack } from "tamagui";
 
 const CARD_RADIUS = 20;
@@ -46,8 +50,20 @@ function CardField<T extends FieldValues>({
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: "rgba(4,8,10,0.5)" },
+                { backgroundColor: "rgba(4,8,10,0.6)" },
               ]}
+            />
+            <WellInsetShadow radius={FIELD_RADIUS} />
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 1,
+                backgroundColor: WELL_BOTTOM_LINE,
+              }}
             />
           </YStack>
           {focused && (
@@ -63,6 +79,7 @@ function CardField<T extends FieldValues>({
                 borderWidth: 1.5,
                 borderColor: "rgba(94,234,212,0.7)",
                 zIndex: 3,
+                // backgroundColor: "rgba(10, 4, 4, 0.5)",
               }}
             />
           )}
@@ -168,7 +185,13 @@ export function CardEditor<T extends FieldValues>({
 
       <YStack p={14} zIndex={2} gap={8}>
         <XStack ai="center" gap={10} mb={3}>
-          <Text f={1} fontSize={11} fontWeight="800" letterSpacing={0.66} color="#5A6B7A">
+          <Text
+            f={1}
+            fontSize={11}
+            fontWeight="800"
+            letterSpacing={0.66}
+            color="#5A6B7A"
+          >
             {String(index + 1).padStart(2, "0")}
           </Text>
           {dragGesture ? (

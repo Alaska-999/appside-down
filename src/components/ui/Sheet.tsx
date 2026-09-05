@@ -44,6 +44,7 @@ interface AppSheetProps {
   subtitle?: string;
   blur?: SheetBlur;
   snapPoints?: number[];
+  keepKeyboard?: boolean;
   leftAction?: ReactNode;
   rightAction?: ReactNode;
   children: ReactNode;
@@ -56,6 +57,7 @@ export function AppSheet({
   subtitle,
   blur = "default",
   snapPoints,
+  keepKeyboard = false,
   leftAction,
   rightAction,
   children,
@@ -91,6 +93,7 @@ export function AppSheet({
           touchStartY.current = e.nativeEvent.pageY;
         }}
         onTouchMove={(e) => {
+          if (keepKeyboard) return;
           if (e.nativeEvent.pageY - touchStartY.current > 12) Keyboard.dismiss();
         }}
       >
@@ -201,7 +204,12 @@ export function AppSheet({
           </Text>
         )}
 
-        <YStack f={1} pos="relative" zIndex={1} onPress={Keyboard.dismiss}>
+        <YStack
+          f={1}
+          pos="relative"
+          zIndex={1}
+          onPress={keepKeyboard ? undefined : Keyboard.dismiss}
+        >
           {children}
         </YStack>
       </Sheet.Frame>

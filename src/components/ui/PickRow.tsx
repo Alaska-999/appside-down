@@ -1,8 +1,11 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import {
+  WELL_BOTTOM_LINE,
+  WellInsetShadow,
+} from "@/src/components/ui/InputShell";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
 import { ComponentType } from "react";
-import { LinearGradient } from "expo-linear-gradient";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -44,21 +47,31 @@ export function PickRow({
           <View
             style={[
               StyleSheet.absoluteFill,
-              { backgroundColor: "rgba(4,8,10,0.5)" },
+              { backgroundColor: "rgba(4,8,10,0.65)" },
             ]}
           />
-          <LinearGradient
-            colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0)"]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, height: 9 }}
+          <WellInsetShadow radius={ROW_RADIUS} />
+          <View
             pointerEvents="none"
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              backgroundColor: WELL_BOTTOM_LINE,
+            }}
           />
         </YStack>
         <GradientBorder radius={ROW_RADIUS} preset="well" />
         <XStack ai="center" gap={11} px={16} zIndex={2}>
           <Icon size={19} color="#8FA8B8" strokeWidth={1.9} />
-          <Text f={1} fontSize={15} color={filled ? "$color" : "#5A6B7A"} numberOfLines={1}>
+          <Text
+            f={1}
+            fontSize={15}
+            color={filled ? "$color" : "#5A6B7A"}
+            numberOfLines={1}
+          >
             {value ?? placeholder}
           </Text>
           <ChevronRight size={16} color="#5A6B7A" strokeWidth={2} />

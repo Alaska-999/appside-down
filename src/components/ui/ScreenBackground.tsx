@@ -27,6 +27,7 @@ export type BackgroundPreset =
   | "home"
   | "module"
   | "form"
+  | "formBright"
   | "folder"
   | "flash"
   | "auth"
@@ -215,6 +216,32 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         ],
         grain: 0.055,
       };
+    case "formBright":
+      return {
+        base: {
+          angle: 96,
+          colors: ["#0C1518", "#08090C"],
+          positions: [0, 0.56],
+        },
+        layers: [
+          {
+            blur: 32,
+            blobs: ribBlobs(-0.27 * w, -0.11 * h, 0.63 * w, 1.28 * h, [
+              [0.45, 0.12, 0.42, 0.44, "rgba(94,234,212,0.43)", 0.5],
+              [0.4, 0.48, 0.43, 0.3, "rgba(45,212,191,0.44)", 0.6],
+              [0.62, 0.84, 0.4, 0.7, "rgba(13,148,136,0.43)", 0.7],
+            ]),
+          },
+          {
+            blur: 40,
+            blobs: ribBlobs(0.62 * w, -0.1 * h, 0.63 * w, 0.29 * h, [
+              [0.52, 0.48, 0.55, 0.5, "rgba(166, 239, 49, 0.48)", 0.8],
+              [0.23, 0.55, 0.56, 0.9, "rgba(45,212,191,0.25)", 0.7],
+            ]),
+          },
+        ],
+        grain: 0.055,
+      };
     case "folder":
       return {
         base: {
@@ -237,7 +264,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
             ]),
           },
         ],
-        grain: 0.05,
+        grain: 0.04,
       };
     case "flash":
       return {

@@ -1,8 +1,8 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { CardEditor } from "@/src/components/flashcards/CardEditor";
-import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { FormInput } from "@/src/components/common/FormInput";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { CardEditor } from "@/src/components/flashcards/CardEditor";
+import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { AddPill } from "@/src/components/ui/AddPill";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
 import { IconButton } from "@/src/components/ui/IconButton";
@@ -10,17 +10,24 @@ import { PickRow } from "@/src/components/ui/PickRow";
 import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { KeyboardBar } from "@/src/components/ui/KeyboardBar";
 import { AppToast } from "@/src/components/ui/Toast";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Folder, Globe, Lock, X } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { Folder, Globe, Lock, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
+import { Platform } from "react-native";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, XStack, YStack } from "tamagui";
 
 type FolderOption = { id: string; name: string };
@@ -32,7 +39,9 @@ export default function ModuleCreate() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
-  const { returnFolderId } = useLocalSearchParams<{ returnFolderId?: string }>();
+  const { returnFolderId } = useLocalSearchParams<{
+    returnFolderId?: string;
+  }>();
 
   const form = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
@@ -87,7 +96,10 @@ export default function ModuleCreate() {
         if (!res.ok) return;
         const page = await res.json();
         setFolders(
-          (page.data ?? []).map((f: FolderOption) => ({ id: f.id, name: f.name })),
+          (page.data ?? []).map((f: FolderOption) => ({
+            id: f.id,
+            name: f.name,
+          })),
         );
       } catch (err) {
         console.error("[ModuleCreate] folders error:", err);
@@ -140,16 +152,17 @@ export default function ModuleCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="form" />
+        <BackgroundMesh preset="formBright" />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
+          mode="layout"
           bottomOffset={40}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
+          keyboardShouldPersistTaps="always"
           contentContainerStyle={{
             paddingTop: screen.top,
-            paddingBottom: screen.bottom + 16,
+            paddingBottom: screen.bottom,
           }}
         >
           <YStack px="$screenX">
@@ -269,9 +282,18 @@ export default function ModuleCreate() {
                 label="Add card"
                 onPress={() => append({ term: "", definition: "" })}
               />
+              {/* <AppButton
+                variant="neon"
+                size="md"
+                onPress={() => append({ term: "", definition: "" })}
+              >
+                + Add Card
+              </AppButton> */}
             </YStack>
           </YStack>
         </KeyboardAwareScrollView>
+
+        <KeyboardBar />
 
         <AppToast
           open={!!serverError}

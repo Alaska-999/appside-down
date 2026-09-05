@@ -28,7 +28,13 @@ export function AddPill({
         alignSelf: "center",
       })}
     >
-      <YStack h={PILL_HEIGHT} px={18} br={PILL_RADIUS} pos="relative" jc="center">
+      <YStack
+        h={PILL_HEIGHT}
+        px={18}
+        br={PILL_RADIUS}
+        pos="relative"
+        jc="center"
+      >
         <YStack
           pos="absolute"
           t={0}
@@ -48,7 +54,7 @@ export function AddPill({
         <GradientBorder
           radius={PILL_RADIUS}
           angle={150}
-          colors={["rgba(45,212,191,0.5)", "rgba(45,212,191,0.1)"]}
+          colors={["rgba(45,212,191,0.7)", "rgba(70, 210, 191, 0.35)"]}
           positions={[0, 1]}
         />
         <XStack ai="center" gap={9} zIndex={2}>

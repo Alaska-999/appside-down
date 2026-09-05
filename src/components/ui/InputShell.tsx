@@ -6,6 +6,7 @@ import {
   Canvas,
   Group,
   RoundedRect,
+  Shadow,
   Skia,
 } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +22,46 @@ import Animated, {
 import { YStack, YStackProps } from "tamagui";
 
 const GLOW_PAD = 20;
+const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.55)" };
+export const WELL_BOTTOM_LINE = "rgba(220,255,245,0.05)";
+
+export function WellInsetShadow({ radius }: { radius: number }) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (width !== size.width || height !== size.height)
+      setSize({ width, height });
+  };
+  return (
+    <View
+      pointerEvents="none"
+      style={StyleSheet.absoluteFill}
+      onLayout={onLayout}
+    >
+      {size.width > 0 && (
+        <Canvas style={StyleSheet.absoluteFill}>
+          <RoundedRect
+            x={0}
+            y={0}
+            width={size.width}
+            height={size.height}
+            r={radius}
+            color="black"
+          >
+            <Shadow
+              dx={0}
+              dy={WELL_INSET_SHADOW.dy}
+              blur={WELL_INSET_SHADOW.blur}
+              color={WELL_INSET_SHADOW.color}
+              inner
+              shadowOnly
+            />
+          </RoundedRect>
+        </Canvas>
+      )}
+    </View>
+  );
+}
 const FOCUS_IN_MS = 260;
 const FOCUS_OUT_MS = 180;
 const FOCUS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
@@ -280,25 +321,11 @@ export function InputShell({
                 StyleSheet.absoluteFill,
                 {
                   backgroundColor:
-                    state === "focus"
-                      ? "rgba(8,16,20,0.55)"
-                      : "rgba(4,7,10,0.5)",
+                    state === "focus" ? "rgba(4,8,10,.7)" : "rgba(4,8,10,.65)",
                 },
               ]}
             />
-            <LinearGradient
-              colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0)"]}
-              start={{ x: 0.5, y: 0 }}
-              end={{ x: 0.5, y: 1 }}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 9,
-              }}
-              pointerEvents="none"
-            />
+            <WellInsetShadow radius={s.radius} />
             <View
               pointerEvents="none"
               style={{
@@ -307,7 +334,7 @@ export function InputShell({
                 left: 0,
                 right: 0,
                 height: 1,
-                backgroundColor: "rgba(220,255,245,0.06)",
+                backgroundColor: WELL_BOTTOM_LINE,
               }}
             />
           </>

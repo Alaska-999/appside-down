@@ -81,13 +81,13 @@ export function SavePill({
             <Check
               size={17}
               strokeWidth={2.3}
-              color={active ? "#5EEAD4" : "#3E4C57"}
+              color={active ? "#5EEAD4" : "#5A6B7A"}
             />
           )}
           <Text
             fontSize={14}
             fontWeight="700"
-            color={active ? "#EAF7FF" : "#5A6B7A"}
+            color={active ? "#EAF7FF" : "#8FA8B8"}
           >
             {label}
           </Text>

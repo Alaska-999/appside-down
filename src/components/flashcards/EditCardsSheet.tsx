@@ -2,23 +2,17 @@ import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
 import { AppButton } from "@/src/components/ui/Button";
-import { AppSheet } from "@/src/components/ui/Sheet";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { Flashcard } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { EditModuleForm, editModuleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Check,
-  ChevronDown,
-  Globe,
-  Lock,
-  X,
-} from "@tamagui/lucide-icons";
+import { Check, ChevronDown, Globe, Lock, X } from "@tamagui/lucide-icons";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { Pressable } from "react-native";
 import type { TextInput } from "react-native";
+import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -94,7 +88,8 @@ export function EditCardsSheet({
   }, [fields.length]);
 
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
-  const focusDefinition = (index: number) => definitionRefs.current[index]?.focus();
+  const focusDefinition = (index: number) =>
+    definitionRefs.current[index]?.focus();
 
   useEffect(() => {
     const subscription = form.watch(() => setServerError(null));
@@ -142,28 +137,22 @@ export function EditCardsSheet({
       const [, patchedResults, createdResults, moduleRes] = await Promise.all([
         Promise.all(
           idsToDelete.map((cardId) =>
-            protectedFetch(
-              `${API_BASE_URL}/flashcards/${cardId}`,
-              {
-                method: "DELETE",
-              },
-            ),
+            protectedFetch(`${API_BASE_URL}/flashcards/${cardId}`, {
+              method: "DELETE",
+            }),
           ),
         ),
         Promise.all(
           keptCards
             .filter((c) => !c.isNew)
             .map((c) =>
-              protectedFetch(
-                `${API_BASE_URL}/flashcards/${c.id}`,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    term: c.term,
-                    definition: c.definition,
-                  }),
-                },
-              ).then((r) => r.json()),
+              protectedFetch(`${API_BASE_URL}/flashcards/${c.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                  term: c.term,
+                  definition: c.definition,
+                }),
+              }).then((r) => r.json()),
             ),
         ),
         Promise.all(
@@ -180,17 +169,14 @@ export function EditCardsSheet({
               }).then((r) => r.json()),
             ),
         ),
-        protectedFetch(
-          `${API_BASE_URL}/modules/${moduleId}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify({
-              name: data.name,
-              description: data.description,
-              isPublic,
-            }),
-          },
-        ),
+        protectedFetch(`${API_BASE_URL}/modules/${moduleId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            name: data.name,
+            description: data.description,
+            isPublic,
+          }),
+        }),
       ]);
 
       const updatedModule = await moduleRes.json();
@@ -216,6 +202,7 @@ export function EditCardsSheet({
         onOpenChange={onOpenChange}
         title="Edit module"
         snapPoints={[90]}
+        keepKeyboard
         leftAction={
           <IconButton
             variant="glass"
@@ -237,10 +224,11 @@ export function EditCardsSheet({
       >
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
+          mode="layout"
           bottomOffset={40}
           showsVerticalScrollIndicator={false}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+          keyboardShouldPersistTaps="always"
         >
           <YStack gap="$3">
             <FormInput
@@ -363,7 +351,12 @@ export function EditCardsSheet({
                   if (index + 1 < fields.length) {
                     focusTerm(index + 1);
                   } else {
-                    append({ id: `new-${Date.now()}`, term: "", definition: "", isNew: true });
+                    append({
+                      id: `new-${Date.now()}`,
+                      term: "",
+                      definition: "",
+                      isNew: true,
+                    });
                   }
                 }}
               />
