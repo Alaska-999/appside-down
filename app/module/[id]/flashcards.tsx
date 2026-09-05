@@ -1,3 +1,4 @@
+import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { API_BASE_URL } from "@/src/api/config";
 import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlashcards";
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
@@ -6,6 +7,7 @@ import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsS
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SyncingPill } from "@/src/components/ui/SyncingPill";
+import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import { useGameStore } from "@/src/store/useGameStore";
@@ -44,6 +46,7 @@ export default function FlashcardsGame() {
     "left" | "right"
   >("right");
   const [decision, setDecision] = useState<SwipeDecision>("idle");
+  const [toast, setToast] = useState<string | null>(null);
 
   const litSide =
     decision === "know" || decision === "dragRight"
@@ -103,6 +106,7 @@ export default function FlashcardsGame() {
     } catch (err) {
       console.error("[FlashcardsGame] star error:", err);
       toggleStar(card.id);
+      setToast("Couldn't update star. Try again");
     }
   }, [activeCards, currentIndex, toggleStar]);
 
@@ -139,9 +143,16 @@ export default function FlashcardsGame() {
             known={knownPiles.length}
             learning={stillLearningPiles.length}
             litSide={litSide}
+            showPiles={settings.sortByPiles}
             rightAction={
               <IconButton
-                icon={<Settings2 size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                icon={
+                  <Settings2
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
+                }
                 variant="liquidGlass"
                 onPress={() => setSettingsSheetOpen(true)}
               />
@@ -187,6 +198,7 @@ export default function FlashcardsGame() {
                 onSwipeRight={handleSwipeRight}
                 onDecisionChange={setDecision}
                 revertKey={revertCount}
+                showStamps={settings.sortByPiles}
               />
             </YStack>
           </YStack>
@@ -203,7 +215,7 @@ export default function FlashcardsGame() {
               icon={
                 <RotateCcw
                   size={22}
-                  color={currentIndex === 0 ? "#8FA8B8" : "#EAF7FF"}
+                  color={currentIndex === 0 ? ICON_MUTED : ICON_ON_GLASS}
                   strokeWidth={1.9}
                   opacity={currentIndex === 0 ? 0.45 : 0.85}
                 />
@@ -215,6 +227,12 @@ export default function FlashcardsGame() {
             />
           </YStack>
         )}
+
+        <AppToast
+          open={!!toast}
+          message={toast ?? ""}
+          onDismiss={() => setToast(null)}
+        />
       </YStack>
     </PortalProvider>
   );

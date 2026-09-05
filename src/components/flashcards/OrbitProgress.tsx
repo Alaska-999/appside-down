@@ -1,4 +1,10 @@
 import {
+  ICON_ACCENT,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+} from "@/src/constants/iconColors";
+import {
   Blur,
   Canvas,
   Circle,
@@ -83,32 +89,32 @@ const COMET_TONES: Record<
   default: {
     stops: [
       [0, "#FBFFF4"],
-      [0.55, "#BEF264"],
-      [0.8, "#A3E635"],
+      [0.55, ICON_LIME_LIGHT],
+      [0.8, ICON_LIME],
     ],
     glow1: "rgba(190,242,100,1)",
     glow2: "rgba(163,230,53,0.55)",
-    tail: "#BEF264",
+    tail: ICON_LIME_LIGHT,
   },
   cold: {
     stops: [
       [0, "#FBFFF4"],
-      [0.55, "#BEF264"],
-      [0.8, "#A3E635"],
+      [0.55, ICON_LIME_LIGHT],
+      [0.8, ICON_LIME],
     ],
     glow1: "rgba(190,242,100,1)",
     glow2: "rgba(163,230,53,0.55)",
-    tail: "#BEF264",
+    tail: ICON_LIME_LIGHT,
   },
   warm: {
     stops: [
       [0, "#FBFFFE"],
-      [0.55, "#5EEAD4"],
-      [0.8, "#2DD4BF"],
+      [0.55, ICON_ACCENT],
+      [0.8, ICON_MINT],
     ],
     glow1: "rgba(94,234,212,1)",
     glow2: "rgba(45,212,191,0.55)",
-    tail: "#5EEAD4",
+    tail: ICON_ACCENT,
   },
 };
 
@@ -134,7 +140,10 @@ function Planet({
     if (reducedMotion) return;
     breathe.value = withRepeat(
       withSequence(
-        withTiming(1.028, { duration: 3250, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1.028, {
+          duration: 3250,
+          easing: Easing.inOut(Easing.ease),
+        }),
         withTiming(1, { duration: 3250, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
@@ -177,7 +186,13 @@ function Planet({
             <Stop offset="0" stopColor="#01080A" stopOpacity={0.72} />
             <Stop offset="0.54" stopColor="#01080A" stopOpacity={0} />
           </LinearGradient>
-          <Filter id="finishHighlightBlur" x="-60%" y="-60%" width="220%" height="220%">
+          <Filter
+            id="finishHighlightBlur"
+            x="-60%"
+            y="-60%"
+            width="220%"
+            height="220%"
+          >
             <FeGaussianBlur stdDeviation={4} />
           </Filter>
         </Defs>
@@ -254,7 +269,10 @@ function Shell({
     scale.value = withDelay(
       delay,
       withRepeat(
-        withTiming(1.55, { duration: 4200, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        withTiming(1.55, {
+          duration: 4200,
+          easing: Easing.bezier(0.2, 0.7, 0.3, 1),
+        }),
         -1,
         false,
       ),
@@ -262,7 +280,10 @@ function Shell({
     opacity.value = withDelay(
       delay,
       withRepeat(
-        withTiming(0, { duration: 4200, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        withTiming(0, {
+          duration: 4200,
+          easing: Easing.bezier(0.2, 0.7, 0.3, 1),
+        }),
         -1,
         false,
       ),
@@ -297,9 +318,21 @@ function Shell({
 function Shells({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
-      <Shell delay={0} color="rgba(94,234,212,0.5)" reducedMotion={reducedMotion} />
-      <Shell delay={1400} color="rgba(190,242,100,0.42)" reducedMotion={reducedMotion} />
-      <Shell delay={2800} color="rgba(94,234,212,0.3)" reducedMotion={reducedMotion} />
+      <Shell
+        delay={0}
+        color="rgba(94,234,212,0.5)"
+        reducedMotion={reducedMotion}
+      />
+      <Shell
+        delay={1400}
+        color="rgba(190,242,100,0.42)"
+        reducedMotion={reducedMotion}
+      />
+      <Shell
+        delay={2800}
+        color="rgba(94,234,212,0.3)"
+        reducedMotion={reducedMotion}
+      />
     </>
   );
 }
@@ -321,7 +354,10 @@ function Flare({
     scale.value = withDelay(
       delay,
       withRepeat(
-        withTiming(1.28, { duration: 2600, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        withTiming(1.28, {
+          duration: 2600,
+          easing: Easing.bezier(0.2, 0.7, 0.3, 1),
+        }),
         -1,
         false,
       ),
@@ -329,7 +365,10 @@ function Flare({
     opacity.value = withDelay(
       delay,
       withRepeat(
-        withTiming(0, { duration: 2600, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        withTiming(0, {
+          duration: 2600,
+          easing: Easing.bezier(0.2, 0.7, 0.3, 1),
+        }),
         -1,
         false,
       ),
@@ -364,8 +403,16 @@ function Flare({
 function Flares({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
-      <Flare delay={2600} color="rgba(190,242,100,0.85)" reducedMotion={reducedMotion} />
-      <Flare delay={3500} color="rgba(94,234,212,0.6)" reducedMotion={reducedMotion} />
+      <Flare
+        delay={2600}
+        color="rgba(190,242,100,0.85)"
+        reducedMotion={reducedMotion}
+      />
+      <Flare
+        delay={3500}
+        color="rgba(94,234,212,0.6)"
+        reducedMotion={reducedMotion}
+      />
     </>
   );
 }
@@ -416,7 +463,10 @@ function TailDot({
   return (
     <View
       pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${offsetDeg}deg` }] }]}
+      style={[
+        StyleSheet.absoluteFill,
+        { transform: [{ rotate: `${offsetDeg}deg` }] },
+      ]}
     >
       <View
         style={{
@@ -484,7 +534,13 @@ function Comet({
   );
 }
 
-function Arc({ progress, fraction }: { progress: SharedValue<number>; fraction: number }) {
+function Arc({
+  progress,
+  fraction,
+}: {
+  progress: SharedValue<number>;
+  fraction: number;
+}) {
   const circlePath = useMemo(() => {
     const path = Skia.Path.Make();
     path.addCircle(CENTER, CENTER, RADIUS);
@@ -495,7 +551,10 @@ function Arc({ progress, fraction }: { progress: SharedValue<number>; fraction: 
 
   return (
     <Canvas style={StyleSheet.absoluteFill}>
-      <Group transform={[{ rotate: -Math.PI / 2 }]} origin={vec(CENTER, CENTER)}>
+      <Group
+        transform={[{ rotate: -Math.PI / 2 }]}
+        origin={vec(CENTER, CENTER)}
+      >
         <Circle
           cx={CENTER}
           cy={CENTER}
@@ -519,7 +578,7 @@ function Arc({ progress, fraction }: { progress: SharedValue<number>; fraction: 
           <SkiaLinearGradient
             start={vec(0, 0)}
             end={vec(ORB_SIZE, ORB_SIZE)}
-            colors={["#2DD4BF", "#BEF264"]}
+            colors={[ICON_MINT, ICON_LIME_LIGHT]}
           />
         </SkiaPath>
         <SkiaPath
@@ -533,7 +592,7 @@ function Arc({ progress, fraction }: { progress: SharedValue<number>; fraction: 
           <SkiaLinearGradient
             start={vec(0, 0)}
             end={vec(ORB_SIZE, ORB_SIZE)}
-            colors={["#2DD4BF", "#BEF264"]}
+            colors={[ICON_MINT, ICON_LIME_LIGHT]}
           />
         </SkiaPath>
       </Group>

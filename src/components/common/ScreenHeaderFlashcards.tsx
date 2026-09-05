@@ -11,6 +11,7 @@ export function ScreenHeaderFlashcards({
   known,
   learning,
   litSide,
+  showPiles = true,
   onClose,
 }: {
   title: string;
@@ -18,6 +19,7 @@ export function ScreenHeaderFlashcards({
   known: number;
   learning: number;
   litSide?: "known" | "learning" | null;
+  showPiles?: boolean;
   onClose?: () => void;
 }) {
   const router = useRouter();
@@ -42,22 +44,24 @@ export function ScreenHeaderFlashcards({
         >
           {title}
         </Text>
-        <XStack ai="center" gap={12}>
-          <StatusPill
-            kind="game"
-            tone="known"
-            count={known}
-            lit={litSide === "known"}
-            dim={litSide === "learning"}
-          />
-          <StatusPill
-            kind="game"
-            tone="learning"
-            count={learning}
-            lit={litSide === "learning"}
-            dim={litSide === "known"}
-          />
-        </XStack>
+        {showPiles && (
+          <XStack ai="center" gap={12}>
+            <StatusPill
+              kind="game"
+              tone="learning"
+              count={learning}
+              lit={litSide === "learning"}
+              dim={litSide === "known"}
+            />
+            <StatusPill
+              kind="game"
+              tone="known"
+              count={known}
+              lit={litSide === "known"}
+              dim={litSide === "learning"}
+            />
+          </XStack>
+        )}
       </YStack>
       {rightAction}
     </XStack>

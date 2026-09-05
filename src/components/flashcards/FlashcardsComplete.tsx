@@ -1,3 +1,8 @@
+import {
+  ICON_ACCENT,
+  ICON_LIME_LIGHT,
+  ICON_ON_GLASS,
+} from "@/src/constants/iconColors";
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
@@ -30,9 +35,10 @@ interface FlashcardsCompleteProps {
   onClose?: () => void;
 }
 
-export function finishToneForHour(
-  hour: number,
-): { preset: BackgroundPreset; tone: "default" | "cold" | "warm" } {
+export function finishToneForHour(hour: number): {
+  preset: BackgroundPreset;
+  tone: "default" | "cold" | "warm";
+} {
   if (hour >= 6 && hour < 12) return { preset: "finishWarm", tone: "warm" };
   if (hour >= 12 && hour < 20) return { preset: "finish", tone: "default" };
   return { preset: "finishCold", tone: "cold" };
@@ -84,7 +90,7 @@ export function FlashcardsComplete({
         <XStack px={16}>
           <IconButton
             variant="liquidGlass"
-            icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
             onPress={onClose ?? (() => router.back())}
             accessibilityLabel="Close"
           />
@@ -104,7 +110,7 @@ export function FlashcardsComplete({
             from={0}
             to={targetPct}
             suffix="%"
-            gradientColors={["#5EEAD4", "#BEF264"]}
+            gradientColors={[ICON_ACCENT, ICON_LIME_LIGHT]}
             width={210}
             height={76}
             style={{

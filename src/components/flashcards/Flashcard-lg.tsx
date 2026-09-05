@@ -121,6 +121,7 @@ interface FlashcardLgProps {
   onSwipeRight?: () => void;
   onDecisionChange?: (decision: SwipeDecision) => void;
   revertKey?: number;
+  showStamps?: boolean;
 }
 
 function Ghosts() {
@@ -407,6 +408,7 @@ export function FlashcardLg({
   onSwipeRight,
   onDecisionChange,
   revertKey,
+  showStamps = true,
 }: FlashcardLgProps) {
   const front = showDefinitionFirst
     ? cardSideText(card?.definition)
@@ -520,7 +522,9 @@ export function FlashcardLg({
             decision={decision}
             translateX={translateX}
           />
-          <StampPair translateX={translateX} reducedMotion={reducedMotion} />
+          {showStamps && (
+            <StampPair translateX={translateX} reducedMotion={reducedMotion} />
+          )}
         </Animated.View>
       </GestureDetector>
     </View>
