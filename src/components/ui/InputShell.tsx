@@ -135,7 +135,7 @@ const WELL_BORDERS: Record<
   },
   focus: {
     colors: [
-      "rgba(66, 242, 215, 0.67)",
+      "rgba(65, 237, 237, 0.67)",
       "rgba(175, 246, 234, 0.45)",
       "rgba(178, 242, 219, 0.45)",
       "rgba(82, 227, 172, 0.6)",
@@ -335,7 +335,7 @@ export function InputShell({
         >
           <OuterGlow
             radius={s.radius}
-            blur={7}
+            blur={6}
             width={3.5}
             color="rgba(45, 212, 190, 0.4)"
           />

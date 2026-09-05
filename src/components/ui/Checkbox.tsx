@@ -1,24 +1,25 @@
 import { hapticTap } from "@/src/utils/haptics";
-import { Check } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Check } from "lucide-react-native";
 import { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
-type ControlSize = "lg" | "md" | "sm" | "xs";
+type ControlSize = "lg" | "md" | "sm";
 
-const CHECKBOX_SIZES: Record<ControlSize, { box: number; radius: number; check: number }> = {
+const CHECKBOX_SIZES: Record<
+  ControlSize,
+  { box: number; radius: number; check: number }
+> = {
   lg: { box: 30, radius: 10, check: 17 },
   md: { box: 26, radius: 9, check: 15 },
-  sm: { box: 22, radius: 8, check: 13 },
-  xs: { box: 24, radius: 8, check: 14 },
+  sm: { box: 24, radius: 8, check: 12 },
 };
 
 const RADIO_SIZES: Record<ControlSize, { box: number; dot: number }> = {
   lg: { box: 30, dot: 15 },
   md: { box: 26, dot: 13 },
-  sm: { box: 22, dot: 11 },
-  xs: { box: 24, dot: 12 },
+  sm: { box: 24, dot: 11 },
 };
 
 export function Checkbox({
@@ -70,7 +71,7 @@ export function Checkbox({
         {checked ? (
           <>
             <LinearGradient
-              colors={["#2DD4BF", "#A3E635"]}
+              colors={["#2DD4BF", "#65A30D"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
               style={StyleSheet.absoluteFill}
@@ -80,7 +81,14 @@ export function Checkbox({
         ) : (
           <View
             pointerEvents="none"
-            style={{ position: "absolute", top: 0, left: 0, right: 0, height: 7, backgroundColor: "rgba(0,0,0,0.35)" }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 7,
+              backgroundColor: "rgba(0,0,0,0.35)",
+            }}
           />
         )}
       </YStack>
@@ -123,7 +131,9 @@ export function Radio({
         jc="center"
         bg="rgba(4,7,10,0.5)"
         borderWidth={selected ? 1.4 : 1}
-        borderColor={selected ? "rgba(94,234,212,0.7)" : "rgba(220,255,245,0.12)"}
+        borderColor={
+          selected ? "rgba(94,234,212,0.7)" : "rgba(220,255,245,0.12)"
+        }
       >
         {selected && (
           <View

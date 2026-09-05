@@ -1,8 +1,8 @@
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { X } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { X } from "lucide-react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 export function ScreenHeaderFlashcards({
@@ -24,13 +24,13 @@ export function ScreenHeaderFlashcards({
   const screen = useScreenInsets();
 
   return (
-    <XStack ai="center" gap={12} px="$4" pt={screen.top} pb={8}>
+    <XStack ai="center" gap={12} px="$4" pt={screen.top + 6} pb={8}>
       <IconButton
         icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
         variant="liquidGlass"
         onPress={() => (onClose ? onClose() : router.back())}
       />
-      <YStack f={1} ai="center" gap={5}>
+      <YStack f={1} ai="center" gap={7}>
         <Text
           fontFamily="$heading"
           fontSize={15}
@@ -42,7 +42,7 @@ export function ScreenHeaderFlashcards({
         >
           {title}
         </Text>
-        <XStack ai="center" gap={14}>
+        <XStack ai="center" gap={12}>
           <StatusPill
             kind="game"
             tone="known"

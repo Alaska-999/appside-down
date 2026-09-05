@@ -10,11 +10,11 @@ import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
-import { protectedFetch } from "@/src/utils/protectedFetch";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
+import { protectedFetch } from "@/src/utils/protectedFetch";
 import { soundComplete } from "@/src/utils/sounds";
-import { RotateCcw, Settings2 } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { RotateCcw, Settings2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { PortalProvider, YStack } from "tamagui";
@@ -40,7 +40,9 @@ export default function FlashcardsGame() {
   const screen = useScreenInsets();
 
   const [revertCount, setRevertCount] = useState(0);
-  const [lastSwipeDirection, setLastSwipeDirection] = useState<"left" | "right">("right");
+  const [lastSwipeDirection, setLastSwipeDirection] = useState<
+    "left" | "right"
+  >("right");
   const [decision, setDecision] = useState<SwipeDecision>("idle");
 
   const litSide =
@@ -153,7 +155,12 @@ export default function FlashcardsGame() {
         />
 
         {flushing && !isComplete && (
-          <SyncingPill pos="absolute" top={screen.top + 84} right={19} zIndex={10} />
+          <SyncingPill
+            pos="absolute"
+            top={screen.top + 84}
+            right={19}
+            zIndex={10}
+          />
         )}
 
         {isComplete ? (
@@ -168,11 +175,13 @@ export default function FlashcardsGame() {
           />
         ) : (
           <YStack f={1} px={16} pt={20} pb={20} ai="center" jc="center">
-            <YStack width="100%" f={1} maxHeight={500}>
+            <YStack width="100%" f={1} maxHeight={750}>
               <FlashcardLg
                 card={activeCards[currentIndex]}
                 revertDirection={lastSwipeDirection}
-                showDefinitionFirst={settings.cardOrientation === "definition_first"}
+                showDefinitionFirst={
+                  settings.cardOrientation === "definition_first"
+                }
                 onStar={handleToggleStar}
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
@@ -184,7 +193,12 @@ export default function FlashcardsGame() {
         )}
 
         {!isComplete && (
-          <YStack alignItems="center" pt={8} pb={screen.insets.bottom + 16} zIndex={3}>
+          <YStack
+            alignItems="center"
+            pt={8}
+            pb={screen.insets.bottom + 16}
+            zIndex={3}
+          >
             <IconButton
               icon={
                 <RotateCcw

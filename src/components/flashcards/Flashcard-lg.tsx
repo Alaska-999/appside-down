@@ -1,15 +1,27 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
-import { SwipeDecision, useSwipeCard } from "@/src/hooks/useSwipeCard";
+import {
+  DEAD_ZONE,
+  SwipeDecision,
+  useSwipeCard,
+} from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { LinearGradient } from "expo-linear-gradient";
 import { Star, Volume2 } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import Animated from "react-native-reanimated";
+import Animated, {
+  Extrapolation,
+  SharedValue,
+  interpolate,
+  useAnimatedStyle,
+  useDerivedValue,
+} from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
+
+const STAMP_RAMP_DISTANCE = 70;
 
 const CARD_RADIUS = 32;
 
@@ -75,7 +87,7 @@ function Ghosts() {
 }
 
 function Edge({ decision }: { decision: SwipeDecision }) {
-  if (decision === "learning") {
+  if (decision === "learning" || decision === "dragLeft") {
     return (
       <GradientBorder
         radius={CARD_RADIUS}
@@ -87,7 +99,7 @@ function Edge({ decision }: { decision: SwipeDecision }) {
       />
     );
   }
-  if (decision === "dragRight" || decision === "dragLeft" || decision === "know") {
+  if (decision === "dragRight" || decision === "know") {
     return (
       <GradientBorder
         radius={CARD_RADIUS}
@@ -110,30 +122,43 @@ function Edge({ decision }: { decision: SwipeDecision }) {
   );
 }
 
-function Stamp({ decision }: { decision: SwipeDecision }) {
-  if (decision !== "know" && decision !== "learning") return null;
-  const isKnow = decision === "know";
-  const style = STAMP_STYLES[decision];
+function StampFace({
+  isKnow,
+  progress,
+  reducedMotion,
+}: {
+  isKnow: boolean;
+  progress: SharedValue<number>;
+  reducedMotion: boolean;
+}) {
+  const style = STAMP_STYLES[isKnow ? "know" : "learning"];
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const p = progress.value;
+    const scale = reducedMotion ? 1 : 0.92 + p * 0.08;
+    return {
+      opacity: p,
+      transform: [{ rotate: isKnow ? "9deg" : "-9deg" }, { scale }],
+      ...(isKnow ? { shadowOpacity: p } : null),
+    };
+  });
 
   return (
-    <YStack
-      pos="absolute"
-      top={70}
-      {...(isKnow ? { right: 26 } : { left: 26 })}
-      style={{ transform: [{ rotate: isKnow ? "9deg" : "-9deg" }] }}
-      br={14}
-      px={16}
-      py={9}
-      zIndex={6}
-      overflow="hidden"
+    <Animated.View
       pointerEvents="none"
-      bg={style.solid}
-      borderWidth={style.borderColor ? 1.4 : 0}
-      borderColor={style.borderColor}
-      shadowColor={style.shadowColor}
-      shadowOpacity={style.shadowColor ? 1 : 0}
-      shadowRadius={13}
-      shadowOffset={{ width: 0, height: 0 }}
+      style={[
+        styles.stamp,
+        isKnow ? styles.stampR : styles.stampL,
+        {
+          backgroundColor: style.solid,
+          borderWidth: style.borderColor ? 1.4 : 0,
+          borderColor: style.borderColor,
+          shadowColor: style.shadowColor,
+          shadowRadius: 13,
+          shadowOffset: { width: 0, height: 0 },
+        },
+        animatedStyle,
+      ]}
     >
       {isKnow && (
         <LinearGradient
@@ -153,14 +178,63 @@ function Stamp({ decision }: { decision: SwipeDecision }) {
       >
         {isKnow ? "Know" : "Learning"}
       </Text>
-    </YStack>
+    </Animated.View>
   );
 }
 
-function CardFace({ style, text, weak }: { style: object; text: string; weak?: boolean }) {
+function StampPair({
+  translateX,
+  reducedMotion,
+}: {
+  translateX: SharedValue<number>;
+  reducedMotion: boolean;
+}) {
+  const knowProgress = useDerivedValue(() => {
+    return interpolate(
+      translateX.value,
+      [DEAD_ZONE, DEAD_ZONE + STAMP_RAMP_DISTANCE],
+      [0, 1],
+      Extrapolation.CLAMP,
+    );
+  });
+  const learningProgress = useDerivedValue(() => {
+    return interpolate(
+      -translateX.value,
+      [DEAD_ZONE, DEAD_ZONE + STAMP_RAMP_DISTANCE],
+      [0, 1],
+      Extrapolation.CLAMP,
+    );
+  });
+
+  return (
+    <>
+      <StampFace isKnow progress={knowProgress} reducedMotion={reducedMotion} />
+      <StampFace
+        isKnow={false}
+        progress={learningProgress}
+        reducedMotion={reducedMotion}
+      />
+    </>
+  );
+}
+
+function CardFace({
+  style,
+  text,
+  weak,
+}: {
+  style: object;
+  text: string;
+  weak?: boolean;
+}) {
   return (
     <Animated.View style={[styles.face, style]}>
-      <YStack f={1} br={CARD_RADIUS} overflow="hidden" bg="rgba(12,20,24,0.55)">
+      <YStack
+        f={1}
+        br={CARD_RADIUS}
+        overflow="hidden"
+        bg="rgba(7, 21, 29, 0.45)"
+      >
         <LiquidGlass intensity={40} tint="default" borderRadius={CARD_RADIUS} />
         <View pointerEvents="none" style={styles.topHighlight} />
         <YStack f={1} ai="center" jc="center" pt={64} px={26} pb={30}>
@@ -205,15 +279,16 @@ export function FlashcardLg({
     resetKey: card?.id,
   });
 
-  const { gesture, cardAnimatedStyle, decision } = useSwipeCard({
-    onSwipeLeft,
-    onSwipeRight,
-    onTap: flip,
-    onDecisionChange,
-    resetKey: card?.id,
-    revertKey,
-    revertDirection,
-  });
+  const { gesture, cardAnimatedStyle, decision, translateX, reducedMotion } =
+    useSwipeCard({
+      onSwipeLeft,
+      onSwipeRight,
+      onTap: flip,
+      onDecisionChange,
+      resetKey: card?.id,
+      revertKey,
+      revertDirection,
+    });
 
   const ttsColor = isFront ? "#3E4C57" : "#B7CEDA";
 
@@ -223,12 +298,16 @@ export function FlashcardLg({
 
       <GestureDetector gesture={gesture}>
         <Animated.View
-          style={[StyleSheet.absoluteFill, styles.bigcardWrap, cardAnimatedStyle]}
+          style={[
+            StyleSheet.absoluteFill,
+            styles.bigcardWrap,
+            cardAnimatedStyle,
+          ]}
         >
           <CardFace style={frontAnimatedStyle} text={front} />
           <CardFace style={backAnimatedStyle} text={back} weak />
           <Edge decision={decision} />
-          <Stamp decision={decision} />
+          <StampPair translateX={translateX} reducedMotion={reducedMotion} />
 
           <XStack
             pos="absolute"
@@ -325,4 +404,15 @@ const styles = StyleSheet.create({
     zIndex: 0,
     backgroundColor: "rgba(14,24,28,0.32)",
   },
+  stamp: {
+    position: "absolute",
+    top: 70,
+    zIndex: 6,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    overflow: "hidden",
+  },
+  stampR: { right: 26 },
+  stampL: { left: 26 },
 });

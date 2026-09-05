@@ -2,6 +2,7 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { Plus, X } from "lucide-react-native";
+import { ReactNode } from "react";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -54,12 +55,14 @@ const CHIP_STYLES: Record<
 export function TagChip({
   label,
   count,
+  leading,
   variant = "default",
   onPress,
   onRemove,
 }: {
   label: string;
   count?: number;
+  leading?: ReactNode;
   variant?: TagChipVariant;
   onPress?: () => void;
   onRemove?: () => void;
@@ -121,6 +124,7 @@ export function TagChip({
           {variant === "add" && (
             <Plus size={14} color="#5EEAD4" strokeWidth={2.3} />
           )}
+          {leading}
           {!!label && (
             <Text fontSize={12.5} fontWeight="600" color={s.textColor}>
               {label}

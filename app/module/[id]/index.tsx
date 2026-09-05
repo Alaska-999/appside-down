@@ -32,6 +32,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
   ArrowDownUp,
+  BookmarkCheck,
   BookmarkPlus,
   Captions,
   ChevronLeft,
@@ -265,6 +266,7 @@ export default function ModuleScreen() {
         ...rawModule,
         itemsCount: rawModule._count?.flashcards ?? 0,
         folderIds: (rawModule.folders ?? []).map((f: { id: string }) => f.id),
+        savedCopyId: rawModule.savedCopyId ?? null,
         user: rawModule.user ?? null,
         author: rawModule.author ?? null,
       });
@@ -654,15 +656,31 @@ export default function ModuleScreen() {
 
                 {!isOwner && (
                   <YStack mt={22}>
-                    <AppButton
-                      variant="primary"
-                      size="lg"
-                      icon={<BookmarkPlus size={18} color="#06231F" />}
-                      loading={saving}
-                      onPress={handleSaveToLibrary}
-                    >
-                      Save to library
-                    </AppButton>
+                    {moduleData.savedCopyId ? (
+                      <AppButton
+                        variant="secondary"
+                        size="lg"
+                        icon={<BookmarkCheck size={18} color="#EAF7FF" strokeWidth={1.9} />}
+                        onPress={() =>
+                          router.push({
+                            pathname: "/module/[id]",
+                            params: { id: moduleData.savedCopyId as string },
+                          })
+                        }
+                      >
+                        In your library · open
+                      </AppButton>
+                    ) : (
+                      <AppButton
+                        variant="primary"
+                        size="lg"
+                        icon={<BookmarkPlus size={18} color="#06231F" />}
+                        loading={saving}
+                        onPress={handleSaveToLibrary}
+                      >
+                        Save to library
+                      </AppButton>
+                    )}
                   </YStack>
                 )}
 

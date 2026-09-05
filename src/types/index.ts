@@ -75,6 +75,7 @@ export interface Module {
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
+    savedCopyId?: string | null;
     known?: number;
     total?: number;
     progress?: ModuleProgress;

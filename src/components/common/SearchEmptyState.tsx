@@ -1,6 +1,6 @@
 import { StateCard } from "@/src/components/ui/StateCard";
 import { Search } from "lucide-react-native";
-import { Text } from "tamagui";
+import { Text, YStackProps } from "tamagui";
 
 type SearchNoun = "modules" | "folders";
 
@@ -13,13 +13,15 @@ export function SearchEmptyState({
   query,
   noun,
   onCreate,
+  ...rest
 }: {
   query: string;
   noun: SearchNoun;
   onCreate?: () => void;
-}) {
+} & YStackProps) {
   return (
     <StateCard
+      {...rest}
       tone="empty"
       icon={Search}
       title="Nothing found"

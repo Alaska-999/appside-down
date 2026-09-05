@@ -14,7 +14,7 @@ import {
 
 export type SwipeDecision = "idle" | "dragRight" | "dragLeft" | "know" | "learning";
 
-const DEAD_ZONE = 10;
+export const DEAD_ZONE = 10;
 const COMMIT_THRESHOLD = 100;
 const DECISION_OFFSET = 52;
 const DECISION_ROTATE = 6;
@@ -174,5 +174,5 @@ export function useSwipeCard({
     ],
   }));
 
-  return { gesture, cardAnimatedStyle, decision };
+  return { gesture, cardAnimatedStyle, decision, translateX, reducedMotion };
 }

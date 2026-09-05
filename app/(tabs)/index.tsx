@@ -20,7 +20,7 @@ import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { AlertTriangle, Layers, Sparkles } from "lucide-react-native";
+import { AlertTriangle, BookmarkCheck, Layers, Sparkles } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { FlatList, Pressable, RefreshControl, StyleSheet } from "react-native";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -32,7 +32,8 @@ type PublicModuleResult = {
   user?: { id: string; username: string; avatarUrl?: string | null };
   author?: { id: string; username: string; avatarUrl?: string | null } | null;
   authorUsername?: string | null;
-  _count?: { flashcards: number };
+  _count?: { flashcards: number; copies?: number };
+  savedCopyId?: string | null;
 };
 
 type HomeModule = {
@@ -73,6 +74,7 @@ const DISCOVER_COVERS: [string, string][] = [
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   const count = module._count?.flashcards ?? 0;
+  const saves = module._count?.copies ?? 0;
   return (
     <Pressable
       onPress={() =>
@@ -83,11 +85,21 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         <Text fontSize={17} fontWeight="700" color="$color">
           {module.name}
         </Text>
-        <Text fontSize={14} color="$colorMuted">
-          {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
-          {count} term
-          {count !== 1 ? "s" : ""}
-        </Text>
+        <XStack ai="center" gap={6} flexWrap="wrap">
+          <Text fontSize={14} color="$colorMuted">
+            {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
+            {count} term{count !== 1 ? "s" : ""}
+            {saves > 0 ? ` · ${saves} save${saves !== 1 ? "s" : ""}` : ""}
+          </Text>
+          {module.savedCopyId && (
+            <XStack ai="center" gap={4} px={8} py={2} br={999} bg="$mintGlassBg">
+              <BookmarkCheck size={12} color="#5EEAD4" strokeWidth={2} />
+              <Text fontSize={11} fontWeight="700" color="$mintLight">
+                Saved
+              </Text>
+            </XStack>
+          )}
+        </XStack>
       </AppCard>
     </Pressable>
   );

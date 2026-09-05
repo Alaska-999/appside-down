@@ -101,16 +101,48 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
   switch (preset) {
     case "home":
       return {
-        base: { angle: 178, colors: ["#0E1A1E", "#08090C"], positions: [0, 0.42] },
+        base: {
+          angle: 178,
+          colors: ["#0E1A1E", "#08090C"],
+          positions: [0, 0.42],
+        },
         layers: [
           {
             blur: 24,
             saturate: 1.1,
             blobs: [
-              { cx: 0.26 * w, cy: 0.02 * h, rx: 0.42 * w, ry: 0.2 * h, color: "rgba(45,212,191,0.42)", edge: 0.72 },
-              { cx: 0.82 * w, cy: 0.1 * h, rx: 0.38 * w, ry: 0.17 * h, color: "rgba(13,148,136,0.34)", edge: 0.72 },
-              { cx: -0.04 * w, cy: 0.4 * h, rx: 0.22 * w, ry: 0.3 * h, color: "rgba(94,234,212,0.28)", edge: 0.74 },
-              { cx: -0.04 * w, cy: 0.74 * h, rx: 0.2 * w, ry: 0.26 * h, color: "rgba(13,148,136,0.26)", edge: 0.74 },
+              {
+                cx: 0.26 * w,
+                cy: 0.02 * h,
+                rx: 0.42 * w,
+                ry: 0.2 * h,
+                color: "rgba(45,212,191,0.42)",
+                edge: 0.72,
+              },
+              {
+                cx: 0.82 * w,
+                cy: 0.1 * h,
+                rx: 0.38 * w,
+                ry: 0.17 * h,
+                color: "rgba(13,148,136,0.34)",
+                edge: 0.72,
+              },
+              {
+                cx: -0.04 * w,
+                cy: 0.4 * h,
+                rx: 0.22 * w,
+                ry: 0.3 * h,
+                color: "rgba(94,234,212,0.28)",
+                edge: 0.74,
+              },
+              {
+                cx: -0.04 * w,
+                cy: 0.74 * h,
+                rx: 0.2 * w,
+                ry: 0.26 * h,
+                color: "rgba(13,148,136,0.26)",
+                edge: 0.74,
+              },
             ],
           },
         ],
@@ -126,7 +158,11 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
       };
     case "module":
       return {
-        base: { angle: 96, colors: ["#0C1518", "#08090C"], positions: [0, 0.56] },
+        base: {
+          angle: 96,
+          colors: ["#0C1518", "#08090C"],
+          positions: [0, 0.56],
+        },
         layers: [
           {
             blur: 40,
@@ -151,11 +187,15 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           colors: [off(DIM_MOD), off(DIM_MOD), DIM_MOD, DIM_MOD],
           positions: [0, 0.38, 0.92, 1],
         },
-        grain: 0.055,
+        grain: 0.05,
       };
     case "form":
       return {
-        base: { angle: 96, colors: ["#0C1518", "#08090C"], positions: [0, 0.56] },
+        base: {
+          angle: 96,
+          colors: ["#0C1518", "#08090C"],
+          positions: [0, 0.56],
+        },
         layers: [
           {
             blur: 32,
@@ -177,23 +217,27 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
       };
     case "folder":
       return {
-        base: { angle: 140, colors: ["#0C1518", "#08090C"], positions: [0, 0.58] },
+        base: {
+          angle: 140,
+          colors: ["#0C1518", "#08090C"],
+          positions: [0, 0.58],
+        },
         layers: [
           {
-            blur: 36,
+            blur: 37,
             blobs: ribBlobs(-0.22 * w, -0.14 * h, 0.64 * w, 0.38 * h, [
-              [0.52, 0.4, 0.55, 0.65, "rgba(94,234,212,0.5)", 0.7],
+              [0.55, 0.45, 0.55, 0.66, "rgba(94,234,212,0.5)", 0.72],
             ]),
           },
           {
-            blur: 42,
-            blobs: ribBlobs(0.58 * w, 0.74 * h, 0.64 * w, 0.34 * h, [
-              [0.5, 0.5, 0.58, 0.62, "rgba(13,148,136,0.46)", 0.72],
-              [0.66, 0.4, 0.41, 0.41, "rgba(163,230,53,0.2)", 0.74],
+            blur: 60,
+            blobs: ribBlobs(0.61 * w, 0.78 * h, 0.69 * w, 0.38 * h, [
+              [0.6, 0.53, 0.7, 0.8, "rgba(13,148,136,0.62)", 0.78],
+              [0.2, 0.68, 0.6, 0.6, "rgba(163,230,53,0.38)", 0.65],
             ]),
           },
         ],
-        grain: 0.055,
+        grain: 0.05,
       };
     case "flash":
       return {
@@ -219,7 +263,14 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           {
             blur: 40,
             blobs: [
-              { cx: 0.5 * w, cy: 1.06 * h, rx: 0.7 * w, ry: 0.3 * h, color: "rgba(13,148,136,0.5)", edge: 0.74 },
+              {
+                cx: 0.5 * w,
+                cy: 1.06 * h,
+                rx: 0.7 * w,
+                ry: 0.3 * h,
+                color: "rgba(13,148,136,0.5)",
+                edge: 0.74,
+              },
             ],
           },
         ],
@@ -249,7 +300,14 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           {
             blur: 40,
             blobs: [
-              { cx: 0.5 * w, cy: 1.04 * h, rx: 0.7 * w, ry: 0.28 * h, color: "rgba(13,148,136,0.5)", edge: 0.74 },
+              {
+                cx: 0.5 * w,
+                cy: 1.04 * h,
+                rx: 0.7 * w,
+                ry: 0.28 * h,
+                color: "rgba(13,148,136,0.5)",
+                edge: 0.74,
+              },
             ],
           },
         ],
@@ -271,25 +329,52 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           {
             blur: 54,
             blobs: [
-              { cx: 40, cy: 30, rx: 200, ry: 200, color: "rgba(13,148,136,0.32)", edge: 0.68 },
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(13,148,136,0.32)",
+                edge: 0.68,
+              },
             ],
           },
           {
             blur: 52,
             blobs: [
-              { cx: w - 10, cy: 50, rx: 150, ry: 150, color: "rgba(67,56,202,0.24)", edge: 0.68 },
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(67,56,202,0.24)",
+                edge: 0.68,
+              },
             ],
           },
           {
             blur: 56,
             blobs: [
-              { cx: 0.06 * w + 180, cy: h + 15, rx: 180, ry: 125, color: "rgba(45,212,191,0.16)", edge: 0.7 },
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(45,212,191,0.16)",
+                edge: 0.7,
+              },
             ],
           },
         ],
         vignette: {
           kind: "linear",
-          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.5)", "rgba(1,3,5,0.86)", "rgba(1,3,5,0.94)"],
+          colors: [
+            NIGHT,
+            NIGHT,
+            "rgba(1,3,5,0.5)",
+            "rgba(1,3,5,0.86)",
+            "rgba(1,3,5,0.94)",
+          ],
           positions: [0, 0.34, 0.58, 0.78, 1],
         },
         grain: 0.07,
@@ -302,23 +387,45 @@ function saturationMatrix(s: number) {
   const lg = 0.715;
   const lb = 0.072;
   return [
-    lr + s * (1 - lr), lg - s * lg, lb - s * lb, 0, 0,
-    lr - s * lr, lg + s * (1 - lg), lb - s * lb, 0, 0,
-    lr - s * lr, lg - s * lg, lb + s * (1 - lb), 0, 0,
-    0, 0, 0, 1, 0,
+    lr + s * (1 - lr),
+    lg - s * lg,
+    lb - s * lb,
+    0,
+    0,
+    lr - s * lr,
+    lg + s * (1 - lg),
+    lb - s * lb,
+    0,
+    0,
+    lr - s * lr,
+    lg - s * lg,
+    lb + s * (1 - lb),
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
   ];
 }
 
 export type BgDebugMode = "noblur" | "clamp" | "decal";
 
-function useLayerPaint(blur: number, saturate?: number, mode: BgDebugMode = "clamp") {
+function useLayerPaint(
+  blur: number,
+  saturate?: number,
+  mode: BgDebugMode = "clamp",
+) {
   return useMemo(() => {
     if (mode === "noblur") return true;
     const paint = Skia.Paint();
     paint.setDither(true);
     const tile = mode === "decal" ? TileMode.Decal : TileMode.Clamp;
     paint.setImageFilter(Skia.ImageFilter.MakeBlur(blur, blur, tile, null));
-    paint.setColorFilter(Skia.ColorFilter.MakeMatrix(saturationMatrix(saturate ?? 1)));
+    paint.setColorFilter(
+      Skia.ColorFilter.MakeMatrix(saturationMatrix(saturate ?? 1)),
+    );
     return paint;
   }, [blur, saturate, mode]);
 }
@@ -369,14 +476,19 @@ function BeamLayer({
     if (run) {
       drift.value = -0.06 * w;
       drift.value = withRepeat(
-        withTiming(0.06 * w, { duration: beam.duration, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.06 * w, {
+          duration: beam.duration,
+          easing: Easing.inOut(Easing.ease),
+        }),
         -1,
         true,
       );
     }
   }, [run, w, beam.duration, drift]);
 
-  const transform = useDerivedValue(() => [{ translateX: run ? drift.value : 0 }]);
+  const transform = useDerivedValue(() => [
+    { translateX: run ? drift.value : 0 },
+  ]);
   const paint = useLayerPaint(beam.blur);
   const line = gradientLine(beam.angle, w, h);
 
@@ -482,7 +594,9 @@ export function BackgroundMesh({
       {spec.layers.map((layer, i) => (
         <BlobLayer key={i} layer={layer} mode={debugMode} />
       ))}
-      {spec.beam && <BeamLayer beam={spec.beam} w={w} h={h} animated={animated} />}
+      {spec.beam && (
+        <BeamLayer beam={spec.beam} w={w} h={h} animated={animated} />
+      )}
       {spec.vignette && <Vignette vignette={spec.vignette} w={w} h={h} />}
       {spec.grain !== undefined && <Grain w={w} h={h} amount={spec.grain} />}
     </Canvas>

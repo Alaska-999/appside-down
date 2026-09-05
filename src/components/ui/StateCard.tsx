@@ -1,14 +1,10 @@
 import { AppButton } from "@/src/components/ui/Button";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import {
-  BlurMask,
-  Canvas,
-  Circle,
-} from "@shopify/react-native-skia";
+import { BlurMask, Canvas, Circle } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { ComponentType, ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
-import { Text, YStack } from "tamagui";
+import { Text, YStack, YStackProps } from "tamagui";
 
 export type StateTone = "error" | "warn" | "empty";
 
@@ -43,7 +39,12 @@ function StateHalo({ color }: { color: string }) {
       }}
     >
       <Canvas style={StyleSheet.absoluteFill}>
-        <Circle cx={HALO_SIZE / 2} cy={HALO_SIZE / 2} r={HALO_RADIUS} color={color}>
+        <Circle
+          cx={HALO_SIZE / 2}
+          cy={HALO_SIZE / 2}
+          r={HALO_RADIUS}
+          color={color}
+        >
           <BlurMask blur={HALO_BLUR} style="normal" />
         </Circle>
       </Canvas>
@@ -51,7 +52,7 @@ function StateHalo({ color }: { color: string }) {
   );
 }
 
-interface StateCardProps {
+interface StateCardProps extends YStackProps {
   tone: StateTone;
   icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   title: string;
@@ -71,9 +72,10 @@ export function StateCard({
   buttonIcon,
   onButtonPress,
   loading,
+  ...rest
 }: StateCardProps) {
   return (
-    <YStack f={1} ai="center" jc="center" px={14}>
+    <YStack f={1} ai="center" jc="center" px={14} {...rest}>
       <YStack width={DISC_SIZE} height={DISC_SIZE} mb={22} pos="relative">
         <StateHalo color={TONE_HALO[tone]} />
         <YStack
@@ -117,7 +119,13 @@ export function StateCard({
 
       {subtitle ? (
         typeof subtitle === "string" ? (
-          <Text fontSize={13.5} color="#7F97A6" textAlign="center" lineHeight={21.6} maxWidth={280}>
+          <Text
+            fontSize={13.5}
+            color="#7F97A6"
+            textAlign="center"
+            lineHeight={21.6}
+            maxWidth={280}
+          >
             {subtitle}
           </Text>
         ) : (

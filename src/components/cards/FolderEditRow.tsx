@@ -35,6 +35,11 @@ const ICON_ACTION_TONE = {
     border: "rgba(239,68,68,0.3)",
     icon: "#FCA5A5",
   },
+  accent: {
+    bg: "rgba(45,212,191,0.1)",
+    border: "rgba(45,212,191,0.3)",
+    icon: "#5EEAD4",
+  },
 } as const;
 
 export function FolderEditIconAction({
@@ -86,7 +91,13 @@ export function FolderTagEditRow({
 }) {
   return (
     <XStack ai="center" gap={12} px={16} py={14}>
-      <Text fontSize={15} fontWeight="600" color="$color" f={1} numberOfLines={1}>
+      <Text
+        fontSize={15}
+        fontWeight="600"
+        color="$color"
+        f={1}
+        numberOfLines={1}
+      >
         {label}
       </Text>
       {count !== undefined && (
