@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
-import { Gesture } from "react-native-gesture-handler";
+import { Gesture, GestureType } from "react-native-gesture-handler";
 import {
   Easing,
   runOnJS,
@@ -15,7 +15,7 @@ import {
 export type SwipeDecision = "idle" | "dragRight" | "dragLeft" | "know" | "learning";
 
 export const DEAD_ZONE = 10;
-const COMMIT_THRESHOLD = 100;
+const COMMIT_THRESHOLD = 75;
 const DECISION_OFFSET = 52;
 const DECISION_ROTATE = 6;
 const SNAP_DURATION = 140;
@@ -32,6 +32,7 @@ interface UseSwipeCardOptions {
   resetKey?: string | number;
   revertKey?: number;
   revertDirection?: "left" | "right";
+  tapBlockers?: GestureType[];
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -47,6 +48,7 @@ export function useSwipeCard({
   resetKey,
   revertKey,
   revertDirection = "right",
+  tapBlockers = [],
 }: UseSwipeCardOptions) {
   const { width: screenWidth } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
@@ -132,7 +134,7 @@ export function useSwipeCard({
   }, [translateX, rotateZ, updateDecision]);
 
   const panGesture = Gesture.Pan()
-    .activeOffsetX([-10, 10])
+    .activeOffsetX([-6, 6])
     .onUpdate((e) => {
       translateX.value = e.translationX;
       rotateZ.value = clamp(
@@ -163,6 +165,7 @@ export function useSwipeCard({
 
   const tapGesture = Gesture.Tap()
     .maxDuration(250)
+    .requireExternalGestureToFail(...tapBlockers)
     .onEnd(() => {
       runOnJS(onTap)();
     });

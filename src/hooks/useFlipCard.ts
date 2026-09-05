@@ -22,8 +22,8 @@ interface UseFlipCardResult {
 }
 
 const FLIP_TIMING = {
-  duration: 340,
-  easing: Easing.bezier(0.2, 0.8, 0.3, 1),
+  duration: 550,
+  easing: Easing.bezier(0.2, 0.6, 0.4, 1),
 };
 
 export function useFlipCard({

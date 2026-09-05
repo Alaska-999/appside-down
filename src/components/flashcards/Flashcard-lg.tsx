@@ -8,11 +8,20 @@ import {
 } from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
+import { hapticTap } from "@/src/utils/haptics";
+import {
+  BlurMask,
+  Canvas,
+  Group,
+  RoundedRect,
+  rect,
+  rrect,
+} from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { Star, Volume2 } from "lucide-react-native";
-import { ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
+import { ReactNode, useState } from "react";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
   SharedValue,
@@ -27,6 +36,29 @@ const STAMP_RAMP_DISTANCE = 70;
 const CARD_RADIUS = 32;
 const CARD_ACTION_INSET = 14;
 const DRAG_SHADOW_DISTANCE = 60;
+const LEARNING_SHADE = { distance: 140, maxOpacity: 0.3 };
+const KNOW_GLOW = {
+  distance: 140,
+  margin: 64,
+  spread: -14,
+  blur: 30,
+  color: "rgba(163,230,53,0.65)",
+};
+
+function useActionTaps(onStar?: () => void) {
+  const star = Gesture.Tap()
+    .runOnJS(true)
+    .onEnd(() => {
+      hapticTap();
+      onStar?.();
+    });
+  const tts = Gesture.Tap()
+    .runOnJS(true)
+    .onEnd(() => {
+      hapticTap();
+    });
+  return { star, tts };
+}
 
 const CALM_EDGE = {
   width: 1.6,
@@ -141,7 +173,7 @@ function StampFace({
     const scale = reducedMotion ? 1 : 0.92 + p * 0.08;
     return {
       opacity: p,
-      transform: [{ rotate: isKnow ? "9deg" : "-9deg" }, { scale }],
+      transform: [{ rotate: isKnow ? "-9deg" : "9deg" }, { scale }],
       ...(isKnow ? { shadowOpacity: p } : null),
     };
   });
@@ -221,18 +253,105 @@ function StampPair({
   );
 }
 
+type GlowRecipe = typeof KNOW_GLOW;
+
+function DragGlow({
+  translateX,
+  recipe,
+  sign,
+}: {
+  translateX: SharedValue<number>;
+  recipe: GlowRecipe;
+  sign: 1 | -1;
+}) {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const opacity = useDerivedValue(() =>
+    interpolate(
+      sign * translateX.value,
+      [DEAD_ZONE, DEAD_ZONE + recipe.distance],
+      [0, 1],
+      Extrapolation.CLAMP,
+    ),
+  );
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (width !== size.width || height !== size.height)
+      setSize({ width, height });
+  };
+  const inset = recipe.margin - recipe.spread;
+  const cardClip = rrect(
+    rect(recipe.margin, recipe.margin, size.width, size.height),
+    CARD_RADIUS,
+    CARD_RADIUS,
+  );
+
+  return (
+    <View
+      pointerEvents="none"
+      style={StyleSheet.absoluteFill}
+      onLayout={onLayout}
+    >
+      {size.width > 0 && (
+        <Canvas
+          style={{
+            position: "absolute",
+            top: -recipe.margin,
+            left: -recipe.margin,
+            width: size.width + recipe.margin * 2,
+            height: size.height + recipe.margin * 2,
+          }}
+        >
+          <Group opacity={opacity} clip={cardClip} invertClip>
+            <RoundedRect
+              x={inset}
+              y={inset}
+              width={size.width + recipe.spread * 2}
+              height={size.height + recipe.spread * 2}
+              r={CARD_RADIUS + recipe.spread}
+              color={recipe.color}
+            >
+              <BlurMask blur={recipe.blur} style="normal" />
+            </RoundedRect>
+          </Group>
+        </Canvas>
+      )}
+    </View>
+  );
+}
+
+function LearningShade({ translateX }: { translateX: SharedValue<number> }) {
+  const style = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      -translateX.value,
+      [DEAD_ZONE, DEAD_ZONE + LEARNING_SHADE.distance],
+      [0, LEARNING_SHADE.maxOpacity],
+      Extrapolation.CLAMP,
+    ),
+  }));
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, styles.learningShade, style]}
+    />
+  );
+}
+
 function CardFace({
   style,
   text,
   weak,
   active,
   actions,
+  decision,
+  translateX,
 }: {
   style: object;
   text: string;
   weak?: boolean;
   active: boolean;
   actions: ReactNode;
+  decision: SwipeDecision;
+  translateX: SharedValue<number>;
 }) {
   return (
     <Animated.View
@@ -242,9 +361,10 @@ function CardFace({
       <YStack f={1} br={CARD_RADIUS} overflow="hidden">
         <LiquidGlass
           intensity={22}
-          backgroundColor="rgba(12,20,24,.55)"
+          backgroundColor="rgba(12,20,24,.5)"
           borderRadius={CARD_RADIUS}
         />
+        <LearningShade translateX={translateX} />
         <View pointerEvents="none" style={styles.topHighlight} />
         {actions}
         <YStack f={1} ai="center" jc="center" pt={64} px={26} pb={30}>
@@ -262,6 +382,7 @@ function CardFace({
           </Text>
         </YStack>
       </YStack>
+      <Edge decision={decision} />
     </Animated.View>
   );
 }
@@ -289,6 +410,9 @@ export function FlashcardLg({
     resetKey: card?.id,
   });
 
+  const frontTaps = useActionTaps(onStar);
+  const backTaps = useActionTaps(onStar);
+
   const { gesture, cardAnimatedStyle, decision, translateX, reducedMotion } =
     useSwipeCard({
       onSwipeLeft,
@@ -298,6 +422,7 @@ export function FlashcardLg({
       resetKey: card?.id,
       revertKey,
       revertDirection,
+      tapBlockers: [frontTaps.star, frontTaps.tts, backTaps.star, backTaps.tts],
     });
 
   const dragShadowStyle = useAnimatedStyle(() => {
@@ -309,7 +434,10 @@ export function FlashcardLg({
     };
   });
 
-  const renderActions = (ttsColor: string) => (
+  const renderActions = (
+    taps: ReturnType<typeof useActionTaps>,
+    ttsColor: string,
+  ) => (
     <XStack
       pos="absolute"
       top={CARD_ACTION_INSET}
@@ -318,35 +446,36 @@ export function FlashcardLg({
       ai="center"
       jc="space-between"
       zIndex={5}
+      p={1}
     >
-      <YStack
-        w={40}
-        h={40}
-        br={20}
-        ai="center"
-        jc="center"
-        bg="rgba(220,255,245,0.05)"
-        onPress={onStar}
-        pressStyle={{ scale: 0.9 }}
-        hitSlop={4}
-      >
-        <Star
-          size={20}
-          color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
-          strokeWidth={card?.isStarred ? 2.1 : 1.8}
-        />
-      </YStack>
-      <YStack
-        w={40}
-        h={40}
-        br={20}
-        ai="center"
-        jc="center"
-        bg="rgba(220,255,245,0.05)"
-        hitSlop={4}
-      >
-        <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
-      </YStack>
+      <GestureDetector gesture={taps.star}>
+        <YStack
+          w={40}
+          h={40}
+          br={20}
+          ai="center"
+          jc="center"
+          bg="rgba(220,255,245,0.05)"
+        >
+          <Star
+            size={20}
+            color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
+            strokeWidth={card?.isStarred ? 2.1 : 1.8}
+          />
+        </YStack>
+      </GestureDetector>
+      <GestureDetector gesture={taps.tts}>
+        <YStack
+          w={40}
+          h={40}
+          br={20}
+          ai="center"
+          jc="center"
+          bg="rgba(220,255,245,0.05)"
+        >
+          <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
+        </YStack>
+      </GestureDetector>
     </XStack>
   );
 
@@ -363,20 +492,24 @@ export function FlashcardLg({
             dragShadowStyle,
           ]}
         >
+          <DragGlow translateX={translateX} recipe={KNOW_GLOW} sign={1} />
           <CardFace
             style={frontAnimatedStyle}
             text={front}
             active={isFront}
-            actions={renderActions("#3E4C57")}
+            actions={renderActions(frontTaps, "#3E4C57")}
+            decision={decision}
+            translateX={translateX}
           />
           <CardFace
             style={backAnimatedStyle}
             text={back}
             weak
             active={!isFront}
-            actions={renderActions("#B7CEDA")}
+            actions={renderActions(backTaps, "#B7CEDA")}
+            decision={decision}
+            translateX={translateX}
           />
-          <Edge decision={decision} />
           <StampPair translateX={translateX} reducedMotion={reducedMotion} />
         </Animated.View>
       </GestureDetector>
@@ -404,6 +537,9 @@ const styles = StyleSheet.create({
     borderRadius: CARD_RADIUS,
     backfaceVisibility: "hidden",
   },
+  learningShade: {
+    backgroundColor: "rgb(0, 10, 5)",
+  },
   topHighlight: {
     position: "absolute",
     top: 0,
@@ -420,14 +556,14 @@ const styles = StyleSheet.create({
     bottom: -14,
     borderRadius: 30,
     zIndex: 1,
-    backgroundColor: "rgba(14,24,28,0.5)",
+    backgroundColor: "rgba(14,24,28,0.45)",
   },
   ghostG2: {
     position: "absolute",
     left: 22,
     right: 22,
-    top: 26,
-    bottom: -26,
+    top: 27,
+    bottom: -27,
     borderRadius: 30,
     zIndex: 0,
     backgroundColor: "rgba(14,24,28,0.32)",
