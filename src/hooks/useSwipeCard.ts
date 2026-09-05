@@ -19,9 +19,10 @@ const COMMIT_THRESHOLD = 100;
 const DECISION_OFFSET = 52;
 const DECISION_ROTATE = 6;
 const SNAP_DURATION = 140;
-const EXIT_DURATION = 260;
-const CANCEL_SPRING = { damping: 16, stiffness: 180 };
+const EXIT_DURATION = 320;
+const CANCEL_SPRING = { damping: 22, stiffness: 160 };
 const EASE = Easing.out(Easing.cubic);
+const EXIT_EASE = Easing.inOut(Easing.quad);
 
 interface UseSwipeCardOptions {
   onSwipeLeft?: () => void;
@@ -112,13 +113,14 @@ export function useSwipeCard({
         return;
       }
 
-      translateX.value = withSequence(
-        withTiming(sign * DECISION_OFFSET, { duration: SNAP_DURATION, easing: EASE }),
-        withTiming(sign * screenWidth * 1.3, { duration: EXIT_DURATION, easing: EASE }, (finished) => {
+      translateX.value = withTiming(
+        sign * screenWidth * 1.2,
+        { duration: EXIT_DURATION, easing: EXIT_EASE },
+        (finished) => {
           if (finished && callback) runOnJS(callback)();
-        }),
+        },
       );
-      rotateZ.value = withTiming(sign * DECISION_ROTATE, { duration: SNAP_DURATION, easing: EASE });
+      rotateZ.value = withTiming(sign * DECISION_ROTATE, { duration: EXIT_DURATION, easing: EXIT_EASE });
     },
     [onSwipeRight, onSwipeLeft, reducedMotion, screenWidth, translateX, rotateZ, updateDecision],
   );

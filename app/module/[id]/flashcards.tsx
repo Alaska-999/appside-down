@@ -174,8 +174,8 @@ export default function FlashcardsGame() {
             stillLearning={stillLearningPiles.length}
           />
         ) : (
-          <YStack f={1} px={16} pt={20} pb={20} ai="center" jc="center">
-            <YStack width="100%" f={1} maxHeight={750}>
+          <YStack f={1} px={18} pt={20} pb={20} ai="center" jc="center">
+            <YStack width="100%" f={1} maxHeight={730}>
               <FlashcardLg
                 card={activeCards[currentIndex]}
                 revertDirection={lastSwipeDirection}

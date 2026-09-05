@@ -10,6 +10,7 @@ import { Flashcard } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { LinearGradient } from "expo-linear-gradient";
 import { Star, Volume2 } from "lucide-react-native";
+import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -24,6 +25,8 @@ import { Text, XStack, YStack } from "tamagui";
 const STAMP_RAMP_DISTANCE = 70;
 
 const CARD_RADIUS = 32;
+const CARD_ACTION_INSET = 14;
+const DRAG_SHADOW_DISTANCE = 60;
 
 const CALM_EDGE = {
   width: 1.6,
@@ -222,21 +225,28 @@ function CardFace({
   style,
   text,
   weak,
+  active,
+  actions,
 }: {
   style: object;
   text: string;
   weak?: boolean;
+  active: boolean;
+  actions: ReactNode;
 }) {
   return (
-    <Animated.View style={[styles.face, style]}>
-      <YStack
-        f={1}
-        br={CARD_RADIUS}
-        overflow="hidden"
-        bg="rgba(7, 21, 29, 0.45)"
-      >
-        <LiquidGlass intensity={40} tint="default" borderRadius={CARD_RADIUS} />
+    <Animated.View
+      style={[styles.face, style]}
+      pointerEvents={active ? "auto" : "none"}
+    >
+      <YStack f={1} br={CARD_RADIUS} overflow="hidden">
+        <LiquidGlass
+          intensity={22}
+          backgroundColor="rgba(12,20,24,.55)"
+          borderRadius={CARD_RADIUS}
+        />
         <View pointerEvents="none" style={styles.topHighlight} />
+        {actions}
         <YStack f={1} ai="center" jc="center" pt={64} px={26} pb={30}>
           <Text
             fontSize={weak ? 25 : 32}
@@ -290,7 +300,55 @@ export function FlashcardLg({
       revertDirection,
     });
 
-  const ttsColor = isFront ? "#3E4C57" : "#B7CEDA";
+  const dragShadowStyle = useAnimatedStyle(() => {
+    const drag = Math.min(Math.abs(translateX.value) / DRAG_SHADOW_DISTANCE, 1);
+    return {
+      shadowOpacity: interpolate(drag, [0, 1], [0.5, 0.78]),
+      shadowRadius: interpolate(drag, [0, 1], [30, 40]),
+      shadowOffset: { width: 0, height: interpolate(drag, [0, 1], [18, 30]) },
+    };
+  });
+
+  const renderActions = (ttsColor: string) => (
+    <XStack
+      pos="absolute"
+      top={CARD_ACTION_INSET}
+      left={CARD_ACTION_INSET}
+      right={CARD_ACTION_INSET}
+      ai="center"
+      jc="space-between"
+      zIndex={5}
+    >
+      <YStack
+        w={40}
+        h={40}
+        br={20}
+        ai="center"
+        jc="center"
+        bg="rgba(220,255,245,0.05)"
+        onPress={onStar}
+        pressStyle={{ scale: 0.9 }}
+        hitSlop={4}
+      >
+        <Star
+          size={20}
+          color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
+          strokeWidth={card?.isStarred ? 2.1 : 1.8}
+        />
+      </YStack>
+      <YStack
+        w={40}
+        h={40}
+        br={20}
+        ai="center"
+        jc="center"
+        bg="rgba(220,255,245,0.05)"
+        hitSlop={4}
+      >
+        <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
+      </YStack>
+    </XStack>
+  );
 
   return (
     <View style={styles.container}>
@@ -302,54 +360,24 @@ export function FlashcardLg({
             StyleSheet.absoluteFill,
             styles.bigcardWrap,
             cardAnimatedStyle,
+            dragShadowStyle,
           ]}
         >
-          <CardFace style={frontAnimatedStyle} text={front} />
-          <CardFace style={backAnimatedStyle} text={back} weak />
+          <CardFace
+            style={frontAnimatedStyle}
+            text={front}
+            active={isFront}
+            actions={renderActions("#3E4C57")}
+          />
+          <CardFace
+            style={backAnimatedStyle}
+            text={back}
+            weak
+            active={!isFront}
+            actions={renderActions("#B7CEDA")}
+          />
           <Edge decision={decision} />
           <StampPair translateX={translateX} reducedMotion={reducedMotion} />
-
-          <XStack
-            pos="absolute"
-            top={0}
-            left={0}
-            right={0}
-            height={60}
-            ai="center"
-            jc="space-between"
-            px={12}
-            zIndex={5}
-          >
-            <YStack
-              w={40}
-              h={40}
-              br={20}
-              ai="center"
-              jc="center"
-              bg="rgba(220,255,245,0.05)"
-              onPress={onStar}
-              pressStyle={{ scale: 0.9 }}
-              hitSlop={4}
-            >
-              <Star
-                size={20}
-                color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
-                fill={card?.isStarred ? "rgba(252,211,77,0.85)" : "none"}
-                strokeWidth={1.8}
-              />
-            </YStack>
-            <YStack
-              w={40}
-              h={40}
-              br={20}
-              ai="center"
-              jc="center"
-              bg="rgba(220,255,245,0.05)"
-              hitSlop={4}
-            >
-              <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
-            </YStack>
-          </XStack>
         </Animated.View>
       </GestureDetector>
     </View>

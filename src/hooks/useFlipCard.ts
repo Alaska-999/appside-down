@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Easing,
   interpolate,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 interface UseFlipCardOptions {
@@ -20,7 +21,10 @@ interface UseFlipCardResult {
   backAnimatedStyle: object;
 }
 
-const SPRING_CONFIG = { damping: 20, stiffness: 180 };
+const FLIP_TIMING = {
+  duration: 340,
+  easing: Easing.bezier(0.2, 0.8, 0.3, 1),
+};
 
 export function useFlipCard({
   direction = "horizontal",
@@ -44,7 +48,7 @@ export function useFlipCard({
       ? next
         ? 0
         : 180
-      : withSpring(next ? 0 : 180, SPRING_CONFIG);
+      : withTiming(next ? 0 : 180, FLIP_TIMING);
     setIsFront(next);
   };
 
