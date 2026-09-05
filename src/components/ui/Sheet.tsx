@@ -236,7 +236,7 @@ export function AppSheet({
 type SheetRowTone = "light" | "dark" | "surface";
 
 const ROW_BG: Record<SheetRowTone, string> = {
-  dark: "rgba(5, 13, 21, 0.38)",
+  dark: "rgba(5, 13, 21, 0.39)",
   light: "rgba(31, 40, 44, 0.75)",
   surface: "rgba(133, 155, 152, 0.07)",
 };
@@ -260,6 +260,7 @@ interface SheetRowProps {
   selected?: boolean;
   right?: ReactNode;
   tone?: SheetRowTone;
+  disabled?: boolean;
   onPress?: () => void;
 }
 
@@ -273,6 +274,7 @@ export function SheetRow({
   selected,
   right,
   tone,
+  disabled,
   onPress,
 }: SheetRowProps) {
   const rows = useContext(SheetRowsContext);
@@ -280,7 +282,7 @@ export function SheetRow({
   const labelColor = danger ? "$roseSoft" : "$color";
   const iconColor = danger ? ICON_DANGER : ICON_MUTED_LIGHT;
 
-  const pressable = !!onPress;
+  const pressable = !!onPress && !disabled;
 
   return (
     <XStack
@@ -290,6 +292,7 @@ export function SheetRow({
       py={16}
       minHeight={44}
       bg={ROW_BG[rowTone]}
+      opacity={disabled ? 0.5 : 1}
       transition="quick"
       {...(pressable && {
         onPress: () => {

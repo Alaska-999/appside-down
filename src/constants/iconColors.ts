@@ -1,7 +1,7 @@
 export const ICON_ON_GLASS = "#EAF7FF";
 export const ICON_MUTED = "#8FA8B8";
 export const ICON_SUBTLE = "#5A6B7A";
-export const ICON_ACCENT = "#5EEAD4";
+export const ICON_ACCENT = "#B7CEDA";
 export const ICON_MINT = "#2DD4BF";
 export const ICON_TEAL = "#0D9488";
 export const ICON_LIME = "#A3E635";

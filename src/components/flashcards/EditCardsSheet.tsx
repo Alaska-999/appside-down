@@ -1,19 +1,20 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { FormInput } from "@/src/components/common/FormInput";
-import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
-import { AppButton } from "@/src/components/ui/Button";
+import { CardEditor } from "@/src/components/flashcards/CardEditor";
+import { AddPill } from "@/src/components/ui/AddPill";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { SavePill } from "@/src/components/ui/SavePill";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useServerError } from "@/src/hooks/useServerError";
 import { Flashcard } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { EditModuleForm, editModuleSchema } from "@/src/validation/entities";
+import { EditCardsForm, editCardsSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronDown, Globe, Lock, X } from "@tamagui/lucide-icons";
+import { X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { Pressable, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import Animated from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
@@ -23,17 +24,15 @@ interface EditCardsSheetProps {
   onOpenChange: (open: boolean) => void;
   moduleId: string;
   cards: { id: string; term: string; definition: string }[];
-  onSaved: (
-    updatedCards: Flashcard[],
-    name: string,
-    description: string,
-    isPublic: boolean,
-    updatedAt: string,
-  ) => void;
-  moduleName: string;
-  moduleDescription: string;
-  moduleIsPublic: boolean;
+  onSaved: (updatedCards: Flashcard[]) => void;
 }
+
+const newCard = () => ({
+  id: `new-${Date.now()}`,
+  term: "",
+  definition: "",
+  isNew: true,
+});
 
 export function EditCardsSheet({
   open,
@@ -41,21 +40,12 @@ export function EditCardsSheet({
   moduleId,
   cards,
   onSaved,
-  moduleName,
-  moduleDescription,
-  moduleIsPublic,
 }: EditCardsSheetProps) {
   const [removedIds, setRemovedIds] = useState<string[]>([]);
-  const [isPublic, setIsPublic] = useState(moduleIsPublic);
-  const [privacyOpen, setPrivacyOpen] = useState(false);
 
-  const form = useForm<EditModuleForm>({
-    resolver: zodResolver(editModuleSchema),
-    defaultValues: {
-      name: moduleName,
-      description: moduleDescription,
-      flashcards: cards,
-    },
+  const form = useForm<EditCardsForm>({
+    resolver: zodResolver(editCardsSchema),
+    defaultValues: { flashcards: cards },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
@@ -84,7 +74,6 @@ export function EditCardsSheet({
     onViewportLayout,
     spacerStyle,
     liftCard,
-    releaseCard,
   } = useKeyboardCardLift();
   const termRefs = useRef<Array<TextInput | null>>([]);
   const definitionRefs = useRef<Array<TextInput | null>>([]);
@@ -103,21 +92,11 @@ export function EditCardsSheet({
 
   useEffect(() => {
     if (open) {
-      reset({
-        name: moduleName,
-        description: moduleDescription,
-        flashcards: cards.map((c) => ({ ...c })),
-      });
+      reset({ flashcards: cards.map((c) => ({ ...c })) });
       setRemovedIds([]);
-      setIsPublic(moduleIsPublic);
-      setPrivacyOpen(false);
       setServerError(null);
     }
   }, [open]);
-
-  const handleAdd = () => {
-    append({ id: `new-${Date.now()}`, term: "", definition: "", isNew: true });
-  };
 
   const handleRemove = (index: number) => {
     const card = getValues(`flashcards.${index}`);
@@ -127,7 +106,7 @@ export function EditCardsSheet({
     remove(index);
   };
 
-  const onSubmit = async (data: EditModuleForm) => {
+  const onSubmit = async (data: EditCardsForm) => {
     setServerError(null);
 
     const isEmpty = (card: { term: string; definition: string }) =>
@@ -144,7 +123,7 @@ export function EditCardsSheet({
         return res.json();
       };
 
-      const [, patchedResults, createdResults, moduleRes] = await Promise.all([
+      const [, patchedResults, createdResults] = await Promise.all([
         Promise.all(
           idsToDelete.map((cardId) =>
             protectedFetch(`${API_BASE_URL}/flashcards/${cardId}`, {
@@ -182,30 +161,13 @@ export function EditCardsSheet({
               }).then(readJson),
             ),
         ),
-        protectedFetch(`${API_BASE_URL}/modules/${moduleId}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            name: data.name,
-            description: data.description,
-            isPublic,
-          }),
-        }),
       ]);
 
-      if (!moduleRes.ok) throw new Error(`Error: ${moduleRes.status}`);
-      const updatedModule = await moduleRes.json();
-
-      onSaved(
-        [...patchedResults, ...createdResults],
-        data.name,
-        data.description,
-        isPublic,
-        updatedModule.updatedAt,
-      );
+      onSaved([...patchedResults, ...createdResults]);
       onOpenChange(false);
     } catch (err) {
       console.error("[EditCardsSheet] save error:", err);
-      setServerError("Failed to save changes. Please try again");
+      setServerError("Couldn't save the cards. Try again");
     }
   };
 
@@ -214,27 +176,20 @@ export function EditCardsSheet({
       <AppSheet
         open={open}
         onOpenChange={onOpenChange}
-        title="Edit module"
+        title="Edit cards"
         snapPoints={[90]}
         keepKeyboard
         growWithKeyboard
         leftAction={
           <IconButton
-            variant="glass"
-            size={36}
-            icon={<X size={16} color="$colorSecondary" />}
+            variant="liquidGlass"
+            icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
             onPress={() => onOpenChange(false)}
+            accessibilityLabel="Close"
           />
         }
         rightAction={
-          <AppButton
-            variant="primary"
-            size="sm"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-          >
-            Save
-          </AppButton>
+          <SavePill loading={isSubmitting} onPress={handleSubmit(onSubmit)} />
         }
       >
         <View style={{ flex: 1 }} onLayout={onViewportLayout}>
@@ -247,156 +202,60 @@ export function EditCardsSheet({
             keyboardDismissMode="none"
             keyboardShouldPersistTaps="always"
           >
-            <YStack gap="$3">
-              <FormInput
-                control={control}
-                name="name"
-                placeholder="Untitled Module"
-                variant="glass"
-                inputSize="md"
-                onFocus={releaseCard}
-              />
+            <XStack ai="center" jc="space-between" mb={6}>
+              <Text fontSize={16} fontWeight="700" color="$color">
+                Cards
+              </Text>
+              <Text fontSize={12.5} color="$textMuted">
+                {fields.length}
+              </Text>
+            </XStack>
 
-              <FormInput
-                control={control}
-                name="description"
-                placeholder="Description (optional)"
-                variant="glass"
-                inputSize="md"
-                onFocus={releaseCard}
-              />
-
-              <YStack>
-                <Pressable onPress={() => setPrivacyOpen((prev) => !prev)}>
-                  <XStack
-                    bg="$glassBg"
-                    br={16}
-                    px="$4"
-                    height={48}
-                    ai="center"
-                    jc="space-between"
-                    borderWidth={1}
-                    borderColor="$glassBorder"
-                  >
-                    <XStack ai="center" gap="$2">
-                      {isPublic ? (
-                        <Globe size={16} color="$colorSecondary" />
-                      ) : (
-                        <Lock size={16} color="$colorSecondary" />
-                      )}
-                      <Text fontSize="$4" color="$color">
-                        {isPublic ? "Public" : "Private"}
-                      </Text>
-                    </XStack>
-                    <ChevronDown
-                      size={16}
-                      color="$colorMuted"
-                      rotate={privacyOpen ? "180deg" : "0deg"}
-                    />
-                  </XStack>
-                </Pressable>
-
-                {privacyOpen && (
-                  <YStack
-                    bg="$glassBg"
-                    br={16}
-                    mt="$2"
-                    borderWidth={1}
-                    borderColor="$glassBorder"
-                    overflow="hidden"
-                  >
-                    {(
-                      [
-                        {
-                          value: false,
-                          label: "Private",
-                          hint: "Only you can see this module",
-                          Icon: Lock,
-                        },
-                        {
-                          value: true,
-                          label: "Public",
-                          hint: "Anyone can find and save it",
-                          Icon: Globe,
-                        },
-                      ] as const
-                    ).map(({ value, label, hint, Icon }) => (
-                      <Pressable
-                        key={label}
-                        onPress={() => {
-                          setIsPublic(value);
-                          setPrivacyOpen(false);
-                        }}
-                      >
-                        <XStack px="$4" py="$3" ai="center" gap="$2">
-                          <Icon size={16} color="$colorSecondary" />
-                          <YStack f={1}>
-                            <Text fontSize="$4" color="$color">
-                              {label}
-                            </Text>
-                            <Text fontSize="$2" color="$colorMuted">
-                              {hint}
-                            </Text>
-                          </YStack>
-                          {isPublic === value && (
-                            <Check size={16} color="$accentGradientStart" />
-                          )}
-                        </XStack>
-                      </Pressable>
-                    ))}
-                  </YStack>
-                )}
-              </YStack>
-            </YStack>
-
-            <YStack pt="$5" gap="$4">
+            <YStack gap={10}>
               {fields.map((field, index) => (
-                <FlashcardEditItem
+                <CardEditor
                   key={field.fieldKey}
                   control={control}
                   termName={`flashcards.${index}.term`}
                   definitionName={`flashcards.${index}.definition`}
                   index={index}
                   onRemove={handleRemove}
-                  showRemove={fields.length > 1}
+                  canRemove={fields.length > 2}
+                  onFieldFocus={liftCard}
                   termRef={(node) => {
                     termRefs.current[index] = node;
                   }}
                   definitionRef={(node) => {
                     definitionRefs.current[index] = node;
                   }}
-                  onFieldFocus={liftCard}
                   onSubmitTerm={() => focusDefinition(index)}
                   onSubmitDefinition={() => {
-                    if (index + 1 < fields.length) {
-                      focusTerm(index + 1);
-                    } else {
-                      append({
-                        id: `new-${Date.now()}`,
-                        term: "",
-                        definition: "",
-                        isNew: true,
-                      });
-                    }
+                    if (index + 1 < fields.length) focusTerm(index + 1);
+                    else append(newCard());
                   }}
                 />
               ))}
+            </YStack>
 
-              {flashcardsError && (
-                <Text color="$statusDanger" fontSize="$2">
-                  {flashcardsError}
-                </Text>
-              )}
+            {flashcardsError && (
+              <Text color="$dangerText" fontSize={11.5} mt={8}>
+                {flashcardsError}
+              </Text>
+            )}
 
-              {serverError && (
-                <Text color="$statusDanger" fontSize="$3" textAlign="center">
-                  {serverError}
-                </Text>
-              )}
+            {serverError && (
+              <Text
+                color="$dangerText"
+                fontSize={12.5}
+                textAlign="center"
+                mt={12}
+              >
+                {serverError}
+              </Text>
+            )}
 
-              <AppButton variant="outline" size="lg" onPress={handleAdd}>
-                + Add Card
-              </AppButton>
+            <YStack ai="center" mt={18}>
+              <AddPill label="Add card" onPress={() => append(newCard())} />
             </YStack>
             <Animated.View style={spacerStyle} />
           </KeyboardAwareScrollView>

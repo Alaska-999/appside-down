@@ -1,5 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { FocusRing, useFocusProgress } from "@/src/components/ui/InputShell";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
@@ -192,7 +192,7 @@ export function CardEditor<T extends FieldValues>({
           >
             Card {String(index + 1).padStart(2, "0")}
           </Text>
-          {dragGesture ? (
+          {dragGesture && (
             <GestureDetector gesture={dragGesture}>
               <View
                 accessibilityLabel={`Reorder card ${index + 1}`}
@@ -206,8 +206,6 @@ export function CardEditor<T extends FieldValues>({
                 />
               </View>
             </GestureDetector>
-          ) : (
-            <GripHorizontal size={18} color={ICON_SUBTLE} strokeWidth={1.9} />
           )}
           {canRemove && (
             <Pressable

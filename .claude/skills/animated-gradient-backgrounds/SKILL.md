@@ -23,15 +23,15 @@ Working ranges from the approved mockups: node drift cycles 7-12s with per-node 
 
 ## Tutorial index (user-vetted, 2026-08-09)
 
-| Technique | Source |
-|---|---|
-| Animated gradient via interpolateColor | Software Mansion — "Animated Gradient Picker with RN Reanimated" (youtube _FehNLxxpRY) |
-| Mesh gradient module | Code with Beto — "Expo Mesh Gradient" (B8Hkuq6EZ7o) |
-| Glassmorphism over animated bg | Candillon — "Glassmorphism in React Native" (ao2i_sOD-z0) |
-| Skia clock-driven loader | Reactiive — "Animated Loader with RN (Skia)" (7pCiGUrJuow) |
-| Neumorphism shadows | Candillon — "Neumorphism in React Native" (GFssmWUhwww) |
-| Liquid glass via Skia | Candillon — "Liquid Glass with RN Skia" (qYFMOMVZoPY) |
-| Progressive blur gradient | Candillon — "Experimental Blur Gradient in RN" (oboF_H1MApo) |
+| Technique                              | Source                                                                                  |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| Animated gradient via interpolateColor | Software Mansion — "Animated Gradient Picker with RN Reanimated" (youtube \_FehNLxxpRY) |
+| Mesh gradient module                   | Code with Beto — "Expo Mesh Gradient" (B8Hkuq6EZ7o)                                     |
+| Glassmorphism over animated bg         | Candillon — "Glassmorphism in React Native" (ao2i_sOD-z0)                               |
+| Skia clock-driven loader               | Reactiive — "Animated Loader with RN (Skia)" (7pCiGUrJuow)                              |
+| Neumorphism shadows                    | Candillon — "Neumorphism in React Native" (GFssmWUhwww)                                 |
+| Liquid glass via Skia                  | Candillon — "Liquid Glass with RN Skia" (qYFMOMVZoPY)                                   |
+| Progressive blur gradient              | Candillon — "Experimental Blur Gradient in RN" (oboF_H1MApo)                            |
 
 ## Approved visual ground truth
 

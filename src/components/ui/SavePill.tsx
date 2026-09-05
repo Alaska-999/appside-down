@@ -17,7 +17,7 @@ export function SavePill({
     <AppButton
       variant="primary"
       size="sm"
-      icon={<Check size={16} color={ICON_NEAR_BLACK} strokeWidth={2.4} />}
+      icon={<Check size={17} color={ICON_NEAR_BLACK} strokeWidth={2.4} />}
       onPress={onPress}
       loading={loading}
       disabled={!enabled}

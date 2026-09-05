@@ -1,54 +1,15 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
-import { AppSheet } from "@/src/components/ui/Sheet";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useGameStore } from "@/src/store/useGameStore";
-import { RotateCcw } from "lucide-react-native";
-import { ReactNode } from "react";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Layers, RotateCcw, Shuffle, Volume2 } from "lucide-react-native";
+import { Text, XStack, YStack } from "tamagui";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-function SettingsRow({
-  label,
-  disabled,
-  right,
-}: {
-  label: string;
-  disabled?: boolean;
-  right: ReactNode;
-}) {
-  return (
-    <XStack
-      ai="center"
-      gap={12}
-      height={56}
-      px={16}
-      opacity={disabled ? 0.45 : 1}
-    >
-      <Text f={1} fontSize={15} fontWeight="600" color="$color">
-        {label}
-      </Text>
-      {right}
-    </XStack>
-  );
-}
-
-function RowDivider() {
-  return (
-    <View
-      pos="absolute"
-      top={0}
-      left={16}
-      right={0}
-      height={1}
-      bg="rgba(220,255,245,0.08)"
-    />
-  );
 }
 
 function SoonBadge() {
@@ -81,6 +42,10 @@ export function FlashcardsSettingsSheet({
   const updateSettings = useGameStore((state) => state.updateSettings);
   const restart = useGameStore((state) => state.restart);
 
+  const toggleShuffle = () => updateSettings({ shuffle: !settings.shuffle });
+  const togglePiles = () =>
+    updateSettings({ sortByPiles: !settings.sortByPiles });
+
   const handleRestart = () => {
     restart(false);
     onOpenChange(false);
@@ -89,47 +54,38 @@ export function FlashcardsSettingsSheet({
   return (
     <AppSheet open={open} onOpenChange={onOpenChange} title="Settings">
       <YStack gap={12}>
-        <YStack
-          br="$cardSoft"
-          overflow="hidden"
-          bg="rgba(220,255,245,0.05)"
-          borderWidth={1}
-          borderColor="rgba(220,255,245,0.1)"
-        >
-          <SettingsRow
+        <SheetRows>
+          <SheetRow
+            icon={Shuffle}
             label="Shuffle cards"
             right={
               <Toggle
                 size="md"
                 value={settings.shuffle}
-                onToggle={() => updateSettings({ shuffle: !settings.shuffle })}
+                onToggle={toggleShuffle}
               />
             }
+            onPress={toggleShuffle}
           />
-          <View pos="relative">
-            <RowDivider />
-            <SettingsRow
-              label="Sort into piles"
-              right={
-                <Toggle
-                  size="md"
-                  value={settings.sortByPiles}
-                  onToggle={() =>
-                    updateSettings({ sortByPiles: !settings.sortByPiles })
-                  }
-                />
-              }
-            />
-          </View>
-          <View pos="relative">
-            <RowDivider />
-            <SettingsRow
-              label="Text to speech"
-              disabled
-              right={<SoonBadge />}
-            />
-          </View>
-        </YStack>
+          <SheetRow
+            icon={Layers}
+            label="Sort into piles"
+            right={
+              <Toggle
+                size="md"
+                value={settings.sortByPiles}
+                onToggle={togglePiles}
+              />
+            }
+            onPress={togglePiles}
+          />
+          <SheetRow
+            icon={Volume2}
+            label="Text to speech"
+            disabled
+            right={<SoonBadge />}
+          />
+        </SheetRows>
 
         <YStack gap={9} mt={2}>
           <Text
@@ -157,7 +113,7 @@ export function FlashcardsSettingsSheet({
         <AppButton
           variant="danger"
           size="md"
-          icon={<RotateCcw size={19} color={ICON_DANGER} strokeWidth={1.9} />}
+          icon={<RotateCcw size={20} color={ICON_DANGER} strokeWidth={2} />}
           onPress={handleRestart}
         >
           Restart game

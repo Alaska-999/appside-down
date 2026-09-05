@@ -64,7 +64,7 @@ const LEGACY_VARIANT_STYLES: Record<
   },
 };
 
-const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
+const PRESS_EASING = Easing.bezier(0.2, 0.4, 0.25, 1);
 
 export function IconButton({
   icon,
@@ -95,7 +95,7 @@ export function IconButton({
         ai="center"
         jc="center"
         onPress={handlePress}
-        pressStyle={{ scale: 0.9 }}
+        pressStyle={{ scale: 0.92 }}
         transition="press"
         accessibilityRole="button"
         shadowColor="#000"
@@ -315,7 +315,7 @@ export function AppFab({
           ]}
         >
           <Canvas style={StyleSheet.absoluteFill}>
-            <Circle cx={58} cy={58} r={44} color="rgba(94,234,212,0.32)">
+            <Circle cx={58} cy={58} r={44} color="rgba(92,234,212,0.32)">
               <BlurMask blur={16} style="normal" />
             </Circle>
           </Canvas>
@@ -343,7 +343,7 @@ export function AppFab({
             ai="center"
             jc="center"
             overflow="hidden"
-            shadowColor="rgba(94,234,212,1)"
+            shadowColor="rgba(92,234,212,1)"
             shadowOffset={{ width: 0, height: 8 }}
             shadowRadius={15}
             shadowOpacity={0.7}

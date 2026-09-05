@@ -1,9 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  FocusRing,
-  useFocusProgress,
-  WellInsetShadow,
-} from "@/src/components/ui/InputShell";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
+import { WellInsetShadow } from "@/src/components/ui/InputShell";
 import { Children, createContext, ReactNode, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { YStack } from "tamagui";

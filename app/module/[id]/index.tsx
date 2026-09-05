@@ -1,5 +1,4 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { Toggle } from "@/src/components/ui/Toggle";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
@@ -17,11 +16,11 @@ import {
   SheetRows,
 } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StateCard } from "@/src/components/ui/StateCard";
 import { StatTile } from "@/src/components/ui/StatTile";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { Toggle } from "@/src/components/ui/Toggle";
 import {
   ICON_ACCENT,
   ICON_DANGER,
@@ -29,6 +28,7 @@ import {
   ICON_MUTED,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
@@ -406,25 +406,10 @@ export default function ModuleScreen() {
     setTimeout(() => setEditModuleOpen(true), 300);
   };
 
-  const handleSaved = (
-    updatedCards: Flashcard[],
-    name: string,
-    description: string,
-    isPublic: boolean,
-    updatedAt: string,
-  ) => {
+  const handleSaved = (updatedCards: Flashcard[]) => {
     setFlashcards(updatedCards);
     setModuleData((prev) =>
-      prev
-        ? {
-            ...prev,
-            name,
-            description,
-            isPublic,
-            updatedAt,
-            itemsCount: updatedCards.length,
-          }
-        : prev,
+      prev ? { ...prev, itemsCount: updatedCards.length } : prev,
     );
   };
 
@@ -484,7 +469,13 @@ export default function ModuleScreen() {
           <XStack px="$screenX" pt={screen.top} jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <ChevronLeft
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
+              }
               onPress={() => router.back()}
               accessibilityLabel="Back"
             />
@@ -496,7 +487,9 @@ export default function ModuleScreen() {
                     <Star
                       size={22}
                       strokeWidth={1.9}
-                      color={moduleData.isFavorite ? ICON_LIME_LIGHT : ICON_ON_GLASS}
+                      color={
+                        moduleData.isFavorite ? ICON_LIME_LIGHT : ICON_ON_GLASS
+                      }
                       fill={
                         moduleData.isFavorite
                           ? "rgba(190,242,100,0.22)"
@@ -573,7 +566,12 @@ export default function ModuleScreen() {
                 </Text>
 
                 {!!moduleData.description && (
-                  <Text fontSize={13.5} lineHeight={20} color="$textMuted" mt={7}>
+                  <Text
+                    fontSize={13.5}
+                    lineHeight={20}
+                    color="$textMuted"
+                    mt={7}
+                  >
                     {moduleData.description}
                   </Text>
                 )}
@@ -675,7 +673,11 @@ export default function ModuleScreen() {
                   >
                     <Lock size={16} color={ICON_MUTED} strokeWidth={1.8} />
                     <Text fontSize={12.5} color="$textMuted">
-                      <Text fontSize={12.5} fontWeight="600" color="$mutedLight">
+                      <Text
+                        fontSize={12.5}
+                        fontWeight="600"
+                        color="$mutedLight"
+                      >
                         Test, Match, Learn
                       </Text>{" "}
                       — coming soon
@@ -689,7 +691,13 @@ export default function ModuleScreen() {
                       <AppButton
                         variant="secondary"
                         size="lg"
-                        icon={<BookmarkCheck size={18} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+                        icon={
+                          <BookmarkCheck
+                            size={18}
+                            color={ICON_ON_GLASS}
+                            strokeWidth={1.9}
+                          />
+                        }
                         onPress={() =>
                           router.push({
                             pathname: "/module/[id]",
@@ -807,7 +815,9 @@ export default function ModuleScreen() {
             <YStack gap={10}>
               <AppButton
                 variant="danger"
-                icon={<Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />}
+                icon={
+                  <Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />
+                }
                 loading={deleting}
                 onPress={handleDeleteModule}
               >
@@ -847,9 +857,6 @@ export default function ModuleScreen() {
             definition: c.definition,
           }))}
           onSaved={handleSaved}
-          moduleName={moduleData?.name ?? ""}
-          moduleDescription={moduleData?.description ?? ""}
-          moduleIsPublic={moduleData?.isPublic ?? false}
         />
       )}
 

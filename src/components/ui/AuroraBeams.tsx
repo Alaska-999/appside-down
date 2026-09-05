@@ -12,9 +12,9 @@ import Svg, {
   Defs,
   FeGaussianBlur,
   Filter,
-  LinearGradient as SvgLinearGradient,
   Rect,
   Stop,
+  LinearGradient as SvgLinearGradient,
 } from "react-native-svg";
 
 const BEAM_WIDTH = 564.83;
@@ -56,10 +56,15 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
       stops: [
         { offset: 0, color: "#2dd4bf", opacity: 0 },
         { offset: 1 / 3, color: "#2dd4bf", opacity: 0.2 },
-        { offset: 2 / 3, color: "#a3e635", opacity: 0.1 },
-        { offset: 1, color: "#a3e635", opacity: 0 },
+        { offset: 2 / 3, color: "#A3E635", opacity: 0.1 },
+        { offset: 1, color: "#A3E635", opacity: 0 },
       ],
-      drift: { duration: 9000, amplitudeX: 20, amplitudeY: 15, minOpacity: 0.88 },
+      drift: {
+        duration: 9000,
+        amplitudeX: 20,
+        amplitudeY: 15,
+        minOpacity: 0.88,
+      },
       tier: "base",
     },
     {
@@ -71,7 +76,12 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
         { offset: 0.5, color: "#6366f1", opacity: 0.22 },
         { offset: 1, color: "#6366f1", opacity: 0 },
       ],
-      drift: { duration: 12500, amplitudeX: 25, amplitudeY: 20, minOpacity: 0.85 },
+      drift: {
+        duration: 12500,
+        amplitudeX: 25,
+        amplitudeY: 20,
+        minOpacity: 0.85,
+      },
       tier: "base",
     },
     {
@@ -83,7 +93,12 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
         { offset: 0.5, color: "#0d9488", opacity: 0.14 },
         { offset: 1, color: "#0d9488", opacity: 0 },
       ],
-      drift: { duration: 14000, amplitudeX: 18, amplitudeY: 18, minOpacity: 0.9 },
+      drift: {
+        duration: 14000,
+        amplitudeX: 18,
+        amplitudeY: 18,
+        minOpacity: 0.9,
+      },
       tier: "base",
     },
     {
@@ -93,10 +108,15 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
       stops: [
         { offset: 0, color: "#2dd4bf", opacity: 0 },
         { offset: 1 / 3, color: "#2dd4bf", opacity: 0.18 },
-        { offset: 2 / 3, color: "#a3e635", opacity: 0.09 },
-        { offset: 1, color: "#a3e635", opacity: 0 },
+        { offset: 2 / 3, color: "#A3E635", opacity: 0.09 },
+        { offset: 1, color: "#A3E635", opacity: 0 },
       ],
-      drift: { duration: 11000, amplitudeX: 22, amplitudeY: 17, minOpacity: 0.87 },
+      drift: {
+        duration: 11000,
+        amplitudeX: 22,
+        amplitudeY: 17,
+        minOpacity: 0.87,
+      },
       tier: "extra",
     },
     {
@@ -108,13 +128,21 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
         { offset: 0.5, color: "#6366f1", opacity: 0.2 },
         { offset: 1, color: "#6366f1", opacity: 0 },
       ],
-      drift: { duration: 13500, amplitudeX: 26, amplitudeY: 21, minOpacity: 0.84 },
+      drift: {
+        duration: 13500,
+        amplitudeX: 26,
+        amplitudeY: 21,
+        minOpacity: 0.84,
+      },
       tier: "extra",
     },
   ],
 };
 
-const MOTION_PRESETS: Record<"calm" | "lively", { durationMul: number; amplitudeMul: number }> = {
+const MOTION_PRESETS: Record<
+  "calm" | "lively",
+  { durationMul: number; amplitudeMul: number }
+> = {
   calm: { durationMul: 0.65, amplitudeMul: 1.6 },
   lively: { durationMul: 0.55, amplitudeMul: 1.8 },
 };
@@ -140,7 +168,10 @@ function Beam({
     }
 
     progress.value = withRepeat(
-      withTiming(1, { duration: drift.duration, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, {
+        duration: drift.duration,
+        easing: Easing.inOut(Easing.sin),
+      }),
       -1,
       true,
     );
@@ -176,7 +207,13 @@ function Beam({
       <Animated.View style={[{ flex: 1 }, animatedStyle]}>
         <Svg width="100%" height="100%">
           <Defs>
-            <SvgLinearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <SvgLinearGradient
+              id={gradientId}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               {stops.map((stop) => (
                 <Stop
                   key={stop.offset}
@@ -227,8 +264,9 @@ export function AuroraBeams({
   const reducedMotion = useReducedMotion();
   const motionPreset = MOTION_PRESETS[motion];
 
-  const beams = BEAM_SETS[type].filter((beam) => coverage === "full" || beam.tier === "base").map(
-    (beam) => ({
+  const beams = BEAM_SETS[type]
+    .filter((beam) => coverage === "full" || beam.tier === "base")
+    .map((beam) => ({
       ...beam,
       drift: {
         ...beam.drift,
@@ -236,8 +274,7 @@ export function AuroraBeams({
         amplitudeX: beam.drift.amplitudeX * motionPreset.amplitudeMul,
         amplitudeY: beam.drift.amplitudeY * motionPreset.amplitudeMul,
       },
-    }),
-  );
+    }));
 
   return (
     <View
@@ -252,7 +289,12 @@ export function AuroraBeams({
       }}
     >
       {beams.map((beam) => (
-        <Beam key={beam.id} {...beam} reducedMotion={reducedMotion} intensity={intensity} />
+        <Beam
+          key={beam.id}
+          {...beam}
+          reducedMotion={reducedMotion}
+          intensity={intensity}
+        />
       ))}
     </View>
   );

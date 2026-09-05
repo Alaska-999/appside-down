@@ -83,8 +83,8 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     shadow: {
       color: "rgb(45,212,191)",
       offset: { width: 0, height: 1 },
-      radius: 6,
-      opacity: 0.4,
+      radius: 5,
+      opacity: 0.35,
     },
   },
   soft: {
@@ -117,9 +117,9 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     pressedBg: "rgba(220,255,245,0.05)",
   },
   danger: {
-    bg: "rgba(239,68,68,0.13)",
+    bg: "rgba(239,68,68,0.17)",
     borderAngle: 150,
-    borderColors: ["rgba(239,68,68,0.55)", "rgba(239,68,68,0.14)"],
+    borderColors: ["rgba(239,68,68,0.6)", "rgba(239,68,68,0.16)"],
     textColor: "$roseSoft",
   },
   glass: {
@@ -366,140 +366,140 @@ export function AppButton({
 
         return (
           <Animated.View style={pressAnimStyle}>
-          <YStack
-            br={radius}
-            opacity={disabled ? 0.34 : 1}
-            borderWidth={spec.ringWidth}
-            borderColor={spec.ringColor}
-            {...shadowProps}
-          >
             <YStack
-              height={height}
-              pl={split ? 26 : paddingHorizontal}
-              pr={split ? 6 : paddingHorizontal}
               br={radius}
-              ai="center"
-              jc="center"
-              fd="row"
-              gap={split ? 14 : 9}
-              pos="relative"
-              overflow="hidden"
-              bg={pressed && spec.pressedBg ? spec.pressedBg : undefined}
+              opacity={disabled ? 0.34 : 1}
+              borderWidth={spec.ringWidth}
+              borderColor={spec.ringColor}
+              {...shadowProps}
             >
-              {spec.gradient && (
-                <LinearGradient
-                  colors={spec.gradient}
-                  start={{ x: 0, y: 0.4 }}
-                  end={{ x: 1, y: 0.6 }}
-                  style={StyleSheet.absoluteFill}
-                />
-              )}
-              {!spec.gradient && (spec.blurIntensity || spec.liquidGlass) && (
-                <LiquidGlass
-                  intensity={spec.blurIntensity ?? 25}
-                  tint="default"
-                  liquid={spec.liquidGlass}
-                  borderRadius={radius}
-                  backgroundColor={spec.bg}
-                />
-              )}
-              {!spec.gradient &&
-                !spec.blurIntensity &&
-                !spec.liquidGlass &&
-                spec.bg && (
-                  <View
-                    style={[
-                      StyleSheet.absoluteFill,
-                      { backgroundColor: spec.bg },
-                    ]}
+              <YStack
+                height={height}
+                pl={split ? 26 : paddingHorizontal}
+                pr={split ? 6 : paddingHorizontal}
+                br={radius}
+                ai="center"
+                jc="center"
+                fd="row"
+                gap={split ? 14 : 9}
+                pos="relative"
+                overflow="hidden"
+                bg={pressed && spec.pressedBg ? spec.pressedBg : undefined}
+              >
+                {spec.gradient && (
+                  <LinearGradient
+                    colors={spec.gradient}
+                    start={{ x: 0, y: 0.4 }}
+                    end={{ x: 1, y: 0.6 }}
+                    style={StyleSheet.absoluteFill}
                   />
                 )}
-              {spec.gloss && (
-                <LinearGradient
-                  colors={["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"]}
-                  locations={[0, 0.52]}
-                  start={{ x: 0.5, y: 0 }}
-                  end={{ x: 0.5, y: 1 }}
-                  style={[
-                    StyleSheet.absoluteFill,
-                    { margin: 1, borderRadius: radius },
-                  ]}
-                  pointerEvents="none"
-                />
-              )}
-              {spec.innerBloom && (
-                <InnerBloom
-                  color={spec.innerBloom.color}
-                  radius={radius}
-                  spread={spec.innerBloom.spread}
-                  blur={spec.innerBloom.blur}
-                />
-              )}
-              {spec.liquidInsets && (
-                <>
-                  <View
-                    pointerEvents="none"
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 12,
-                      right: 12,
-                      height: 1.2,
-                      backgroundColor: "rgba(255,255,255,0.6)",
-                    }}
+                {!spec.gradient && (spec.blurIntensity || spec.liquidGlass) && (
+                  <LiquidGlass
+                    intensity={spec.blurIntensity ?? 25}
+                    tint="default"
+                    liquid={spec.liquidGlass}
+                    borderRadius={radius}
+                    backgroundColor={spec.bg}
                   />
-                  <View
+                )}
+                {!spec.gradient &&
+                  !spec.blurIntensity &&
+                  !spec.liquidGlass &&
+                  spec.bg && (
+                    <View
+                      style={[
+                        StyleSheet.absoluteFill,
+                        { backgroundColor: spec.bg },
+                      ]}
+                    />
+                  )}
+                {spec.gloss && (
+                  <LinearGradient
+                    colors={["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"]}
+                    locations={[0, 0.52]}
+                    start={{ x: 0.5, y: 0 }}
+                    end={{ x: 0.5, y: 1 }}
+                    style={[
+                      StyleSheet.absoluteFill,
+                      { margin: 1, borderRadius: radius },
+                    ]}
                     pointerEvents="none"
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 12,
-                      right: 12,
-                      height: 1.2,
-                      backgroundColor: "rgba(255,255,255,0.18)",
-                    }}
                   />
-                </>
-              )}
-              {flood && <Flood pressed={floodActive} />}
-              {sheen && !isBlocked && (
-                <Sheen dark={sheen === "dark"} height={height} />
-              )}
-              <YStack fd="row" ai="center" gap={9} zIndex={5}>
-                {loading ? <Spinner size="small" color={textColor} /> : icon}
-                <Text
-                  fontSize={fontSize}
-                  fontWeight="600"
-                  color={textColor}
-                  {...spec.textShadow}
-                >
-                  {children}
-                </Text>
-              </YStack>
-              {split && (
-                <YStack
-                  w={40}
-                  h={40}
-                  br="$cardSoft"
-                  ai="center"
-                  jc="center"
-                  bg="rgba(8,9,12,0.82)"
-                  zIndex={5}
-                  transform={[{ translateX: pressed ? 4 : 0 }]}
-                >
-                  {split}
+                )}
+                {spec.innerBloom && (
+                  <InnerBloom
+                    color={spec.innerBloom.color}
+                    radius={radius}
+                    spread={spec.innerBloom.spread}
+                    blur={spec.innerBloom.blur}
+                  />
+                )}
+                {spec.liquidInsets && (
+                  <>
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 12,
+                        right: 12,
+                        height: 1.2,
+                        backgroundColor: "rgba(255,255,255,0.6)",
+                      }}
+                    />
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 12,
+                        right: 12,
+                        height: 1.2,
+                        backgroundColor: "rgba(255,255,255,0.18)",
+                      }}
+                    />
+                  </>
+                )}
+                {flood && <Flood pressed={floodActive} />}
+                {sheen && !isBlocked && (
+                  <Sheen dark={sheen === "dark"} height={height} />
+                )}
+                <YStack fd="row" ai="center" gap={9} zIndex={5}>
+                  {loading ? <Spinner size="small" color={textColor} /> : icon}
+                  <Text
+                    fontSize={fontSize}
+                    fontWeight="600"
+                    color={textColor}
+                    {...spec.textShadow}
+                  >
+                    {children}
+                  </Text>
                 </YStack>
+                {split && (
+                  <YStack
+                    w={40}
+                    h={40}
+                    br="$cardSoft"
+                    ai="center"
+                    jc="center"
+                    bg="rgba(8,9,12,0.82)"
+                    zIndex={5}
+                    transform={[{ translateX: pressed ? 4 : 0 }]}
+                  >
+                    {split}
+                  </YStack>
+                )}
+              </YStack>
+              {spec.borderColors && (
+                <GradientBorder
+                  radius={radius}
+                  angle={spec.borderAngle}
+                  colors={spec.borderColors}
+                  positions={spec.borderPositions ?? [0, 1]}
+                />
               )}
             </YStack>
-            {spec.borderColors && (
-              <GradientBorder
-                radius={radius}
-                angle={spec.borderAngle}
-                colors={spec.borderColors}
-                positions={spec.borderPositions ?? [0, 1]}
-              />
-            )}
-          </YStack>
           </Animated.View>
         );
       }}

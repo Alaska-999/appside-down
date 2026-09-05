@@ -1,5 +1,4 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { FocusRing, useFocusProgress } from "@/src/components/ui/InputShell";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,10 +23,10 @@ interface SegmentedControlProps {
 
 const TONE_STYLES: Record<
   SegmentedTone,
-  { glass: boolean; activeText: string; glow: number }
+  { glass: boolean; activeText: string }
 > = {
-  gradient: { glass: false, activeText: "#0D1117", glow: 0.45 },
-  glass: { glass: true, activeText: "#5EEAD4", glow: 0.35 },
+  gradient: { glass: false, activeText: "$nearBlack" },
+  glass: { glass: true, activeText: "$mint" },
 };
 
 const PADDING = 3;
@@ -46,7 +45,8 @@ export function SegmentedControl({
 
   const tabWidth =
     containerWidth > 0
-      ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) / options.length
+      ? (containerWidth - PADDING * 2 - GAP * (options.length - 1)) /
+        options.length
       : 0;
 
   const translateX = useSharedValue(0);
@@ -110,20 +110,8 @@ export function SegmentedControl({
               <LiquidGlass
                 intensity={25}
                 borderRadius={13}
-                backgroundColor="rgba(220,255,245,0.05)"
+                backgroundColor="rgba(220,255,245,0.03)"
               />
-              <View
-                pointerEvents="none"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 8,
-                  right: 8,
-                  height: 1,
-                  backgroundColor: "rgba(255,255,255,0.34)",
-                }}
-              />
-              <GradientBorder radius={13} preset="lens" />
               <FocusRing radius={13} progress={glowProgress} />
             </>
           ) : (
