@@ -9,6 +9,7 @@ import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
+import { getErrorMessage } from "@/src/utils/apiError";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -24,7 +25,7 @@ import { Text, YStack } from "tamagui";
 
 export default function Login() {
   const insets = useSafeAreaInsets();
-  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const setAuth = useAuthStore((state) => state.setAuth);
   const sessionExpired = useAuthStore((state) => state.sessionExpired);
@@ -44,7 +45,7 @@ export default function Login() {
   const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    if (sessionExpired) setToastOpen(true);
+    if (sessionExpired) setToastMessage("Session expired");
   }, [sessionExpired]);
 
   const onSubmit = async ({ email, password }: LoginForm) => {
@@ -58,7 +59,9 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError("password", { message: data.message || "Wrong email or password" });
+        setError("password", {
+          message: getErrorMessage(data, "Wrong email or password"),
+        });
         return;
       }
 
@@ -88,7 +91,7 @@ export default function Login() {
       router.replace("/");
     } catch (error) {
       console.error("Network error:", error);
-      setError("password", { message: "Connection problem. Please try again" });
+      setToastMessage("Connection problem. Try again");
     }
   };
 
@@ -173,10 +176,12 @@ export default function Login() {
         <StatusBarScrim />
 
         <AppToast
-          open={toastOpen}
-          message="Session expired"
-          description="Log in again to continue"
-          onDismiss={() => setToastOpen(false)}
+          open={!!toastMessage}
+          message={toastMessage ?? ""}
+          description={
+            toastMessage === "Session expired" ? "Log in again to continue" : undefined
+          }
+          onDismiss={() => setToastMessage(null)}
         />
       </YStack>
     </FormProvider>

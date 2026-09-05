@@ -57,7 +57,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
-import { Alert, InteractionManager, Pressable, ScrollView } from "react-native";
+import { InteractionManager, Pressable, ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type SortOrder = "original" | "alphabetical";
@@ -218,6 +218,7 @@ export default function ModuleScreen() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
   const [starredOnly, setStarredOnly] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
@@ -253,6 +254,7 @@ export default function ModuleScreen() {
   const fetchData = async (silent = false) => {
     if (!silent) setLoading(true);
     setError(null);
+    setNotFound(false);
     try {
       await useStudyQueueStore.getState().flush();
       const [moduleRes, flashcardsRes] = await Promise.all([
@@ -261,6 +263,10 @@ export default function ModuleScreen() {
           method: "GET",
         }),
       ]);
+      if (moduleRes.status === 403 || moduleRes.status === 404) {
+        if (!silent) setNotFound(true);
+        return;
+      }
       if (!moduleRes.ok) throw new Error(`Module error: ${moduleRes.status}`);
       if (!flashcardsRes.ok)
         throw new Error(`Flashcards error: ${flashcardsRes.status}`);
@@ -345,6 +351,7 @@ export default function ModuleScreen() {
           c.id === card.id ? { ...c, isStarred: card.isStarred } : c,
         ),
       );
+      setToast("Couldn't update star. Try again");
     }
   };
 
@@ -363,6 +370,7 @@ export default function ModuleScreen() {
       setModuleData((prev) =>
         prev ? { ...prev, isFavorite: !newValue } : prev,
       );
+      setToast("Couldn't update favorite. Try again");
     }
   };
 
@@ -381,7 +389,7 @@ export default function ModuleScreen() {
       });
     } catch (err) {
       console.error("[ModuleScreen] save error:", err);
-      Alert.alert("Error", "Failed to save module");
+      setToast("Couldn't save to library. Try again");
     } finally {
       setSaving(false);
     }
@@ -523,20 +531,33 @@ export default function ModuleScreen() {
             </YStack>
           )}
 
-          {error && !loading && (
+          {notFound && !loading && (
+            <YStack px="$screenX" pt={22}>
+              <StateCard
+                tone="empty"
+                icon={Sparkles}
+                title="Module not found"
+                subtitle="It may have been removed or made private."
+                buttonLabel="Try again"
+                onButtonPress={() => fetchData()}
+              />
+            </YStack>
+          )}
+
+          {error && !loading && !notFound && (
             <YStack px="$screenX" pt={22}>
               <StateCard
                 tone="error"
                 icon={AlertTriangle}
                 title="Couldn't load module"
                 subtitle="Looks like a connection hiccup. Your data is safe — try again."
-                buttonLabel="Retry"
+                buttonLabel="Try again"
                 onButtonPress={() => fetchData()}
               />
             </YStack>
           )}
 
-          {moduleData && !loading && (
+          {moduleData && !loading && !notFound && (
             <>
               {deckCards.length > 0 && <ModuleDeck cards={deckCards} />}
 

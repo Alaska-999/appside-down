@@ -6,6 +6,7 @@ import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { AppToast } from "@/src/components/ui/Toast";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -14,7 +15,7 @@ import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
 import { ReactNode, useState } from "react";
-import { Alert, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
@@ -97,6 +98,7 @@ export default function SettingsScreen() {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const logout = async () => {
     try {
@@ -145,7 +147,7 @@ export default function SettingsScreen() {
       router.replace("/login");
     } catch (err) {
       console.error("[SettingsScreen] delete account error:", err);
-      Alert.alert("Error", "Failed to delete account");
+      setToast("Couldn't delete the account. Try again");
     } finally {
       setIsDeleting(false);
     }
@@ -168,7 +170,7 @@ export default function SettingsScreen() {
             ai="center"
             gap={16}
           >
-            <AvatarPicker size={76} />
+            <AvatarPicker size={76} onError={setToast} />
             <YStack f={1}>
               <Text fontSize={19} fontWeight="800" color="$color">
                 {user?.username ?? "Unknown"}
@@ -321,6 +323,12 @@ export default function SettingsScreen() {
           </YStack>
         </KeyboardAwareScrollView>
       </AppSheet>
+
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
     </YStack>
   );
 }

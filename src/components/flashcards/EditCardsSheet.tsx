@@ -139,11 +139,19 @@ export function EditCardsSheet({
     const idsToDelete = [...removedIds, ...emptiedExistingIds];
 
     try {
+      const readJson = async (res: Response) => {
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        return res.json();
+      };
+
       const [, patchedResults, createdResults, moduleRes] = await Promise.all([
         Promise.all(
           idsToDelete.map((cardId) =>
             protectedFetch(`${API_BASE_URL}/flashcards/${cardId}`, {
               method: "DELETE",
+            }).then((r) => {
+              if (!r.ok) throw new Error(`Error: ${r.status}`);
+              return r;
             }),
           ),
         ),
@@ -157,7 +165,7 @@ export function EditCardsSheet({
                   term: c.term,
                   definition: c.definition,
                 }),
-              }).then((r) => r.json()),
+              }).then(readJson),
             ),
         ),
         Promise.all(
@@ -171,7 +179,7 @@ export function EditCardsSheet({
                   definition: c.definition,
                   moduleId,
                 }),
-              }).then((r) => r.json()),
+              }).then(readJson),
             ),
         ),
         protectedFetch(`${API_BASE_URL}/modules/${moduleId}`, {
@@ -184,6 +192,7 @@ export function EditCardsSheet({
         }),
       ]);
 
+      if (!moduleRes.ok) throw new Error(`Error: ${moduleRes.status}`);
       const updatedModule = await moduleRes.json();
 
       onSaved(

@@ -9,6 +9,7 @@ import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
+import { getErrorMessage } from "@/src/utils/apiError";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -52,7 +53,7 @@ export default function Signup() {
       const data = await response.json();
 
       if (!response.ok) {
-        setServerError(data.message || "Signup failed");
+        setServerError(getErrorMessage(data, "Signup failed"));
         return;
       }
 

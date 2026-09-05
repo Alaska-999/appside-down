@@ -243,7 +243,7 @@ export default function AddModules() {
               icon={AlertTriangle}
               title="Couldn't load modules"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
-              buttonLabel="Retry"
+              buttonLabel="Try again"
               onButtonPress={fetchModules}
             />
           </YStack>

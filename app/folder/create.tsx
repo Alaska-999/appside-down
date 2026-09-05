@@ -3,7 +3,9 @@ import { FolderCover } from "@/src/components/common/FolderCover";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
+import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
@@ -11,8 +13,8 @@ import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useNavigation } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, XStack, YStack } from "tamagui";
@@ -22,6 +24,12 @@ export default function FolderCreate() {
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const navigation = useNavigation();
+  const allowLeaveRef = useRef(false);
+  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(
+    null,
+  );
 
   const form = useForm<FolderForm>({
     resolver: zodResolver(folderSchema),
@@ -36,6 +44,30 @@ export default function FolderCreate() {
   } = form;
   const name = useWatch({ control, name: "name" });
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (allowLeaveRef.current) return;
+      const hasChanges =
+        !!form.getValues("name")?.trim() || tags.length > 0 || !!coverUri;
+      if (!hasChanges) return;
+
+      e.preventDefault();
+      pendingLeaveActionRef.current = e.data.action;
+      setDiscardOpen(true);
+    });
+    return unsubscribe;
+  }, [navigation, form, tags, coverUri]);
+
+  const confirmDiscard = () => {
+    allowLeaveRef.current = true;
+    setDiscardOpen(false);
+    if (pendingLeaveActionRef.current) {
+      navigation.dispatch(pendingLeaveActionRef.current);
+    } else {
+      router.back();
+    }
+  };
+
   const onSubmit = async (data: FolderForm) => {
     setServerError(null);
     try {
@@ -49,6 +81,7 @@ export default function FolderCreate() {
       });
       if (!response.ok) throw new Error("Failed to create folder");
       const folder = await response.json();
+      allowLeaveRef.current = true;
       router.replace({ pathname: "/folder/[id]", params: { id: folder.id } });
     } catch (error) {
       console.error(error);
@@ -122,6 +155,25 @@ export default function FolderCreate() {
           message={serverError ?? ""}
           onDismiss={() => setServerError(null)}
         />
+
+        <AppSheet
+          open={discardOpen}
+          onOpenChange={(open) => {
+            if (!open) setDiscardOpen(false);
+          }}
+          title="Discard this folder?"
+          subtitle="This can't be undone."
+          blur="strong"
+        >
+          <YStack gap={10}>
+            <AppButton variant="danger" onPress={confirmDiscard}>
+              Discard
+            </AppButton>
+            <AppButton variant="ghost" onPress={() => setDiscardOpen(false)}>
+              Keep editing
+            </AppButton>
+          </YStack>
+        </AppSheet>
       </YStack>
     </FormProvider>
   );

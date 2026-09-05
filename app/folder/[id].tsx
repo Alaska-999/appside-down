@@ -69,6 +69,7 @@ export default function FolderScreen() {
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
 
@@ -90,11 +91,16 @@ export default function FolderScreen() {
     if (isFirstLoad) {
       setLoading(true);
       setError(null);
+      setNotFound(false);
     }
     try {
       const res = await protectedFetch(`${API_BASE_URL}/folders/${id}`, {
         method: "GET",
       });
+      if (res.status === 403 || res.status === 404) {
+        if (isFirstLoad) setNotFound(true);
+        return;
+      }
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const raw = await res.json();
       setFolder({
@@ -167,6 +173,33 @@ export default function FolderScreen() {
     );
   }
 
+  if (notFound && !folder) {
+    return (
+      <YStack f={1} bg="$background">
+        <BackgroundMesh preset="folder" />
+        <YStack f={1} px="$screenX" gap="$3" pt={screen.top}>
+          <XStack jc="space-between" ai="center">
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              onPress={() => router.back()}
+            />
+          </XStack>
+          <YStack f={1} jc="center">
+            <StateCard
+              tone="empty"
+              icon={BookOpen}
+              title="Folder not found"
+              subtitle="It may have been removed or made private."
+              buttonLabel="Try again"
+              onButtonPress={fetchFolder}
+            />
+          </YStack>
+        </YStack>
+      </YStack>
+    );
+  }
+
   if (error && !folder) {
     return (
       <YStack f={1} bg="$background">
@@ -185,7 +218,7 @@ export default function FolderScreen() {
               icon={AlertTriangle}
               title="Couldn't load folder"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
-              buttonLabel="Retry"
+              buttonLabel="Try again"
               onButtonPress={fetchFolder}
             />
           </YStack>

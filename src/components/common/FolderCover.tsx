@@ -13,7 +13,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Camera, ImagePlus, Pencil, Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Image, Pressable, View } from "react-native";
+import { Alert, Image, Linking, Pressable, View } from "react-native";
 import { YStack } from "tamagui";
 
 const COVER_BOX = 72;
@@ -26,6 +26,10 @@ export async function pickCoverImage(): Promise<string | null> {
     Alert.alert(
       "Photos access needed",
       "Allow access to your photo library in Settings to pick a cover.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Open Settings", onPress: () => Linking.openSettings() },
+      ],
     );
     return null;
   }

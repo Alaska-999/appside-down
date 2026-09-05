@@ -315,13 +315,22 @@ export default function Home() {
               />
             }
             ListEmptyComponent={
-              !searchList.initialLoading ? (
+              searchList.initialLoading ? null : searchList.error ? (
+                <StateCard
+                  tone="error"
+                  icon={AlertTriangle}
+                  title="Couldn't load results"
+                  subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                  buttonLabel="Try again"
+                  onButtonPress={searchList.retry}
+                />
+              ) : (
                 <SearchEmptyState
                   query={debouncedSearch}
                   noun="modules"
                   onCreate={() => router.push("/module/create")}
                 />
-              ) : null
+              )
             }
           />
         ) : (
@@ -346,7 +355,7 @@ export default function Home() {
                     icon={AlertTriangle}
                     title="Couldn't load your stats"
                     subtitle="Looks like a connection hiccup. Your data is safe — try again."
-                    buttonLabel="Retry"
+                    buttonLabel="Try again"
                     onButtonPress={() => fetchData()}
                   />
                 ) : featuredModule && featuredStats ? (

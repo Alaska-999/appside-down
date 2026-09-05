@@ -14,6 +14,7 @@ import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { AppToast } from "@/src/components/ui/Toast";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -177,7 +178,7 @@ const FoldersPane = memo(function FoldersPane({
             icon={AlertTriangle}
             title="Couldn't load folders"
             subtitle="Looks like a connection hiccup. Your data is safe — try again."
-            buttonLabel="Retry"
+            buttonLabel="Try again"
             onButtonPress={retry}
           />
         ) : search ? (
@@ -277,7 +278,7 @@ const ModulesPane = memo(function ModulesPane({
             icon={AlertTriangle}
             title="Couldn't load modules"
             subtitle="Looks like a connection hiccup. Your data is safe — try again."
-            buttonLabel="Retry"
+            buttonLabel="Try again"
             onButtonPress={retry}
           />
         ) : search ? (
@@ -324,6 +325,7 @@ export default function Library() {
   const [folderModules, setFolderModules] = useState<
     Record<string, FolderModulesState>
   >({});
+  const [toast, setToast] = useState<string | null>(null);
   const tabBarClearance =
     TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
@@ -402,6 +404,7 @@ export default function Library() {
         ...prev,
         [folderId]: { items: prev[folderId]?.items ?? [], loading: false },
       }));
+      setToast("Couldn't load modules. Try again");
     }
   }, []);
 
@@ -529,6 +532,12 @@ export default function Library() {
           )}
         </SheetRows>
       </AppSheet>
+
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
     </ScreenBackground>
   );
 }

@@ -5,14 +5,15 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Ban, Camera } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Linking } from "react-native";
 import { Button, Spinner, YStack } from "tamagui";
 
 interface AvatarPickerProps {
   size?: number;
+  onError?: (message: string) => void;
 }
 
-export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
+export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
   const { user } = useAuthStore();
   const [uploading, setUploading] = useState(false);
   const isDefaultSize = size === 120;
@@ -41,7 +42,7 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
       useAuthStore.getState().updateAvatar(data.avatarUrl);
     } catch (err) {
       console.error("[AvatarPicker] upload error:", err);
-      Alert.alert("Error", "Failed to upload photo. Please try again");
+      onError?.("Couldn't upload photo. Try again");
     } finally {
       setUploading(false);
     }
@@ -52,7 +53,11 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
     if (status !== "granted") {
       Alert.alert(
         "Permission needed",
-        "Please grant access to your photos in settings to upload a picture.",
+        "Grant access to your photos in Settings to upload a picture.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: () => Linking.openSettings() },
+        ],
       );
       return;
     }
@@ -80,7 +85,7 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
       useAuthStore.getState().updateAvatar(null);
     } catch (err) {
       console.error("[AvatarPicker] remove error:", err);
-      Alert.alert("Error", "Failed to remove photo. Please try again");
+      onError?.("Couldn't remove photo. Try again");
     } finally {
       setUploading(false);
     }

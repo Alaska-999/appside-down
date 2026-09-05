@@ -4,6 +4,7 @@ import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { AddPill } from "@/src/components/ui/AddPill";
+import { AppButton } from "@/src/components/ui/Button";
 import { FieldGroup } from "@/src/components/ui/FieldGroup";
 import {
   KEYBOARD_BAR_HEIGHT,
@@ -20,7 +21,11 @@ import { useServerError } from "@/src/hooks/useServerError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, useLocalSearchParams } from "expo-router";
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
 import { Folder, Globe } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -59,6 +64,13 @@ export default function ModuleCreate() {
   }));
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [discardCardCount, setDiscardCardCount] = useState(0);
+  const navigation = useNavigation();
+  const allowLeaveRef = useRef(false);
+  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(
+    null,
+  );
   const { returnFolderId } = useLocalSearchParams<{
     returnFolderId?: string;
   }>();
@@ -140,6 +152,35 @@ export default function ModuleCreate() {
     loadFolders();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (allowLeaveRef.current) return;
+      const data = form.getValues();
+      const filledCards = data.flashcards.filter(
+        (card) => card.term.trim() || card.definition.trim(),
+      ).length;
+      const hasChanges =
+        !!data.name?.trim() || !!data.description?.trim() || filledCards > 0;
+      if (!hasChanges) return;
+
+      e.preventDefault();
+      setDiscardCardCount(filledCards);
+      pendingLeaveActionRef.current = e.data.action;
+      setDiscardOpen(true);
+    });
+    return unsubscribe;
+  }, [navigation, form]);
+
+  const confirmDiscard = () => {
+    allowLeaveRef.current = true;
+    setDiscardOpen(false);
+    if (pendingLeaveActionRef.current) {
+      navigation.dispatch(pendingLeaveActionRef.current);
+    } else {
+      router.back();
+    }
+  };
+
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
@@ -164,6 +205,7 @@ export default function ModuleCreate() {
       if (!response.ok) throw new Error("Failed to create module");
       const newModule = await response.json();
 
+      allowLeaveRef.current = true;
       if (returnFolderId) router.back();
       else
         router.replace({
@@ -362,6 +404,32 @@ export default function ModuleCreate() {
               />
             ))}
           </SheetRows>
+        </AppSheet>
+
+        <AppSheet
+          open={discardOpen}
+          onOpenChange={(open) => {
+            if (!open) setDiscardOpen(false);
+          }}
+          title={
+            discardCardCount > 0
+              ? `Discard ${discardCardCount} card${discardCardCount !== 1 ? "s" : ""}?`
+              : "Discard this module?"
+          }
+          subtitle="This can't be undone."
+          blur="strong"
+        >
+          <YStack gap={10}>
+            <AppButton variant="danger" onPress={confirmDiscard}>
+              Discard
+            </AppButton>
+            <AppButton
+              variant="ghost"
+              onPress={() => setDiscardOpen(false)}
+            >
+              Keep editing
+            </AppButton>
+          </YStack>
         </AppSheet>
       </YStack>
     </FormProvider>

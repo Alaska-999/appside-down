@@ -6,6 +6,7 @@ import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
+import { getErrorMessage } from "@/src/utils/apiError";
 import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
@@ -13,7 +14,7 @@ import { Lock } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { TextInput } from "react-native";
-import { Alert, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import { Text, YStack } from "tamagui";
 
 function formatCooldown(totalSeconds: number) {
@@ -64,7 +65,7 @@ export default function ResetPassword() {
 
       if (!response.ok) {
         const data = await response.json();
-        setServerError(data.message || "Failed to send code");
+        setServerError(getErrorMessage(data, "Failed to send code"));
         return;
       }
 
@@ -89,11 +90,10 @@ export default function ResetPassword() {
 
       if (!response.ok) {
         const data = await response.json();
-        setServerError(data.message || "Failed to reset password");
+        setServerError(getErrorMessage(data, "Failed to reset password"));
         return;
       }
 
-      Alert.alert("Password updated", "You can now log in with a new password");
       router.replace("/login");
     } catch (error) {
       console.error("[ResetPassword] request error:", error);

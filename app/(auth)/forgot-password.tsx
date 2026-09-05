@@ -5,6 +5,7 @@ import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
+import { getErrorMessage } from "@/src/utils/apiError";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
@@ -42,7 +43,7 @@ export default function ForgotPassword() {
 
       if (!response.ok) {
         const data = await response.json();
-        setServerError(data.message || "Failed to send code");
+        setServerError(getErrorMessage(data, "Failed to send code"));
         return;
       }
 

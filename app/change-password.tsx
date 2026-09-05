@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Alert, Keyboard } from "react-native";
+import { Keyboard } from "react-native";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, YStack } from "tamagui";
@@ -56,7 +56,6 @@ export default function ChangePasswordScreen() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      Alert.alert("Password updated");
       router.back();
     } catch (err) {
       console.error("[ChangePasswordScreen] update error:", err);
