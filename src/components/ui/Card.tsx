@@ -1,4 +1,3 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import {
   GlowSurface,
   GlowSurfaceProps,
@@ -7,6 +6,7 @@ import {
   LAMP_ROW,
   LightLevel,
 } from "@/src/components/ui/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
@@ -20,7 +20,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { Text, YStack, YStackProps } from "tamagui";
+import { YStack, YStackProps } from "tamagui";
 
 type CardVariant =
   | "surface"
@@ -106,7 +106,11 @@ const SURFACE_VARIANTS: Record<
     fill: "rgba(220,255,245,0.06)",
     blurIntensity: 65,
     borderAngle: 140,
-    borderColors: ["rgba(255,255,255,0.45)", "rgba(255,255,255,0.06)", "rgba(255,255,255,0.03)"],
+    borderColors: [
+      "rgba(255,255,255,0.45)",
+      "rgba(255,255,255,0.06)",
+      "rgba(255,255,255,0.03)",
+    ],
     borderPositions: [0, 0.42, 1],
   },
   liquid: {
@@ -114,7 +118,11 @@ const SURFACE_VARIANTS: Record<
     blurIntensity: 12,
     liquidGlass: true,
     borderAngle: 155,
-    borderColors: ["rgba(255,255,255,0.8)", "rgba(255,255,255,0.06)", "rgba(255,255,255,0.32)"],
+    borderColors: [
+      "rgba(255,255,255,0.8)",
+      "rgba(255,255,255,0.06)",
+      "rgba(255,255,255,0.32)",
+    ],
     borderPositions: [0, 0.46, 1],
   },
   well: {
@@ -159,7 +167,16 @@ function SweepBand({ animate }: { animate: boolean }) {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[{ position: "absolute", top: "-40%", bottom: "-40%", left: "-60%", right: "-60%" }, style]}
+      style={[
+        {
+          position: "absolute",
+          top: "-40%",
+          bottom: "-40%",
+          left: "-60%",
+          right: "-60%",
+        },
+        style,
+      ]}
     >
       <LinearGradient
         colors={[
@@ -206,7 +223,13 @@ function SelectedRing({ radius }: { radius: number }) {
           colors={["#5EEAD4", "#A3E635"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.76, y: 0.64 }}
-          style={{ width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Check size={14} color="#06231F" strokeWidth={3} />
         </LinearGradient>
@@ -290,14 +313,27 @@ export function AppCard(props: CardProps) {
         {...stateProps}
         {...rest}
       >
-        <YStack pos="absolute" t={0} l={0} r={0} b={0} br={sizeStyle.br - 1.4} overflow="hidden">
+        <YStack
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          br={sizeStyle.br - 1.4}
+          overflow="hidden"
+        >
           <LiquidGlass
             intensity={28}
             tint="default"
             borderRadius={sizeStyle.br - 1.4}
             backgroundColor="rgba(8,9,12,0.3)"
           />
-          <InnerBloom color="rgba(45,212,191,0.22)" radius={sizeStyle.br} spread={22} blur={17} />
+          <InnerBloom
+            color="rgba(45,212,191,0.22)"
+            radius={sizeStyle.br}
+            spread={22}
+            blur={17}
+          />
         </YStack>
         <YStack f={1} zIndex={2} px={sizeStyle.px} py={sizeStyle.py}>
           {children}
@@ -307,7 +343,10 @@ export function AppCard(props: CardProps) {
     );
   } else {
     const surfaceKey =
-      variant === "glow" || variant === "solid" || variant === "soft" || variant === "flat"
+      variant === "glow" ||
+      variant === "solid" ||
+      variant === "soft" ||
+      variant === "flat"
         ? variant === "glow"
           ? "glow"
           : "surface"
@@ -337,20 +376,44 @@ export function AppCard(props: CardProps) {
         <>
           <View
             pointerEvents="none"
-            style={{ position: "absolute", top: 0, left: 10, right: 10, height: 1.2, backgroundColor: "rgba(255,255,255,0.6)" }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 10,
+              right: 10,
+              height: 1.2,
+              backgroundColor: "rgba(255,255,255,0.6)",
+            }}
           />
           <View
             pointerEvents="none"
-            style={{ position: "absolute", bottom: 0, left: 10, right: 10, height: 1.2, backgroundColor: "rgba(255,255,255,0.16)" }}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 10,
+              right: 10,
+              height: 1.2,
+              backgroundColor: "rgba(255,255,255,0.16)",
+            }}
           />
         </>
       ) : variant === "progressLit" ? (
         <View
           pointerEvents="none"
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: `${Math.round(lit * 100)}%` }}
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `${Math.round(lit * 100)}%`,
+          }}
         >
           <LinearGradient
-            colors={["rgba(45,212,191,0)", "rgba(45,212,191,0.09)", "rgba(45,212,191,0.34)"]}
+            colors={[
+              "rgba(45,212,191,0)",
+              "rgba(45,212,191,0.09)",
+              "rgba(45,212,191,0.34)",
+            ]}
             locations={[0, 0.44, 1]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
@@ -363,12 +426,25 @@ export function AppCard(props: CardProps) {
             colors={["rgba(0,0,0,0.62)", "rgba(0,0,0,0)"]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
-            style={{ position: "absolute", top: 0, left: 0, right: 0, height: 12 }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 12,
+            }}
             pointerEvents="none"
           />
           <View
             pointerEvents="none"
-            style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, backgroundColor: "rgba(220,255,245,0.07)" }}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              backgroundColor: "rgba(220,255,245,0.07)",
+            }}
           />
         </>
       ) : variant === "sweep" ? (

@@ -45,10 +45,9 @@ export function AddPill({
           overflow="hidden"
         >
           <LiquidGlass
-            intensity={50}
-            tint="default"
+            intensity={35}
             borderRadius={PILL_RADIUS}
-            backgroundColor="rgba(45,212,191,0.12)"
+            backgroundColor="rgba(45,212,191,0.15)"
           />
         </YStack>
         <GradientBorder

@@ -57,7 +57,6 @@ export function SavePill({
         >
           <LiquidGlass
             intensity={25}
-            tint="default"
             borderRadius={PILL_RADIUS}
             backgroundColor="rgba(220,255,245,0.05)"
           />

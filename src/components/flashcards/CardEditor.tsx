@@ -50,7 +50,7 @@ function CardField<T extends FieldValues>({
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { backgroundColor: "rgba(4,8,10,0.6)" },
+                { backgroundColor: "rgba(4,8,10,0.65)" },
               ]}
             />
             <WellInsetShadow radius={FIELD_RADIUS} />
@@ -155,10 +155,9 @@ export function CardEditor<T extends FieldValues>({
         overflow="hidden"
       >
         <LiquidGlass
-          intensity={30}
-          tint="default"
+          intensity={3}
           borderRadius={CARD_RADIUS}
-          backgroundColor="rgba(220,255,245,0.04)"
+          backgroundColor="rgba(220,255,245,0.05)"
         />
         <View
           pointerEvents="none"
@@ -168,7 +167,7 @@ export function CardEditor<T extends FieldValues>({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: "rgba(255,255,255,0.26)",
+            backgroundColor: "rgba(255,255,255,0.12)",
           }}
         />
       </YStack>
@@ -176,9 +175,9 @@ export function CardEditor<T extends FieldValues>({
         radius={CARD_RADIUS}
         angle={160}
         colors={[
-          "rgba(255,255,255,0.4)",
-          "rgba(255,255,255,0.04)",
-          "rgba(150,220,255,0.18)",
+          "rgba(214, 249, 251, 0.28)",
+          "rgba(255,255,255,0.08)",
+          "rgba(210, 248, 238, 0.2)",
         ]}
         positions={[0, 0.46, 1]}
       />
