@@ -12,6 +12,7 @@ import {
   useRef,
 } from "react";
 import { Keyboard, Pressable, View } from "react-native";
+import { useKeyboardState } from "react-native-keyboard-controller";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -45,6 +46,7 @@ interface AppSheetProps {
   blur?: SheetBlur;
   snapPoints?: number[];
   keepKeyboard?: boolean;
+  growWithKeyboard?: boolean;
   leftAction?: ReactNode;
   rightAction?: ReactNode;
   children: ReactNode;
@@ -58,6 +60,7 @@ export function AppSheet({
   blur = "default",
   snapPoints,
   keepKeyboard = false,
+  growWithKeyboard = false,
   leftAction,
   rightAction,
   children,
@@ -66,17 +69,20 @@ export function AppSheet({
   const theme = useTheme();
   const touchStartY = useRef(0);
   const hasHeaderActions = Boolean(leftAction || rightAction);
+  const keyboardVisible = useKeyboardState((state) => state.isVisible);
+  const grown = growWithKeyboard && keyboardVisible;
   const fitContent = !snapPoints;
+  const activeSnapPoints = grown ? [100] : snapPoints;
 
   return (
     <Sheet
       modal
       open={open}
       onOpenChange={onOpenChange}
-      snapPoints={fitContent ? ["fit"] : snapPoints}
+      snapPoints={fitContent ? ["fit"] : activeSnapPoints}
       snapPointsMode={fitContent ? "fit" : "percent"}
       dismissOnSnapToBottom
-      moveOnKeyboardChange
+      moveOnKeyboardChange={!growWithKeyboard}
     >
       <Sheet.Overlay bg="rgba(3,5,8,0.5)" />
 
@@ -84,7 +90,7 @@ export function AppSheet({
         bg="transparent"
         btlr={35}
         btrr={35}
-        pt={14}
+        pt={grown ? 14 + insets.top : 14}
         px={24}
         pb={30 + insets.bottom}
         overflow="visible"

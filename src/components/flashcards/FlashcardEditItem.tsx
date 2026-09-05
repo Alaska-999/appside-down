@@ -1,8 +1,8 @@
 import { FormInput } from "@/src/components/common/FormInput";
 import { AppCard } from "@/src/components/ui/Card";
 import { X } from "@tamagui/lucide-icons";
-import { Ref } from "react";
-import type { TextInput } from "react-native";
+import { Ref, useRef } from "react";
+import { TextInput, View } from "react-native";
 import {
   Control,
   FieldValues,
@@ -21,6 +21,7 @@ interface FlashcardEditItemProps<T extends FieldValues> {
   showRemove: boolean;
   termRef?: Ref<TextInput>;
   definitionRef?: Ref<TextInput>;
+  onFieldFocus?: (card: View | null) => void;
   onSubmitTerm?: () => void;
   onSubmitDefinition?: () => void;
 }
@@ -51,10 +52,14 @@ export function FlashcardEditItem<T extends FieldValues>({
   definitionRef,
   onSubmitTerm,
   onSubmitDefinition,
+  onFieldFocus,
 }: FlashcardEditItemProps<T>) {
   const term = useController({ control, name: termName });
   const definition = useController({ control, name: definitionName });
   const error = term.fieldState.error ?? definition.fieldState.error;
+
+  const cardRef = useRef<View>(null);
+  const handleFocus = () => onFieldFocus?.(cardRef.current);
 
   const formContext = useFormContext();
   const arrayName = termName.split(".")[0];
@@ -65,6 +70,7 @@ export function FlashcardEditItem<T extends FieldValues>({
   };
 
   return (
+    <View ref={cardRef} collapsable={false}>
     <YStack gap="$1">
       <AppCard
         variant="soft"
@@ -99,6 +105,7 @@ export function FlashcardEditItem<T extends FieldValues>({
             inputSize="lg"
             hideError
             placeholder="Enter term"
+            onFocus={handleFocus}
             onValueChange={clearListError}
             returnKeyType={onSubmitTerm ? "next" : undefined}
             blurOnSubmit={onSubmitTerm ? false : undefined}
@@ -116,6 +123,7 @@ export function FlashcardEditItem<T extends FieldValues>({
             inputSize="lg"
             hideError
             placeholder="Enter definition"
+            onFocus={handleFocus}
             onValueChange={clearListError}
             returnKeyType={onSubmitDefinition ? "next" : undefined}
             blurOnSubmit={onSubmitDefinition ? false : undefined}
@@ -130,5 +138,6 @@ export function FlashcardEditItem<T extends FieldValues>({
         </Text>
       )}
     </YStack>
+    </View>
   );
 }

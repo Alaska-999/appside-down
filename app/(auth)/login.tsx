@@ -4,6 +4,7 @@ import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
@@ -177,6 +178,8 @@ export default function Login() {
 
           <AuthSwitchLink href="/signup" prompt="New here?" action="Create an account" />
         </KeyboardAwareScrollView>
+
+        <StatusBarScrim />
 
         <AppToast
           open={toastOpen}

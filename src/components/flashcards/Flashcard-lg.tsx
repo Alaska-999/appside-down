@@ -173,7 +173,7 @@ function StampFace({
     const scale = reducedMotion ? 1 : 0.92 + p * 0.08;
     return {
       opacity: p,
-      transform: [{ rotate: isKnow ? "-9deg" : "9deg" }, { scale }],
+      transform: [{ scale }],
       ...(isKnow ? { shadowOpacity: p } : null),
     };
   });
@@ -183,7 +183,6 @@ function StampFace({
       pointerEvents="none"
       style={[
         styles.stamp,
-        isKnow ? styles.stampR : styles.stampL,
         {
           backgroundColor: style.solid,
           borderWidth: style.borderColor ? 1.4 : 0,
@@ -570,13 +569,12 @@ const styles = StyleSheet.create({
   },
   stamp: {
     position: "absolute",
-    top: 70,
+    // top: 60,
     zIndex: 6,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 9,
     overflow: "hidden",
+    alignSelf: "center",
   },
-  stampR: { right: 26 },
-  stampL: { left: 26 },
 });

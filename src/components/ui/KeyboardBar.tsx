@@ -4,6 +4,8 @@ import {
   KeyboardToolbarProps,
 } from "react-native-keyboard-controller";
 
+export const KEYBOARD_BAR_HEIGHT = Platform.OS === "ios" ? 42 : 0;
+
 const BAR_THEME = {
   primary: "#fff",
   disabled: "#3E4C57",

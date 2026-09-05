@@ -11,10 +11,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronDown, Globe, Lock, X } from "@tamagui/lucide-icons";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import type { TextInput } from "react-native";
-import { Pressable } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { Pressable, ScrollView, TextInput, View } from "react-native";
+import {
+  KeyboardAwareScrollView,
+  KeyboardAwareScrollViewRef,
+} from "react-native-keyboard-controller";
 import { Text, XStack, YStack } from "tamagui";
+
+const CARD_TOP_GAP = 12;
+const LIFT_SETTLE_DELAY = 360;
 
 interface EditCardsSheetProps {
   open: boolean;
@@ -76,6 +81,8 @@ export function EditCardsSheet({
     keyName: "fieldKey",
   });
 
+  const scrollRef = useRef<KeyboardAwareScrollViewRef & ScrollView>(null);
+  const scrollInnerRef = useRef<View>(null as unknown as View);
   const termRefs = useRef<Array<TextInput | null>>([]);
   const definitionRefs = useRef<Array<TextInput | null>>([]);
   const prevFieldsLength = useRef(fields.length);
@@ -86,6 +93,20 @@ export function EditCardsSheet({
     }
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
+
+  const liftCard = (card: View | null) => {
+    const scrollTo = () => {
+      const scroll = scrollRef.current;
+      const inner = scrollInnerRef.current;
+      if (!card || !scroll || !inner) return;
+      card.measureLayout(inner, (_x, y) => {
+        console.log("[EditCardsSheet] liftCard", { y });
+        scroll.scrollTo({ y: Math.max(0, y - CARD_TOP_GAP), animated: true });
+      });
+    };
+    scrollTo();
+    setTimeout(scrollTo, LIFT_SETTLE_DELAY);
+  };
 
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
@@ -203,6 +224,7 @@ export function EditCardsSheet({
         title="Edit module"
         snapPoints={[90]}
         keepKeyboard
+        growWithKeyboard
         leftAction={
           <IconButton
             variant="glass"
@@ -223,6 +245,8 @@ export function EditCardsSheet({
         }
       >
         <KeyboardAwareScrollView
+          ref={scrollRef}
+          innerViewRef={scrollInnerRef}
           style={{ flex: 1 }}
           mode="layout"
           bottomOffset={40}
@@ -346,6 +370,7 @@ export function EditCardsSheet({
                 definitionRef={(node) => {
                   definitionRefs.current[index] = node;
                 }}
+                onFieldFocus={liftCard}
                 onSubmitTerm={() => focusDefinition(index)}
                 onSubmitDefinition={() => {
                   if (index + 1 < fields.length) {

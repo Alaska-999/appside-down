@@ -53,7 +53,7 @@ export const controlHeight = {
 
 export const screenGutter = 16
 
-export const topPaddingBoost = 10
+export const topPaddingBoost = 18
 
 export const elevation = {
     sm: { shadowRadius: 12, shadowOpacity: 0.06 },

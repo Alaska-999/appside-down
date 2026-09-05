@@ -6,6 +6,7 @@ import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
@@ -204,6 +205,8 @@ export default function Signup() {
             action="Log in"
           />
         </KeyboardAwareScrollView>
+
+        <StatusBarScrim />
       </YStack>
     </FormProvider>
   );

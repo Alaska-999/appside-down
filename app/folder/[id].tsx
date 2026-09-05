@@ -5,6 +5,7 @@ import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -321,6 +322,8 @@ export default function FolderScreen() {
           )}
         </YStack>
       </Animated.ScrollView>
+
+      <StatusBarScrim />
 
       <AppToast
         open={!!toast}

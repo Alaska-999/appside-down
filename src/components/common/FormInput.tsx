@@ -4,7 +4,8 @@ import {
   InputShellVariant,
 } from "@/src/components/ui/InputShell";
 import { AlertCircle } from "lucide-react-native";
-import { forwardRef, ReactNode, Ref, useState } from "react";
+import { FieldGroupContext } from "@/src/components/ui/FieldGroup";
+import { forwardRef, ReactNode, Ref, useContext, useState } from "react";
 import {
   Control,
   Controller,
@@ -59,6 +60,7 @@ function FormInputInner<T extends FieldValues>(
 ) {
   const formContext = useFormContext();
   const [focused, setFocused] = useState(false);
+  const groupFocus = useContext(FieldGroupContext);
   const shellVariant: InputShellVariant =
     variant === "bordered" ? "well" : variant;
 
@@ -122,14 +124,20 @@ function FormInputInner<T extends FieldValues>(
                   onValueChange?.(text);
                   field.onChange(text);
                 }}
-                onFocus={() => setFocused(true)}
-                onBlur={() => {
+                onFocus={(e) => {
+                  setFocused(true);
+                  groupFocus?.(true);
+                  inputProps.onFocus?.(e);
+                }}
+                onBlur={(e) => {
                   setFocused(false);
+                  groupFocus?.(false);
                   field.onBlur();
+                  inputProps.onBlur?.(e);
                 }}
               />
               {rightElement}
-              {showCounter && maxLength !== undefined && (
+              {showCounter && maxLength !== undefined && value.length > 0 && (
                 <Text
                   als={multiline ? "flex-end" : undefined}
                   mt={multiline ? "auto" : undefined}

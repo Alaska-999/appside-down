@@ -1,23 +1,24 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { AddPill } from "@/src/components/ui/AddPill";
-import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { FieldGroup } from "@/src/components/ui/FieldGroup";
 import { IconButton } from "@/src/components/ui/IconButton";
-import { PickRow } from "@/src/components/ui/PickRow";
+import { KeyboardBar } from "@/src/components/ui/KeyboardBar";
 import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { KeyboardBar } from "@/src/components/ui/KeyboardBar";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
+import { Toggle } from "@/src/components/ui/Toggle";
+import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import { Folder, Globe, Lock, X } from "lucide-react-native";
+import { Folder, Globe, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   FormProvider,
@@ -25,14 +26,12 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import { Platform } from "react-native";
-import type { TextInput } from "react-native";
+import { Platform, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import Animated from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
 
 type FolderOption = { id: string; name: string };
-
-const VISIBILITY_ICONS = [Lock, Globe];
 
 export default function ModuleCreate() {
   const screen = useScreenInsets();
@@ -77,6 +76,9 @@ export default function ModuleCreate() {
     control,
     name: "flashcards",
   });
+
+  const { scrollRef, scrollInnerRef, onViewportLayout, spacerStyle, liftCard } =
+    useKeyboardCardLift();
 
   const termRefs = useRef<(TextInput | null)[]>([]);
   const definitionRefs = useRef<(TextInput | null)[]>([]);
@@ -154,144 +156,147 @@ export default function ModuleCreate() {
       <YStack f={1} bg="$background">
         <BackgroundMesh preset="formBright" />
 
-        <KeyboardAwareScrollView
+        <View
           style={{ flex: 1 }}
-          mode="layout"
-          bottomOffset={40}
-          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{
-            paddingTop: screen.top,
-            paddingBottom: screen.bottom,
-          }}
+          onLayout={onViewportLayout}
         >
-          <YStack px="$screenX">
-            <XStack ai="center" gap={10} mb={18}>
-              <IconButton
-                variant="liquidGlass"
-                icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
-                onPress={() => router.back()}
-                accessibilityLabel="Close"
-              />
-              <Text f={1} fontSize={19} fontWeight="800" color="$color">
-                New module
-              </Text>
-              <SavePill
-                enabled={!!name?.trim()}
-                loading={isSubmitting}
-                onPress={() => handleSubmit(onSubmit)()}
-              />
-            </XStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Name" />
-              <FormInput
-                control={control}
-                name="name"
-                placeholder="Untitled module"
-                maxLength={60}
-                showCounter
-              />
-            </YStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Description" hint="optional" />
-              <FormInput
-                control={control}
-                name="description"
-                placeholder="What is this module about?"
-                maxLength={300}
-                multiline
-              />
-            </YStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Folder" hint="optional" />
-              <PickRow
-                icon={Folder}
-                value={selectedFolder?.name}
-                placeholder="No folder"
-                onPress={() => setFolderSheetOpen(true)}
-              />
-            </YStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Visibility" />
-              <SegmentedControl
-                options={["Private", "Public"]}
-                selected={isPublic ? 1 : 0}
-                onChange={(index) => setValue("isPublic", index === 1)}
-                renderIcon={(index, active) => {
-                  const Icon = VISIBILITY_ICONS[index];
-                  return (
-                    <Icon
-                      size={16}
-                      strokeWidth={1.9}
-                      color={active ? "#0D1117" : "#8FA8B8"}
-                    />
-                  );
-                }}
-              />
-            </YStack>
-
-            <XStack ai="center" jc="space-between" mt={4} mb={11}>
-              <Text fontSize={16} fontWeight="700" color="$color">
-                Cards
-              </Text>
-              <Text fontSize={12.5} color="#8FA8B8">
-                {fields.length}
-              </Text>
-            </XStack>
-
-            <SortableCardList
-              ids={fields.map((field) => field.id)}
-              onMove={move}
-              renderItem={({ index, dragGesture, dragging }) => (
-                <CardEditor
-                  control={control}
-                  termName={`flashcards.${index}.term`}
-                  definitionName={`flashcards.${index}.definition`}
-                  index={index}
-                  onRemove={remove}
-                  canRemove={fields.length > 2}
-                  dragGesture={dragGesture}
-                  dragging={dragging}
-                  termRef={(node) => {
-                    termRefs.current[index] = node;
-                  }}
-                  definitionRef={(node) => {
-                    definitionRefs.current[index] = node;
-                  }}
-                  onSubmitTerm={() => focusDefinition(index)}
-                  onSubmitDefinition={() => {
-                    if (index + 1 < fields.length) focusTerm(index + 1);
-                    else append({ term: "", definition: "" });
-                  }}
+          <KeyboardAwareScrollView
+            ref={scrollRef}
+            innerViewRef={scrollInnerRef}
+            enabled={false}
+            style={{ flex: 1 }}
+            keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              paddingTop: screen.top,
+              paddingBottom: screen.bottom,
+            }}
+          >
+            <YStack px="$screenX">
+              <XStack ai="center" gap={14} mb={18}>
+                <IconButton
+                  variant="liquidGlass"
+                  icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                  onPress={() => router.back()}
+                  accessibilityLabel="Close"
                 />
-              )}
-            />
+                <Text f={1} fontSize={20} fontWeight="800" color="$color">
+                  New module
+                </Text>
+                <SavePill
+                  enabled={!!name?.trim()}
+                  loading={isSubmitting}
+                  onPress={() => handleSubmit(onSubmit)()}
+                />
+              </XStack>
 
-            {flashcardsError && (
-              <Text color="$dangerText" fontSize={11.5} mt={8}>
-                {flashcardsError}
-              </Text>
-            )}
+              <YStack mb={14}>
+                <FieldGroup>
+                  <FormInput
+                    control={control}
+                    name="name"
+                    variant="plain"
+                    placeholder="Module name"
+                    maxLength={60}
+                    showCounter
+                    hideError
+                  />
+                  <FormInput
+                    control={control}
+                    name="description"
+                    variant="plain"
+                    placeholder="Description (optional)"
+                    maxLength={300}
+                    multiline
+                    hideError
+                  />
+                </FieldGroup>
+                {errors.name && (
+                  <Text color="$dangerText" fontSize={11.5} mt={8} ml={4}>
+                    {errors.name.message}
+                  </Text>
+                )}
+              </YStack>
 
-            <YStack mt={16}>
-              <AddPill
-                label="Add card"
-                onPress={() => append({ term: "", definition: "" })}
+              <YStack mb={22}>
+                <SheetRows>
+                  <SheetRow
+                    icon={Folder}
+                    label="Folder"
+                    hint={selectedFolder?.name ?? "None"}
+                    chevron
+                    onPress={() => setFolderSheetOpen(true)}
+                  />
+                  <SheetRow
+                    icon={Globe}
+                    label="Public"
+                    right={
+                      <Toggle
+                        value={!!isPublic}
+                        onChange={(next) => setValue("isPublic", next)}
+                        accessibilityLabel="Public module"
+                      />
+                    }
+                  />
+                </SheetRows>
+              </YStack>
+
+              <XStack ai="center" jc="space-between" mb={6}>
+                <Text fontSize={16} fontWeight="700" color="$color">
+                  Cards
+                </Text>
+                <Text fontSize={12.5} color="#8FA8B8">
+                  {fields.length}
+                </Text>
+              </XStack>
+
+              <SortableCardList
+                ids={fields.map((field) => field.id)}
+                onMove={move}
+                renderItem={({ index, dragGesture, dragging }) => (
+                  <CardEditor
+                    control={control}
+                    termName={`flashcards.${index}.term`}
+                    definitionName={`flashcards.${index}.definition`}
+                    index={index}
+                    onRemove={remove}
+                    canRemove={fields.length > 2}
+                    dragGesture={dragGesture}
+                    dragging={dragging}
+                    onFieldFocus={liftCard}
+                    termRef={(node) => {
+                      termRefs.current[index] = node;
+                    }}
+                    definitionRef={(node) => {
+                      definitionRefs.current[index] = node;
+                    }}
+                    onSubmitTerm={() => focusDefinition(index)}
+                    onSubmitDefinition={() => {
+                      if (index + 1 < fields.length) focusTerm(index + 1);
+                      else append({ term: "", definition: "" });
+                    }}
+                  />
+                )}
               />
-              {/* <AppButton
-                variant="neon"
-                size="md"
-                onPress={() => append({ term: "", definition: "" })}
-              >
-                + Add Card
-              </AppButton> */}
+
+              {flashcardsError && (
+                <Text color="$dangerText" fontSize={11.5} mt={8}>
+                  {flashcardsError}
+                </Text>
+              )}
+
+              <YStack mt={16}>
+                <AddPill
+                  label="Add card"
+                  onPress={() => append({ term: "", definition: "" })}
+                />
+              </YStack>
             </YStack>
-          </YStack>
-        </KeyboardAwareScrollView>
+            <Animated.View style={spacerStyle} />
+          </KeyboardAwareScrollView>
+        </View>
+
+        <StatusBarScrim />
 
         <KeyboardBar />
 

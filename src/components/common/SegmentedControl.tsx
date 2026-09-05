@@ -78,8 +78,8 @@ export function SegmentedControl({
               overflow: "hidden",
               shadowColor: "rgba(45,212,191,1)",
               shadowOffset: { width: 0, height: 0 },
-              shadowRadius: 9,
-              shadowOpacity: 0.55,
+              shadowRadius: 4,
+              shadowOpacity: 0.45,
             },
             pillStyle,
           ]}

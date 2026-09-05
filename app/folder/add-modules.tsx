@@ -9,6 +9,7 @@ import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
@@ -307,6 +308,8 @@ export default function AddModules() {
           />
         )}
       </YStack>
+
+      <StatusBarScrim />
 
       <LinearGradient
         pointerEvents="none"

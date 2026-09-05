@@ -15,6 +15,7 @@ import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
@@ -148,7 +149,9 @@ export default function FolderEditScreen() {
       init,
     );
     if (!res.ok) {
-      const error = new Error(`Error: ${res.status}`) as Error & { status?: number };
+      const error = new Error(`Error: ${res.status}`) as Error & {
+        status?: number;
+      };
       error.status = res.status;
       throw error;
     }
@@ -419,43 +422,44 @@ export default function FolderEditScreen() {
                     ...folder.tags.map((tag) =>
                       renamingTag === tag.id ? (
                         <YStack key={tag.id} px={16} py={10} gap={6}>
-                        <XStack ai="center" gap={10}>
-                          <Input
-                            ref={(node: TamaguiElement | null) => {
-                              renameInputRef.current = node as unknown as TextInput | null;
-                            }}
-                            f={1}
-                            unstyled
-                            fontSize={15}
-                            fontWeight="600"
-                            color="$color"
-                            selectTextOnFocus
-                            value={renameValue}
-                            onChangeText={(v) => {
-                              setRenameValue(v);
-                              if (tagError) setTagError(null);
-                            }}
-                            onSubmitEditing={commitRenameTag}
-                          />
-                          <FolderEditIconAction
-                            icon={Check}
-                            label="Save tag"
-                            onPress={commitRenameTag}
-                          />
-                          <FolderEditIconAction
-                            icon={X}
-                            label="Cancel"
-                            onPress={() => {
-                              setRenamingTag(null);
-                              setTagError(null);
-                            }}
-                          />
-                        </XStack>
-                        {tagError && (
-                          <Text fontSize={11.5} color="$dangerText">
-                            {tagError}
-                          </Text>
-                        )}
+                          <XStack ai="center" gap={10}>
+                            <Input
+                              ref={(node: TamaguiElement | null) => {
+                                renameInputRef.current =
+                                  node as unknown as TextInput | null;
+                              }}
+                              f={1}
+                              unstyled
+                              fontSize={15}
+                              fontWeight="600"
+                              color="$color"
+                              selectTextOnFocus
+                              value={renameValue}
+                              onChangeText={(v) => {
+                                setRenameValue(v);
+                                if (tagError) setTagError(null);
+                              }}
+                              onSubmitEditing={commitRenameTag}
+                            />
+                            <FolderEditIconAction
+                              icon={Check}
+                              label="Save tag"
+                              onPress={commitRenameTag}
+                            />
+                            <FolderEditIconAction
+                              icon={X}
+                              label="Cancel"
+                              onPress={() => {
+                                setRenamingTag(null);
+                                setTagError(null);
+                              }}
+                            />
+                          </XStack>
+                          {tagError && (
+                            <Text fontSize={11.5} color="$dangerText">
+                              {tagError}
+                            </Text>
+                          )}
                         </YStack>
                       ) : (
                         <FolderTagEditRow
@@ -485,36 +489,37 @@ export default function FolderEditScreen() {
                     ),
                     addingTag ? (
                       <YStack key="__add" px={16} py={15} gap={6}>
-                      <XStack ai="center" gap={10}>
-                        <Input
-                          ref={(node: TamaguiElement | null) => {
-                            newTagInputRef.current = node as unknown as TextInput | null;
-                          }}
-                          f={1}
-                          unstyled
-                          fontSize={15}
-                          fontWeight="600"
-                          color="#5EEAD4"
-                          placeholder="New tag"
-                          placeholderTextColor="$placeholderColor"
-                          value={newTagValue}
-                          onChangeText={(v) => {
-                            setNewTagValue(v);
-                            if (tagError) setTagError(null);
-                          }}
-                          onSubmitEditing={commitAddTag}
-                        />
-                        <FolderEditIconAction
-                          icon={Check}
-                          label="Add tag"
-                          onPress={commitAddTag}
-                        />
-                      </XStack>
-                      {tagError && (
-                        <Text fontSize={11.5} color="$dangerText">
-                          {tagError}
-                        </Text>
-                      )}
+                        <XStack ai="center" gap={10}>
+                          <Input
+                            ref={(node: TamaguiElement | null) => {
+                              newTagInputRef.current =
+                                node as unknown as TextInput | null;
+                            }}
+                            f={1}
+                            unstyled
+                            fontSize={15}
+                            fontWeight="600"
+                            color="#5EEAD4"
+                            placeholder="New tag"
+                            placeholderTextColor="$placeholderColor"
+                            value={newTagValue}
+                            onChangeText={(v) => {
+                              setNewTagValue(v);
+                              if (tagError) setTagError(null);
+                            }}
+                            onSubmitEditing={commitAddTag}
+                          />
+                          <FolderEditIconAction
+                            icon={Check}
+                            label="Add tag"
+                            onPress={commitAddTag}
+                          />
+                        </XStack>
+                        {tagError && (
+                          <Text fontSize={11.5} color="$dangerText">
+                            {tagError}
+                          </Text>
+                        )}
                       </YStack>
                     ) : (
                       <FolderAddRow
@@ -586,6 +591,8 @@ export default function FolderEditScreen() {
         </YStack>
       </KeyboardAwareScrollView>
 
+      <StatusBarScrim />
+
       <AppSheet
         open={!!tagsModule}
         onOpenChange={(open) => {
@@ -620,6 +627,7 @@ export default function FolderEditScreen() {
         onOpenChange={setConfirmDelete}
         title="Delete this folder?"
         subtitle={`${moduleCount} module${moduleCount !== 1 ? "s" : ""} will stay in your library.\nThis can't be undone.`}
+        blur="strong"
       >
         <YStack gap={10}>
           <AppButton
@@ -647,6 +655,7 @@ export default function FolderEditScreen() {
             ? `${tagCounts.get(confirmTag.id) ?? 0} module${(tagCounts.get(confirmTag.id) ?? 0) !== 1 ? "s" : ""} will lose this tag.\nThe modules themselves stay.`
             : undefined
         }
+        blur="strong"
       >
         <YStack gap={10}>
           <AppButton

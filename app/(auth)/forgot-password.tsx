@@ -4,6 +4,7 @@ import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
@@ -135,6 +136,8 @@ export default function ForgotPassword() {
             </Text>
           </Pressable>
         </KeyboardAwareScrollView>
+
+        <StatusBarScrim />
       </YStack>
     </FormProvider>
   );

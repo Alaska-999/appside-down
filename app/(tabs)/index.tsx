@@ -9,6 +9,7 @@ import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { GlowTone } from "@/src/components/ui/GlowSurface";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
@@ -558,6 +559,8 @@ export default function Home() {
           </ScrollView>
         )}
       </YStack>
+
+      <StatusBarScrim />
     </YStack>
   );
 }

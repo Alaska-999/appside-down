@@ -5,6 +5,7 @@ import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
 import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -250,6 +251,8 @@ export default function ResetPassword() {
             </Text>
           </Pressable>
         </KeyboardAwareScrollView>
+
+        <StatusBarScrim />
       </YStack>
     </FormProvider>
   );

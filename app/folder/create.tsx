@@ -7,6 +7,7 @@ import { IconButton } from "@/src/components/ui/IconButton";
 import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -152,6 +153,8 @@ export default function FolderCreate() {
             </YStack>
           </YStack>
         </KeyboardAwareScrollView>
+
+        <StatusBarScrim />
 
         <AppSheet
           open={tagSheetOpen}

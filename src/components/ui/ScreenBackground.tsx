@@ -1,4 +1,5 @@
 import { gradientLine } from "@/src/components/ui/GradientBorder";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import {
   Canvas,
   Circle,
@@ -259,8 +260,8 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           {
             blur: 60,
             blobs: ribBlobs(0.61 * w, 0.78 * h, 0.69 * w, 0.38 * h, [
-              [0.6, 0.53, 0.7, 0.8, "rgba(13,148,136,0.62)", 0.78],
-              [0.2, 0.68, 0.6, 0.6, "rgba(163,230,53,0.38)", 0.65],
+              [0.6, 0.53, 0.7, 0.8, "rgba(13,148,136,0.60)", 0.78],
+              [0.2, 0.68, 0.6, 0.6, "rgba(163,230,53,0.35)", 0.65],
             ]),
           },
         ],
@@ -645,6 +646,7 @@ export function ScreenBackground({
       <YStack f={1} w="100%" maxWidth={560} als="center">
         {children}
       </YStack>
+      <StatusBarScrim />
     </YStack>
   );
 }

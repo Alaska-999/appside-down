@@ -14,6 +14,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
+  SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -62,11 +63,21 @@ export function WellInsetShadow({ radius }: { radius: number }) {
     </View>
   );
 }
+export const FOCUS_BORDER = {
+  colors: [
+    "rgba(65, 237, 237, 0.6)",
+    "rgba(175, 246, 234, 0.4)",
+    "rgba(82, 227, 172, 0.55)",
+  ],
+  positions: [0, 0.5, 1],
+};
+const FOCUS_GLOW = { color: "rgba(45, 212, 190, 0.4)", blur: 6, width: 3.5 };
+const FOCUS_RING = { width: 1.4, color: "rgba(94,234,212,0.4)" };
 const FOCUS_IN_MS = 260;
 const FOCUS_OUT_MS = 180;
 const FOCUS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
 
-function useFocusProgress(focused: boolean) {
+export function useFocusProgress(focused: boolean) {
   const reduced = useReducedMotion();
   const progress = useSharedValue(focused ? 1 : 0);
   useEffect(() => {
@@ -80,6 +91,48 @@ function useFocusProgress(focused: boolean) {
         });
   }, [focused, reduced, progress]);
   return progress;
+}
+
+export function FocusRing({
+  radius,
+  progress,
+}: {
+  radius: number;
+  progress: SharedValue<number>;
+}) {
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: 0.985 + 0.015 * progress.value }],
+  }));
+  const ringStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
+  return (
+    <>
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, glowStyle]}
+      >
+        <OuterGlow
+          radius={radius}
+          blur={FOCUS_GLOW.blur}
+          width={FOCUS_GLOW.width}
+          color={FOCUS_GLOW.color}
+        />
+      </Animated.View>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            borderRadius: radius,
+            borderWidth: FOCUS_RING.width,
+            borderColor: FOCUS_RING.color,
+            zIndex: 3,
+          },
+          ringStyle,
+        ]}
+      />
+    </>
+  );
 }
 
 export function OuterGlow({
@@ -149,7 +202,7 @@ export function OuterGlow({
   );
 }
 
-export type InputShellVariant = "well" | "glass" | "underline";
+export type InputShellVariant = "well" | "glass" | "underline" | "plain";
 export type InputShellState = "default" | "focus" | "error" | "good";
 export type InputShellSize = "sm" | "md" | "lg";
 
@@ -162,7 +215,7 @@ export const INPUT_SIZE_STYLES: Record<
   lg: { height: controlHeight.lg, radius: 18, px: 19 },
 };
 
-const WELL_BORDERS: Record<
+export const WELL_BORDERS: Record<
   InputShellState,
   { colors: string[]; positions: number[] }
 > = {
@@ -174,15 +227,7 @@ const WELL_BORDERS: Record<
     ],
     positions: [0, 0.8, 1],
   },
-  focus: {
-    colors: [
-      "rgba(65, 237, 237, 0.67)",
-      "rgba(175, 246, 234, 0.45)",
-      "rgba(178, 242, 219, 0.45)",
-      "rgba(82, 227, 172, 0.6)",
-    ],
-    positions: [0, 0.3, 0.7, 1],
-  },
+  focus: FOCUS_BORDER,
   error: {
     colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"],
     positions: [0, 1],
@@ -194,10 +239,9 @@ const WELL_BORDERS: Record<
 };
 
 const RINGS: Record<
-  Exclude<InputShellState, "default">,
+  Exclude<InputShellState, "default" | "focus">,
   { width: number; color: string }
 > = {
-  focus: { width: 1.4, color: "rgba(94,234,212,0.15)" },
   error: { width: 1.4, color: "rgba(239,68,68,0.75)" },
   good: { width: 1.3, color: "rgba(163,230,53,0.55)" },
 };
@@ -221,15 +265,8 @@ export function InputShell({
   ...rest
 }: InputShellProps) {
   const s = INPUT_SIZE_STYLES[size];
-  const ring = state !== "default" ? RINGS[state] : null;
+  const ring = state === "error" || state === "good" ? RINGS[state] : null;
   const focusProgress = useFocusProgress(state === "focus" && !disabled);
-  const focusGlowStyle = useAnimatedStyle(() => ({
-    opacity: focusProgress.value,
-    transform: [{ scale: 0.985 + 0.015 * focusProgress.value }],
-  }));
-  const focusRingStyle = useAnimatedStyle(() => ({
-    opacity: focusProgress.value,
-  }));
   const underlineStyle = useAnimatedStyle(() => ({
     opacity: focusProgress.value,
     transform: [{ scaleX: 0.6 + 0.4 * focusProgress.value }],
@@ -289,6 +326,24 @@ export function InputShell({
     );
   }
 
+  if (variant === "plain") {
+    return (
+      <YStack
+        h={multiline ? undefined : s.height}
+        minHeight={multiline ? 112 : undefined}
+        fd={multiline ? "column" : "row"}
+        ai={multiline ? "stretch" : "center"}
+        px={s.px}
+        py={multiline ? 15 : 0}
+        gap={multiline ? 0 : 10}
+        opacity={disabled ? 0.42 : 1}
+        {...rest}
+      >
+        {children}
+      </YStack>
+    );
+  }
+
   return (
     <YStack
       h={multiline ? undefined : s.height}
@@ -321,7 +376,7 @@ export function InputShell({
                 StyleSheet.absoluteFill,
                 {
                   backgroundColor:
-                    state === "focus" ? "rgba(4,8,10,.7)" : "rgba(4,8,10,.65)",
+                    state === "focus" ? "rgba(4,8,10,.6)" : "rgba(4,8,10,.55)",
                 },
               ]}
             />
@@ -355,38 +410,21 @@ export function InputShell({
           positions={WELL_BORDERS[state].positions}
         />
       )}
-      {!disabled && (
-        <Animated.View
-          pointerEvents="none"
-          style={[StyleSheet.absoluteFill, focusGlowStyle]}
-        >
-          <OuterGlow
-            radius={s.radius}
-            blur={6}
-            width={3.5}
-            color="rgba(45, 212, 190, 0.4)"
-          />
-        </Animated.View>
-      )}
+      {!disabled && <FocusRing radius={s.radius} progress={focusProgress} />}
       {state === "error" && !disabled && (
         <OuterGlow radius={s.radius} color="rgba(239,68,68,0.4)" />
       )}
       {ring && (
-        <Animated.View
+        <View
           pointerEvents="none"
           style={[
+            StyleSheet.absoluteFill,
             {
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
               borderRadius: s.radius,
               borderWidth: ring.width,
               borderColor: ring.color,
               zIndex: 3,
             },
-            state === "focus" ? focusRingStyle : null,
           ]}
         />
       )}

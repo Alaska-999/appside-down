@@ -18,6 +18,7 @@ import {
 } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StatTile } from "@/src/components/ui/StatTile";
+import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -724,6 +725,8 @@ export default function ModuleScreen() {
           )}
         </YStack>
       </ScrollView>
+
+      <StatusBarScrim />
 
       <AppSheet
         open={menuSheetOpen}

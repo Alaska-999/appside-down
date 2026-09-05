@@ -203,12 +203,13 @@ export default function FlashcardsGame() {
               icon={
                 <RotateCcw
                   size={22}
-                  color={currentIndex === 0 ? "#2E3A44" : "#EAF7FF"}
-                  strokeWidth={2}
+                  color={currentIndex === 0 ? "#8FA8B8" : "#EAF7FF"}
+                  strokeWidth={1.9}
+                  opacity={currentIndex === 0 ? 0.45 : 0.85}
                 />
               }
               variant="liquidGlass"
-              size={52}
+              size={55}
               disabled={currentIndex === 0}
               onPress={handleRevert}
             />
