@@ -1,4 +1,5 @@
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
+import { ICON_LIME_LIGHT, ICON_MINT } from "@/src/constants/iconColors";
 import { StyleSheet, View } from "react-native";
 import { XStack } from "tamagui";
 
@@ -48,13 +49,13 @@ export function ProgressSplitBar({
   return (
     <XStack h={BAR_HEIGHT} br={999} overflow="hidden" bg="rgba(220,255,245,0.07)">
       {knownRatio > 0 && (
-        <View style={{ width: `${knownRatio * 100}%`, backgroundColor: "#BEF264" }} />
+        <View style={{ width: `${knownRatio * 100}%`, backgroundColor: ICON_LIME_LIGHT }} />
       )}
       {learningRatio > 0 && (
         <View
           style={{
             width: `${learningRatio * 100}%`,
-            backgroundColor: "#2DD4BF",
+            backgroundColor: ICON_MINT,
             position: "relative",
           }}
         >

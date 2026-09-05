@@ -1,5 +1,10 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_ACCENT,
+  ICON_DANGER,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronRight } from "lucide-react-native";
 import {
@@ -198,7 +203,7 @@ export function AppSheet({
         ) : null}
         {subtitle && (
           <Text
-            color="#8FA8B8"
+            color="$textMuted"
             fontSize={12.5}
             lineHeight={19}
             textAlign="center"
@@ -255,7 +260,7 @@ export function SheetRow({
 }: SheetRowProps) {
   const { dense } = useContext(SheetRowsContext);
   const labelColor = danger ? "$roseSoft" : "$color";
-  const iconColor = danger ? "#FCA5A5" : "rgb(213, 225, 234)";
+  const iconColor = danger ? ICON_DANGER : "rgb(213, 225, 234)";
 
   const row = (pressed: boolean) => (
     <XStack
@@ -282,9 +287,9 @@ export function SheetRow({
           {hint}
         </Text>
       )}
-      {selected && <Check size={18} color="#5EEAD4" strokeWidth={2.4} />}
+      {selected && <Check size={18} color={ICON_ACCENT} strokeWidth={2.4} />}
       {right}
-      {chevron && <ChevronRight size={16} color="#5A6B7A" strokeWidth={2} />}
+      {chevron && <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />}
     </XStack>
   );
 
@@ -310,7 +315,7 @@ export function SheetRows({ children }: { children: ReactNode }) {
 
   return (
     <SheetRowsContext.Provider value={{ dense }}>
-      <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.085)">
+      <YStack br="$cardSoft" overflow="hidden" bg="rgba(220,255,245,0.085)">
         {items.map((child, index) => (
           <View key={index}>
             {index > 0 && (

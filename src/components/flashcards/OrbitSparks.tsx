@@ -1,3 +1,4 @@
+import { ICON_ACCENT, ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { useEffect } from "react";
 import { DimensionValue } from "react-native";
 import Animated, {
@@ -10,8 +11,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const MINT = "#5EEAD4";
-const LIME = "#BEF264";
+const MINT = ICON_ACCENT;
+const LIME = ICON_LIME_LIGHT;
 
 interface SparkSpec {
   leftPct: number;

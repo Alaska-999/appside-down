@@ -3,7 +3,12 @@ import { Text, TextProps } from "tamagui";
 
 type SectionTitleTone = "muted" | "onGlass" | "eyebrow";
 
-interface SectionTitleProps extends Omit<TextProps, "children" | "tone"> {
+type SectionTitleLayoutProps = Pick<
+  TextProps,
+  "mt" | "mb" | "ml" | "mr" | "px" | "testID"
+>;
+
+interface SectionTitleProps extends SectionTitleLayoutProps {
   children: ReactNode;
   tone?: SectionTitleTone;
 }

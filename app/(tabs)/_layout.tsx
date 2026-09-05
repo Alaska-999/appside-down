@@ -1,5 +1,11 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_LIME,
+  ICON_MINT,
+  ICON_MUTED,
+  ICON_NEAR_BLACK,
+} from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { BookOpen, House, PlusCircle } from "lucide-react-native";
@@ -24,7 +30,7 @@ function TabIcon(
           ai="center"
           jc="center"
         >
-          <Icon size={20} color="#8FA8B8" strokeWidth={1.9} />
+          <Icon size={20} color={ICON_MUTED} strokeWidth={1.9} />
         </YStack>
       );
     }
@@ -43,7 +49,7 @@ function TabIcon(
         shadowOffset={{ width: 0, height: 0 }}
       >
         <LinearGradient
-          colors={["#2DD4BF", "#A3E635"]}
+          colors={[ICON_MINT, ICON_LIME]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
@@ -54,7 +60,7 @@ function TabIcon(
             bottom: 0,
           }}
         />
-        <Icon size={20} color="#0D1117" strokeWidth={2.1} />
+        <Icon size={20} color={ICON_NEAR_BLACK} strokeWidth={2.1} />
       </YStack>
     );
   };

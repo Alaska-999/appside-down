@@ -1,5 +1,14 @@
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import {
+  ICON_BASE_DEEP,
+  ICON_HERO_LIME,
+  ICON_MUTED,
+  ICON_NEAR_BLACK,
+  ICON_TEAL,
+  ICON_TEXT,
+  ICON_WHITE,
+} from "@/src/constants/iconColors";
+import {
   MeshGradientBackground,
   MeshVariant,
 } from "@/src/components/ui/MeshGradientBackground";
@@ -116,7 +125,7 @@ export function ErrorBoundary({
       </Text>
       <Pressable onPress={retry}>
         <LinearGradient
-          colors={["#0D9488", "#65A30D"]}
+          colors={[ICON_TEAL, ICON_HERO_LIME]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.errorRetry}
@@ -213,7 +222,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   splashRoot: {
     flex: 1,
-    backgroundColor: "#11141F", // Темний фон підкладки з HTML[cite: 2]
+    backgroundColor: ICON_BASE_DEEP, // Темний фон підкладки з HTML[cite: 2]
   },
   splashCenter: {
     flex: 1,
@@ -226,7 +235,7 @@ const styles = StyleSheet.create({
     fontSize: 23, // Розмір тексту з HTML[cite: 2]
     fontFamily: "Sora_800ExtraBold",
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: ICON_WHITE,
     // М'яка тінь для чіткості поверх світлих зон мешу[cite: 2]
     textShadowColor: "rgba(0,0,0,0.4)",
     textShadowOffset: { width: 0, height: 2 },
@@ -251,7 +260,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   badgeText: {
-    color: "#8FA8B8",
+    color: ICON_MUTED,
     fontSize: 11,
     fontWeight: "600",
   },
@@ -261,16 +270,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     padding: 24,
-    backgroundColor: "#0D1117",
+    backgroundColor: ICON_NEAR_BLACK,
   },
   errorTitle: {
-    color: "#EFFDF8",
+    color: ICON_TEXT,
     fontSize: 19,
     fontWeight: "800",
     textAlign: "center",
   },
   errorSubtitle: {
-    color: "#8FA8B8",
+    color: ICON_MUTED,
     fontSize: 15,
     lineHeight: 21,
     textAlign: "center",
@@ -285,7 +294,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   errorRetryLabel: {
-    color: "#EFFDF8",
+    color: ICON_TEXT,
     fontSize: 17,
     fontWeight: "700",
   },

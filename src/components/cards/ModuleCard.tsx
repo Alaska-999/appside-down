@@ -1,5 +1,12 @@
 import { AppCard } from "@/src/components/ui/Card";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
+import {
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+  ICON_MUTED,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, ChevronRight, Star, X } from "lucide-react-native";
@@ -43,7 +50,7 @@ function MasteredTick() {
       shadowOpacity={0.6}
       accessibilityLabel="Mastered"
     >
-      <Check size={11} color="#BEF264" strokeWidth={3} />
+      <Check size={11} color={ICON_LIME_LIGHT} strokeWidth={3} />
     </YStack>
   );
 }
@@ -79,7 +86,7 @@ function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
       >
         {!dim && (
           <LinearGradient
-            colors={["#2DD4BF", "#A3E635"]}
+            colors={[ICON_MINT, ICON_LIME]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}
@@ -141,13 +148,13 @@ export function ModuleCard({
               </Text>
               {mastered && <MasteredTick />}
             </XStack>
-            <Text fontSize={12.5} color="#8FA8B8" mt={3}>
+            <Text fontSize={12.5} color="$textMuted" mt={3}>
               {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
             </Text>
           </YStack>
 
           {module.isFavorite && !mastered && (
-            <Star size={14} color="#BEF264" fill="#BEF264" />
+            <Star size={14} color={ICON_LIME_LIGHT} fill={ICON_LIME_LIGHT} />
           )}
 
           {trailing}
@@ -155,13 +162,13 @@ export function ModuleCard({
           {!trailing && removeButton && onRemoveButtonPress && (
             <IconButton
               size={36}
-              icon={<X size={18} color="#8FA8B8" />}
+              icon={<X size={18} color={ICON_MUTED} />}
               onPress={onRemoveButtonPress}
             />
           )}
 
           {!trailing && !removeButton && (
-            <ChevronRight size={15} color="#5A6B7A" strokeWidth={2} />
+            <ChevronRight size={15} color={ICON_SUBTLE} strokeWidth={2} />
           )}
         </XStack>
       </AppCard>

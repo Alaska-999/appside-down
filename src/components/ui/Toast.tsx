@@ -1,3 +1,4 @@
+import { ICON_DANGER } from "@/src/constants/iconColors";
 import { AlertCircle } from "lucide-react-native";
 import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -78,7 +79,7 @@ export function AppToast({ open, message, description, duration = 3200, onDismis
             backgroundColor: "rgba(255,255,255,0.2)",
           }}
         />
-        <AlertCircle size={19} color="#FCA5A5" strokeWidth={2.2} />
+        <AlertCircle size={19} color={ICON_DANGER} strokeWidth={2.2} />
         <YStack f={1}>
           <Text fontSize={13.5} fontWeight="600" color="#FFE4E6">
             {message}

@@ -8,6 +8,11 @@ import {
 } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_ACCENT,
+  ICON_LIME,
+  ICON_MINT_TINT_DARK,
+} from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
 import { ReactNode, useEffect } from "react";
@@ -41,7 +46,38 @@ type CardVariant =
 
 type CardSize = "sm" | "md" | "lg";
 
-interface CardProps extends YStackProps {
+type CardLayoutProps = Pick<
+  YStackProps,
+  | "mt"
+  | "mb"
+  | "ml"
+  | "mr"
+  | "f"
+  | "flex"
+  | "w"
+  | "width"
+  | "h"
+  | "height"
+  | "minHeight"
+  | "ai"
+  | "als"
+  | "pos"
+  | "zIndex"
+  | "gap"
+  | "px"
+  | "py"
+  | "p"
+  | "jc"
+  | "opacity"
+  | "overflow"
+  | "borderLeftWidth"
+  | "borderLeftColor"
+  | "br"
+  | "testID"
+  | "onPress"
+>;
+
+interface CardProps extends CardLayoutProps {
   variant?: CardVariant;
   size?: CardSize;
   tone?: GlowTone;
@@ -220,7 +256,7 @@ function SelectedRing({ radius }: { radius: number }) {
         style={{ position: "absolute", top: 14, right: 14, zIndex: 5 }}
       >
         <LinearGradient
-          colors={["#5EEAD4", "#A3E635"]}
+          colors={[ICON_ACCENT, ICON_LIME]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.76, y: 0.64 }}
           style={{
@@ -231,7 +267,7 @@ function SelectedRing({ radius }: { radius: number }) {
             justifyContent: "center",
           }}
         >
-          <Check size={14} color="#06231F" strokeWidth={3} />
+          <Check size={14} color={ICON_MINT_TINT_DARK} strokeWidth={3} />
         </LinearGradient>
       </View>
     </>
@@ -282,7 +318,7 @@ export function AppCard(props: CardProps) {
         {...rest}
       >
         <LinearGradient
-          colors={["#5EEAD4", "#A3E635"]}
+          colors={[ICON_ACCENT, ICON_LIME]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.85, y: 0.85 }}
           style={StyleSheet.absoluteFill}
@@ -507,7 +543,7 @@ export function AppCard(props: CardProps) {
         l={14}
         r={14}
         h={38}
-        br={20}
+        br="$cardSoft"
         bg="rgba(24,34,38,0.42)"
         borderWidth={1}
         borderColor="rgba(220,255,245,0.09)"
@@ -518,7 +554,7 @@ export function AppCard(props: CardProps) {
         l={7}
         r={7}
         h={38}
-        br={20}
+        br="$cardSoft"
         bg="rgba(24,34,38,0.62)"
         borderWidth={1}
         borderColor="rgba(220,255,245,0.12)"

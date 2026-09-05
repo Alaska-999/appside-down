@@ -1,15 +1,18 @@
-import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
-import { AppButton } from "@/src/components/ui/Button";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
+import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
+import { AppButton } from "@/src/components/ui/Button";
+import { IconButton } from "@/src/components/ui/IconButton";
+import {
+  BackgroundMesh,
+  BackgroundPreset,
+} from "@/src/components/ui/ScreenBackground";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import {
   Easing,
@@ -25,6 +28,14 @@ interface FlashcardsCompleteProps {
   known: number;
   stillLearning: number;
   onClose?: () => void;
+}
+
+export function finishToneForHour(
+  hour: number,
+): { preset: BackgroundPreset; tone: "default" | "cold" | "warm" } {
+  if (hour >= 6 && hour < 12) return { preset: "finishWarm", tone: "warm" };
+  if (hour >= 12 && hour < 20) return { preset: "finish", tone: "default" };
+  return { preset: "finishCold", tone: "cold" };
 }
 
 export function FlashcardsComplete({
@@ -44,6 +55,10 @@ export function FlashcardsComplete({
   const duration = isFull ? 2400 : 1700;
 
   const progress = useSharedValue(reducedMotion ? 1 : 0);
+  const { preset, tone } = useMemo(
+    () => finishToneForHour(new Date().getHours()),
+    [],
+  );
 
   useEffect(() => {
     if (reducedMotion) {
@@ -59,7 +74,7 @@ export function FlashcardsComplete({
 
   return (
     <YStack f={1} pos="relative">
-      <BackgroundMesh preset="finish" />
+      <BackgroundMesh preset={preset} />
 
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <OrbitSparks reducedMotion={reducedMotion} />
@@ -75,7 +90,12 @@ export function FlashcardsComplete({
           />
         </XStack>
         <YStack f={1} ai="center" jc="center">
-          <OrbitProgress progress={progress} fraction={fraction} hot={isFull} />
+          <OrbitProgress
+            progress={progress}
+            fraction={fraction}
+            hot={isFull}
+            tone={tone}
+          />
         </YStack>
 
         <YStack ai="center">
@@ -109,7 +129,12 @@ export function FlashcardsComplete({
         <XStack jc="center" gap={10} mt={15}>
           <StatusPill kind="moon" tone="known" count={known} label="known" />
           {!isFull && (
-            <StatusPill kind="moon" tone="learning" count={stillLearning} label="learning" />
+            <StatusPill
+              kind="moon"
+              tone="learning"
+              count={stillLearning}
+              label="learning"
+            />
           )}
         </XStack>
 
@@ -119,19 +144,35 @@ export function FlashcardsComplete({
               <AppButton variant="primary" size="lg" onPress={() => restart()}>
                 Practise all again
               </AppButton>
-              <AppButton variant="ghost" size="sm" onPress={() => router.back()}>
+              <AppButton
+                variant="ghost"
+                size="sm"
+                onPress={() => router.back()}
+              >
                 Back to module
               </AppButton>
             </>
           ) : (
             <>
-              <AppButton variant="primary" size="lg" onPress={() => restart(true)}>
+              <AppButton
+                variant="primary"
+                size="lg"
+                onPress={() => restart(true)}
+              >
                 Practise {stillLearning} cards
               </AppButton>
-              <AppButton variant="secondary" size="md" onPress={() => restart()}>
+              <AppButton
+                variant="secondary"
+                size="md"
+                onPress={() => restart()}
+              >
                 Restart game
               </AppButton>
-              <AppButton variant="ghost" size="sm" onPress={() => router.back()}>
+              <AppButton
+                variant="ghost"
+                size="sm"
+                onPress={() => router.back()}
+              >
                 Back to module
               </AppButton>
             </>

@@ -2,6 +2,7 @@ import { Lamp } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
 import { useState } from "react";
@@ -147,7 +148,7 @@ export function FolderModuleRow({
               {name}
             </Text>
             <XStack ai="center" gap={5} mt={3} flexWrap="wrap">
-              <Text fontSize={12.5} color="#8FA8B8">
+              <Text fontSize={12.5} color="$textMuted">
                 {itemsCount} card{itemsCount !== 1 ? "s" : ""}
               </Text>
               {tags.map((tag) => (
@@ -160,14 +161,14 @@ export function FolderModuleRow({
                   borderWidth={1}
                   borderColor="rgba(220,255,245,0.11)"
                 >
-                  <Text fontSize={10} fontWeight="700" color="#8FA8B8">
+                  <Text fontSize={10} fontWeight="700" color="$textMuted">
                     {tag}
                   </Text>
                 </XStack>
               ))}
             </XStack>
           </YStack>
-          <ChevronRight size={15} color="#5A6B7A" strokeWidth={2} />
+          <ChevronRight size={15} color={ICON_SUBTLE} strokeWidth={2} />
         </XStack>
 
         {hasProgress && (

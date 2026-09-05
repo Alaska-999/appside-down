@@ -2,7 +2,7 @@ import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { Toggle } from "@/src/components/common/Toggle";
+import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
@@ -283,7 +283,7 @@ export default function SettingsScreen() {
               placeholder="Password"
               height={controlHeight.md}
               px={16}
-              br={16}
+              br="$control"
               bg="$glassBg"
               borderWidth={1}
               borderColor="$glassBorder"

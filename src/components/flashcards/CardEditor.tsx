@@ -5,6 +5,7 @@ import {
   useFocusProgress,
 } from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { GripHorizontal, Trash2 } from "lucide-react-native";
@@ -55,9 +56,9 @@ function CardField<T extends FieldValues>({
           py={term ? 4 : 8}
           fontSize={term ? 18 : 16}
           fontWeight={term ? "500" : "400"}
-          color={term ? "#EFFDF8" : "#99b3c4"}
+          color={term ? "$text" : "#99b3c4"}
           placeholder={placeholder}
-          placeholderTextColor={"#5A6B7A" as never}
+          placeholderTextColor={"$mutedDim" as never}
           returnKeyType={returnKeyType}
           onSubmitEditing={onSubmitEditing}
           ref={inputRef as never}
@@ -164,7 +165,7 @@ export function CardEditor<T extends FieldValues>({
             fontWeight="700"
             letterSpacing={0.63}
             textTransform="uppercase"
-            color={lit ? "#5EEAD4" : "#5A6B7A"}
+            color={lit ? "$mintLight" : "$mutedDim"}
           >
             Card {String(index + 1).padStart(2, "0")}
           </Text>
@@ -177,13 +178,13 @@ export function CardEditor<T extends FieldValues>({
               >
                 <GripHorizontal
                   size={18}
-                  color={dragging ? "#5EEAD4" : "#5A6B7A"}
+                  color={dragging ? ICON_ACCENT : ICON_SUBTLE}
                   strokeWidth={1.9}
                 />
               </View>
             </GestureDetector>
           ) : (
-            <GripHorizontal size={18} color="#5A6B7A" strokeWidth={1.9} />
+            <GripHorizontal size={18} color={ICON_SUBTLE} strokeWidth={1.9} />
           )}
           {canRemove && (
             <Pressable
@@ -195,7 +196,7 @@ export function CardEditor<T extends FieldValues>({
                 onRemove(index);
               }}
             >
-              <Trash2 size={18} color="#5A6B7A" strokeWidth={1.9} />
+              <Trash2 size={18} color={ICON_SUBTLE} strokeWidth={1.9} />
             </Pressable>
           )}
         </XStack>

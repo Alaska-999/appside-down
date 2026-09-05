@@ -45,10 +45,15 @@ function useShimmerProgress() {
   return progress;
 }
 
-interface SkeletonProps extends Omit<YStackProps, "width" | "height"> {
+type SkeletonLayoutProps = Pick<
+  YStackProps,
+  "mt" | "mb" | "ml" | "mr" | "f" | "flex" | "ai" | "als" | "pos" | "zIndex" | "testID"
+>;
+
+interface SkeletonProps extends SkeletonLayoutProps {
   width?: number | string;
   height?: number;
-  borderRadius?: number;
+  borderRadius?: YStackProps["br"];
   variant?: SkeletonVariant;
 }
 

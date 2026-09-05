@@ -20,7 +20,7 @@ const tokens = createTokens({
         indigo: '#4338CA',
         indigoAccent: '#6366F1',
         text: '#EFFDF8',
-        muted: '#8FA8B8',
+        textMuted: '#8FA8B8',
         nearBlack: '#0D1117',
         base: '#08090C',
         baseTop: '#0E1A1E',
@@ -30,6 +30,13 @@ const tokens = createTokens({
         linkBlueDark: '#38BDF8',
         disabledDark: '#3F4E5C',
         onAccentTextMuted: '#3A3A3A',
+
+        mutedDim: '#5A6B7A',
+        iconOnGlass: '#EAF7FF',
+        backgroundDeep: '#11141F',
+        mintTintDark: '#06231F',
+        indigoLight: '#818CF8',
+        mutedLight: '#B7CEDA',
     },
     space: {
         ...config.tokens.space,
@@ -126,15 +133,16 @@ const appConfig = createTamagui({
 
             color: tokens.color.text,
             colorHeading: tokens.color.text,
-            colorSecondary: tokens.color.muted,
-            colorMuted: tokens.color.muted,
+            colorSecondary: tokens.color.textMuted,
+            colorMuted: tokens.color.textMuted,
             colorDisabled: tokens.color.disabledDark,
             colorLink: tokens.color.linkBlueDark,
             iconMuted: '#6E8496',
+            iconOnGlass: tokens.color.iconOnGlass,
 
             borderColor: 'rgba(220,255,245,0.13)',
             hairline: 'rgba(220,255,245,0.08)',
-            placeholderColor: '#5A6B7A',
+            placeholderColor: tokens.color.mutedDim,
 
             accentGradientStart: tokens.color.mint,
             accentGradientEnd: tokens.color.lime,

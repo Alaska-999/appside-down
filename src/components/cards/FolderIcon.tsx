@@ -1,11 +1,18 @@
+import {
+  ICON_ACCENT,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "react-native";
 import { Text, YStack } from "tamagui";
 
 export const FOLDER_ICON_GRADIENTS: [string, string][] = [
-  ["#2DD4BF", "#0D9488"],
-  ["#BEF264", "#A3E635"],
-  ["#5EEAD4", "#16323A"],
+  [ICON_MINT, ICON_TEAL],
+  [ICON_LIME_LIGHT, ICON_LIME],
+  [ICON_ACCENT, "#16323A"],
 ];
 
 const EMOJI_ICON = /^[\p{Extended_Pictographic}\p{Emoji_Presentation}‍️]{1,4}$/u;
@@ -60,7 +67,7 @@ export function FolderIcon({
       {icon ? (
         <Text fontSize={size * 0.4}>{icon}</Text>
       ) : (
-        <Text fontSize={size * 0.4} fontWeight="800" color="#06231F">
+        <Text fontSize={size * 0.4} fontWeight="800" color="$mintTintDark">
           {name.slice(0, 1).toUpperCase()}
         </Text>
       )}

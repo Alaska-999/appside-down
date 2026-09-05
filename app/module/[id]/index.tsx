@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { Toggle } from "@/src/components/common/Toggle";
+import { Toggle } from "@/src/components/ui/Toggle";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
@@ -22,6 +22,13 @@ import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import {
+  ICON_ACCENT,
+  ICON_DANGER,
+  ICON_LIME_LIGHT,
+  ICON_MUTED,
+  ICON_ON_GLASS,
+} from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
@@ -106,9 +113,9 @@ function ModuleSkeleton() {
         <Skeleton height={17} width="90%" borderRadius={6} />
         <Skeleton height={8} borderRadius={999} />
         <XStack gap={9}>
-          <Skeleton height={62} f={1} borderRadius={16} />
-          <Skeleton height={62} f={1} borderRadius={16} />
-          <Skeleton height={62} f={1} borderRadius={16} />
+          <Skeleton height={62} f={1} borderRadius="$control" />
+          <Skeleton height={62} f={1} borderRadius="$control" />
+          <Skeleton height={62} f={1} borderRadius="$control" />
         </XStack>
       </YStack>
     </YStack>
@@ -135,12 +142,12 @@ function CardsHeader({
           Cards
         </Text>
         {starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="#8FA8B8">
+          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
             {starredCount} starred
           </Text>
         )}
         {!starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="#8FA8B8">
+          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
             {count}
           </Text>
         )}
@@ -179,7 +186,7 @@ function CardsHeader({
             <Star
               size={16}
               strokeWidth={1.8}
-              color={starredOnly ? "#BEF264" : "#8FA8B8"}
+              color={starredOnly ? ICON_LIME_LIGHT : ICON_MUTED}
               fill={starredOnly ? "rgba(190,242,100,0.85)" : "transparent"}
             />
           </YStack>
@@ -193,8 +200,8 @@ function CardsHeader({
           }}
         >
           <XStack ai="center" gap={6}>
-            <ArrowDownUp size={14} color="#5EEAD4" strokeWidth={2} />
-            <Text fontSize={12.5} fontWeight="600" color="#5EEAD4">
+            <ArrowDownUp size={14} color={ICON_ACCENT} strokeWidth={2} />
+            <Text fontSize={12.5} fontWeight="600" color="$mintLight">
               Sort
             </Text>
           </XStack>
@@ -469,7 +476,7 @@ export default function ModuleScreen() {
           <XStack px="$screenX" pt={screen.top} jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               onPress={() => router.back()}
               accessibilityLabel="Back"
             />
@@ -481,7 +488,7 @@ export default function ModuleScreen() {
                     <Star
                       size={22}
                       strokeWidth={1.9}
-                      color={moduleData.isFavorite ? "#BEF264" : "#EAF7FF"}
+                      color={moduleData.isFavorite ? ICON_LIME_LIGHT : ICON_ON_GLASS}
                       fill={
                         moduleData.isFavorite
                           ? "rgba(190,242,100,0.22)"
@@ -499,7 +506,7 @@ export default function ModuleScreen() {
                   icon={
                     <MoreHorizontal
                       size={22}
-                      color="#EAF7FF"
+                      color={ICON_ON_GLASS}
                       strokeWidth={1.9}
                     />
                   }
@@ -545,7 +552,7 @@ export default function ModuleScreen() {
                 </Text>
 
                 {!!moduleData.description && (
-                  <Text fontSize={13.5} lineHeight={20} color="#8FA8B8" mt={7}>
+                  <Text fontSize={13.5} lineHeight={20} color="$textMuted" mt={7}>
                     {moduleData.description}
                   </Text>
                 )}
@@ -560,12 +567,12 @@ export default function ModuleScreen() {
                     @{authorName ?? "unknown"}
                   </Text>
                   {isDeletedAuthor && (
-                    <Text fontSize={12.5} color="#8FA8B8">
+                    <Text fontSize={12.5} color="$textMuted">
                       (deleted)
                     </Text>
                   )}
-                  <YStack w={3} h={3} br={2} bg="#5A6B7A" />
-                  <Text fontSize={12.5} color="#8FA8B8">
+                  <YStack w={3} h={3} br={2} bg="$mutedDim" />
+                  <Text fontSize={12.5} color="$textMuted">
                     {moduleData.itemsCount} card
                     {moduleData.itemsCount !== 1 ? "s" : ""}
                   </Text>
@@ -579,7 +586,7 @@ export default function ModuleScreen() {
                       borderWidth={1}
                       borderColor="rgba(45,212,191,0.32)"
                     >
-                      <Text fontSize={10.5} fontWeight="600" color="#5EEAD4">
+                      <Text fontSize={10.5} fontWeight="600" color="$mintLight">
                         Public
                       </Text>
                     </XStack>
@@ -645,9 +652,9 @@ export default function ModuleScreen() {
                     borderStyle="dashed"
                     borderColor="rgba(220,255,245,0.13)"
                   >
-                    <Lock size={16} color="#8FA8B8" strokeWidth={1.8} />
-                    <Text fontSize={12.5} color="#8FA8B8">
-                      <Text fontSize={12.5} fontWeight="600" color="#B7CEDA">
+                    <Lock size={16} color={ICON_MUTED} strokeWidth={1.8} />
+                    <Text fontSize={12.5} color="$textMuted">
+                      <Text fontSize={12.5} fontWeight="600" color="$mutedLight">
                         Test, Match, Learn
                       </Text>{" "}
                       — coming soon
@@ -661,7 +668,7 @@ export default function ModuleScreen() {
                       <AppButton
                         variant="secondary"
                         size="lg"
-                        icon={<BookmarkCheck size={18} color="#EAF7FF" strokeWidth={1.9} />}
+                        icon={<BookmarkCheck size={18} color={ICON_ON_GLASS} strokeWidth={1.9} />}
                         onPress={() =>
                           router.push({
                             pathname: "/module/[id]",
@@ -779,7 +786,7 @@ export default function ModuleScreen() {
             <YStack gap={10}>
               <AppButton
                 variant="danger"
-                icon={<Trash2 size={19} color="#FCA5A5" strokeWidth={1.9} />}
+                icon={<Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />}
                 loading={deleting}
                 onPress={handleDeleteModule}
               >

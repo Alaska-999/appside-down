@@ -1,5 +1,6 @@
 import { InputShell, InputShellSize } from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronDown } from "lucide-react-native";
 import { useRef, useState } from "react";
@@ -191,7 +192,7 @@ export function SelectField({
                         <Text fontSize={14.5} color={selected ? "$limeLight" : "$color"}>
                           {option.label}
                         </Text>
-                        {selected && <Check size={16} color="#BEF264" />}
+                        {selected && <Check size={16} color={ICON_LIME_LIGHT} />}
                       </XStack>
                     </Pressable>
                   </View>

@@ -11,6 +11,13 @@ import {
   TileMode,
   vec,
 } from "@shopify/react-native-skia";
+import {
+  ICON_ACCENT,
+  ICON_INDIGO,
+  ICON_LIME,
+  ICON_MINT,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import React, { useEffect, useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import {
@@ -237,28 +244,28 @@ function MeshFull({ width, height, still }: VariantProps) {
   const y4 = useTrack(move, THIRDS, [0.7, 0.88, 0.55, 0.7], boxH);
 
   const m1 = useMorphColor(hue, THIRDS, [
-    "#2DD4BF",
+    ICON_MINT,
     "#6366F1",
-    "#A3E635",
-    "#2DD4BF",
+    ICON_LIME,
+    ICON_MINT,
   ]);
   const m2 = useMorphColor(hue, THIRDS, [
-    "#0D9488",
-    "#2DD4BF",
-    "#4338CA",
-    "#0D9488",
+    ICON_TEAL,
+    ICON_MINT,
+    ICON_INDIGO,
+    ICON_TEAL,
   ]);
   const m3 = useMorphColor(hue, THIRDS, [
-    "#4338CA",
-    "#0D9488",
-    "#2DD4BF",
-    "#4338CA",
+    ICON_INDIGO,
+    ICON_TEAL,
+    ICON_MINT,
+    ICON_INDIGO,
   ]);
   const m4 = useMorphColor(hue, THIRDS, [
-    "#A3E635",
-    "#5EEAD4",
-    "#0D9488",
-    "#A3E635",
+    ICON_LIME,
+    ICON_ACCENT,
+    ICON_TEAL,
+    ICON_LIME,
   ]);
 
   return (
@@ -267,7 +274,7 @@ function MeshFull({ width, height, still }: VariantProps) {
         <LinearGradient
           start={vec(base.start.x, base.start.y)}
           end={vec(base.end.x, base.end.y)}
-          colors={["#0D9488", "#4338CA"]}
+          colors={[ICON_TEAL, ICON_INDIGO]}
         />
       </Rect>
       <MeshNode
@@ -316,9 +323,9 @@ function MeshDark({ width, height, still }: VariantProps) {
   const x3 = useTrack(move, THIRDS, [0.3, 0.15, 0.45, 0.3], boxW);
   const y3 = useTrack(move, THIRDS, [0.85, 0.6, 0.92, 0.85], boxH);
 
-  const m1 = useMorphColor(hue, HALVES, ["#2DD4BF", "#6366F1"]);
-  const m2 = useMorphColor(hue, HALVES, ["#0D9488", "#2DD4BF"]);
-  const m3 = useMorphColor(hue, HALVES, ["#4338CA", "#0D9488"]);
+  const m1 = useMorphColor(hue, HALVES, [ICON_MINT, "#6366F1"]);
+  const m2 = useMorphColor(hue, HALVES, [ICON_TEAL, ICON_MINT]);
+  const m3 = useMorphColor(hue, HALVES, [ICON_INDIGO, ICON_TEAL]);
 
   return (
     <Group transform={offset} layer={paint}>
@@ -378,16 +385,16 @@ function FallMorph({ width, height, still }: VariantProps) {
 
   const wallColors = useDerivedValue(() => {
     const wt = interpolateColor(hue.value, THIRDS, [
-      "#2DD4BF",
-      "#5EEAD4",
+      ICON_MINT,
+      ICON_ACCENT,
       "#6366F1",
-      "#2DD4BF",
+      ICON_MINT,
     ]);
     const wm2 = interpolateColor(hue.value, THIRDS, [
-      "#0D9488",
-      "#2DD4BF",
-      "#4338CA",
-      "#0D9488",
+      ICON_TEAL,
+      ICON_MINT,
+      ICON_INDIGO,
+      ICON_TEAL,
     ]);
     return [
       withAlpha(wt, 1),
@@ -461,8 +468,8 @@ function BreatheCore({ width, height, still }: VariantProps) {
   const counterX = useTrack(move, HALVES, [0.8, 0.6], boxW);
   const counterY = useDerivedValue(() => boxH * 0.78);
 
-  const m1 = useMorphColor(hue, HALVES, ["#2DD4BF", "#A3E635"]);
-  const m3 = useMorphColor(hue, HALVES, ["#4338CA", "#2DD4BF"]);
+  const m1 = useMorphColor(hue, HALVES, [ICON_MINT, ICON_LIME]);
+  const m3 = useMorphColor(hue, HALVES, [ICON_INDIGO, ICON_MINT]);
 
   const baseStart = useDerivedValue(
     () =>

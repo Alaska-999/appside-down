@@ -1,9 +1,10 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_ACCENT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
-import { Plus, X } from "lucide-react-native";
+import { Plus } from "lucide-react-native";
 import { ReactNode } from "react";
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type TagChipVariant = "default" | "on" | "add";
@@ -22,7 +23,7 @@ const CHIP_STYLES: Record<
   }
 > = {
   default: {
-    textColor: "#B7CEDA",
+    textColor: "$mutedLight",
     fill: "rgba(220,255,245,0.05)",
     borderColors: [
       "rgba(255,255,255,0.35)",
@@ -33,14 +34,18 @@ const CHIP_STYLES: Record<
     glow: false,
   },
   on: {
-    textColor: "#5EEAD4",
-    fill: "rgba(45,212,191,0.14)",
-    borderColors: ["rgba(45,212,191,0.45)", "rgba(45,212,191,0.45)"],
-    borderPositions: [0, 1],
+    textColor: "$text",
+    fill: "rgba(220,255,245,0.05)",
+    borderColors: [
+      "rgba(255,255,255,0.6)",
+      "rgba(94,234,212,0.4)",
+      "rgba(94,234,212,0.5)",
+    ],
+    borderPositions: [0, 0.6, 1],
     glow: true,
   },
   add: {
-    textColor: "#5EEAD4",
+    textColor: "$mintLight",
     fill: "rgba(45,212,191,0.1)",
     borderColors: [
       "rgba(255,255,255,0.44)",
@@ -58,17 +63,15 @@ export function TagChip({
   leading,
   variant = "default",
   onPress,
-  onRemove,
 }: {
   label: string;
   count?: number;
   leading?: ReactNode;
   variant?: TagChipVariant;
   onPress?: () => void;
-  onRemove?: () => void;
 }) {
   const s = CHIP_STYLES[variant];
-  const countColor = variant === "on" ? "#8FA8B8" : "#5A6B7A";
+  const countColor = variant === "on" ? "$textMuted" : "$mutedDim";
 
   return (
     <Pressable
@@ -95,8 +98,8 @@ export function TagChip({
         jc="center"
         shadowColor={s.glow ? "rgb(94, 234, 213)" : "#000"}
         shadowOffset={{ width: 0, height: s.glow ? 0 : 3 }}
-        shadowRadius={s.glow ? 6 : 5}
-        shadowOpacity={0.35}
+        shadowRadius={s.glow ? 7 : 5}
+        shadowOpacity={s.glow ? 0.55 : 0.35}
       >
         <YStack
           pos="absolute"
@@ -113,6 +116,19 @@ export function TagChip({
             borderRadius={CHIP_RADIUS}
             backgroundColor={s.fill}
           />
+          {s.glow && (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 8,
+                right: 8,
+                height: 1,
+                backgroundColor: "rgba(255,255,255,0.4)",
+              }}
+            />
+          )}
         </YStack>
         <GradientBorder
           radius={CHIP_HEIGHT / 2}
@@ -122,7 +138,7 @@ export function TagChip({
         />
         <XStack ai="center" gap={label ? 7 : 0} zIndex={2}>
           {variant === "add" && (
-            <Plus size={14} color="#5EEAD4" strokeWidth={2.3} />
+            <Plus size={14} color={ICON_ACCENT} strokeWidth={2.3} />
           )}
           {leading}
           {!!label && (
@@ -134,19 +150,6 @@ export function TagChip({
             <Text fontSize={12.5} fontWeight="700" color={countColor}>
               {count}
             </Text>
-          )}
-          {onRemove && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Remove ${label}`}
-              hitSlop={10}
-              onPress={() => {
-                hapticTap();
-                onRemove();
-              }}
-            >
-              <X size={13} color="#5A6B7A" strokeWidth={2.2} />
-            </Pressable>
           )}
         </XStack>
       </YStack>

@@ -3,6 +3,7 @@ import { FolderIcon } from "@/src/components/cards/FolderIcon";
 import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { ICON_MINT, ICON_TEAL } from "@/src/constants/iconColors";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -59,7 +60,7 @@ function mapModule(raw: any): FolderModule {
   };
 }
 
-const HERO_GRADIENT: [string, string] = ["#0D9488", "#2DD4BF"];
+const HERO_GRADIENT: [string, string] = [ICON_TEAL, ICON_MINT];
 
 export default function FolderScreen() {
   const screen = useScreenInsets();
@@ -146,7 +147,7 @@ export default function FolderScreen() {
             />
           </XStack>
           <XStack ai="center" gap={15}>
-            <Skeleton width={64} height={64} borderRadius={20} />
+            <Skeleton width={64} height={64} borderRadius="$cardSoft" />
             <YStack f={1} gap={8}>
               <Skeleton width={160} height={22} borderRadius={8} />
               <Skeleton width={90} height={14} borderRadius={6} />
@@ -157,9 +158,9 @@ export default function FolderScreen() {
             <Skeleton width={70} height={34} borderRadius={999} />
           </XStack>
           <YStack gap={11}>
-            <Skeleton height={74} borderRadius={23} />
-            <Skeleton height={74} borderRadius={23} />
-            <Skeleton height={74} borderRadius={23} />
+            <Skeleton height={74} borderRadius="$card" />
+            <Skeleton height={74} borderRadius="$card" />
+            <Skeleton height={74} borderRadius="$card" />
           </YStack>
         </YStack>
       </YStack>
@@ -239,7 +240,7 @@ export default function FolderScreen() {
               >
                 {folder.name}
               </Text>
-              <Text fontSize={13} color="#8FA8B8" mt={5}>
+              <Text fontSize={13} color="$textMuted" mt={5}>
                 {folder.modules.length} module
                 {folder.modules.length !== 1 ? "s" : ""}
               </Text>
@@ -275,7 +276,7 @@ export default function FolderScreen() {
             <Text fontSize={17} fontWeight="700" color="$color">
               Modules
             </Text>
-            <Text fontSize={13} color="#8FA8B8">
+            <Text fontSize={13} color="$textMuted">
               {visibleModules.length}
             </Text>
           </XStack>

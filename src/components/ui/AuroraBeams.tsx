@@ -17,11 +17,9 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 
-const MOCKUP_SCALE = 390 / 290;
-
-const BEAM_WIDTH = 420 * MOCKUP_SCALE;
-const BEAM_HEIGHT = 90 * MOCKUP_SCALE;
-const BLUR_STD_DEVIATION = 34 * MOCKUP_SCALE;
+const BEAM_WIDTH = 564.83;
+const BEAM_HEIGHT = 121.03;
+const BLUR_STD_DEVIATION = 45.72;
 const CANVAS_PADDING = BLUR_STD_DEVIATION * 4;
 const ROTATION = "-28deg";
 
@@ -53,8 +51,8 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
   aurora: [
     {
       id: "b1",
-      top: 30 * MOCKUP_SCALE,
-      left: -80 * MOCKUP_SCALE,
+      top: 40.34,
+      left: -107.59,
       stops: [
         { offset: 0, color: "#2dd4bf", opacity: 0 },
         { offset: 1 / 3, color: "#2dd4bf", opacity: 0.2 },
@@ -66,8 +64,8 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
     },
     {
       id: "b2",
-      top: 110 * MOCKUP_SCALE,
-      left: -40 * MOCKUP_SCALE,
+      top: 147.93,
+      left: -53.79,
       stops: [
         { offset: 0, color: "#6366f1", opacity: 0 },
         { offset: 0.5, color: "#6366f1", opacity: 0.22 },
@@ -78,8 +76,8 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
     },
     {
       id: "b3",
-      top: 190 * MOCKUP_SCALE,
-      left: -100 * MOCKUP_SCALE,
+      top: 255.52,
+      left: -134.48,
       stops: [
         { offset: 0, color: "#0d9488", opacity: 0 },
         { offset: 0.5, color: "#0d9488", opacity: 0.14 },
@@ -90,8 +88,8 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
     },
     {
       id: "b4",
-      top: 340 * MOCKUP_SCALE,
-      left: 40 * MOCKUP_SCALE,
+      top: 457.24,
+      left: 53.79,
       stops: [
         { offset: 0, color: "#2dd4bf", opacity: 0 },
         { offset: 1 / 3, color: "#2dd4bf", opacity: 0.18 },
@@ -103,8 +101,8 @@ const BEAM_SETS: Record<AuroraGradientType, BeamSpec[]> = {
     },
     {
       id: "b5",
-      top: 460 * MOCKUP_SCALE,
-      left: -160 * MOCKUP_SCALE,
+      top: 618.62,
+      left: -215.17,
       stops: [
         { offset: 0, color: "#6366f1", opacity: 0 },
         { offset: 0.5, color: "#6366f1", opacity: 0.2 },

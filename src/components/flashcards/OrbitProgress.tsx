@@ -16,9 +16,11 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
   useDerivedValue,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import Svg, {
@@ -39,37 +41,137 @@ const RADIUS = 116;
 const PLANET_SIZE = 130;
 const PLANET_OFFSET = (ORB_SIZE - PLANET_SIZE) / 2;
 
-function Planet({ hot }: { hot: boolean }) {
+export type OrbitTone = "default" | "cold" | "warm";
+
+const PLANET_TONES: Record<
+  OrbitTone,
+  { stops: [number, string][]; glowColor: string }
+> = {
+  default: {
+    stops: [
+      [0, "#4FDCC9"],
+      [0.24, "#1FA495"],
+      [0.54, "#0A625B"],
+      [0.84, "#051E1D"],
+    ],
+    glowColor: "rgba(45,212,191,0.34)",
+  },
+  cold: {
+    stops: [
+      [0, "#4FDCC9"],
+      [0.24, "#1FA495"],
+      [0.54, "#0A625B"],
+      [0.84, "#051E1D"],
+    ],
+    glowColor: "rgba(45,212,191,0.34)",
+  },
+  warm: {
+    stops: [
+      [0, "#B9F27A"],
+      [0.22, "#6BB84A"],
+      [0.52, "#2C6E4E"],
+      [0.84, "#06201A"],
+    ],
+    glowColor: "rgba(163,230,53,0.3)",
+  },
+};
+
+const COMET_TONES: Record<
+  OrbitTone,
+  { stops: [number, string][]; glow1: string; glow2: string; tail: string }
+> = {
+  default: {
+    stops: [
+      [0, "#FBFFF4"],
+      [0.55, "#BEF264"],
+      [0.8, "#A3E635"],
+    ],
+    glow1: "rgba(190,242,100,1)",
+    glow2: "rgba(163,230,53,0.55)",
+    tail: "#BEF264",
+  },
+  cold: {
+    stops: [
+      [0, "#FBFFF4"],
+      [0.55, "#BEF264"],
+      [0.8, "#A3E635"],
+    ],
+    glow1: "rgba(190,242,100,1)",
+    glow2: "rgba(163,230,53,0.55)",
+    tail: "#BEF264",
+  },
+  warm: {
+    stops: [
+      [0, "#FBFFFE"],
+      [0.55, "#5EEAD4"],
+      [0.8, "#2DD4BF"],
+    ],
+    glow1: "rgba(94,234,212,1)",
+    glow2: "rgba(45,212,191,0.55)",
+    tail: "#5EEAD4",
+  },
+};
+
+function Planet({
+  hot,
+  tone,
+  reducedMotion,
+}: {
+  hot: boolean;
+  tone: OrbitTone;
+  reducedMotion: boolean;
+}) {
   const box = PLANET_SIZE;
   const highlightW = box * 0.3;
   const highlightH = box * 0.16;
   const highlightCx = box * 0.15 + highlightW / 2;
   const highlightCy = box * 0.11 + highlightH / 2;
+  const { stops, glowColor } = PLANET_TONES[tone];
+
+  const breathe = useSharedValue(1);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    breathe.value = withRepeat(
+      withSequence(
+        withTiming(1.028, { duration: 3250, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 3250, easing: Easing.inOut(Easing.ease) }),
+      ),
+      -1,
+      false,
+    );
+  }, [reducedMotion, breathe]);
+
+  const breatheStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: breathe.value }],
+  }));
 
   return (
-    <View
+    <Animated.View
       pointerEvents="none"
-      style={{
-        position: "absolute",
-        top: PLANET_OFFSET,
-        left: PLANET_OFFSET,
-        width: box,
-        height: box,
-        borderRadius: box / 2,
-        overflow: "hidden",
-        shadowColor: hot ? "rgba(190,242,100,0.45)" : "rgba(45,212,191,0.34)",
-        shadowOpacity: 1,
-        shadowRadius: hot ? 74 : 44,
-        shadowOffset: { width: 0, height: 0 },
-      }}
+      style={[
+        {
+          position: "absolute",
+          top: PLANET_OFFSET,
+          left: PLANET_OFFSET,
+          width: box,
+          height: box,
+          borderRadius: box / 2,
+          overflow: "hidden",
+          shadowColor: hot ? "rgba(190,242,100,0.45)" : glowColor,
+          shadowOpacity: 1,
+          shadowRadius: hot ? 74 : 44,
+          shadowOffset: { width: 0, height: 0 },
+        },
+        breatheStyle,
+      ]}
     >
       <Svg width="100%" height="100%" viewBox={`0 0 ${box} ${box}`}>
         <Defs>
           <RadialGradient id="finishPlanet" cx="34%" cy="30%" r="75%">
-            <Stop offset="0" stopColor="#4FDCC9" />
-            <Stop offset="0.24" stopColor="#1FA495" />
-            <Stop offset="0.54" stopColor="#0A625B" />
-            <Stop offset="0.84" stopColor="#051E1D" />
+            {stops.map(([offset, color]) => (
+              <Stop key={offset} offset={offset} stopColor={color} />
+            ))}
           </RadialGradient>
           <LinearGradient id="finishTerm" x1="80%" y1="10%" x2="20%" y2="90%">
             <Stop offset="0" stopColor="#01080A" stopOpacity={0.72} />
@@ -91,7 +193,7 @@ function Planet({ hot }: { hot: boolean }) {
         />
         <Rect x={0} y={0} width={box} height={box} fill="url(#finishTerm)" />
       </Svg>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -135,11 +237,20 @@ function SaturnRing() {
   );
 }
 
-function Shell({ delay, color }: { delay: number; color: string }) {
+function Shell({
+  delay,
+  color,
+  reducedMotion,
+}: {
+  delay: number;
+  color: string;
+  reducedMotion: boolean;
+}) {
   const scale = useSharedValue(1);
-  const opacity = useSharedValue(0.85);
+  const opacity = useSharedValue(reducedMotion ? 0 : 0.85);
 
   useEffect(() => {
+    if (reducedMotion) return;
     scale.value = withDelay(
       delay,
       withRepeat(
@@ -156,7 +267,7 @@ function Shell({ delay, color }: { delay: number; color: string }) {
         false,
       ),
     );
-  }, [delay, scale, opacity]);
+  }, [reducedMotion, delay, scale, opacity]);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -183,21 +294,30 @@ function Shell({ delay, color }: { delay: number; color: string }) {
   );
 }
 
-function Shells() {
+function Shells({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
-      <Shell delay={0} color="rgba(94,234,212,0.5)" />
-      <Shell delay={1400} color="rgba(190,242,100,0.42)" />
-      <Shell delay={2800} color="rgba(94,234,212,0.3)" />
+      <Shell delay={0} color="rgba(94,234,212,0.5)" reducedMotion={reducedMotion} />
+      <Shell delay={1400} color="rgba(190,242,100,0.42)" reducedMotion={reducedMotion} />
+      <Shell delay={2800} color="rgba(94,234,212,0.3)" reducedMotion={reducedMotion} />
     </>
   );
 }
 
-function Flare({ delay, color }: { delay: number; color: string }) {
+function Flare({
+  delay,
+  color,
+  reducedMotion,
+}: {
+  delay: number;
+  color: string;
+  reducedMotion: boolean;
+}) {
   const scale = useSharedValue(0.52);
-  const opacity = useSharedValue(0.9);
+  const opacity = useSharedValue(reducedMotion ? 0 : 0.9);
 
   useEffect(() => {
+    if (reducedMotion) return;
     scale.value = withDelay(
       delay,
       withRepeat(
@@ -214,7 +334,7 @@ function Flare({ delay, color }: { delay: number; color: string }) {
         false,
       ),
     );
-  }, [delay, scale, opacity]);
+  }, [reducedMotion, delay, scale, opacity]);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -241,17 +361,18 @@ function Flare({ delay, color }: { delay: number; color: string }) {
   );
 }
 
-function Flares() {
+function Flares({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <>
-      <Flare delay={2600} color="rgba(190,242,100,0.85)" />
-      <Flare delay={3500} color="rgba(94,234,212,0.6)" />
+      <Flare delay={2600} color="rgba(190,242,100,0.85)" reducedMotion={reducedMotion} />
+      <Flare delay={3500} color="rgba(94,234,212,0.6)" reducedMotion={reducedMotion} />
     </>
   );
 }
 
-function CometDot() {
+function CometDot({ tone }: { tone: OrbitTone }) {
   const size = 20;
+  const { stops, glow1 } = COMET_TONES[tone];
   return (
     <View
       style={{
@@ -263,7 +384,7 @@ function CometDot() {
         height: size,
         borderRadius: size / 2,
         overflow: "hidden",
-        shadowColor: "rgba(190,242,100,1)",
+        shadowColor: glow1,
         shadowOpacity: 1,
         shadowRadius: size * 2.7,
         shadowOffset: { width: 0, height: 0 },
@@ -272,9 +393,9 @@ function CometDot() {
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <Defs>
           <RadialGradient id="cometGrad" cx="35%" cy="35%" r="70%">
-            <Stop offset="0" stopColor="#FBFFF4" />
-            <Stop offset="0.55" stopColor="#BEF264" />
-            <Stop offset="0.8" stopColor="#A3E635" />
+            {stops.map(([offset, color]) => (
+              <Stop key={offset} offset={offset} stopColor={color} />
+            ))}
           </RadialGradient>
         </Defs>
         <Rect x={0} y={0} width={size} height={size} fill="url(#cometGrad)" />
@@ -283,7 +404,15 @@ function CometDot() {
   );
 }
 
-function TailDot({ offsetDeg, opacity }: { offsetDeg: number; opacity: number }) {
+function TailDot({
+  offsetDeg,
+  opacity,
+  color,
+}: {
+  offsetDeg: number;
+  opacity: number;
+  color: string;
+}) {
   return (
     <View
       pointerEvents="none"
@@ -298,9 +427,9 @@ function TailDot({ offsetDeg, opacity }: { offsetDeg: number; opacity: number })
           width: 8,
           height: 8,
           borderRadius: 4,
-          backgroundColor: "#BEF264",
+          backgroundColor: color,
           opacity,
-          shadowColor: "rgba(190,242,100,0.8)",
+          shadowColor: color,
           shadowOpacity: 1,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 0 },
@@ -314,16 +443,22 @@ function Comet({
   progress,
   fraction,
   hot,
+  tone,
+  reducedMotion,
 }: {
   progress: SharedValue<number>;
   fraction: number;
   hot: boolean;
+  tone: OrbitTone;
+  reducedMotion: boolean;
 }) {
   const pulse = useSharedValue(1);
+  const { tail } = COMET_TONES[tone];
 
   useEffect(() => {
+    if (reducedMotion) return;
     pulse.value = withRepeat(withTiming(1.26, { duration: 1800 }), -1, true);
-  }, [pulse]);
+  }, [reducedMotion, pulse]);
 
   const rotateStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${progress.value * fraction * 360}deg` }],
@@ -336,13 +471,13 @@ function Comet({
   return (
     <Animated.View style={[StyleSheet.absoluteFill, rotateStyle]}>
       <Animated.View style={pulseStyle}>
-        <CometDot />
+        <CometDot tone={tone} />
       </Animated.View>
       {hot && (
         <>
-          <TailDot offsetDeg={-7} opacity={0.55} />
-          <TailDot offsetDeg={-14} opacity={0.34} />
-          <TailDot offsetDeg={-22} opacity={0.18} />
+          <TailDot offsetDeg={-7} opacity={0.55} color={tail} />
+          <TailDot offsetDeg={-14} opacity={0.34} color={tail} />
+          <TailDot offsetDeg={-22} opacity={0.18} color={tail} />
         </>
       )}
     </Animated.View>
@@ -410,17 +545,31 @@ interface OrbitProgressProps {
   progress: SharedValue<number>;
   fraction: number;
   hot?: boolean;
+  tone?: OrbitTone;
 }
 
-export function OrbitProgress({ progress, fraction, hot = false }: OrbitProgressProps) {
+export function OrbitProgress({
+  progress,
+  fraction,
+  hot = false,
+  tone = "default",
+}: OrbitProgressProps) {
+  const reducedMotion = useReducedMotion();
+
   return (
     <View style={{ width: ORB_SIZE, height: ORB_SIZE }}>
       <Arc progress={progress} fraction={fraction} />
-      <Shells />
-      <Planet hot={hot} />
+      <Shells reducedMotion={reducedMotion} />
+      <Planet hot={hot} tone={tone} reducedMotion={reducedMotion} />
       <SaturnRing />
-      {hot && <Flares />}
-      <Comet progress={progress} fraction={fraction} hot={hot} />
+      {hot && <Flares reducedMotion={reducedMotion} />}
+      <Comet
+        progress={progress}
+        fraction={fraction}
+        hot={hot}
+        tone={tone}
+        reducedMotion={reducedMotion}
+      />
     </View>
   );
 }

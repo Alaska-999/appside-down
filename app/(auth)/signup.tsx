@@ -1,33 +1,25 @@
 import { API_BASE_URL } from "@/src/api/config";
+import { AuthScreenShell } from "@/src/components/common/AuthScreenShell";
 import { FormInput } from "@/src/components/common/FormInput";
 import { PasswordStrengthMeter } from "@/src/components/common/PasswordStrengthMeter";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { useServerError } from "@/src/hooks/useServerError";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
-import { screenGutter } from "@/tamagui.config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { ChevronLeft, Eye, EyeOff, Lock, Mail, User } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { Lock, Mail, User } from "lucide-react-native";
+import { useRef } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import type { TextInput } from "react-native";
-import { Pressable } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, YStack } from "tamagui";
 
 export default function Signup() {
-  const insets = useSafeAreaInsets();
-  const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const form = useForm<SignupForm>({
@@ -41,15 +33,11 @@ export default function Signup() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
   const password = useWatch({ control, name: "password" });
 
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   const onSubmit = async ({ email, username, password }: SignupForm) => {
     setServerError(null);
@@ -100,114 +88,82 @@ export default function Signup() {
 
   return (
     <FormProvider {...form}>
-      <YStack f={1} bg="$background">
-        <BackgroundMesh preset="auth" animated />
-        <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
-          <IconButton
-            variant="liquidGlass"
-            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
-            onPress={() => router.back()}
+      <AuthScreenShell>
+        <AuthHeading
+          title="Create"
+          titleHighlight="an account"
+          subtitle="Flashcards, streaks and progress — all yours"
+        />
+
+        <YStack width="100%" gap={14}>
+          <FormInput
+            control={control}
+            name="email"
+            label="Email"
+            placeholder="Email"
+            leftElement={<Mail size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            textContentType="emailAddress"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => usernameRef.current?.focus()}
           />
+          <FormInput
+            ref={usernameRef}
+            control={control}
+            name="username"
+            label="Username"
+            placeholder="Username"
+            leftElement={<User size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            textContentType="username"
+            autoCapitalize="none"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => passwordRef.current?.focus()}
+          />
+          <YStack>
+            <FormInput
+              ref={passwordRef}
+              control={control}
+              name="password"
+              label="Password"
+              placeholder="Password"
+              leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+              secureToggle
+              textContentType="newPassword"
+              returnKeyType="done"
+              onSubmitEditing={() => handleSubmit(onSubmit)()}
+            />
+            <PasswordStrengthMeter password={password ?? ""} />
+          </YStack>
         </YStack>
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          bottomOffset={40}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingHorizontal: 20,
-            paddingTop: insets.top + 62,
-            paddingBottom: insets.bottom + 22,
-          }}
-        >
-          <AuthHeading
-            title="Create"
-            titleHighlight="an account"
-            subtitle="Flashcards, streaks and progress — all yours"
-          />
 
-          <YStack width="100%" gap={14}>
-            <FormInput
-              control={control}
-              name="email"
-              label="Email"
-              placeholder="Email"
-              leftElement={<Mail size={19} color="#5A6B7A" strokeWidth={1.9} />}
-              textContentType="emailAddress"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              returnKeyType="next"
-              blurOnSubmit={false}
-              onSubmitEditing={() => usernameRef.current?.focus()}
-            />
-            <FormInput
-              ref={usernameRef}
-              control={control}
-              name="username"
-              label="Username"
-              placeholder="Username"
-              leftElement={<User size={19} color="#5A6B7A" strokeWidth={1.9} />}
-              textContentType="username"
-              autoCapitalize="none"
-              returnKeyType="next"
-              blurOnSubmit={false}
-              onSubmitEditing={() => passwordRef.current?.focus()}
-            />
-            <YStack>
-              <FormInput
-                ref={passwordRef}
-                control={control}
-                name="password"
-                label="Password"
-                placeholder="Password"
-                leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
-                secureTextEntry={!showPassword}
-                textContentType="newPassword"
-                returnKeyType="done"
-                onSubmitEditing={() => handleSubmit(onSubmit)()}
-                rightElement={
-                  <Pressable onPress={() => setShowPassword((prev) => !prev)} hitSlop={8}>
-                    {showPassword ? (
-                      <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
-                    ) : (
-                      <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
-                    )}
-                  </Pressable>
-                }
-              />
-              <PasswordStrengthMeter password={password ?? ""} />
-            </YStack>
-          </YStack>
+        {serverError && (
+          <Text color="$roseSoft" fontSize={12.5} textAlign="center" mt={10}>
+            {serverError}
+          </Text>
+        )}
 
-          {serverError && (
-            <Text color="#FCA5A5" fontSize={12.5} textAlign="center" mt={10}>
-              {serverError}
-            </Text>
-          )}
+        <YStack width="100%" mt={20}>
+          <AppButton
+            variant="primary"
+            size="lg"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+          >
+            {isSubmitting ? "Creating account" : "Create account"}
+          </AppButton>
+        </YStack>
 
-          <YStack width="100%" mt={20}>
-            <AppButton
-              variant="primary"
-              size="lg"
-              onPress={handleSubmit(onSubmit)}
-              loading={isSubmitting}
-            >
-              {isSubmitting ? "Creating account" : "Create account"}
-            </AppButton>
-          </YStack>
+        <YStack f={1} minHeight={22} />
 
-          <YStack f={1} minHeight={22} />
-
-          <AuthSwitchLink
-            href="/login"
-            prompt="Already have an account?"
-            action="Log in"
-          />
-        </KeyboardAwareScrollView>
-
-        <StatusBarScrim />
-      </YStack>
+        <AuthSwitchLink
+          href="/login"
+          prompt="Already have an account?"
+          action="Log in"
+        />
+      </AuthScreenShell>
     </FormProvider>
   );
 }

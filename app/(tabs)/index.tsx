@@ -12,6 +12,16 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { GlowTone } from "@/src/components/ui/GlowSurface";
+import {
+  ICON_ACCENT,
+  ICON_BASE,
+  ICON_HERO_LIME,
+  ICON_INDIGO,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -61,16 +71,16 @@ type Stats = {
 
 const RECENT_TONES: GlowTone[] = ["mint", "teal", "lime"];
 const RECENT_MONOGRAM_GRADIENTS: [string, string][] = [
-  ["#5EEAD4", "#2DD4BF"],
-  ["#2DD4BF", "#0D9488"],
-  ["#BEF264", "#A3E635"],
-  ["#5EEAD4", "#0D9488"],
+  [ICON_ACCENT, ICON_MINT],
+  [ICON_MINT, ICON_TEAL],
+  [ICON_LIME_LIGHT, ICON_LIME],
+  [ICON_ACCENT, ICON_TEAL],
 ];
 const DISCOVER_COVERS: [string, string][] = [
-  ["#1BA88F", "#08090C"],
-  ["#65A30D", "#08090C"],
-  ["#0D9488", "#08090C"],
-  ["#4338CA", "#08090C"],
+  ["#1BA88F", ICON_BASE],
+  [ICON_HERO_LIME, ICON_BASE],
+  [ICON_TEAL, ICON_BASE],
+  [ICON_INDIGO, ICON_BASE],
 ];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
@@ -94,7 +104,7 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
           </Text>
           {module.savedCopyId && (
             <XStack ai="center" gap={4} px={8} py={2} br={999} bg="$mintGlassBg">
-              <BookmarkCheck size={12} color="#5EEAD4" strokeWidth={2} />
+              <BookmarkCheck size={12} color={ICON_ACCENT} strokeWidth={2} />
               <Text fontSize={11} fontWeight="700" color="$mintLight">
                 Saved
               </Text>
@@ -329,7 +339,7 @@ export default function Home() {
             <YStack px="$screenX" gap="$section" pb={tabBarClearance}>
               <YStack gap={14}>
                 {loading && !stats ? (
-                  <Skeleton height={186} borderRadius={23} />
+                  <Skeleton height={186} borderRadius="$card" />
                 ) : error && !stats ? (
                   <StateCard
                     tone="error"
@@ -543,7 +553,7 @@ export default function Home() {
                                 px={9}
                                 py={3}
                               >
-                                <Text fontSize={10.5} color="#EFFDF8" fontWeight="600">
+                                <Text fontSize={10.5} color="$text" fontWeight="600">
                                   {count} cards
                                 </Text>
                               </XStack>

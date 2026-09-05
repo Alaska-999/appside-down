@@ -1,3 +1,4 @@
+import { ICON_MINT } from "@/src/constants/iconColors";
 import { useEffect } from "react";
 import Animated, {
   Easing,
@@ -8,14 +9,17 @@ import Animated, {
 } from "react-native-reanimated";
 import { Text, XStack, XStackProps } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 250;
-
-const DOT_SIZE = 6 * MOCKUP_SCALE;
-const DOT_RADIUS = 3 * MOCKUP_SCALE;
+const DOT_SIZE = 9.36;
+const DOT_RADIUS = 4.68;
 const PULSE_HALF_DURATION = 500;
-const MINT = "#2DD4BF";
+const MINT = ICON_MINT;
 
-export function SyncingPill({ ...rest }: XStackProps) {
+type SyncingPillLayoutProps = Pick<
+  XStackProps,
+  "mt" | "mb" | "ml" | "mr" | "pos" | "top" | "right" | "bottom" | "left" | "zIndex" | "testID"
+>;
+
+export function SyncingPill({ ...rest }: SyncingPillLayoutProps) {
   const opacity = useSharedValue(1);
 
   useEffect(() => {

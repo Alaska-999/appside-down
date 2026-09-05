@@ -1,3 +1,4 @@
+import { ICON_WHITE } from "@/src/constants/iconColors";
 import { Platform } from "react-native";
 import {
   KeyboardToolbar,
@@ -7,7 +8,7 @@ import {
 export const KEYBOARD_BAR_HEIGHT = Platform.OS === "ios" ? 42 : 0;
 
 const BAR_THEME = {
-  primary: "#fff",
+  primary: ICON_WHITE,
   disabled: "#3E4C57",
   background: "#0E1A1E",
   ripple: "rgba(94,234,212,0.2)",

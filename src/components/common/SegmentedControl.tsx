@@ -46,12 +46,7 @@ export function SegmentedControl({
 }: SegmentedControlProps) {
   const t = TONE_STYLES[tone];
   const glowProgress = useFocusProgress(t.glass);
-  const [internalSelected, setInternalSelected] = useState(selected);
   const [containerWidth, setContainerWidth] = useState(0);
-
-  useEffect(() => {
-    setInternalSelected(selected);
-  }, [selected]);
 
   const tabWidth =
     containerWidth > 0
@@ -62,11 +57,11 @@ export function SegmentedControl({
 
   useEffect(() => {
     if (tabWidth > 0) {
-      translateX.value = withTiming(internalSelected * (tabWidth + GAP), {
+      translateX.value = withTiming(selected * (tabWidth + GAP), {
         duration: 200,
       });
     }
-  }, [internalSelected, tabWidth, translateX]);
+  }, [selected, tabWidth, translateX]);
 
   const pillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -160,13 +155,12 @@ export function SegmentedControl({
       )}
 
       {options.map((option, i) => {
-        const active = internalSelected === i;
+        const active = selected === i;
         return (
           <Pressable
             key={option}
             onPress={() => {
               hapticTap();
-              setInternalSelected(i);
               onChange(i);
             }}
             style={{ flex: 1 }}

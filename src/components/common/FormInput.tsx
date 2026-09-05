@@ -3,7 +3,8 @@ import {
   InputShellSize,
   InputShellVariant,
 } from "@/src/components/ui/InputShell";
-import { AlertCircle } from "lucide-react-native";
+import { ICON_DANGER, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { AlertCircle, Eye, EyeOff } from "lucide-react-native";
 import { FieldGroupContext } from "@/src/components/ui/FieldGroup";
 import { forwardRef, ReactNode, Ref, useContext, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 import type { TextInput } from "react-native";
+import { Pressable } from "react-native";
 import {
   Input,
   InputProps,
@@ -37,7 +39,19 @@ type FormInputProps<T extends FieldValues> = {
   onValueChange?: (value: string) => void;
   hideError?: boolean;
   showCounter?: boolean;
+  secureToggle?: boolean;
+  textRole?: FormInputTextRole;
 } & Omit<InputProps, "value" | "onChangeText" | "size">;
+
+type FormInputTextRole = "body" | "title";
+
+const TEXT_ROLE_STYLES: Record<
+  FormInputTextRole,
+  { fontSize: number; fontWeight: "400" | "700" }
+> = {
+  body: { fontSize: 16, fontWeight: "400" },
+  title: { fontSize: 19, fontWeight: "700" },
+};
 
 function FormInputInner<T extends FieldValues>(
   {
@@ -51,6 +65,8 @@ function FormInputInner<T extends FieldValues>(
     onValueChange,
     hideError = false,
     showCounter = false,
+    secureToggle = false,
+    textRole = "body",
     maxLength,
     multiline,
     disabled,
@@ -60,9 +76,11 @@ function FormInputInner<T extends FieldValues>(
 ) {
   const formContext = useFormContext();
   const [focused, setFocused] = useState(false);
+  const [secureVisible, setSecureVisible] = useState(false);
   const groupFocus = useContext(FieldGroupContext);
   const shellVariant: InputShellVariant =
     variant === "bordered" ? "well" : variant;
+  const text = TEXT_ROLE_STYLES[textRole];
 
   return (
     <Controller
@@ -100,7 +118,8 @@ function FormInputInner<T extends FieldValues>(
                 unstyled
                 h={multiline ? undefined : "100%"}
                 minHeight={multiline ? 66 : undefined}
-                fontSize={multiline ? 15 : 16}
+                fontSize={multiline ? 15 : text.fontSize}
+                fontWeight={text.fontWeight}
                 color="$color"
                 placeholderTextColor="$placeholderColor"
                 multiline={multiline}
@@ -108,6 +127,9 @@ function FormInputInner<T extends FieldValues>(
                 disabled={disabled}
                 textAlignVertical={multiline ? "top" : undefined}
                 {...inputProps}
+                secureTextEntry={
+                  secureToggle ? !secureVisible : inputProps.secureTextEntry
+                }
                 ref={(node: TamaguiElement | null) => {
                   const textInputNode = node as TextInput | null;
                   field.ref(textInputNode);
@@ -136,14 +158,27 @@ function FormInputInner<T extends FieldValues>(
                   inputProps.onBlur?.(e);
                 }}
               />
-              {rightElement}
+              {secureToggle ? (
+                <Pressable
+                  onPress={() => setSecureVisible((prev) => !prev)}
+                  hitSlop={8}
+                >
+                  {secureVisible ? (
+                    <EyeOff size={19} color={ICON_SUBTLE} strokeWidth={1.9} />
+                  ) : (
+                    <Eye size={19} color={ICON_SUBTLE} strokeWidth={1.9} />
+                  )}
+                </Pressable>
+              ) : (
+                rightElement
+              )}
               {showCounter && maxLength !== undefined && value.length > 0 && (
                 <Text
                   als={multiline ? "flex-end" : undefined}
                   mt={multiline ? "auto" : undefined}
                   pt={multiline ? 8 : undefined}
                   fontSize={multiline ? 10.5 : 11.5}
-                  color={nearLimit ? "#FCD34D" : "#5A6B7A"}
+                  color={nearLimit ? "#FCD34D" : "$mutedDim"}
                 >
                   {value.length}/{maxLength}
                 </Text>
@@ -151,7 +186,7 @@ function FormInputInner<T extends FieldValues>(
             </InputShell>
             {!hideError && fieldState.error && (
               <XStack ai="center" gap={6}>
-                <AlertCircle size={13} color="#FCA5A5" strokeWidth={2.2} />
+                <AlertCircle size={13} color={ICON_DANGER} strokeWidth={2.2} />
                 <Text color="$dangerText" fontSize={11.5}>
                   {fieldState.error.message}
                 </Text>

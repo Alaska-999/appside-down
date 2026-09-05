@@ -1,4 +1,5 @@
 import { GlowSurface } from "@/src/components/ui/GlowSurface";
+import { ICON_ACCENT, ICON_MUTED } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType } from "react";
 import { Pressable, View } from "react-native";
@@ -63,7 +64,7 @@ function SoonPill() {
       borderWidth={1}
       borderColor="rgba(220,255,245,0.12)"
     >
-      <Text fontSize={9} fontWeight="700" letterSpacing={0.72} color="#8FA8B8">
+      <Text fontSize={9} fontWeight="700" letterSpacing={0.72} color="$textMuted">
         SOON
       </Text>
     </XStack>
@@ -106,12 +107,12 @@ export function ModeTile({
         underlay={<EdgeHighlights live={live} />}
         {...TILE_BORDER}
       >
-        <Icon size={22} color={live ? "#5EEAD4" : "#8FA8B8"} strokeWidth={1.9} />
+        <Icon size={22} color={live ? ICON_ACCENT : ICON_MUTED} strokeWidth={1.9} />
         <YStack>
           <Text fontSize={15} fontWeight="700" color="$color">
             {label}
           </Text>
-          <Text fontSize={11} color="#8FA8B8" mt={3}>
+          <Text fontSize={11} color="$textMuted" mt={3}>
             {hint}
           </Text>
         </YStack>

@@ -1,3 +1,8 @@
+import {
+  ICON_ACCENT,
+  ICON_DANGER,
+  ICON_MUTED_LIGHT,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType, Fragment, ReactNode } from "react";
 import { Pressable, View } from "react-native";
@@ -5,7 +10,7 @@ import { Text, XStack, YStack } from "tamagui";
 
 export function FolderEditRows({ children }: { children: ReactNode[] }) {
   return (
-    <YStack br={20} overflow="hidden" bg="rgba(220,255,245,0.045)">
+    <YStack br="$cardSoft" overflow="hidden" bg="rgba(220,255,245,0.045)">
       {children.map((child, index) => (
         <Fragment key={index}>
           {index > 0 && (
@@ -28,17 +33,17 @@ const ICON_ACTION_TONE = {
   neutral: {
     bg: "rgba(220,255,245,0.055)",
     border: "rgba(220,255,245,0.11)",
-    icon: "#B7CEDA",
+    icon: ICON_MUTED_LIGHT,
   },
   danger: {
     bg: "rgba(239,68,68,0.1)",
     border: "rgba(239,68,68,0.3)",
-    icon: "#FCA5A5",
+    icon: ICON_DANGER,
   },
   accent: {
     bg: "rgba(45,212,191,0.1)",
     border: "rgba(45,212,191,0.3)",
-    icon: "#5EEAD4",
+    icon: ICON_ACCENT,
   },
 } as const;
 
@@ -101,7 +106,7 @@ export function FolderTagEditRow({
         {label}
       </Text>
       {count !== undefined && (
-        <Text fontSize={12} color="#5A6B7A">
+        <Text fontSize={12} color="$mutedDim">
           {count}
         </Text>
       )}
@@ -139,14 +144,14 @@ export function FolderModuleEditRow({
                 borderWidth={1}
                 borderColor="rgba(220,255,245,0.11)"
               >
-                <Text fontSize={10} fontWeight="700" color="#8FA8B8">
+                <Text fontSize={10} fontWeight="700" color="$textMuted">
                   {tag}
                 </Text>
               </XStack>
             ))}
           </XStack>
         ) : (
-          <Text fontSize={11} color="#5A6B7A">
+          <Text fontSize={11} color="$mutedDim">
             No tags
           </Text>
         )}
@@ -177,8 +182,8 @@ export function FolderAddRow({
       }}
     >
       <XStack ai="center" gap={10} px={16} py={15}>
-        <Icon size={19} color="#5EEAD4" strokeWidth={2.2} />
-        <Text fontSize={15} fontWeight="600" color="#5EEAD4">
+        <Icon size={19} color={ICON_ACCENT} strokeWidth={2.2} />
+        <Text fontSize={15} fontWeight="600" color="$mintLight">
           {label}
         </Text>
       </XStack>

@@ -32,7 +32,9 @@ export type BackgroundPreset =
   | "folder"
   | "flash"
   | "auth"
-  | "finish";
+  | "finish"
+  | "finishCold"
+  | "finishWarm";
 
 type Blob = {
   cx: number;
@@ -404,6 +406,116 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
             "rgba(1,3,5,0.94)",
           ],
           positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        grain: 0.07,
+      };
+    case "finishCold":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#090F2C", "#06091B", "#03050E", "#020304"],
+          positions: [0, 0.38, 0.72, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(67,56,202,0.28)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 52,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(13,148,136,0.25)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(45,212,191,0.16)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
+          positions: [0, 0.4, 0.66, 1],
+        },
+        grain: 0.07,
+      };
+    case "finishWarm":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#081F1A", "#06110C", "#030603", "#020302"],
+          positions: [0, 0.4, 0.74, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(163,230,53,0.16)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 52,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(67,56,202,0.24)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(190,242,100,0.11)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
+          positions: [0, 0.4, 0.66, 1],
         },
         grain: 0.07,
       };

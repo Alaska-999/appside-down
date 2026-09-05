@@ -28,13 +28,13 @@ const TONE_STYLES: Record<
     tone: "lime",
     lampAlpha: 0.3,
     fill: "rgba(220,255,245,0.04)",
-    color: "#BEF264",
+    color: "$limeLight",
   },
   learning: {
     tone: "mint",
     lampAlpha: 0.3,
     fill: "rgba(220,255,245,0.04)",
-    color: "#5EEAD4",
+    color: "$mintLight",
   },
   new: {
     tone: "neutral",
@@ -93,7 +93,7 @@ export function StatTile({
       >
         {value}
       </Text>
-      <Text fontSize={10.5} color="#8FA8B8" mt={5}>
+      <Text fontSize={10.5} color="$textMuted" mt={5}>
         {label}
       </Text>
     </GlowSurface>

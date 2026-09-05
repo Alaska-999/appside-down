@@ -2,11 +2,10 @@ import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
+import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { AddPill } from "@/src/components/ui/AddPill";
 import { FieldGroup } from "@/src/components/ui/FieldGroup";
-import { IconButton } from "@/src/components/ui/IconButton";
 import { KeyboardBar } from "@/src/components/ui/KeyboardBar";
-import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -14,11 +13,12 @@ import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { useServerError } from "@/src/hooks/useServerError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import { Folder, Globe, X } from "lucide-react-native";
+import { Folder, Globe } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   FormProvider,
@@ -35,7 +35,6 @@ type FolderOption = { id: string; name: string };
 
 export default function ModuleCreate() {
   const screen = useScreenInsets();
-  const [serverError, setServerError] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const { returnFolderId } = useLocalSearchParams<{
@@ -63,6 +62,7 @@ export default function ModuleCreate() {
     setValue,
     formState: { errors, isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
 
   const name = useWatch({ control, name: "name" });
   const folderId = useWatch({ control, name: "folderId" });
@@ -115,11 +115,6 @@ export default function ModuleCreate() {
     };
     loadFolders();
   }, []);
-
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
@@ -179,22 +174,13 @@ export default function ModuleCreate() {
             }}
           >
             <YStack px="$screenX">
-              <XStack ai="center" gap={14} mb={18}>
-                <IconButton
-                  variant="liquidGlass"
-                  icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
-                  onPress={() => router.back()}
-                  accessibilityLabel="Close"
-                />
-                <Text f={1} fontSize={20} fontWeight="800" color="$color">
-                  New module
-                </Text>
-                <SavePill
-                  enabled={!!name?.trim()}
-                  loading={isSubmitting}
-                  onPress={() => handleSubmit(onSubmit)()}
-                />
-              </XStack>
+              <ModalFormHeader
+                title="New module"
+                onClose={() => router.back()}
+                saveEnabled={!!name?.trim()}
+                saveLoading={isSubmitting}
+                onSave={() => handleSubmit(onSubmit)()}
+              />
 
               <YStack mb={14}>
                 <FieldGroup>
@@ -241,7 +227,8 @@ export default function ModuleCreate() {
                     right={
                       <Toggle
                         value={!!isPublic}
-                        onChange={(next) => setValue("isPublic", next)}
+                        onToggle={() => setValue("isPublic", !isPublic)}
+                        size="md"
                         accessibilityLabel="Public module"
                       />
                     }
@@ -253,7 +240,7 @@ export default function ModuleCreate() {
                 <Text fontSize={16} fontWeight="700" color="$color">
                   Cards
                 </Text>
-                <Text fontSize={12.5} color="#8FA8B8">
+                <Text fontSize={12.5} color="$textMuted">
                   {fields.length}
                 </Text>
               </XStack>

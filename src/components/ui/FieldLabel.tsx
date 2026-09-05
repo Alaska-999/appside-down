@@ -14,12 +14,12 @@ export function FieldLabel({
         fontWeight="700"
         letterSpacing={0.575}
         textTransform="uppercase"
-        color="#8FA8B8"
+        color="$textMuted"
       >
         {label}
       </Text>
       {hint && (
-        <Text fontSize={10.5} fontWeight="600" color="#5A6B7A">
+        <Text fontSize={10.5} fontWeight="600" color="$mutedDim">
           {hint}
         </Text>
       )}

@@ -1,3 +1,4 @@
+import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
@@ -12,18 +13,18 @@ const CHIP_STYLES: Record<
 > = {
   default: {
     bg: "rgba(220,255,245,0.06)",
-    textColor: "#8FA8B8",
+    textColor: "$textMuted",
     borderColor: "rgba(220,255,245,0.11)",
     fontWeight: "400",
   },
   on: {
     bg: "rgba(45,212,191,0.14)",
-    textColor: "#5EEAD4",
+    textColor: "$mintLight",
     borderColor: "rgba(45,212,191,0.45)",
     fontWeight: "400",
   },
   solid: {
-    textColor: "#0D1117",
+    textColor: "$nearBlack",
     fontWeight: "600",
   },
 };
@@ -77,7 +78,7 @@ export function FilterChip({
       >
         {variant === "solid" && (
           <LinearGradient
-            colors={["#2DD4BF", "#A3E635"]}
+            colors={[ICON_MINT, ICON_LIME]}
             start={{ x: 0, y: 0.4 }}
             end={{ x: 1, y: 0.6 }}
             style={StyleSheet.absoluteFill}

@@ -2,6 +2,7 @@ import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { useServerError } from "@/src/hooks/useServerError";
 import { AppButton } from "@/src/components/ui/Button";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
@@ -10,18 +11,15 @@ import {
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { Alert, Keyboard } from "react-native";
 import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, YStack } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 290;
-
 export default function ChangePasswordScreen() {
   const screen = useScreenInsets();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
@@ -36,11 +34,7 @@ export default function ChangePasswordScreen() {
   } = form;
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
+  const [serverError, setServerError] = useServerError(form);
 
   const onSubmit = async ({ oldPassword, newPassword }: ChangePasswordForm) => {
     setServerError(null);
@@ -81,7 +75,7 @@ export default function ChangePasswordScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: screen.bottom }}
         >
-          <YStack gap={10 * MOCKUP_SCALE} onPress={Keyboard.dismiss}>
+          <YStack gap={13.45} onPress={Keyboard.dismiss}>
             <FormInput
               control={control}
               name="oldPassword"
@@ -118,12 +112,12 @@ export default function ChangePasswordScreen() {
             />
 
             {serverError && (
-              <Text color="$statusDanger" fontSize={12.5 * MOCKUP_SCALE} textAlign="center">
+              <Text color="$statusDanger" fontSize={16.81} textAlign="center">
                 {serverError}
               </Text>
             )}
 
-            <YStack mt={10 * MOCKUP_SCALE}>
+            <YStack mt={13.45}>
               <AppButton
                 variant="soft"
                 onPress={handleSubmit(onSubmit)}

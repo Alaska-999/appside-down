@@ -3,6 +3,7 @@ import {
   WELL_BOTTOM_LINE,
   WellInsetShadow,
 } from "@/src/components/ui/InputShell";
+import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
 import { ComponentType } from "react";
@@ -65,16 +66,16 @@ export function PickRow({
         </YStack>
         <GradientBorder radius={ROW_RADIUS} preset="well" />
         <XStack ai="center" gap={11} px={16} zIndex={2}>
-          <Icon size={19} color="#8FA8B8" strokeWidth={1.9} />
+          <Icon size={19} color={ICON_MUTED} strokeWidth={1.9} />
           <Text
             f={1}
             fontSize={15}
-            color={filled ? "$color" : "#5A6B7A"}
+            color={filled ? "$color" : "$mutedDim"}
             numberOfLines={1}
           >
             {value ?? placeholder}
           </Text>
-          <ChevronRight size={16} color="#5A6B7A" strokeWidth={2} />
+          <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />
         </XStack>
       </YStack>
     </Pressable>

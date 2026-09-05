@@ -1,5 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Star } from "lucide-react-native";
 import { Pressable } from "react-native";
@@ -47,7 +48,7 @@ export function CardRow({
           <Text fontSize={14.5} fontWeight="600" color="$color">
             {term}
           </Text>
-          <Text fontSize={12.5} color="#8FA8B8" mt={3}>
+          <Text fontSize={12.5} color="$textMuted" mt={3}>
             {definition}
           </Text>
         </YStack>
@@ -64,7 +65,7 @@ export function CardRow({
             <Star
               size={16}
               strokeWidth={1.7}
-              color={starred ? "#BEF264" : "#3E4C57"}
+              color={starred ? ICON_LIME_LIGHT : "#3E4C57"}
               fill={starred ? "rgba(190,242,100,0.25)" : "transparent"}
             />
           </Pressable>

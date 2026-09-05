@@ -1,10 +1,16 @@
 import { InputShell } from "@/src/components/ui/InputShell";
+import { ICON_MUTED } from "@/src/constants/iconColors";
 import { Search, X } from "@tamagui/lucide-icons";
 import { useState } from "react";
 import { Pressable } from "react-native";
 import { Input, YStackProps } from "tamagui";
 
-interface SearchFieldProps extends YStackProps {
+type SearchFieldLayoutProps = Pick<
+  YStackProps,
+  "mt" | "mb" | "ml" | "mr" | "f" | "flex" | "w" | "h" | "ai" | "als" | "pos" | "zIndex" | "testID"
+>;
+
+interface SearchFieldProps extends SearchFieldLayoutProps {
   value: string;
   onChangeText: (value: string) => void;
   placeholder?: string;
@@ -42,7 +48,7 @@ export function SearchField({
       />
       {showClear && value.length > 0 && (
         <Pressable hitSlop={13} onPress={() => onChangeText("")}>
-          <X size={20} color="#8FA8B8" />
+          <X size={20} color={ICON_MUTED} />
         </Pressable>
       )}
     </InputShell>

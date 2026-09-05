@@ -6,13 +6,14 @@ import { AppButton } from "@/src/components/ui/Button";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { CardOrientation, ThemeMode } from "@/src/types";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react-native";
+import { Lock, Mail } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { TextInput } from "react-native";
@@ -23,7 +24,6 @@ import { Text, YStack } from "tamagui";
 
 export default function Login() {
   const insets = useSafeAreaInsets();
-  const [showPassword, setShowPassword] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
 
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -120,7 +120,7 @@ export default function Login() {
               name="email"
               label="Email"
               placeholder="Email"
-              leftElement={<Mail size={19} color="#5A6B7A" strokeWidth={1.9} />}
+              leftElement={<Mail size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
               textContentType="emailAddress"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -136,20 +136,11 @@ export default function Login() {
                 name="password"
                 label="Password"
                 placeholder="Password"
-                leftElement={<Lock size={19} color="#5A6B7A" strokeWidth={1.9} />}
-                secureTextEntry={!showPassword}
+                leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+                secureToggle
                 textContentType="password"
                 returnKeyType="done"
                 onSubmitEditing={() => handleSubmit(onSubmit)()}
-                rightElement={
-                  <Pressable onPress={() => setShowPassword((prev) => !prev)} hitSlop={8}>
-                    {showPassword ? (
-                      <EyeOff size={19} color="#5A6B7A" strokeWidth={1.9} />
-                    ) : (
-                      <Eye size={19} color="#5A6B7A" strokeWidth={1.9} />
-                    )}
-                  </Pressable>
-                }
               />
               <Pressable
                 onPress={() => router.push("/forgot-password")}

@@ -1,3 +1,9 @@
+import {
+  ICON_HERO_LIME,
+  ICON_LIME,
+  ICON_MINT,
+  ICON_NEAR_BLACK,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
@@ -71,12 +77,12 @@ export function Checkbox({
         {checked ? (
           <>
             <LinearGradient
-              colors={["#2DD4BF", "#65A30D"]}
+              colors={[ICON_MINT, ICON_HERO_LIME]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
               style={StyleSheet.absoluteFill}
             />
-            <Check size={s.check} color="#0D1117" strokeWidth={3} />
+            <Check size={s.check} color={ICON_NEAR_BLACK} strokeWidth={3} />
           </>
         ) : (
           <View
@@ -149,7 +155,7 @@ export function Radio({
             }}
           >
             <LinearGradient
-              colors={["#2DD4BF", "#A3E635"]}
+              colors={[ICON_MINT, ICON_LIME]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
               style={StyleSheet.absoluteFill}

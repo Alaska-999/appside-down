@@ -9,6 +9,11 @@ const CREATE_LABEL: Record<SearchNoun, string> = {
   folders: "Create a folder",
 };
 
+type SearchEmptyStateLayoutProps = Pick<
+  YStackProps,
+  "mt" | "mb" | "ml" | "mr" | "f" | "flex" | "testID"
+>;
+
 export function SearchEmptyState({
   query,
   noun,
@@ -18,7 +23,7 @@ export function SearchEmptyState({
   query: string;
   noun: SearchNoun;
   onCreate?: () => void;
-} & YStackProps) {
+} & SearchEmptyStateLayoutProps) {
   return (
     <StateCard
       {...rest}

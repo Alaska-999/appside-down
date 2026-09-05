@@ -1,6 +1,7 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { Lamp } from "@/src/components/ui/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useCallback, useEffect, useState } from "react";
@@ -54,16 +55,16 @@ function CardSurface({ children }: { children: ReactNode }) {
         borderRadius={CARD_RADIUS}
         backgroundColor="rgba(20,28,34,0.6)"
       />
-      <Lamp color="rgba(45,212,191,0.2)" />
+      <Lamp color="rgba(45,212,191,0.25)" />
       <GradientBorder
         radius={CARD_RADIUS}
-        angle={138}
+        angle={160}
         colors={[
-          "rgba(94,234,212,0.45)",
-          "rgba(94,234,212,0.06)",
-          "rgba(220,255,245,0.03)",
+          "rgba(225, 247, 191, 0.6)",
+          "rgba(94, 234, 212, 0.35)",
+          "rgba(94, 234, 212, 0.05)",
         ]}
-        positions={[0, 0.46, 1]}
+        positions={[0, 0.2, 0.9]}
       />
       <YStack f={1} zIndex={2}>
         {children}
@@ -186,7 +187,10 @@ function DeckSlot({
 
 function Dots({ count, index }: { count: number; index: number }) {
   const visible = Math.min(count, 8);
-  const start = Math.max(0, Math.min(index - Math.floor(visible / 2), count - visible));
+  const start = Math.max(
+    0,
+    Math.min(index - Math.floor(visible / 2), count - visible),
+  );
 
   return (
     <XStack gap={5} jc="center" mt={10}>
@@ -204,7 +208,7 @@ function Dots({ count, index }: { count: number; index: number }) {
           >
             {on && (
               <LinearGradient
-                colors={["#2DD4BF", "#A3E635"]}
+                colors={[ICON_MINT, ICON_LIME]}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}
@@ -274,10 +278,10 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
       <Dots count={cards.length} index={index} />
 
       <XStack jc="center" mt={8} gap={3}>
-        <Text fontSize={11.5} fontWeight="700" color="#5A6B7A">
+        <Text fontSize={11.5} fontWeight="700" color="$mutedDim">
           {index + 1}
         </Text>
-        <Text fontSize={11.5} color="#5A6B7A">
+        <Text fontSize={11.5} color="$mutedDim">
           / {cards.length}
         </Text>
       </XStack>

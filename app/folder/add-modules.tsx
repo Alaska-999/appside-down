@@ -6,6 +6,7 @@ import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
@@ -205,8 +206,8 @@ export default function AddModules() {
                 chip.leading ? (
                   <Star
                     size={13}
-                    color="#BEF264"
-                    fill="#BEF264"
+                    color={ICON_LIME_LIGHT}
+                    fill={ICON_LIME_LIGHT}
                     strokeWidth={1.9}
                   />
                 ) : undefined
@@ -232,7 +233,7 @@ export default function AddModules() {
         {loading ? (
           <YStack px="$screenX" gap={11}>
             {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} height={74} borderRadius={23} />
+              <Skeleton key={i} height={74} borderRadius="$card" />
             ))}
           </YStack>
         ) : error ? (

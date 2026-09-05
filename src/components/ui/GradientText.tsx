@@ -1,4 +1,5 @@
 import { Sora_800ExtraBold } from "@expo-google-fonts/sora";
+import { ICON_ACCENT, ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import {
   Canvas,
   LinearGradient,
@@ -16,7 +17,7 @@ interface GradientTextProps {
 export function GradientText({
   children,
   fontSize,
-  colors = ["#5EEAD4", "#BEF264"],
+  colors = [ICON_ACCENT, ICON_LIME_LIGHT],
 }: GradientTextProps) {
   const font = useFont(Sora_800ExtraBold, fontSize);
 

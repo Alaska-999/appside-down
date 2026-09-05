@@ -1,6 +1,12 @@
 import { FOLDER_ICON_GRADIENTS, FolderIcon } from "@/src/components/cards/FolderIcon";
 import { AppCard } from "@/src/components/ui/Card";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import {
+  ICON_ACCENT,
+  ICON_LIME_LIGHT,
+  ICON_MUTED,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight, Plus, Settings, Star } from "lucide-react-native";
 import { useState } from "react";
@@ -124,11 +130,11 @@ function SubRow({
         <Text fontSize={14.5} fontWeight="600" color="$color" f={1} numberOfLines={1}>
           {module.name}
         </Text>
-        {module.isFavorite && <Star size={12} color="#BEF264" fill="#BEF264" />}
-        <Text fontSize={11.5} color="#8FA8B8">
+        {module.isFavorite && <Star size={12} color={ICON_LIME_LIGHT} fill={ICON_LIME_LIGHT} />}
+        <Text fontSize={11.5} color="$textMuted">
           {module.itemsCount}
         </Text>
-        <ChevronRight size={13} color="#5A6B7A" strokeWidth={2} />
+        <ChevronRight size={13} color={ICON_SUBTLE} strokeWidth={2} />
       </XStack>
     </Pressable>
   );
@@ -194,7 +200,7 @@ export function FolderCard({
                   >
                     {folder.name}
                   </Text>
-                  <Text fontSize={12.5} color="#8FA8B8" mt={3}>
+                  <Text fontSize={12.5} color="$textMuted" mt={3}>
                     {moduleCount} module{moduleCount !== 1 ? "s" : ""}
                   </Text>
                 </YStack>
@@ -217,7 +223,7 @@ export function FolderCard({
                   >
                     <ChevronRight
                       size={16}
-                      color={expanded ? "#5EEAD4" : "#5A6B7A"}
+                      color={expanded ? ICON_ACCENT : ICON_SUBTLE}
                       strokeWidth={2}
                     />
                   </YStack>
@@ -234,7 +240,7 @@ export function FolderCard({
               >
                 <YStack pt={8} gap={4}>
                   {modulesLoading && !visible.length ? (
-                    <Text fontSize={12.5} color="#8FA8B8" p={12}>
+                    <Text fontSize={12.5} color="$textMuted" p={12}>
                       Loading…
                     </Text>
                   ) : (
@@ -265,8 +271,8 @@ export function FolderCard({
                     borderStyle="dashed"
                     borderColor="rgba(220,255,245,0.18)"
                   >
-                    <Plus size={14} color="#5EEAD4" strokeWidth={2.2} />
-                    <Text fontSize={12.5} fontWeight="600" color="#5EEAD4">
+                    <Plus size={14} color={ICON_ACCENT} strokeWidth={2.2} />
+                    <Text fontSize={12.5} fontWeight="600" color="$mintLight">
                       Add module
                     </Text>
                   </XStack>
@@ -287,11 +293,11 @@ export function FolderCard({
                     borderTopWidth={1}
                     borderTopColor="rgba(220,255,245,0.08)"
                   >
-                    <Settings size={18} color="#8FA8B8" strokeWidth={1.8} />
-                    <Text fontSize={13} fontWeight="600" color="#8FA8B8" f={1}>
+                    <Settings size={18} color={ICON_MUTED} strokeWidth={1.8} />
+                    <Text fontSize={13} fontWeight="600" color="$textMuted" f={1}>
                       Folder settings
                     </Text>
-                    <ChevronRight size={14} color="#5A6B7A" strokeWidth={2} />
+                    <ChevronRight size={14} color={ICON_SUBTLE} strokeWidth={2} />
                   </XStack>
                 </Pressable>
               </YStack>

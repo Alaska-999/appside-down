@@ -10,7 +10,7 @@ import {
 } from "@/src/components/ui/ScreenBackground";
 import { FormInput } from "@/src/components/common/FormInput";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { Toggle } from "@/src/components/common/Toggle";
+import { Toggle } from "@/src/components/ui/Toggle";
 import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
 import { FilterChip } from "@/src/components/ui/FilterChip";
 import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
@@ -24,6 +24,12 @@ import { AppSheet, SheetCrossfade, SheetRow, SheetRows } from "@/src/components/
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
 import { TYPE } from "@/src/constants/type";
+import {
+  ICON_BASE,
+  ICON_LIME_LIGHT,
+  ICON_NEAR_BLACK,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import { useDelayedLoading } from "@/src/hooks/useDelayedLoading";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -215,7 +221,7 @@ function SheetsDemo() {
         <AppButton variant="secondary" onPress={() => setToastOpen(true)}>
           Показати тост
         </AppButton>
-        <YStack h={140} br={20} bg="$surfaceCard" ai="center" jc="center" overflow="hidden">
+        <YStack h={140} br="$cardSoft" bg="$surfaceCard" ai="center" jc="center" overflow="hidden">
           <Text {...TYPE.meta} color="$colorMuted">
             тост з’явиться тут знизу
           </Text>
@@ -272,18 +278,18 @@ function StatesDemo() {
     <>
       <YStack gap={10}>
         <Label>Стани · disc 96 liquid + halo</Label>
-        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+        <YStack h={340} br="$cardSoft" bg="$surfaceCard" overflow="hidden">
           <StateCard
             tone="error"
             icon={WifiOff}
             title="No connection"
             subtitle="Check your Wi-Fi or mobile data and try again."
             buttonLabel="Try again"
-            buttonIcon={<RotateCcw size={18} color="#0D1117" strokeWidth={2.2} />}
+            buttonIcon={<RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />}
             onButtonPress={() => {}}
           />
         </YStack>
-        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+        <YStack h={340} br="$cardSoft" bg="$surfaceCard" overflow="hidden">
           <StateCard
             tone="warn"
             icon={FileX}
@@ -293,18 +299,18 @@ function StatesDemo() {
             onButtonPress={() => {}}
           />
         </YStack>
-        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+        <YStack h={340} br="$cardSoft" bg="$surfaceCard" overflow="hidden">
           <StateCard
             tone="error"
             icon={AlertTriangle}
             title="Something broke on our side"
             subtitle="Not your fault. Give it a second and try again."
             buttonLabel="Try again"
-            buttonIcon={<RotateCcw size={18} color="#0D1117" strokeWidth={2.2} />}
+            buttonIcon={<RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />}
             onButtonPress={() => {}}
           />
         </YStack>
-        <YStack h={340} br={20} bg="$surfaceCard" overflow="hidden">
+        <YStack h={340} br="$cardSoft" bg="$surfaceCard" overflow="hidden">
           <StateCard
             tone="empty"
             icon={Search}
@@ -326,13 +332,13 @@ function StatesDemo() {
         <AppButton variant="secondary" onPress={() => setLoading((prev) => !prev)}>
           {loading ? "Зупинити завантаження" : "Імітувати завантаження"}
         </AppButton>
-        <YStack h={54} br={16} overflow="hidden">
+        <YStack h={54} br="$control" overflow="hidden">
           {showSkeleton ? (
-            <Skeleton variant="states" height={54} borderRadius={16} />
+            <Skeleton variant="states" height={54} borderRadius="$control" />
           ) : (
             <XStack
               h={54}
-              br={16}
+              br="$control"
               bg="$surfaceCard"
               ai="center"
               px={16}
@@ -359,6 +365,10 @@ function Label(props: { children: string }) {
 export default function Showcase() {
   const insets = useSafeAreaInsets();
   const [bgIndex, setBgIndex] = useState<number | null>(null);
+
+  if (!__DEV__) {
+    return null;
+  }
 
   if (bgIndex !== null) {
     const entry = BG_PRESETS[bgIndex];
@@ -412,7 +422,7 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>Фонові меші · тап відкриває на повний екран</Label>
           <Pressable onPress={() => setBgIndex(0)}>
-            <YStack h={52} br={16} bg="$surfaceCard" jc="center" ai="center">
+            <YStack h={52} br="$control" bg="$surfaceCard" jc="center" ai="center">
               <GradientBorder radius={16} preset="surf" />
               <Text {...TYPE.card} color="$color">
                 7 пресетів фону
@@ -471,11 +481,11 @@ export default function Showcase() {
               <Text {...TYPE.card} color="$color">glass</Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="liquid" gap={6}>
-              <Text {...TYPE.card} color="#FFFFFF">liquid</Text>
+              <Text {...TYPE.card} color="$white">liquid</Text>
             </AppCard>
           </XStack>
           <Label>Тест заломлення · скроль фото під склом</Label>
-          <YStack h={300} br={23} overflow="hidden" pos="relative">
+          <YStack h={300} br="$card" overflow="hidden" pos="relative">
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <Image
                 source={{ uri: "https://picsum.photos/id/1015/1600/600" }}
@@ -493,7 +503,7 @@ export default function Showcase() {
               pointerEvents="none"
             >
               <AppCard w={230} size="lg" variant="liquid" ai="center" gap={4}>
-                <Text {...TYPE.card} color="#FFFFFF">liquid</Text>
+                <Text {...TYPE.card} color="$white">liquid</Text>
                 <Text {...TYPE.meta} color="rgba(255,255,255,0.8)">скроль фото під карткою</Text>
               </AppCard>
             </YStack>
@@ -537,7 +547,7 @@ export default function Showcase() {
             minHeight={176}
             cover={
               <LinearGradient
-                colors={["#1BA88F", "#0D9488", "#08090C"]}
+                colors={["#1BA88F", ICON_TEAL, ICON_BASE]}
                 start={{ x: 0.2, y: 0 }}
                 end={{ x: 0.8, y: 1 }}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
@@ -591,7 +601,7 @@ export default function Showcase() {
           <AppButton variant="secondary" flood>Flood · затисни</AppButton>
           <AppButton
             variant="primary"
-            split={<ArrowRight size={16} color="#BEF264" strokeWidth={2.2} />}
+            split={<ArrowRight size={16} color={ICON_LIME_LIGHT} strokeWidth={2.2} />}
           >
             Split
           </AppButton>
@@ -610,9 +620,9 @@ export default function Showcase() {
             />
             <IconButton
               variant="acc"
-              icon={<Plus size={22} color="#0D1117" strokeWidth={2.1} />}
+              icon={<Plus size={22} color={ICON_NEAR_BLACK} strokeWidth={2.1} />}
             />
-            <AppFab icon={<Plus size={26} color="#0D1117" strokeWidth={1.6} />} />
+            <AppFab icon={<Plus size={26} color={ICON_NEAR_BLACK} strokeWidth={1.6} />} />
           </XStack>
         </YStack>
 
@@ -636,12 +646,12 @@ export default function Showcase() {
               </YStack>
             </XStack>
           </AppCard>
-          <YStack h={74} br={23} bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+          <YStack h={74} br="$card" bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
             <GradientBorder radius={23} preset="surf" />
             <Text {...TYPE.card} color="$color">Рядок з underline 29%</Text>
             <ProgressUnderline progress={0.29} />
           </YStack>
-          <YStack h={74} br={23} bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+          <YStack h={74} br="$card" bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
             <GradientBorder radius={23} preset="surf" />
             <Text {...TYPE.card} color="$color">Dim-варіант 62%</Text>
             <ProgressUnderline progress={0.62} dim />
@@ -667,7 +677,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>surf · 140deg · r23</Label>
-          <YStack h={96} br={23} bg="$surfaceCard" p="$cardPad" jc="center">
+          <YStack h={96} br="$card" bg="$surfaceCard" p="$cardPad" jc="center">
             <GradientBorder radius={23} preset="surf" />
             <Text {...TYPE.card} color="$color">
               Base card border
@@ -678,21 +688,21 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>glow mint / teal / lime / indigo · 138deg</Label>
           <XStack gap={10}>
-            <YStack f={1} h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
               <GradientBorder radius={23} preset="glowMint" />
               <Text {...TYPE.micro} color="$color">mint</Text>
             </YStack>
-            <YStack f={1} h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
               <GradientBorder radius={23} preset="glowTeal" />
               <Text {...TYPE.micro} color="$color">teal</Text>
             </YStack>
           </XStack>
           <XStack gap={10}>
-            <YStack f={1} h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
               <GradientBorder radius={23} preset="glowLime" />
               <Text {...TYPE.micro} color="$color">lime</Text>
             </YStack>
-            <YStack f={1} h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
               <GradientBorder radius={23} preset="glowIndigo" />
               <Text {...TYPE.micro} color="$color">indigo</Text>
             </YStack>
@@ -701,7 +711,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>liquid · 155deg · r20</Label>
-          <YStack h={84} br={20} bg="$surfaceGlass" jc="center" ai="center">
+          <YStack h={84} br="$cardSoft" bg="$surfaceGlass" jc="center" ai="center">
             <GradientBorder radius={20} preset="liquid" />
             <Text {...TYPE.card} color="$color">
               Liquid border
@@ -711,7 +721,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>liquid лінза 44 · тільки над градієнтом</Label>
-          <YStack h={140} br={23} overflow="hidden">
+          <YStack h={140} br="$card" overflow="hidden">
             <BackgroundMesh preset="module" />
             <XStack f={1} ai="center" jc="center" gap={16}>
               <IconButton
@@ -745,7 +755,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>well · 180deg · r16</Label>
-          <YStack h={52} br={16} bg="$surfaceWell" jc="center" px={16}>
+          <YStack h={52} br="$control" bg="$surfaceWell" jc="center" px={16}>
             <GradientBorder radius={16} preset="well" />
             <Text {...TYPE.body} color="$placeholderColor">
               Input placeholder
@@ -755,7 +765,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>sweep (conic) · r23</Label>
-          <YStack h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+          <YStack h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
             <GradientBorder radius={23} preset="glowMint" sweep />
             <Text {...TYPE.micro} color="$color">SweepGradient</Text>
           </YStack>
@@ -763,7 +773,7 @@ export default function Showcase() {
 
         <YStack gap={10}>
           <Label>width 2.2 · r23</Label>
-          <YStack h={84} br={23} bg="$surfaceCard" jc="center" ai="center">
+          <YStack h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
             <GradientBorder radius={23} preset="glowLime" width={2.2} />
             <Text {...TYPE.micro} color="$color">товстий кант</Text>
           </YStack>

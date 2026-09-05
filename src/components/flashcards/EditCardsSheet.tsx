@@ -4,6 +4,8 @@ import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
+import { useServerError } from "@/src/hooks/useServerError";
 import { Flashcard } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { EditModuleForm, editModuleSchema } from "@/src/validation/entities";
@@ -11,15 +13,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, ChevronDown, Globe, Lock, X } from "@tamagui/lucide-icons";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import { Pressable, ScrollView, TextInput, View } from "react-native";
-import {
-  KeyboardAwareScrollView,
-  KeyboardAwareScrollViewRef,
-} from "react-native-keyboard-controller";
+import { Pressable, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import Animated from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
-
-const CARD_TOP_GAP = 12;
-const LIFT_SETTLE_DELAY = 360;
 
 interface EditCardsSheetProps {
   open: boolean;
@@ -51,7 +48,6 @@ export function EditCardsSheet({
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(moduleIsPublic);
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<EditModuleForm>({
     resolver: zodResolver(editModuleSchema),
@@ -70,6 +66,7 @@ export function EditCardsSheet({
     getValues,
     formState: { errors, isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
 
   const flashcardsError =
     errors.flashcards?.root?.message ??
@@ -81,8 +78,14 @@ export function EditCardsSheet({
     keyName: "fieldKey",
   });
 
-  const scrollRef = useRef<KeyboardAwareScrollViewRef & ScrollView>(null);
-  const scrollInnerRef = useRef<View>(null as unknown as View);
+  const {
+    scrollRef,
+    scrollInnerRef,
+    onViewportLayout,
+    spacerStyle,
+    liftCard,
+    releaseCard,
+  } = useKeyboardCardLift();
   const termRefs = useRef<Array<TextInput | null>>([]);
   const definitionRefs = useRef<Array<TextInput | null>>([]);
   const prevFieldsLength = useRef(fields.length);
@@ -94,27 +97,9 @@ export function EditCardsSheet({
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
 
-  const liftCard = (card: View | null) => {
-    const scrollTo = () => {
-      const scroll = scrollRef.current;
-      const inner = scrollInnerRef.current;
-      if (!card || !scroll || !inner) return;
-      card.measureLayout(inner, (_x, y) => {
-        scroll.scrollTo({ y: Math.max(0, y - CARD_TOP_GAP), animated: true });
-      });
-    };
-    scrollTo();
-    setTimeout(scrollTo, LIFT_SETTLE_DELAY);
-  };
-
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
-
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   useEffect(() => {
     if (open) {
@@ -243,166 +228,170 @@ export function EditCardsSheet({
           </AppButton>
         }
       >
-        <KeyboardAwareScrollView
-          ref={scrollRef}
-          innerViewRef={scrollInnerRef}
-          style={{ flex: 1 }}
-          mode="layout"
-          bottomOffset={40}
-          showsVerticalScrollIndicator={false}
-          keyboardDismissMode="none"
-          keyboardShouldPersistTaps="always"
-        >
-          <YStack gap="$3">
-            <FormInput
-              control={control}
-              name="name"
-              placeholder="Untitled Module"
-              variant="glass"
-              inputSize="md"
-            />
-
-            <FormInput
-              control={control}
-              name="description"
-              placeholder="Description (optional)"
-              variant="glass"
-              inputSize="md"
-            />
-
-            <YStack>
-              <Pressable onPress={() => setPrivacyOpen((prev) => !prev)}>
-                <XStack
-                  bg="$glassBg"
-                  br={16}
-                  px="$4"
-                  height={48}
-                  ai="center"
-                  jc="space-between"
-                  borderWidth={1}
-                  borderColor="$glassBorder"
-                >
-                  <XStack ai="center" gap="$2">
-                    {isPublic ? (
-                      <Globe size={16} color="$colorSecondary" />
-                    ) : (
-                      <Lock size={16} color="$colorSecondary" />
-                    )}
-                    <Text fontSize="$4" color="$color">
-                      {isPublic ? "Public" : "Private"}
-                    </Text>
-                  </XStack>
-                  <ChevronDown
-                    size={16}
-                    color="$colorMuted"
-                    rotate={privacyOpen ? "180deg" : "0deg"}
-                  />
-                </XStack>
-              </Pressable>
-
-              {privacyOpen && (
-                <YStack
-                  bg="$glassBg"
-                  br={16}
-                  mt="$2"
-                  borderWidth={1}
-                  borderColor="$glassBorder"
-                  overflow="hidden"
-                >
-                  {(
-                    [
-                      {
-                        value: false,
-                        label: "Private",
-                        hint: "Only you can see this module",
-                        Icon: Lock,
-                      },
-                      {
-                        value: true,
-                        label: "Public",
-                        hint: "Anyone can find and save it",
-                        Icon: Globe,
-                      },
-                    ] as const
-                  ).map(({ value, label, hint, Icon }) => (
-                    <Pressable
-                      key={label}
-                      onPress={() => {
-                        setIsPublic(value);
-                        setPrivacyOpen(false);
-                      }}
-                    >
-                      <XStack px="$4" py="$3" ai="center" gap="$2">
-                        <Icon size={16} color="$colorSecondary" />
-                        <YStack f={1}>
-                          <Text fontSize="$4" color="$color">
-                            {label}
-                          </Text>
-                          <Text fontSize="$2" color="$colorMuted">
-                            {hint}
-                          </Text>
-                        </YStack>
-                        {isPublic === value && (
-                          <Check size={16} color="$accentGradientStart" />
-                        )}
-                      </XStack>
-                    </Pressable>
-                  ))}
-                </YStack>
-              )}
-            </YStack>
-          </YStack>
-
-          <YStack pt="$5" gap="$4">
-            {fields.map((field, index) => (
-              <FlashcardEditItem
-                key={field.fieldKey}
+        <View style={{ flex: 1 }} onLayout={onViewportLayout}>
+          <KeyboardAwareScrollView
+            ref={scrollRef}
+            innerViewRef={scrollInnerRef}
+            enabled={false}
+            style={{ flex: 1 }}
+            showsVerticalScrollIndicator={false}
+            keyboardDismissMode="none"
+            keyboardShouldPersistTaps="always"
+          >
+            <YStack gap="$3">
+              <FormInput
                 control={control}
-                termName={`flashcards.${index}.term`}
-                definitionName={`flashcards.${index}.definition`}
-                index={index}
-                onRemove={handleRemove}
-                showRemove={fields.length > 1}
-                termRef={(node) => {
-                  termRefs.current[index] = node;
-                }}
-                definitionRef={(node) => {
-                  definitionRefs.current[index] = node;
-                }}
-                onFieldFocus={liftCard}
-                onSubmitTerm={() => focusDefinition(index)}
-                onSubmitDefinition={() => {
-                  if (index + 1 < fields.length) {
-                    focusTerm(index + 1);
-                  } else {
-                    append({
-                      id: `new-${Date.now()}`,
-                      term: "",
-                      definition: "",
-                      isNew: true,
-                    });
-                  }
-                }}
+                name="name"
+                placeholder="Untitled Module"
+                variant="glass"
+                inputSize="md"
+                onFocus={releaseCard}
               />
-            ))}
 
-            {flashcardsError && (
-              <Text color="$statusDanger" fontSize="$2">
-                {flashcardsError}
-              </Text>
-            )}
+              <FormInput
+                control={control}
+                name="description"
+                placeholder="Description (optional)"
+                variant="glass"
+                inputSize="md"
+                onFocus={releaseCard}
+              />
 
-            {serverError && (
-              <Text color="$statusDanger" fontSize="$3" textAlign="center">
-                {serverError}
-              </Text>
-            )}
+              <YStack>
+                <Pressable onPress={() => setPrivacyOpen((prev) => !prev)}>
+                  <XStack
+                    bg="$glassBg"
+                    br={16}
+                    px="$4"
+                    height={48}
+                    ai="center"
+                    jc="space-between"
+                    borderWidth={1}
+                    borderColor="$glassBorder"
+                  >
+                    <XStack ai="center" gap="$2">
+                      {isPublic ? (
+                        <Globe size={16} color="$colorSecondary" />
+                      ) : (
+                        <Lock size={16} color="$colorSecondary" />
+                      )}
+                      <Text fontSize="$4" color="$color">
+                        {isPublic ? "Public" : "Private"}
+                      </Text>
+                    </XStack>
+                    <ChevronDown
+                      size={16}
+                      color="$colorMuted"
+                      rotate={privacyOpen ? "180deg" : "0deg"}
+                    />
+                  </XStack>
+                </Pressable>
 
-            <AppButton variant="outline" size="lg" onPress={handleAdd}>
-              + Add Card
-            </AppButton>
-          </YStack>
-        </KeyboardAwareScrollView>
+                {privacyOpen && (
+                  <YStack
+                    bg="$glassBg"
+                    br={16}
+                    mt="$2"
+                    borderWidth={1}
+                    borderColor="$glassBorder"
+                    overflow="hidden"
+                  >
+                    {(
+                      [
+                        {
+                          value: false,
+                          label: "Private",
+                          hint: "Only you can see this module",
+                          Icon: Lock,
+                        },
+                        {
+                          value: true,
+                          label: "Public",
+                          hint: "Anyone can find and save it",
+                          Icon: Globe,
+                        },
+                      ] as const
+                    ).map(({ value, label, hint, Icon }) => (
+                      <Pressable
+                        key={label}
+                        onPress={() => {
+                          setIsPublic(value);
+                          setPrivacyOpen(false);
+                        }}
+                      >
+                        <XStack px="$4" py="$3" ai="center" gap="$2">
+                          <Icon size={16} color="$colorSecondary" />
+                          <YStack f={1}>
+                            <Text fontSize="$4" color="$color">
+                              {label}
+                            </Text>
+                            <Text fontSize="$2" color="$colorMuted">
+                              {hint}
+                            </Text>
+                          </YStack>
+                          {isPublic === value && (
+                            <Check size={16} color="$accentGradientStart" />
+                          )}
+                        </XStack>
+                      </Pressable>
+                    ))}
+                  </YStack>
+                )}
+              </YStack>
+            </YStack>
+
+            <YStack pt="$5" gap="$4">
+              {fields.map((field, index) => (
+                <FlashcardEditItem
+                  key={field.fieldKey}
+                  control={control}
+                  termName={`flashcards.${index}.term`}
+                  definitionName={`flashcards.${index}.definition`}
+                  index={index}
+                  onRemove={handleRemove}
+                  showRemove={fields.length > 1}
+                  termRef={(node) => {
+                    termRefs.current[index] = node;
+                  }}
+                  definitionRef={(node) => {
+                    definitionRefs.current[index] = node;
+                  }}
+                  onFieldFocus={liftCard}
+                  onSubmitTerm={() => focusDefinition(index)}
+                  onSubmitDefinition={() => {
+                    if (index + 1 < fields.length) {
+                      focusTerm(index + 1);
+                    } else {
+                      append({
+                        id: `new-${Date.now()}`,
+                        term: "",
+                        definition: "",
+                        isNew: true,
+                      });
+                    }
+                  }}
+                />
+              ))}
+
+              {flashcardsError && (
+                <Text color="$statusDanger" fontSize="$2">
+                  {flashcardsError}
+                </Text>
+              )}
+
+              {serverError && (
+                <Text color="$statusDanger" fontSize="$3" textAlign="center">
+                  {serverError}
+                </Text>
+              )}
+
+              <AppButton variant="outline" size="lg" onPress={handleAdd}>
+                + Add Card
+              </AppButton>
+            </YStack>
+            <Animated.View style={spacerStyle} />
+          </KeyboardAwareScrollView>
+        </View>
       </AppSheet>
     </FormProvider>
   );

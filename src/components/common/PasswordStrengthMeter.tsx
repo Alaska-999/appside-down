@@ -29,7 +29,7 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
             f={1}
             height={3}
             br={2}
-            bg={on ? "#BEF264" : "rgba(220,255,245,0.1)"}
+            bg={on ? "$limeLight" : "rgba(220,255,245,0.1)"}
           />
         ))}
       </XStack>

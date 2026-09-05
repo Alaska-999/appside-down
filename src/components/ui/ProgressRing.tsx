@@ -5,6 +5,7 @@ import {
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
+import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import {
@@ -63,7 +64,7 @@ export function ProgressRing({
           <Circle cx={center} cy={center} r={center}>
             <SweepGradient
               c={vec(center, center)}
-              colors={["#A3E635", "#2DD4BF", TRACK, TRACK]}
+              colors={[ICON_LIME, ICON_MINT, TRACK, TRACK]}
               positions={positions}
             />
           </Circle>

@@ -1,4 +1,5 @@
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { Check, RotateCcw } from "lucide-react-native";
 import { useEffect } from "react";
 import Animated, {
@@ -11,8 +12,8 @@ import { Text, XStack } from "tamagui";
 type StatusPillTone = "known" | "learning";
 
 const DOT_STYLES: Record<StatusPillTone, { color: string; glow: string }> = {
-  known: { color: "#A3E635", glow: "rgba(163,230,53,0.85)" },
-  learning: { color: "#818CF8", glow: "rgba(129,140,248,0.75)" },
+  known: { color: "$lime", glow: "rgba(163,230,53,0.85)" },
+  learning: { color: "$indigoLight", glow: "rgba(129,140,248,0.75)" },
 };
 
 const GAME_STYLES: Record<
@@ -35,7 +36,7 @@ const GAME_STYLES: Record<
     bgLit: "rgba(163,230,53,0.26)",
     border: "rgba(190,242,100,0.28)",
     borderLit: "rgba(190,242,100,0.6)",
-    icon: "#BEF264",
+    icon: ICON_LIME_LIGHT,
     glow: "rgba(190,242,100,0.9)",
   },
   learning: {

@@ -4,15 +4,15 @@ import {
   FolderEditIconAction,
   FolderEditRows,
   FolderModuleEditRow,
-  FolderTagEditRow,
 } from "@/src/components/cards/FolderEditRow";
 import { FolderCover } from "@/src/components/common/FolderCover";
 import { FormInput } from "@/src/components/common/FormInput";
+import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
+import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { ICON_DANGER } from "@/src/constants/iconColors";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -21,20 +21,11 @@ import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import {
-  ArrowUpFromLine,
-  Check,
-  Pencil,
-  Plus,
-  Tags,
-  Trash2,
-  X,
-} from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpFromLine, Plus, Tags, Trash2 } from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import type { TextInput } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Input, TamaguiElement, Text, XStack, YStack } from "tamagui";
+import { Text, XStack, YStack } from "tamagui";
 
 type FolderTag = { id: string; name: string };
 
@@ -65,27 +56,6 @@ export default function FolderEditScreen() {
   const [saving, setSaving] = useState(false);
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } });
   const nameValue = useWatch({ control: form.control, name: "name" });
-
-  const [renamingTag, setRenamingTag] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [addingTag, setAddingTag] = useState(false);
-  const [newTagValue, setNewTagValue] = useState("");
-  const [tagError, setTagError] = useState<string | null>(null);
-
-  const renameInputRef = useRef<TextInput | null>(null);
-  const newTagInputRef = useRef<TextInput | null>(null);
-
-  useEffect(() => {
-    if (!renamingTag) return;
-    const timer = setTimeout(() => renameInputRef.current?.focus(), 60);
-    return () => clearTimeout(timer);
-  }, [renamingTag]);
-
-  useEffect(() => {
-    if (!addingTag) return;
-    const timer = setTimeout(() => newTagInputRef.current?.focus(), 60);
-    return () => clearTimeout(timer);
-  }, [addingTag]);
 
   const [tagsModuleId, setTagsModuleId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -176,31 +146,13 @@ export default function FolderEditScreen() {
     }
   };
 
-  const isTagNameTaken = (name: string, exceptId?: string) =>
-    !!folder?.tags.some(
-      (t) => t.id !== exceptId && t.name.toLowerCase() === name.toLowerCase(),
-    );
-
-  const commitRenameTag = async () => {
-    const trimmed = renameValue.trim();
-    const target = folder?.tags.find((t) => t.id === renamingTag);
-    if (!folder || !target || !trimmed || trimmed === target.name) {
-      setRenamingTag(null);
-      setTagError(null);
-      return;
-    }
-    if (isTagNameTaken(trimmed, target.id)) {
-      setTagError(`“${trimmed}” already exists in this folder`);
-      return;
-    }
-    setTagError(null);
+  const handleRenameTag = async (tag: FolderTag, name: string) => {
     try {
-      await request(`/tags/${target.id}`, {
+      await request(`/tags/${tag.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name }),
       });
-      const rename = (t: FolderTag) =>
-        t.id === target.id ? { ...t, name: trimmed } : t;
+      const rename = (t: FolderTag) => (t.id === tag.id ? { ...t, name } : t);
       setFolder((prev) =>
         prev
           ? {
@@ -213,15 +165,14 @@ export default function FolderEditScreen() {
             }
           : prev,
       );
-      setRenamingTag(null);
+      return null;
     } catch (err) {
       if ((err as { status?: number }).status === 409) {
-        setTagError(`“${trimmed}” already exists in this folder`);
-        return;
+        return `“${name}” already exists in this folder`;
       }
       console.error("[FolderEdit] rename tag error:", err);
       setToast("Couldn't rename tag. Try again");
-      setRenamingTag(null);
+      return null;
     }
   };
 
@@ -250,39 +201,24 @@ export default function FolderEditScreen() {
     }
   };
 
-  const commitAddTag = async () => {
-    const trimmed = newTagValue.trim();
-    if (!folder || !trimmed) {
-      setAddingTag(false);
-      setNewTagValue("");
-      setTagError(null);
-      return;
-    }
-    if (isTagNameTaken(trimmed)) {
-      setTagError(`“${trimmed}” already exists in this folder`);
-      return;
-    }
-    setTagError(null);
+  const handleAddTag = async (name: string) => {
     try {
       const res = await request("/tags", {
         method: "POST",
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name }),
       });
       const created = await res.json();
       setFolder((prev) =>
         prev ? { ...prev, tags: [...prev.tags, mapTag(created)] } : prev,
       );
-      setAddingTag(false);
-      setNewTagValue("");
+      return null;
     } catch (err) {
       if ((err as { status?: number }).status === 409) {
-        setTagError(`“${trimmed}” already exists in this folder`);
-        return;
+        return `“${name}” already exists in this folder`;
       }
       console.error("[FolderEdit] add tag error:", err);
       setToast("Couldn't add tag. Try again");
-      setAddingTag(false);
-      setNewTagValue("");
+      return null;
     }
   };
 
@@ -368,169 +304,54 @@ export default function FolderEditScreen() {
           paddingBottom: screen.bottom + 16,
         }}
       >
-        <YStack px="$screenX" gap={22}>
-          <XStack ai="center" gap={10}>
-            <IconButton
-              variant="liquidGlass"
-              icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
-              onPress={() => router.back()}
-              accessibilityLabel="Close"
-            />
-            <Text f={1} fontSize={19} fontWeight="800" color="$color">
-              Edit folder
-            </Text>
-            <SavePill
-              enabled={!!folder && !!nameValue?.trim()}
-              loading={saving}
-              onPress={handleSave}
-            />
-          </XStack>
+        <YStack px="$screenX">
+          <ModalFormHeader
+            title="Edit folder"
+            onClose={() => router.back()}
+            saveEnabled={!!folder && !!nameValue?.trim()}
+            saveLoading={saving}
+            onSave={handleSave}
+          />
 
           {loading || !folder ? (
             <YStack gap={22}>
-              <YStack ai="center" pt={4} pb={20}>
-                <Skeleton width={88} height={88} borderRadius={26} />
-              </YStack>
-              <Skeleton height={52} borderRadius={16} />
-              <Skeleton height={160} borderRadius={20} />
+              <XStack ai="center" gap={14}>
+                <Skeleton width={72} height={72} borderRadius={22} />
+                <YStack f={1}>
+                  <Skeleton height={60} borderRadius={18} />
+                </YStack>
+              </XStack>
+              <Skeleton height={160} borderRadius="$cardSoft" />
             </YStack>
           ) : (
-            <>
-              <YStack ai="center" pt={4} pb={20} mt={-22}>
-                <FolderCover
-                  size="md"
-                  imageUri={coverUri}
-                  onChange={setCoverUri}
-                />
-              </YStack>
-
-              <YStack mt={-22}>
-                <FieldLabel label="Name" />
-                <FormInput
-                  control={form.control}
-                  name="name"
-                  placeholder="Folder name"
-                  maxLength={40}
-                  showCounter
-                />
-              </YStack>
+            <YStack gap={22}>
+              <XStack ai="center" gap={14}>
+                <FolderCover imageUri={coverUri} onChange={setCoverUri} />
+                <YStack f={1}>
+                  <FormInput
+                    control={form.control}
+                    name="name"
+                    placeholder="Folder name"
+                    inputSize="lg"
+                    textRole="title"
+                    maxLength={40}
+                    showCounter
+                  />
+                </YStack>
+              </XStack>
 
               <YStack>
                 <FieldLabel label="Tags" />
-                <FolderEditRows>
-                  {[
-                    ...folder.tags.map((tag) =>
-                      renamingTag === tag.id ? (
-                        <YStack key={tag.id} px={16} py={10} gap={6}>
-                          <XStack ai="center" gap={10}>
-                            <Input
-                              ref={(node: TamaguiElement | null) => {
-                                renameInputRef.current =
-                                  node as unknown as TextInput | null;
-                              }}
-                              f={1}
-                              unstyled
-                              fontSize={15}
-                              fontWeight="600"
-                              color="$color"
-                              selectTextOnFocus
-                              value={renameValue}
-                              onChangeText={(v) => {
-                                setRenameValue(v);
-                                if (tagError) setTagError(null);
-                              }}
-                              onSubmitEditing={commitRenameTag}
-                            />
-                            <FolderEditIconAction
-                              icon={Check}
-                              label="Save tag"
-                              onPress={commitRenameTag}
-                            />
-                            <FolderEditIconAction
-                              icon={X}
-                              label="Cancel"
-                              onPress={() => {
-                                setRenamingTag(null);
-                                setTagError(null);
-                              }}
-                            />
-                          </XStack>
-                          {tagError && (
-                            <Text fontSize={11.5} color="$dangerText">
-                              {tagError}
-                            </Text>
-                          )}
-                        </YStack>
-                      ) : (
-                        <FolderTagEditRow
-                          key={tag.id}
-                          label={tag.name}
-                          count={tagCounts.get(tag.id) ?? 0}
-                          actions={
-                            <>
-                              <FolderEditIconAction
-                                icon={Pencil}
-                                label={`Rename ${tag.name}`}
-                                onPress={() => {
-                                  setRenamingTag(tag.id);
-                                  setRenameValue(tag.name);
-                                }}
-                              />
-                              <FolderEditIconAction
-                                icon={Trash2}
-                                tone="danger"
-                                label={`Delete ${tag.name}`}
-                                onPress={() => setConfirmTag(tag)}
-                              />
-                            </>
-                          }
-                        />
-                      ),
-                    ),
-                    addingTag ? (
-                      <YStack key="__add" px={16} py={15} gap={6}>
-                        <XStack ai="center" gap={10}>
-                          <Input
-                            ref={(node: TamaguiElement | null) => {
-                              newTagInputRef.current =
-                                node as unknown as TextInput | null;
-                            }}
-                            f={1}
-                            unstyled
-                            fontSize={15}
-                            fontWeight="600"
-                            color="#5EEAD4"
-                            placeholder="New tag"
-                            placeholderTextColor="$placeholderColor"
-                            value={newTagValue}
-                            onChangeText={(v) => {
-                              setNewTagValue(v);
-                              if (tagError) setTagError(null);
-                            }}
-                            onSubmitEditing={commitAddTag}
-                          />
-                          <FolderEditIconAction
-                            icon={Check}
-                            label="Add tag"
-                            onPress={commitAddTag}
-                          />
-                        </XStack>
-                        {tagError && (
-                          <Text fontSize={11.5} color="$dangerText">
-                            {tagError}
-                          </Text>
-                        )}
-                      </YStack>
-                    ) : (
-                      <FolderAddRow
-                        key="__newtag"
-                        icon={Plus}
-                        label="New tag"
-                        onPress={() => setAddingTag(true)}
-                      />
-                    ),
-                  ]}
-                </FolderEditRows>
+                <TagEditor
+                  mode="manage"
+                  tags={folder.tags.map((tag) => ({
+                    ...tag,
+                    count: tagCounts.get(tag.id) ?? 0,
+                  }))}
+                  onAdd={handleAddTag}
+                  onRename={handleRenameTag}
+                  onRemove={(tag) => setConfirmTag(tag)}
+                />
               </YStack>
 
               <YStack>
@@ -586,7 +407,7 @@ export default function FolderEditScreen() {
                   onPress={() => setConfirmDelete(true)}
                 />
               </SheetRows>
-            </>
+            </YStack>
           )}
         </YStack>
       </KeyboardAwareScrollView>
@@ -601,7 +422,7 @@ export default function FolderEditScreen() {
         title={tagsModule?.name ?? "Tags"}
       >
         {folder && folder.tags.length === 0 ? (
-          <Text fontSize={13} color="#8FA8B8" textAlign="center" py={12}>
+          <Text fontSize={13} color="$textMuted" textAlign="center" py={12}>
             No tags in this folder yet. Add one above.
           </Text>
         ) : (
@@ -632,7 +453,7 @@ export default function FolderEditScreen() {
         <YStack gap={10}>
           <AppButton
             variant="danger"
-            icon={<Trash2 size={19} color="#FCA5A5" strokeWidth={1.9} />}
+            icon={<Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />}
             loading={deleting}
             onPress={handleDeleteFolder}
           >
@@ -660,7 +481,7 @@ export default function FolderEditScreen() {
         <YStack gap={10}>
           <AppButton
             variant="danger"
-            icon={<Trash2 size={19} color="#FCA5A5" strokeWidth={1.9} />}
+            icon={<Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />}
             loading={deletingTag}
             onPress={() => confirmTag && handleDeleteTag(confirmTag)}
           >

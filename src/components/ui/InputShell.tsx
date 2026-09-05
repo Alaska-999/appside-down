@@ -1,5 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { controlHeight } from "@/tamagui.config";
 import {
   BlurMask,
@@ -246,7 +247,12 @@ const RINGS: Record<
   good: { width: 1.3, color: "rgba(163,230,53,0.55)" },
 };
 
-interface InputShellProps extends YStackProps {
+type InputShellLayoutProps = Pick<
+  YStackProps,
+  "mt" | "mb" | "ml" | "mr" | "f" | "flex" | "w" | "h" | "ai" | "als" | "pos" | "zIndex" | "testID"
+>;
+
+interface InputShellProps extends InputShellLayoutProps {
   variant?: InputShellVariant;
   state?: InputShellState;
   size?: InputShellSize;
@@ -316,7 +322,7 @@ export function InputShell({
           ]}
         >
           <LinearGradient
-            colors={["#2DD4BF", "#A3E635"]}
+            colors={[ICON_MINT, ICON_LIME]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}

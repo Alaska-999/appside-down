@@ -1,3 +1,4 @@
+import { ICON_TEXT } from "@/src/constants/iconColors";
 import { useEffect, useRef, useState } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import type { TextInput as RNTextInput } from "react-native";
@@ -31,7 +32,7 @@ const CELL_TEXT: Record<CodeCellState, string> = {
   on: "$color",
   cur: "$color",
   bad: "$dangerText",
-  good: "#BEF264",
+  good: "$limeLight",
 };
 
 function Caret() {
@@ -54,7 +55,7 @@ function Caret() {
 
   return (
     <Animated.View
-      style={[{ width: 1.6, height: 20, backgroundColor: "#EFFDF8" }, style]}
+      style={[{ width: 1.6, height: 20, backgroundColor: ICON_TEXT }, style]}
     />
   );
 }

@@ -5,6 +5,7 @@ import {
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
+import { ICON_LIME, ICON_MINT, ICON_TEAL } from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, Pressable } from "react-native";
 import { Text, YStack } from "tamagui";
@@ -31,7 +32,7 @@ export function AvatarRing({ avatarUrl, username, size = 50, onPress }: AvatarRi
             <Circle cx={center} cy={center} r={center}>
               <SweepGradient
                 c={vec(center, center)}
-                colors={["#2DD4BF", "#A3E635", "rgba(45,212,191,0.1)", "#2DD4BF"]}
+                colors={[ICON_MINT, ICON_LIME, "rgba(45,212,191,0.1)", ICON_MINT]}
                 positions={[0, 0.4, 0.7, 1]}
               />
             </Circle>
@@ -44,7 +45,7 @@ export function AvatarRing({ avatarUrl, username, size = 50, onPress }: AvatarRi
           />
         ) : (
           <LinearGradient
-            colors={["#0D9488", "#2DD4BF"]}
+            colors={[ICON_TEAL, ICON_MINT]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
@@ -55,7 +56,7 @@ export function AvatarRing({ avatarUrl, username, size = 50, onPress }: AvatarRi
               justifyContent: "center",
             }}
           >
-            <Text color="#06231F" fontWeight="800" fontSize={Math.round(size / 2.9)}>
+            <Text color="$mintTintDark" fontWeight="800" fontSize={Math.round(size / 2.9)}>
               {initial}
             </Text>
           </LinearGradient>

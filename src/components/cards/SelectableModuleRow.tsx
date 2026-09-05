@@ -1,5 +1,6 @@
 import { AppCard } from "@/src/components/ui/Card";
 import { Checkbox } from "@/src/components/ui/Checkbox";
+import { ICON_LIME_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Lock, Star } from "lucide-react-native";
 import { useState } from "react";
@@ -58,7 +59,7 @@ export function SelectableModuleRow({
         <XStack ai="center" gap={12}>
           <XStack w={HIT} h={HIT} ml={-10} ai="center" jc="center">
             {locked ? (
-              <Lock size={20} color="#5A6B7A" strokeWidth={1.9} />
+              <Lock size={20} color={ICON_SUBTLE} strokeWidth={1.9} />
             ) : (
               <Checkbox size="md" checked={selected} onToggle={onToggle} />
             )}
@@ -74,19 +75,19 @@ export function SelectableModuleRow({
               {name}
             </Text>
             <XStack ai="center" gap={6} mt={3}>
-              <Text fontSize={12.5} color="#8FA8B8">
+              <Text fontSize={12.5} color="$textMuted">
                 {itemsCount} card{itemsCount !== 1 ? "s" : ""}
               </Text>
               {starred && !locked && (
                 <Star
                   size={12.5}
-                  color="#BEF264"
-                  fill="#BEF264"
+                  color={ICON_LIME_LIGHT}
+                  fill={ICON_LIME_LIGHT}
                   strokeWidth={1.9}
                 />
               )}
               {locked && (
-                <Text fontSize={11} color="#5A6B7A">
+                <Text fontSize={11} color="$mutedDim">
                   · Already here
                 </Text>
               )}

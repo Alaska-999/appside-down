@@ -1,3 +1,4 @@
+import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
 
@@ -42,7 +43,7 @@ export function ProgressUnderline({
           }}
         >
           <LinearGradient
-            colors={["#2DD4BF", "#A3E635"]}
+            colors={[ICON_MINT, ICON_LIME]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}

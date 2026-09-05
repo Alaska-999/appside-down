@@ -1,6 +1,12 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { InnerBloom } from "@/src/components/ui/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_HERO_LIME,
+  ICON_LIME,
+  ICON_MINT,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { controlHeight } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
@@ -70,19 +76,29 @@ type VariantSpec = {
 
 const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   primary: {
-    gradient: ["#2DD4BF", "#A3E635"],
+    gradient: [ICON_MINT, ICON_LIME],
     gloss: true,
     textColor: "$onAccentText",
-    shadow: { color: "rgba(45,212,191,1)", offset: { width: 0, height: 6 }, radius: 13, opacity: 0.55 },
+    shadow: {
+      color: "rgb(45,212,191)",
+      offset: { width: 0, height: 1 },
+      radius: 6,
+      opacity: 0.4,
+    },
   },
   soft: {
-    gradient: ["#0D9488", "#65A30D"],
+    gradient: [ICON_TEAL, ICON_HERO_LIME],
     gloss: true,
     textColor: "$color",
-    shadow: { color: "rgba(13,148,136,1)", offset: { width: 0, height: 5 }, radius: 10, opacity: 0.55 },
+    shadow: {
+      color: "rgba(13,148,136,1)",
+      offset: { width: 0, height: 5 },
+      radius: 10,
+      opacity: 0.55,
+    },
   },
   secondary: {
-    bg: "rgba(220,255,245,0.06)",
+    bg: "rgba(196, 233, 229, 0.03)",
     blurIntensity: 40,
     borderAngle: 150,
     borderColors: ["rgba(220,255,245,0.28)", "rgba(220,255,245,0.06)"],
@@ -117,7 +133,12 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     ringWidth: 1.5,
     ringColor: "rgba(94,234,212,0.85)",
     innerBloom: { color: "rgba(45,212,191,0.16)", spread: 18, blur: 12 },
-    shadow: { color: "rgba(45,212,191,1)", offset: { width: 0, height: 0 }, radius: 13, opacity: 0.45 },
+    shadow: {
+      color: "rgba(45,212,191,1)",
+      offset: { width: 0, height: 0 },
+      radius: 13,
+      opacity: 0.45,
+    },
     textColor: "$mintLight",
   },
   liquid: {
@@ -127,10 +148,19 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     liquidInsets: true,
     innerBloom: { color: "rgba(255,255,255,0.08)", spread: 18, blur: 12 },
     borderAngle: 155,
-    borderColors: ["rgba(255,255,255,0.85)", "rgba(255,255,255,0.08)", "rgba(255,255,255,0.4)"],
+    borderColors: [
+      "rgba(255,255,255,0.85)",
+      "rgba(255,255,255,0.08)",
+      "rgba(255,255,255,0.4)",
+    ],
     borderPositions: [0, 0.46, 1],
-    shadow: { color: "#000", offset: { width: 0, height: 10 }, radius: 15, opacity: 0.5 },
-    textColor: "#FFFFFF",
+    shadow: {
+      color: "#000",
+      offset: { width: 0, height: 10 },
+      radius: 15,
+      opacity: 0.5,
+    },
+    textColor: "$white",
     textShadow: {
       textShadowColor: "rgba(0,0,0,0.45)",
       textShadowOffset: { width: 0, height: 1 },
@@ -147,7 +177,10 @@ function Sheen({ dark, height }: { dark: boolean; height: number }) {
     if (!reduced) {
       shift.value = -1;
       shift.value = withRepeat(
-        withTiming(2.6, { duration: 3800, easing: Easing.bezier(0.5, 0, 0.5, 1) }),
+        withTiming(2.6, {
+          duration: 3800,
+          easing: Easing.bezier(0.5, 0, 0.5, 1),
+        }),
         -1,
         false,
       );
@@ -164,15 +197,30 @@ function Sheen({ dark, height }: { dark: boolean; height: number }) {
     <Animated.View
       pointerEvents="none"
       style={[
-        { position: "absolute", top: 0, bottom: 0, left: 0, width: "60%", zIndex: 4 },
+        {
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: "60%",
+          zIndex: 4,
+        },
         style,
       ]}
     >
       <LinearGradient
         colors={
           dark
-            ? ["rgba(94,234,212,0)", "rgba(94,234,212,0.42)", "rgba(94,234,212,0)"]
-            : ["rgba(255,255,255,0)", "rgba(255,255,255,0.6)", "rgba(255,255,255,0)"]
+            ? [
+                "rgba(94,234,212,0)",
+                "rgba(94,234,212,0.42)",
+                "rgba(94,234,212,0)",
+              ]
+            : [
+                "rgba(255,255,255,0)",
+                "rgba(255,255,255,0.6)",
+                "rgba(255,255,255,0)",
+              ]
         }
         start={{ x: 0, y: 0.4 }}
         end={{ x: 1, y: 0.6 }}
@@ -215,7 +263,11 @@ function Flood({ pressed }: { pressed: boolean }) {
       ]}
     >
       <LinearGradient
-        colors={["rgba(190,242,100,0.95)", "rgba(45,212,191,0.55)", "rgba(45,212,191,0)"]}
+        colors={[
+          "rgba(190,242,100,0.95)",
+          "rgba(45,212,191,0.55)",
+          "rgba(45,212,191,0)",
+        ]}
         locations={[0, 0.58, 0.72]}
         start={{ x: 0.5, y: 0.5 }}
         end={{ x: 0.5, y: 1 }}
@@ -259,7 +311,7 @@ export function AppButton({
 
   const resolveColor = (c: string) =>
     c.startsWith("$")
-      ? theme[c.slice(1) as keyof typeof theme]?.get?.() ?? c
+      ? (theme[c.slice(1) as keyof typeof theme]?.get?.() ?? c)
       : c;
 
   const handlePress = () => {
@@ -283,7 +335,7 @@ export function AppButton({
           variant === "danger"
             ? "$roseSoft"
             : floodActive
-              ? "#0D1117"
+              ? "$nearBlack"
               : pressed && spec.pressedTextColor
                 ? spec.pressedTextColor
                 : spec.textColor;
@@ -335,18 +387,27 @@ export function AppButton({
                   backgroundColor={spec.bg}
                 />
               )}
-              {!spec.gradient && !spec.blurIntensity && !spec.liquidGlass && spec.bg && (
-                <View
-                  style={[StyleSheet.absoluteFill, { backgroundColor: spec.bg }]}
-                />
-              )}
+              {!spec.gradient &&
+                !spec.blurIntensity &&
+                !spec.liquidGlass &&
+                spec.bg && (
+                  <View
+                    style={[
+                      StyleSheet.absoluteFill,
+                      { backgroundColor: spec.bg },
+                    ]}
+                  />
+                )}
               {spec.gloss && (
                 <LinearGradient
                   colors={["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"]}
                   locations={[0, 0.52]}
                   start={{ x: 0.5, y: 0 }}
                   end={{ x: 0.5, y: 1 }}
-                  style={[StyleSheet.absoluteFill, { margin: 1, borderRadius: radius }]}
+                  style={[
+                    StyleSheet.absoluteFill,
+                    { margin: 1, borderRadius: radius },
+                  ]}
                   pointerEvents="none"
                 />
               )}
@@ -362,22 +423,34 @@ export function AppButton({
                 <>
                   <View
                     pointerEvents="none"
-                    style={{ position: "absolute", top: 0, left: 12, right: 12, height: 1.2, backgroundColor: "rgba(255,255,255,0.6)" }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 12,
+                      right: 12,
+                      height: 1.2,
+                      backgroundColor: "rgba(255,255,255,0.6)",
+                    }}
                   />
                   <View
                     pointerEvents="none"
-                    style={{ position: "absolute", bottom: 0, left: 12, right: 12, height: 1.2, backgroundColor: "rgba(255,255,255,0.18)" }}
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 12,
+                      right: 12,
+                      height: 1.2,
+                      backgroundColor: "rgba(255,255,255,0.18)",
+                    }}
                   />
                 </>
               )}
               {flood && <Flood pressed={floodActive} />}
-              {sheen && !isBlocked && <Sheen dark={sheen === "dark"} height={height} />}
+              {sheen && !isBlocked && (
+                <Sheen dark={sheen === "dark"} height={height} />
+              )}
               <YStack fd="row" ai="center" gap={9} zIndex={5}>
-                {loading ? (
-                  <Spinner size="small" color={textColor} />
-                ) : (
-                  icon
-                )}
+                {loading ? <Spinner size="small" color={textColor} /> : icon}
                 <Text
                   fontSize={fontSize}
                   fontWeight="600"
@@ -391,7 +464,7 @@ export function AppButton({
                 <YStack
                   w={40}
                   h={40}
-                  br={20}
+                  br="$cardSoft"
                   ai="center"
                   jc="center"
                   bg="rgba(8,9,12,0.82)"

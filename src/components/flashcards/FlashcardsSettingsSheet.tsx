@@ -1,7 +1,8 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { Toggle } from "@/src/components/common/Toggle";
+import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useGameStore } from "@/src/store/useGameStore";
 import { RotateCcw } from "lucide-react-native";
 import { ReactNode } from "react";
@@ -89,7 +90,7 @@ export function FlashcardsSettingsSheet({
     <AppSheet open={open} onOpenChange={onOpenChange} title="Settings">
       <YStack gap={12}>
         <YStack
-          br={20}
+          br="$cardSoft"
           overflow="hidden"
           bg="rgba(220,255,245,0.05)"
           borderWidth={1}
@@ -136,7 +137,7 @@ export function FlashcardsSettingsSheet({
             fontWeight="800"
             letterSpacing={1.47}
             tt="uppercase"
-            color="#5A6B7A"
+            color="$mutedDim"
             ml={4}
           >
             Front side
@@ -156,7 +157,7 @@ export function FlashcardsSettingsSheet({
         <AppButton
           variant="danger"
           size="md"
-          icon={<RotateCcw size={19} color="#FCA5A5" strokeWidth={1.9} />}
+          icon={<RotateCcw size={19} color={ICON_DANGER} strokeWidth={1.9} />}
           onPress={handleRestart}
         >
           Restart game

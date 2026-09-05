@@ -7,6 +7,7 @@ import {
   RoundedRect,
   Skia,
 } from "@shopify/react-native-skia";
+import { ICON_LIME_LIGHT, ICON_MINT } from "@/src/constants/iconColors";
 import { useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
@@ -58,10 +59,10 @@ export function ProgressBar({
           />
           <Group clip={clip}>
             {knownW > 0 && (
-              <Rect x={0} y={4} width={knownW} height={BAR_HEIGHT} color="#BEF264" />
+              <Rect x={0} y={4} width={knownW} height={BAR_HEIGHT} color={ICON_LIME_LIGHT} />
             )}
             {learningW > 0 && (
-              <Rect x={knownW} y={4} width={learningW} height={BAR_HEIGHT} color="#2DD4BF" />
+              <Rect x={knownW} y={4} width={learningW} height={BAR_HEIGHT} color={ICON_MINT} />
             )}
             {knownW > 0 && learningW > 0 && (
               <Rect x={knownW} y={4} width={1} height={BAR_HEIGHT} color="rgba(8,9,12,0.55)" />

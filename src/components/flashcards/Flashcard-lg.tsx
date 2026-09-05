@@ -1,5 +1,16 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_ACCENT,
+  ICON_INDIGO,
+  ICON_INDIGO_LIGHT,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+  ICON_MUTED,
+  ICON_MUTED_LIGHT,
+  ICON_WARNING,
+} from "@/src/constants/iconColors";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
 import {
   DEAD_ZONE,
@@ -75,20 +86,20 @@ const CALM_EDGE = {
 
 const LIVE_EDGE = {
   width: 2.2,
-  colors: ["#BEF264", "#5EEAD4", "rgba(94,234,212,0.25)", "#BEF264"],
+  colors: [ICON_LIME_LIGHT, ICON_ACCENT, "rgba(94,234,212,0.25)", ICON_LIME_LIGHT],
   positions: [0, 0.3, 0.58, 1],
 };
 
 const LEARNING_EDGE = {
   width: 2.2,
-  colors: ["#818CF8", "#4338CA", "rgba(129,140,248,0.2)", "#818CF8"],
+  colors: [ICON_INDIGO_LIGHT, ICON_INDIGO, "rgba(129,140,248,0.2)", ICON_INDIGO_LIGHT],
   positions: [0, 0.34, 0.62, 1],
 };
 
 const STAMP_STYLES = {
   know: {
     solid: undefined as string | undefined,
-    color: "#0D1117",
+    color: "$nearBlack",
     borderColor: undefined as string | undefined,
     shadowColor: "rgba(163,230,53,0.85)" as string | undefined,
   },
@@ -196,7 +207,7 @@ function StampFace({
     >
       {isKnow && (
         <LinearGradient
-          colors={["#2DD4BF", "#A3E635"]}
+          colors={[ICON_MINT, ICON_LIME]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0.4 }}
           style={StyleSheet.absoluteFill}
@@ -451,14 +462,14 @@ export function FlashcardLg({
         <YStack
           w={40}
           h={40}
-          br={20}
+          br="$cardSoft"
           ai="center"
           jc="center"
           bg="rgba(220,255,245,0.05)"
         >
           <Star
             size={20}
-            color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
+            color={card?.isStarred ? ICON_WARNING : ICON_MUTED}
             strokeWidth={card?.isStarred ? 2.1 : 1.8}
           />
         </YStack>
@@ -467,7 +478,7 @@ export function FlashcardLg({
         <YStack
           w={40}
           h={40}
-          br={20}
+          br="$cardSoft"
           ai="center"
           jc="center"
           bg="rgba(220,255,245,0.05)"
@@ -505,7 +516,7 @@ export function FlashcardLg({
             text={back}
             weak
             active={!isFront}
-            actions={renderActions(backTaps, "#B7CEDA")}
+            actions={renderActions(backTaps, ICON_MUTED_LIGHT)}
             decision={decision}
             translateX={translateX}
           />

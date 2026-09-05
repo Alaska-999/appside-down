@@ -1,5 +1,10 @@
 import { AppButton } from "@/src/components/ui/Button";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  ICON_ACCENT,
+  ICON_DANGER,
+  ICON_WARNING,
+} from "@/src/constants/iconColors";
 import { BlurMask, Canvas, Circle } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { ComponentType, ReactNode } from "react";
@@ -15,9 +20,9 @@ const TONE_HALO: Record<StateTone, string> = {
 };
 
 const TONE_ICON_COLOR: Record<StateTone, string> = {
-  error: "#FCA5A5",
-  warn: "#FCD34D",
-  empty: "#5EEAD4",
+  error: ICON_DANGER,
+  warn: ICON_WARNING,
+  empty: ICON_ACCENT,
 };
 
 const DISC_SIZE = 96;

@@ -1,4 +1,9 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import {
+  ICON_LIME,
+  ICON_MINT,
+  ICON_MINT_TINT_DARK,
+} from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
 import { StyleSheet } from "react-native";
@@ -56,12 +61,12 @@ export function StreakCard({
                 {isOn && (
                   <>
                     <LinearGradient
-                      colors={["#2DD4BF", "#A3E635"]}
+                      colors={[ICON_MINT, ICON_LIME]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={StyleSheet.absoluteFill}
                     />
-                    <Check size={14} color="#06231F" strokeWidth={2.8} />
+                    <Check size={14} color={ICON_MINT_TINT_DARK} strokeWidth={2.8} />
                   </>
                 )}
               </YStack>

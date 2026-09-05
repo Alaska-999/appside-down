@@ -1,3 +1,6 @@
+import { IconButton } from "@/src/components/ui/IconButton";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { ICON_ACCENT, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import {
   Canvas,
@@ -8,15 +11,14 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, Pressable } from "react-native";
-import { Text, YStack } from "tamagui";
+import { Camera, ImagePlus, Pencil, Trash2 } from "lucide-react-native";
+import { useState } from "react";
+import { Alert, Image, Pressable, View } from "react-native";
+import { YStack } from "tamagui";
 
-type FolderCoverSize = "lg" | "md";
-
-const SIZE_STYLES: Record<FolderCoverSize, { box: number; radius: number }> = {
-  lg: { box: 96, radius: 28 },
-  md: { box: 88, radius: 26 },
-};
+const COVER_BOX = 72;
+const COVER_RADIUS = 22;
+const LENS_SIZE = 26;
 
 export async function pickCoverImage(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -70,70 +72,123 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
 export function FolderCover({
   imageUri,
   onChange,
-  size = "lg",
 }: {
   imageUri: string | null;
   onChange: (uri: string | null) => void;
-  size?: FolderCoverSize;
 }) {
-  const { box, radius } = SIZE_STYLES[size];
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const change = async () => {
-    hapticTap();
+  const pick = async () => {
     const uri = await pickCoverImage();
     if (uri) onChange(uri);
   };
 
+  const onPress = () => {
+    hapticTap();
+    if (imageUri) setMenuOpen(true);
+    else void pick();
+  };
+
   return (
-    <YStack ai="center" gap={14}>
+    <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Change cover"
-        onPress={change}
-        style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.97 : 1 }] })}
+        accessibilityLabel={imageUri ? "Change cover" : "Add cover"}
+        onPress={onPress}
+        style={({ pressed }) => ({
+          transform: [{ scale: pressed ? 0.97 : 1 }],
+        })}
       >
-        <YStack
-          w={box}
-          h={box}
-          br={radius}
-          overflow="hidden"
-          shadowColor="rgba(45,212,191,1)"
-          shadowOpacity={0.22}
-          shadowRadius={16}
-          shadowOffset={{ width: 0, height: 0 }}
-        >
-          {imageUri ? (
-            <Image
-              source={{ uri: imageUri }}
-              accessibilityIgnoresInvertColors
-              style={{ width: box, height: box, borderRadius: radius }}
-              resizeMode="cover"
+        <YStack w={COVER_BOX} h={COVER_BOX} pos="relative">
+          <YStack
+            w={COVER_BOX}
+            h={COVER_BOX}
+            br={COVER_RADIUS}
+            overflow="hidden"
+            shadowColor="#000"
+            shadowOpacity={0.9}
+            shadowRadius={13}
+            shadowOffset={{ width: 0, height: 10 }}
+          >
+            {imageUri ? (
+              <Image
+                source={{ uri: imageUri }}
+                accessibilityIgnoresInvertColors
+                style={{
+                  width: COVER_BOX,
+                  height: COVER_BOX,
+                  borderRadius: COVER_RADIUS,
+                }}
+                resizeMode="cover"
+              />
+            ) : (
+              <DefaultCover box={COVER_BOX} radius={COVER_RADIUS} />
+            )}
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 8,
+                right: 8,
+                height: 1,
+                backgroundColor: "rgba(255,255,255,0.25)",
+              }}
             />
+          </YStack>
+          {imageUri ? (
+            <YStack pos="absolute" r={-5} b={-5}>
+              <IconButton
+                variant="liquidGlass"
+                size={LENS_SIZE}
+                icon={
+                  <Pencil size={12} color={ICON_ON_GLASS} strokeWidth={2} />
+                }
+                accessibilityLabel="Change cover"
+                onPress={onPress}
+              />
+            </YStack>
           ) : (
-            <DefaultCover box={box} radius={radius} />
+            <YStack
+              pos="absolute"
+              t={0}
+              l={0}
+              r={0}
+              b={0}
+              br={COVER_RADIUS}
+              ai="center"
+              jc="center"
+              borderWidth={1.5}
+              borderStyle="dashed"
+              borderColor="rgba(94,234,212,0.55)"
+            >
+              <Camera size={26} color={ICON_ACCENT} strokeWidth={1.9} />
+            </YStack>
           )}
         </YStack>
       </Pressable>
-      <YStack ai="center" gap={6}>
-        <Pressable onPress={change} hitSlop={8}>
-          <Text fontSize={12.5} fontWeight="600" color="#5EEAD4">
-            Change cover
-          </Text>
-        </Pressable>
-        {imageUri && (
-          <Pressable
+
+      <AppSheet open={menuOpen} onOpenChange={setMenuOpen} title="Cover">
+        <SheetRows>
+          <SheetRow
+            icon={ImagePlus}
+            label="Choose another photo"
             onPress={() => {
-              hapticTap();
+              setMenuOpen(false);
+              void pick();
+            }}
+          />
+          <SheetRow
+            icon={Trash2}
+            label="Remove cover"
+            danger
+            onPress={() => {
+              setMenuOpen(false);
               onChange(null);
             }}
-            hitSlop={8}
-          >
-            <Text fontSize={12.5} fontWeight="600" color="#5A6B7A">
-              Remove
-            </Text>
-          </Pressable>
-        )}
-      </YStack>
-    </YStack>
+          />
+        </SheetRows>
+      </AppSheet>
+    </>
   );
 }

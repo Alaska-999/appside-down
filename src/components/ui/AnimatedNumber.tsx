@@ -1,4 +1,5 @@
 import MaskedView from "@react-native-masked-view/masked-view";
+import { ICON_TEXT } from "@/src/constants/iconColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { TextInput, TextStyle } from "react-native";
@@ -62,7 +63,7 @@ export function AnimatedNumber({
       editable={false}
       underlineColorAndroid="transparent"
       animatedProps={animatedProps}
-      style={[{ padding: 0, color: gradientColors ? "#000000" : "#EFFDF8" }, style]}
+      style={[{ padding: 0, color: gradientColors ? "#000000" : ICON_TEXT }, style]}
     />
   );
 

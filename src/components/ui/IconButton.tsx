@@ -1,5 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { ICON_ACCENT, ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { BlurMask, Canvas, Circle } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,10 +18,30 @@ import { Button, ButtonProps, YStack, YStackProps } from "tamagui";
 
 type IconButtonVariant = "glass" | "acc" | "liquidGlass" | "badge" | "danger";
 
-interface IconButtonProps extends Omit<
+type IconButtonLayoutProps = Pick<
   ButtonProps,
-  "icon" | "onPress" | "size" | "variant"
-> {
+  | "mt"
+  | "mb"
+  | "ml"
+  | "mr"
+  | "f"
+  | "w"
+  | "h"
+  | "ai"
+  | "als"
+  | "pos"
+  | "top"
+  | "right"
+  | "bottom"
+  | "left"
+  | "zIndex"
+  | "elevation"
+  | "testID"
+  | "accessibilityLabel"
+  | "disabled"
+>;
+
+interface IconButtonProps extends IconButtonLayoutProps {
   icon: ReactElement;
   variant?: IconButtonVariant;
   size?: number;
@@ -176,7 +197,7 @@ export function IconButton({
             >
               {variant === "acc" ? (
                 <LinearGradient
-                  colors={["#2DD4BF", "#A3E635"]}
+                  colors={[ICON_MINT, ICON_LIME]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0.9, y: 0.9 }}
                   style={StyleSheet.absoluteFill}
@@ -298,7 +319,7 @@ export function AppFab({
           shadowOpacity={0.7}
         >
           <LinearGradient
-            colors={["#5EEAD4", "#A3E635"]}
+            colors={[ICON_ACCENT, ICON_LIME]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.9, y: 0.9 }}
             style={StyleSheet.absoluteFill}

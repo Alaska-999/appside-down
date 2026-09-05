@@ -1,33 +1,26 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderCover } from "@/src/components/common/FolderCover";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AppButton } from "@/src/components/ui/Button";
+import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
+import { TagEditor } from "@/src/components/common/TagEditor";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { SavePill } from "@/src/components/ui/SavePill";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { X } from "lucide-react-native";
 import { useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, XStack, YStack } from "tamagui";
 
-const TAG_MAX_LENGTH = 30;
-
 export default function FolderCreate() {
   const screen = useScreenInsets();
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [tags, setTags] = useState<string[]>([]);
-  const [tagSheetOpen, setTagSheetOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FolderForm>({
@@ -42,28 +35,6 @@ export default function FolderCreate() {
     formState: { isSubmitting },
   } = form;
   const name = useWatch({ control, name: "name" });
-
-  const tagForm = useForm<{ tag: string }>({ defaultValues: { tag: "" } });
-
-  const closeTagSheet = (open: boolean) => {
-    setTagSheetOpen(open);
-    if (!open) tagForm.reset({ tag: "" });
-  };
-
-  const addTag = () => {
-    const value = tagForm.getValues("tag").trim();
-    if (!value) return;
-    if (tags.some((tag) => tag.toLowerCase() === value.toLowerCase())) {
-      tagForm.setError("tag", { message: "This tag already exists" });
-      return;
-    }
-    setTags((prev) => [...prev, value]);
-    closeTagSheet(false);
-  };
-
-  const removeTag = (tag: string) => {
-    setTags((prev) => prev.filter((t) => t !== tag));
-  };
 
   const onSubmit = async (data: FolderForm) => {
     setServerError(null);
@@ -101,83 +72,50 @@ export default function FolderCreate() {
           }}
         >
           <YStack px="$screenX">
-            <XStack ai="center" gap={14} mb={18}>
-              <IconButton
-                variant="liquidGlass"
-                icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
-                onPress={() => router.back()}
-                accessibilityLabel="Close"
-              />
-              <Text f={1} fontSize={20} fontWeight="800" color="$color">
-                New folder
-              </Text>
-              <SavePill
-                enabled={!!name?.trim()}
-                loading={isSubmitting}
-                onPress={() => handleSubmit(onSubmit)()}
-              />
-            </XStack>
+            <ModalFormHeader
+              title="New folder"
+              onClose={() => router.back()}
+              saveEnabled={!!name?.trim()}
+              saveLoading={isSubmitting}
+              onSave={() => handleSubmit(onSubmit)()}
+            />
 
-            <YStack ai="center" pt={16} pb={26}>
-              <FolderCover imageUri={coverUri} onChange={setCoverUri} />
-            </YStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Name" />
-              <FormInput
-                control={control}
-                name="name"
-                placeholder="Untitled folder"
-                maxLength={40}
-                showCounter
-                autoFocus
-              />
-            </YStack>
-
-            <YStack mb={18}>
-              <FieldLabel label="Tags" hint="optional" />
-              <XStack gap={7} flexWrap="wrap">
-                {tags.map((tag) => (
-                  <TagChip
-                    key={tag}
-                    label={tag}
-                    onRemove={() => removeTag(tag)}
+            <YStack gap={22}>
+              <XStack ai="center" gap={14}>
+                <FolderCover imageUri={coverUri} onChange={setCoverUri} />
+                <YStack f={1}>
+                  <FormInput
+                    control={control}
+                    name="name"
+                    placeholder="Folder name"
+                    inputSize="lg"
+                    textRole="title"
+                    maxLength={40}
+                    showCounter
+                    autoFocus
                   />
-                ))}
-                <TagChip
-                  label="Add tag"
-                  variant="add"
-                  onPress={() => setTagSheetOpen(true)}
-                />
+                </YStack>
               </XStack>
+
+              <YStack>
+                <FieldLabel label="Tags" hint="optional" />
+                <TagEditor
+                  mode="draft"
+                  tags={tags.map((tag) => ({ id: tag, name: tag }))}
+                  onAdd={(name) => setTags((prev) => [...prev, name])}
+                  onRemove={(tag) =>
+                    setTags((prev) => prev.filter((t) => t !== tag.name))
+                  }
+                />
+                <Text fontSize={11.5} color="$mutedDim" mt={8} ml={4}>
+                  Tags work as subfolders inside this folder
+                </Text>
+              </YStack>
             </YStack>
           </YStack>
         </KeyboardAwareScrollView>
 
         <StatusBarScrim />
-
-        <AppSheet
-          open={tagSheetOpen}
-          onOpenChange={closeTagSheet}
-          title="Add tag"
-        >
-          <YStack gap={16}>
-            <FormInput
-              control={tagForm.control}
-              name="tag"
-              placeholder="Tag name"
-              maxLength={TAG_MAX_LENGTH}
-              showCounter
-              autoFocus
-              autoCapitalize="none"
-              returnKeyType="done"
-              onSubmitEditing={addTag}
-            />
-            <AppButton variant="primary" onPress={addTag}>
-              Add
-            </AppButton>
-          </YStack>
-        </AppSheet>
 
         <AppToast
           open={!!serverError}
