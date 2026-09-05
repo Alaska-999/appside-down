@@ -1,7 +1,10 @@
+import MaskedView from "@react-native-masked-view/masked-view";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { TextInput, TextStyle } from "react-native";
 import Animated, {
   Easing,
+  SharedValue,
   useAnimatedProps,
   useSharedValue,
   withDelay,
@@ -20,6 +23,10 @@ export function AnimatedNumber({
   prefix = "",
   suffix = "",
   style,
+  progress,
+  gradientColors,
+  width,
+  height,
 }: {
   to: number;
   from?: number;
@@ -28,28 +35,49 @@ export function AnimatedNumber({
   prefix?: string;
   suffix?: string;
   style?: TextStyle | TextStyle[];
+  progress?: SharedValue<number>;
+  gradientColors?: [string, string, ...string[]];
+  width?: number;
+  height?: number;
 }) {
   const value = useSharedValue(from);
 
   useEffect(() => {
+    if (progress) return;
     value.value = from;
     value.value = withDelay(
       delay,
       withTiming(to, { duration, easing: Easing.bezier(0.2, 0.8, 0.3, 1) }),
     );
-  }, [to, from, duration, delay, value]);
+  }, [to, from, duration, delay, value, progress]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    text: `${prefix}${Math.round(value.value)}${suffix}`,
-    defaultValue: `${prefix}${Math.round(value.value)}${suffix}`,
-  }));
+  const animatedProps = useAnimatedProps(() => {
+    const current = progress ? from + progress.value * (to - from) : value.value;
+    const text = `${prefix}${Math.round(current)}${suffix}`;
+    return { text, defaultValue: text };
+  });
 
-  return (
+  const textInput = (
     <AnimatedTextInput
       editable={false}
       underlineColorAndroid="transparent"
       animatedProps={animatedProps}
-      style={[{ padding: 0, color: "#EFFDF8" }, style]}
+      style={[{ padding: 0, color: gradientColors ? "#000000" : "#EFFDF8" }, style]}
     />
+  );
+
+  if (!gradientColors) {
+    return textInput;
+  }
+
+  return (
+    <MaskedView maskElement={textInput} style={{ width, height }}>
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ width, height }}
+      />
+    </MaskedView>
   );
 }

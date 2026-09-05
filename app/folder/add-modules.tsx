@@ -1,25 +1,25 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { ModuleCard } from "@/src/components/cards/ModuleCard";
-import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
-import { Badge } from "@/src/components/ui/Badge";
+import { SelectableModuleRow } from "@/src/components/cards/SelectableModuleRow";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
-import { TEXT } from "@/src/constants/typography";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
+import { AppToast } from "@/src/components/ui/Toast";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter } from "@/tamagui.config";
-import { AlertTriangle, Check, ChevronLeft, Plus } from "@tamagui/lucide-icons";
-import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
+import { AlertTriangle, Captions, ChevronLeft } from "lucide-react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { FlatList } from "react-native";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Text, View, XStack, YStack } from "tamagui";
 
 function AddModulesSkeletonRow() {
-  return <Skeleton height={83} borderRadius={20} />;
+  return <Skeleton height={74} borderRadius={23} />;
 }
 
 type ModuleItem = {
@@ -52,6 +52,7 @@ export default function AddModules() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
 
   useFocusEffect(
@@ -67,10 +68,9 @@ export default function AddModules() {
       setError(null);
     }
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/modules?limit=50`,
-        { method: "GET" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/modules?limit=50`, {
+        method: "GET",
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const page: { data: any[] } = await res.json();
       const raw: any[] = page.data ?? [];
@@ -113,14 +113,14 @@ export default function AddModules() {
       );
 
       if (!response.ok) {
-        setError("Failed to add some modules");
+        setToast("Couldn't add some modules. Try again");
         return;
       }
 
       router.back();
     } catch (err) {
       console.error("[AddModules] add error:", err);
-      setError("Failed to add modules");
+      setToast("Couldn't add modules. Try again");
     } finally {
       setSaving(false);
     }
@@ -134,32 +134,36 @@ export default function AddModules() {
 
   return (
     <YStack f={1} bg="$background">
-      <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
+      <BackgroundMesh preset="folder" />
 
       <YStack f={1} pt={screen.top}>
-        <XStack
-          px="$screenX"
-          mb={19}
-          jc="space-between"
-          ai="center"
-        >
+        <XStack px="$screenX" mb={19} jc="space-between" ai="center">
           <IconButton
             variant="liquidGlass"
-            icon={<ChevronLeft size="$1" color="$color" />}
+            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
             onPress={() => router.back()}
+            accessibilityLabel="Back"
           />
-          <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
+          <Text
+            f={1}
+            textAlign="center"
+            fontSize={19}
+            fontWeight="800"
+            color="$color"
+            numberOfLines={1}
+            px={8}
+          >
             {title}
           </Text>
           <View style={{ opacity: 0 }} pointerEvents="none">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size="$1" color="$color" />}
+              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
             />
           </View>
         </XStack>
 
-        <XStack px="$screenX">
+        <XStack px="$screenX" mb={14}>
           <SearchField
             f={1}
             value={search}
@@ -169,14 +173,14 @@ export default function AddModules() {
         </XStack>
 
         {loading ? (
-          <YStack px="$screenX" pt={16} gap={12}>
+          <YStack px="$screenX" gap={11}>
             <AddModulesSkeletonRow />
             <AddModulesSkeletonRow />
             <AddModulesSkeletonRow />
             <AddModulesSkeletonRow />
           </YStack>
         ) : error ? (
-          <YStack px="$screenX" pt={16}>
+          <YStack px="$screenX">
             <StateCard
               tone="error"
               icon={AlertTriangle}
@@ -193,45 +197,42 @@ export default function AddModules() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: screenGutter,
-              paddingTop: 16,
               paddingBottom: screen.bottom + (selectedIds.length > 0 ? 96 : 0),
-              gap: 12,
+              gap: 11,
             }}
             ListEmptyComponent={
-              <Text color="$colorMuted" textAlign="center" mt="$4">
-                No modules available
-              </Text>
+              debouncedSearch.trim() ? (
+                <SearchEmptyState
+                  query={debouncedSearch.trim()}
+                  noun="modules"
+                  onCreate={() =>
+                    router.push({
+                      pathname: "/module/create",
+                      params: { returnFolderId: folderId },
+                    })
+                  }
+                />
+              ) : (
+                <StateCard
+                  tone="empty"
+                  icon={Captions}
+                  title="Nothing to add"
+                  subtitle="All your modules are already in this folder."
+                />
+              )
             }
             renderItem={({ item }) => (
-              <ModuleCard
-                module={{
-                  id: item.id,
-                  name: item.name,
-                  itemsCount: item.itemsCount,
-                  isPublic: item.isPublic,
-                }}
-                dimmed={item.selected}
-                trailing={
-                  item.selected ? (
-                    <Badge tone="mint" icon={<Check size={11} color="$mint" />}>
-                      Added
-                    </Badge>
-                  ) : (
-                    <IconButton
-                      size={36}
-                      icon={<Plus size="$1" color="$color" />}
-                      onPress={() => toggleModule(item.id)}
-                    />
-                  )
-                }
-                onPress={() => toggleModule(item.id)}
+              <SelectableModuleRow
+                name={item.name}
+                itemsCount={item.itemsCount}
+                selected={item.selected}
+                onToggle={() => toggleModule(item.id)}
               />
             )}
             ListFooterComponent={
               <YStack mt={7}>
                 <AppButton
                   variant="secondary"
-                  icon={<Plus size={16} color="$color" />}
                   onPress={() =>
                     router.push({
                       pathname: "/module/create",
@@ -253,18 +254,20 @@ export default function AddModules() {
           bottom={0}
           left={0}
           right={0}
-          pt={19}
-          px="$section"
+          pt={16}
+          px="$screenX"
           pb={Math.max(screen.insets.bottom + 16, 32)}
-          bg="rgba(19,21,32,0.92)"
+          bg="rgba(14,26,28,0.75)"
           btw={1}
-          borderColor="$glassBorder"
+          borderColor="rgba(220,255,245,0.13)"
         >
           <AppButton onPress={handleAdd} loading={saving}>
             {`Done · ${selectedIds.length} added`}
           </AppButton>
         </YStack>
       )}
+
+      <AppToast open={!!toast} message={toast ?? ""} onDismiss={() => setToast(null)} />
     </YStack>
   );
 }

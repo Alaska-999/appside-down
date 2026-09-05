@@ -69,3 +69,15 @@ export const editModuleSchema = z
 export type ModuleForm = z.infer<typeof moduleSchema>;
 export type FolderForm = z.infer<typeof folderSchema>;
 export type EditModuleForm = z.infer<typeof editModuleSchema>;
+
+export const moduleDetailsSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(60, "Max 60 characters"),
+  description: z.string().trim().max(300, "Max 300 characters"),
+  folderId: z.string().optional(),
+});
+
+export type ModuleDetailsForm = z.infer<typeof moduleDetailsSchema>;

@@ -1,32 +1,30 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { ModuleCard } from "@/src/components/cards/ModuleCard";
-import { FormInput } from "@/src/components/common/FormInput";
-import { ImagePickerAvatar } from "@/src/components/common/ImagePickerAvatar";
-import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
-import { AppButton } from "@/src/components/ui/Button";
-import { AppSheet } from "@/src/components/ui/Sheet";
+import { FolderIcon } from "@/src/components/cards/FolderIcon";
+import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
 import { IconButton } from "@/src/components/ui/IconButton";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { TagChip } from "@/src/components/ui/TagChip";
+import { AppToast } from "@/src/components/ui/Toast";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
   BookOpen,
   ChevronLeft,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "@tamagui/lucide-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Alert, Image, Pressable, ScrollView } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { Text, useTheme, XStack, YStack } from "tamagui";
+  MoreHorizontal,
+} from "lucide-react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import { Text, XStack, YStack } from "tamagui";
+
+type FolderTag = { id: string; name: string };
 
 type FolderModule = {
   id: string;
@@ -34,15 +32,15 @@ type FolderModule = {
   itemsCount: number;
   isPublic?: boolean;
   isFavorite?: boolean;
-  author?: { username: string } | null;
-  authorUsername?: string | null;
+  progress?: { known: number; total: number };
+  tags: FolderTag[];
 };
 
 type FolderDetail = {
   id: string;
   name: string;
   icon: string;
-  tags: string[];
+  tags: FolderTag[];
   modules: FolderModule[];
 };
 
@@ -53,28 +51,30 @@ function mapModule(raw: any): FolderModule {
     itemsCount: raw._count?.flashcards ?? raw.itemsCount ?? 0,
     isPublic: raw.isPublic,
     isFavorite: raw.isFavorite,
-    author: raw.author ?? null,
-    authorUsername: raw.authorUsername ?? null,
+    progress: raw.progress
+      ? { known: raw.progress.known, total: raw.progress.total }
+      : undefined,
+    tags: (raw.tags ?? []).map((t: FolderTag) => ({ id: t.id, name: t.name })),
   };
 }
 
+const HERO_GRADIENT: [string, string] = ["#0D9488", "#2DD4BF"];
+
 export default function FolderScreen() {
-  const theme = useTheme();
   const screen = useScreenInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [folder, setFolder] = useState<FolderDetail | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
 
-  const [editOpen, setEditOpen] = useState(false);
-  const [editIconUri, setEditIconUri] = useState<string | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
-  const editForm = useForm<{ name: string }>({ defaultValues: { name: "" } });
-
-  const [showTagInput, setShowTagInput] = useState(false);
-  const tagForm = useForm<{ tag: string }>({ defaultValues: { tag: "" } });
+  const scrollY = useSharedValue(0);
+  const listTop = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((e) => {
+    scrollY.value = e.contentOffset.y;
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -90,21 +90,21 @@ export default function FolderScreen() {
       setError(null);
     }
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/folders/${id}`,
-        { method: "GET" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/folders/${id}`, {
+        method: "GET",
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       const raw = await res.json();
-      const tags: string[] = raw.tags ?? [];
       setFolder({
         id: raw.id,
         name: raw.name,
         icon: raw.icon ?? "",
-        tags,
+        tags: (raw.tags ?? []).map((t: FolderTag) => ({
+          id: t.id,
+          name: t.name,
+        })),
         modules: (raw.modules ?? []).map(mapModule),
       });
-      setSelectedTag((prev) => prev ?? tags[0] ?? null);
       hasLoadedRef.current = true;
     } catch (err) {
       console.error("[FolderScreen] fetch error:", err);
@@ -114,183 +114,53 @@ export default function FolderScreen() {
     }
   };
 
-  const openEdit = () => {
+  const openEditScreen = () => {
     if (!folder) return;
-    editForm.reset({ name: folder.name });
-    setEditIconUri(folder.icon || null);
-    setEditOpen(true);
+    router.push({ pathname: "/folder/edit", params: { folderId: folder.id } });
   };
 
-  const handleEdit = async () => {
-    const name = editForm.getValues("name").trim();
-    if (!folder || !name) return;
-    setEditLoading(true);
-    try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/folders/${id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            name,
-            icon: editIconUri ?? "",
-          }),
-        },
-      );
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-      setFolder((prev) =>
-        prev ? { ...prev, name, icon: editIconUri ?? "" } : prev,
-      );
-      setEditOpen(false);
-    } catch (err) {
-      console.error("[FolderScreen] edit error:", err);
-      Alert.alert("Error", "Failed to update folder");
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleDelete = () => {
-    Alert.alert(
-      "Delete folder",
-      "This will delete the folder. Modules won't be deleted.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await protectedFetch(
-                `${API_BASE_URL}/folders/${id}`,
-                { method: "DELETE" },
-              );
-              if (!res.ok) throw new Error(`Error: ${res.status}`);
-              router.back();
-            } catch (err) {
-              console.error("[FolderScreen] delete error:", err);
-              Alert.alert("Error", "Failed to delete folder");
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const patchTags = async (newTags: string[]) => {
-    const res = await protectedFetch(
-      `${API_BASE_URL}/folders/${id}`,
-      { method: "PATCH", body: JSON.stringify({ tags: newTags }) },
-    );
-    if (!res.ok) throw new Error(`Error: ${res.status}`);
-    return newTags;
-  };
-
-  const handleAddTag = async () => {
-    const trimmed = tagForm.getValues("tag").trim();
-    if (!trimmed || !folder) return;
-    if (folder.tags.includes(trimmed)) return;
-    try {
-      const newTags = await patchTags([...folder.tags, trimmed]);
-      setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
-      tagForm.reset({ tag: "" });
-      setShowTagInput(false);
-    } catch (err) {
-      console.error("[FolderScreen] add tag error:", err);
-      Alert.alert("Error", "Failed to add tag");
-    }
-  };
-
-  const handleDeleteTag = (tag: string) => {
-    Alert.alert("Delete tag", "Remove this tag?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          if (!folder) return;
-          try {
-            const newTags = await patchTags(
-              folder.tags.filter((t) => t !== tag),
-            );
-            setFolder((prev) => (prev ? { ...prev, tags: newTags } : prev));
-            if (selectedTag === tag) setSelectedTag(newTags[0] ?? null);
-          } catch (err) {
-            console.error("[FolderScreen] delete tag error:", err);
-            Alert.alert("Error", "Failed to delete tag");
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleRemoveModule = (moduleId: string) => {
-    Alert.alert("Remove module", "Remove this module from the folder?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const res = await protectedFetch(
-              `${API_BASE_URL}/folders/${id}/modules/remove`,
-              {
-                method: "PATCH",
-                body: JSON.stringify({ moduleIds: [moduleId] }),
-              },
-            );
-            if (!res.ok) throw new Error(`Error: ${res.status}`);
-            setFolder((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    modules: prev.modules.filter((m) => m.id !== moduleId),
-                  }
-                : prev,
-            );
-          } catch (err) {
-            console.error("[FolderScreen] remove module error:", err);
-            Alert.alert("Error", "Failed to remove module");
-          }
-        },
-      },
-    ]);
-  };
-
-  const visibleModules = folder?.modules ?? [];
+  const visibleModules = useMemo(() => {
+    const all = folder?.modules ?? [];
+    if (selectedTag === "all") return all;
+    return all.filter((m) => m.tags.some((t) => t.id === selectedTag));
+  }, [folder?.modules, selectedTag]);
+  const tagCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const m of folder?.modules ?? [])
+      for (const t of m.tags) counts.set(t.id, (counts.get(t.id) ?? 0) + 1);
+    return counts;
+  }, [folder?.modules]);
+  const heroIcon = useMemo(() => folder?.icon ?? "", [folder?.icon]);
 
   if (loading && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <AuroraGlow />
-          <YStack px="$screenX" gap="$6" pb={screen.bottom}>
-            <YStack gap="$3" pt={screen.top}>
-              <XStack jc="space-between" ai="center">
-                <IconButton
-                  variant="liquidGlass"
-                  icon={<ChevronLeft size="$1" color="$color" />}
-                  onPress={() => router.back()}
-                />
-              </XStack>
-              <YStack ai="center" gap="$2">
-                <Skeleton width={102} height={102} borderRadius={30} />
-                <Skeleton width={160} height={24} borderRadius={8} />
-                <Skeleton width={90} height={14} borderRadius={6} />
-              </YStack>
+        <BackgroundMesh preset="folder" />
+        <YStack px="$screenX" gap="$6" pb={screen.bottom} pt={screen.top}>
+          <XStack jc="space-between" ai="center">
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              onPress={() => router.back()}
+            />
+          </XStack>
+          <XStack ai="center" gap={15}>
+            <Skeleton width={64} height={64} borderRadius={20} />
+            <YStack f={1} gap={8}>
+              <Skeleton width={160} height={22} borderRadius={8} />
+              <Skeleton width={90} height={14} borderRadius={6} />
             </YStack>
-
-            <XStack gap="$2.5" jc="center">
-              <Skeleton width={70} height={36} borderRadius={999} />
-              <Skeleton width={70} height={36} borderRadius={999} />
-            </XStack>
-
-            <YStack gap="$3">
-              <Skeleton height={83} borderRadius={20} />
-              <Skeleton height={83} borderRadius={20} />
-              <Skeleton height={83} borderRadius={20} />
-            </YStack>
+          </XStack>
+          <XStack gap={7}>
+            <Skeleton width={60} height={34} borderRadius={999} />
+            <Skeleton width={70} height={34} borderRadius={999} />
+          </XStack>
+          <YStack gap={11}>
+            <Skeleton height={74} borderRadius={23} />
+            <Skeleton height={74} borderRadius={23} />
+            <Skeleton height={74} borderRadius={23} />
           </YStack>
-        </ScrollView>
+        </YStack>
       </YStack>
     );
   }
@@ -298,12 +168,12 @@ export default function FolderScreen() {
   if (error && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <AuroraGlow />
+        <BackgroundMesh preset="folder" />
         <YStack f={1} px="$screenX" gap="$3" pt={screen.top}>
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size="$1" color="$color" />}
+              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
               onPress={() => router.back()}
             />
           </XStack>
@@ -326,272 +196,137 @@ export default function FolderScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <AuroraGlow />
-        <YStack px="$screenX" gap="$6" pb={screen.bottom}>
-          <YStack gap="$3" pt={screen.top}>
-            <XStack jc="space-between" ai="center">
-              <IconButton
-                variant="liquidGlass"
-                icon={<ChevronLeft size="$1" color="$color" />}
-                onPress={() => router.back()}
-              />
-              <XStack gap="$2">
-                <IconButton
-                  variant="liquidGlass"
-                  icon={<Pencil size={15} color="$color" />}
-                  onPress={openEdit}
-                />
-                <IconButton
-                  variant="liquidGlass"
-                  icon={<Trash2 size="$1" color="$color" />}
-                  onPress={handleDelete}
-                />
-              </XStack>
-            </XStack>
-
-            <YStack ai="center" gap="$2">
-              <YStack
-                width={102}
-                height={102}
-                br={30}
-                overflow="hidden"
-                bg="$backgroundStrong"
-                ai="center"
-                jc="center"
+      <BackgroundMesh preset="folder" />
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+      >
+        <YStack px="$screenX" pb={screen.bottom} pt={screen.top}>
+          <XStack jc="space-between" ai="center" mb={20}>
+            <IconButton
+              variant="liquidGlass"
+              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              onPress={() => router.back()}
+              accessibilityLabel="Back"
+            />
+            <IconButton
+              variant="liquidGlass"
+              icon={
+                <MoreHorizontal size={22} color="#EAF7FF" strokeWidth={1.9} />
+              }
+              onPress={openEditScreen}
+              accessibilityLabel="Edit folder"
+            />
+          </XStack>
+          <XStack ai="center" gap={15} mb={20}>
+            <FolderIcon
+              icon={heroIcon}
+              name={folder.name}
+              size={64}
+              radius={20}
+              gradient={HERO_GRADIENT}
+            />
+            <YStack f={1} minWidth={0}>
+              <Text
+                fontSize={27}
+                fontWeight="800"
+                letterSpacing={-0.54}
+                lineHeight={31}
+                color="$color"
+                numberOfLines={1}
               >
-                {folder.icon ? (
-                  <Image
-                    source={{ uri: folder.icon }}
-                    style={{ width: "100%", height: "100%" }}
-                    resizeMode="cover"
-                    accessibilityLabel={folder.name}
-                  />
-                ) : (
-                  <Text fontSize="$8">📁</Text>
-                )}
-              </YStack>
-              <Text fontSize={28} fontWeight="bold" color="$color">
                 {folder.name}
               </Text>
-              <Text fontSize="$3" color="$colorMuted">
+              <Text fontSize={13} color="#8FA8B8" mt={5}>
                 {folder.modules.length} module
                 {folder.modules.length !== 1 ? "s" : ""}
               </Text>
             </YStack>
-          </YStack>
+          </XStack>
 
-          {/* Tags */}
-          <YStack gap="$2">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+          <XStack gap={7} flexWrap="wrap" mb={22}>
+            <TagChip
+              label="All"
+              count={folder.modules.length}
+              variant={selectedTag === "all" ? "on" : "default"}
+              onPress={() => {
+                hapticTap();
+                setSelectedTag("all");
+              }}
+            />
+            {folder.tags.map((tag) => (
+              <TagChip
+                key={tag.id}
+                label={tag.name}
+                count={tagCounts.get(tag.id) ?? 0}
+                variant={selectedTag === tag.id ? "on" : "default"}
+                onPress={() => {
+                  hapticTap();
+                  setSelectedTag(selectedTag === tag.id ? "all" : tag.id);
+                }}
+              />
+            ))}
+            <TagChip label="" variant="add" onPress={openEditScreen} />
+          </XStack>
+
+          <XStack jc="space-between" ai="baseline" mb={11}>
+            <Text fontSize={17} fontWeight="700" color="$color">
+              Modules
+            </Text>
+            <Text fontSize={13} color="#8FA8B8">
+              {visibleModules.length}
+            </Text>
+          </XStack>
+
+          {visibleModules.length === 0 ? (
+            <StateCard
+              tone="empty"
+              icon={BookOpen}
+              title="This folder is empty"
+              subtitle="Add your first module to get going"
+              buttonLabel="Add study materials"
+              onButtonPress={() =>
+                router.push({
+                  pathname: "/folder/add-modules",
+                  params: { folderId: id, folderName: folder.name },
+                })
+              }
+            />
+          ) : (
+            <YStack
+              onLayout={(e) => {
+                listTop.value = e.nativeEvent.layout.y;
+              }}
             >
-              <XStack gap="$2.5" ai="center">
-                {folder.tags.map((tag) => {
-                  const isOn = selectedTag === tag;
-                  const tagContent = (
-                    <>
-                      <Text
-                        fontSize="$4"
-                        fontWeight={isOn ? "800" : "700"}
-                        color={isOn ? "$onAccentText" : "$colorSecondary"}
-                      >
-                        {tag}
-                      </Text>
-                      <Pressable
-                        hitSlop={8}
-                        onPress={() => handleDeleteTag(tag)}
-                      >
-                        <X
-                          size={13}
-                          color={isOn ? "$onAccentText" : "$colorMuted"}
-                        />
-                      </Pressable>
-                    </>
-                  );
-                  return (
-                    <Pressable
-                      key={tag}
-                      onPress={() => setSelectedTag(isOn ? null : tag)}
-                    >
-                      {isOn ? (
-                        <LinearGradient
-                          colors={[
-                            theme.accentGradientStart.get(),
-                            theme.accentGradientEnd.get(),
-                          ]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 8,
-                            borderRadius: 999,
-                            paddingHorizontal: 16,
-                            paddingVertical: 8,
-                          }}
-                        >
-                          {tagContent}
-                        </LinearGradient>
-                      ) : (
-                        <XStack
-                          bg="$glassBg"
-                          borderWidth={1}
-                          borderColor="$glassBorder"
-                          br="$10"
-                          px="$4"
-                          py="$2"
-                          ai="center"
-                          gap="$2"
-                        >
-                          {tagContent}
-                        </XStack>
-                      )}
-                    </Pressable>
-                  );
-                })}
-
-                <Pressable onPress={() => setShowTagInput(true)}>
-                  <XStack
-                    bg="$glassBg"
-                    borderWidth={1}
-                    borderColor="$glassBorder"
-                    br="$10"
-                    w={44}
-                    h={44}
-                    ai="center"
-                    jc="center"
-                  >
-                    <Plus size={16} color="$colorMuted" />
-                  </XStack>
-                </Pressable>
-              </XStack>
-            </ScrollView>
-          </YStack>
-
-          <YStack gap="$3">
-            <XStack jc="space-between" ai="center">
-              <SectionTitle tone="eyebrow">
-                Modules ({visibleModules.length})
-              </SectionTitle>
-              {visibleModules.length > 0 && (
-                <AppButton
-                  variant="ghost"
-                  size="sm"
-                  icon={<Plus size={16} color="$color" />}
+              {visibleModules.map((mod, index) => (
+                <FolderModuleRow
+                  key={mod.id}
+                  index={index}
+                  name={mod.name}
+                  itemsCount={mod.itemsCount}
+                  tags={mod.tags.map((t) => t.name)}
+                  progress={mod.progress}
+                  scrollY={scrollY}
+                  listTop={listTop}
                   onPress={() =>
                     router.push({
-                      pathname: "/folder/add-modules" as any,
-                      params: { folderId: id, folderName: folder.name },
+                      pathname: "/module/[id]",
+                      params: { id: mod.id },
                     })
                   }
-                >
-                  Add
-                </AppButton>
-              )}
-            </XStack>
-
-            {visibleModules.length === 0 ? (
-              <StateCard
-                tone="empty"
-                icon={BookOpen}
-                title="This folder is empty"
-                subtitle="Add your first module to get going"
-                buttonLabel="Add study materials"
-                onButtonPress={() =>
-                  router.push({
-                    pathname: "/folder/add-modules" as any,
-                    params: { folderId: id, folderName: folder.name },
-                  })
-                }
-              />
-            ) : (
-              <YStack gap="$3">
-                {visibleModules.map((mod) => (
-                  <ModuleCard
-                    key={mod.id}
-                    module={mod}
-                    removeButton={true}
-                    onRemoveButtonPress={() => handleRemoveModule(mod.id)}
-                    onPress={() =>
-                      router.push({
-                        pathname: "/module/[id]",
-                        params: { id: mod.id },
-                      })
-                    }
-                  />
-                ))}
-              </YStack>
-            )}
-          </YStack>
+                />
+              ))}
+            </YStack>
+          )}
         </YStack>
-      </ScrollView>
+      </Animated.ScrollView>
 
-      {/* Edit folder sheet */}
-      <AppSheet
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        title="Edit Folder"
-        snapPoints={[50]}
-      >
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          bottomOffset={40}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ gap: 16 }}
-        >
-          <ImagePickerAvatar
-            imageUri={editIconUri}
-            defaultColor="#22222B"
-            onImageSelected={setEditIconUri}
-          />
-
-          <FormInput
-            control={editForm.control}
-            name="name"
-            variant="glass"
-            inputSize="lg"
-            placeholder="Folder name"
-          />
-
-          <AppButton onPress={handleEdit} loading={editLoading}>
-            Save
-          </AppButton>
-        </KeyboardAwareScrollView>
-      </AppSheet>
-
-      {/* Add tag sheet */}
-      <AppSheet
-        open={showTagInput}
-        onOpenChange={(open: boolean) => {
-          setShowTagInput(open);
-          if (!open) tagForm.reset({ tag: "" });
-        }}
-        title="Add Tag"
-        snapPoints={[30]}
-      >
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          bottomOffset={40}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ gap: 16 }}
-        >
-          <FormInput
-            control={tagForm.control}
-            name="tag"
-            variant="glass"
-            inputSize="sm"
-            placeholder="Tag name"
-            onSubmitEditing={handleAddTag}
-          />
-
-          <AppButton onPress={handleAddTag}>Add</AppButton>
-        </KeyboardAwareScrollView>
-      </AppSheet>
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
     </YStack>
   );
 }

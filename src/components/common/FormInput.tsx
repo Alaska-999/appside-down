@@ -5,7 +5,6 @@ import {
 } from "@/src/components/ui/InputShell";
 import { AlertCircle } from "lucide-react-native";
 import { forwardRef, ReactNode, Ref, useState } from "react";
-import type { TextInput } from "react-native";
 import {
   Control,
   Controller,
@@ -13,7 +12,15 @@ import {
   Path,
   useFormContext,
 } from "react-hook-form";
-import { Input, InputProps, TamaguiElement, Text, XStack, YStack } from "tamagui";
+import type { TextInput } from "react-native";
+import {
+  Input,
+  InputProps,
+  TamaguiElement,
+  Text,
+  XStack,
+  YStack,
+} from "tamagui";
 
 type FormInputVariant = InputShellVariant | "bordered";
 type FormInputSize = InputShellSize;
@@ -52,7 +59,8 @@ function FormInputInner<T extends FieldValues>(
 ) {
   const formContext = useFormContext();
   const [focused, setFocused] = useState(false);
-  const shellVariant: InputShellVariant = variant === "bordered" ? "well" : variant;
+  const shellVariant: InputShellVariant =
+    variant === "bordered" ? "well" : variant;
 
   return (
     <Controller
@@ -61,7 +69,8 @@ function FormInputInner<T extends FieldValues>(
       render={({ field, fieldState }) => {
         const value = (field.value as string) ?? "";
         const nearLimit =
-          maxLength !== undefined && value.length >= maxLength - Math.max(3, Math.ceil(maxLength * 0.15));
+          maxLength !== undefined &&
+          value.length >= maxLength - Math.max(3, Math.ceil(maxLength * 0.15));
 
         return (
           <YStack width="100%" gap={6}>
@@ -101,7 +110,9 @@ function FormInputInner<T extends FieldValues>(
                   const textInputNode = node as TextInput | null;
                   field.ref(textInputNode);
                   if (typeof ref === "function") ref(textInputNode);
-                  else if (ref) (ref as { current: TextInput | null }).current = textInputNode;
+                  else if (ref)
+                    (ref as { current: TextInput | null }).current =
+                      textInputNode;
                 }}
                 value={value}
                 onChangeText={(text) => {

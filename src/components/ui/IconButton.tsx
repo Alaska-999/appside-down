@@ -17,8 +17,10 @@ import { Button, ButtonProps, YStack, YStackProps } from "tamagui";
 
 type IconButtonVariant = "glass" | "acc" | "liquidGlass" | "badge" | "danger";
 
-interface IconButtonProps
-  extends Omit<ButtonProps, "icon" | "onPress" | "size" | "variant"> {
+interface IconButtonProps extends Omit<
+  ButtonProps,
+  "icon" | "onPress" | "size" | "variant"
+> {
   icon: ReactElement;
   variant?: IconButtonVariant;
   size?: number;
@@ -44,7 +46,7 @@ const LEGACY_VARIANT_STYLES: Record<
 export function IconButton({
   icon,
   variant = "glass",
-  size = 48,
+  size,
   onPress,
   ...rest
 }: IconButtonProps) {
@@ -54,11 +56,13 @@ export function IconButton({
   };
 
   if (variant === "liquidGlass") {
+    const lgSize = size ?? 44;
+    const lgRadius = lgSize / 2;
     return (
       <YStack
-        w={44}
-        h={44}
-        br={22}
+        w={lgSize}
+        h={lgSize}
+        br={lgRadius}
         ai="center"
         jc="center"
         onPress={handlePress}
@@ -76,11 +80,11 @@ export function IconButton({
           l={0}
           r={0}
           b={0}
-          br={22}
+          br={lgRadius}
           overflow="hidden"
           bg="$surfaceGlassFaint"
         >
-          <LiquidGlass intensity={20} tint="default" borderRadius={22} />
+          <LiquidGlass intensity={8} tint="default" borderRadius={lgRadius} />
           <View
             pointerEvents="none"
             style={{
@@ -89,7 +93,7 @@ export function IconButton({
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: "rgba(255,255,255,0.06)",
+              backgroundColor: "rgba(157, 166, 174, 0.05)",
             }}
           />
           <View
@@ -100,7 +104,7 @@ export function IconButton({
               left: 8,
               right: 8,
               height: 1,
-              backgroundColor: "rgba(255,255,255,0.34)",
+              backgroundColor: "rgba(255, 255, 255, 0.04)",
             }}
           />
           <View
@@ -111,7 +115,7 @@ export function IconButton({
               left: 8,
               right: 8,
               height: 1,
-              backgroundColor: "rgba(120,220,255,0.16)",
+              backgroundColor: "rgba(204, 237, 249, 0.03)",
             }}
           />
           <View
@@ -119,33 +123,34 @@ export function IconButton({
             style={{
               position: "absolute",
               left: 0,
-              top: 8,
-              bottom: 8,
+              top: 7,
+              bottom: 7,
               width: 1,
-              backgroundColor: "rgba(255,190,220,0.1)",
+              backgroundColor: "rgba(160, 214, 239, 0.06)",
             }}
           />
         </YStack>
-        <GradientBorder radius={22} preset="lens" />
+        <GradientBorder radius={lgRadius} preset="lens" />
         {icon}
       </YStack>
     );
   }
 
   if (variant === "glass" || variant === "acc") {
-    const radius = size / 2;
+    const resolvedSize = size ?? 48;
+    const radius = resolvedSize / 2;
     return (
       <Pressable
         onPress={handlePress}
-        hitSlop={Math.max(0, (44 - size) / 2)}
+        hitSlop={Math.max(0, (44 - resolvedSize) / 2)}
         style={({ pressed }) => ({
-          transform: [{ scale: pressed ? 0.92 : 1 }],
+          transform: [{ scale: pressed ? 0.95 : 1 }],
         })}
       >
         {({ pressed }) => (
           <YStack
-            w={size}
-            h={size}
+            w={resolvedSize}
+            h={resolvedSize}
             br={radius}
             ai="center"
             jc="center"
@@ -154,13 +159,21 @@ export function IconButton({
               ? {
                   shadowColor: "rgba(45,212,191,1)",
                   shadowOffset: { width: 0, height: 4 },
-                  shadowRadius: 10,
-                  shadowOpacity: 0.6,
+                  shadowRadius: 8,
+                  shadowOpacity: 0.5,
                 }
               : null)}
             {...(rest as YStackProps)}
           >
-            <YStack pos="absolute" t={0} l={0} r={0} b={0} br={radius} overflow="hidden">
+            <YStack
+              pos="absolute"
+              t={0}
+              l={0}
+              r={0}
+              b={0}
+              br={radius}
+              overflow="hidden"
+            >
               {variant === "acc" ? (
                 <LinearGradient
                   colors={["#2DD4BF", "#A3E635"]}
@@ -174,7 +187,9 @@ export function IconButton({
                   tint="default"
                   borderRadius={radius}
                   backgroundColor={
-                    pressed ? "rgba(220,255,245,0.13)" : "rgba(220,255,245,0.07)"
+                    pressed
+                      ? "rgba(220,255,245,0.13)"
+                      : "rgba(220,255,245,0.07)"
                   }
                 />
               )}
@@ -246,7 +261,13 @@ export function AppFab({
         <Animated.View
           pointerEvents="none"
           style={[
-            { position: "absolute", top: -24, left: -24, width: 116, height: 116 },
+            {
+              position: "absolute",
+              top: -24,
+              left: -24,
+              width: 116,
+              height: 116,
+            },
             haloStyle,
           ]}
         >

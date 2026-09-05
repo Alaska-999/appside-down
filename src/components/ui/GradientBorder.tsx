@@ -124,6 +124,7 @@ type GradientBorderProps = {
   positions?: number[];
   sweep?: boolean;
   spinDuration?: number;
+  sweepStartDeg?: number;
 };
 
 function toCorners(radius: number | CornerRadii): CornerRadii {
@@ -155,6 +156,7 @@ export function GradientBorder({
   positions,
   sweep = false,
   spinDuration,
+  sweepStartDeg = 0,
 }: GradientBorderProps) {
   const [size, setSize] = useState({ w: 0, h: 0 });
   const reducedMotion = useReducedMotion();
@@ -172,7 +174,7 @@ export function GradientBorder({
   }, [spinning, spinDuration, spin]);
 
   const spinTransform = useDerivedValue(() => [
-    { rotate: (spin.value * Math.PI) / 180 },
+    { rotate: ((spin.value + sweepStartDeg) * Math.PI) / 180 },
   ]);
   const presetDef = PRESETS[preset];
   const resolvedAngle = angle ?? presetDef.angle;
@@ -228,7 +230,7 @@ export function GradientBorder({
                 colors={resolvedColors}
                 positions={resolvedPositions}
                 origin={vec(size.w / 2, size.h / 2)}
-                transform={spinning ? spinTransform : undefined}
+                transform={spinning || sweepStartDeg !== 0 ? spinTransform : undefined}
               />
             </Path>
           ) : (

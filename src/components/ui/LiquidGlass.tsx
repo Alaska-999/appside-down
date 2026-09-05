@@ -49,6 +49,7 @@ export function LiquidGlass({
       <BlurView
         intensity={intensity}
         tint={tint}
+        pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
           {

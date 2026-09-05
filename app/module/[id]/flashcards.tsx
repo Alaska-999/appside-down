@@ -3,30 +3,24 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
-import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { IconButton } from "@/src/components/ui/IconButton";
-import { ScreenAtmosphere } from "@/src/components/ui/ScreenAtmosphere";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SyncingPill } from "@/src/components/ui/SyncingPill";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
 import { soundComplete } from "@/src/utils/sounds";
-import { ArrowLeft, ArrowRight, RotateCcw, Settings2 } from "@tamagui/lucide-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { RotateCcw, Settings2 } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { PortalProvider, XStack, YStack } from "tamagui";
-
-const SWIPE_HINT_FADE_AFTER = 3;
-const SWIPE_HINT_FADE_DURATION = 400;
-
-const MOCKUP_SCALE = 390 / 235;
+import { PortalProvider, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
+  const currentModule = useGameStore((state) => state.currentModule);
   const activeCards = useGameStore((state) => state.activeCards);
   const currentIndex = useGameStore((state) => state.currentIndex);
   const knownPiles = useGameStore((state) => state.knownPiles);
@@ -43,33 +37,22 @@ export default function FlashcardsGame() {
   const flush = useStudyQueueStore((state) => state.flush);
   const flushing = useStudyQueueStore((state) => state.flushing);
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
 
   const [revertCount, setRevertCount] = useState(0);
-  const [lastSwipeDirection, setLastSwipeDirection] = useState<
-    "left" | "right"
-  >("right");
+  const [lastSwipeDirection, setLastSwipeDirection] = useState<"left" | "right">("right");
+  const [decision, setDecision] = useState<SwipeDecision>("idle");
 
-  const swipeHintOpacity = useSharedValue(0.6);
-  const swipeCountRef = useRef(0);
-
-  const registerSwipeForHintFade = useCallback(() => {
-    swipeCountRef.current += 1;
-    if (swipeCountRef.current === SWIPE_HINT_FADE_AFTER) {
-      swipeHintOpacity.value = withTiming(0, {
-        duration: SWIPE_HINT_FADE_DURATION,
-      });
-    }
-  }, [swipeHintOpacity]);
-
-  const swipeHintAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: swipeHintOpacity.value,
-  }));
+  const litSide =
+    decision === "know" || decision === "dragRight"
+      ? "known"
+      : decision === "learning" || decision === "dragLeft"
+        ? "learning"
+        : null;
 
   const handleSwipeRight = useCallback(() => {
     setLastSwipeDirection("right");
     hapticSwipe();
-    registerSwipeForHintFade();
     const card = activeCards[currentIndex];
     if (card) {
       addEvent({
@@ -80,12 +63,11 @@ export default function FlashcardsGame() {
       });
     }
     swipeRight();
-  }, [swipeRight, activeCards, currentIndex, addEvent, registerSwipeForHintFade]);
+  }, [swipeRight, activeCards, currentIndex, addEvent]);
 
   const handleSwipeLeft = useCallback(() => {
     setLastSwipeDirection("left");
     hapticSwipe();
-    registerSwipeForHintFade();
     const card = activeCards[currentIndex];
     if (card) {
       addEvent({
@@ -96,7 +78,7 @@ export default function FlashcardsGame() {
       });
     }
     swipeLeft();
-  }, [swipeLeft, activeCards, currentIndex, addEvent, registerSwipeForHintFade]);
+  }, [swipeLeft, activeCards, currentIndex, addEvent]);
 
   const handleRevert = useCallback(() => {
     if (currentIndex <= 0) return;
@@ -147,28 +129,23 @@ export default function FlashcardsGame() {
   return (
     <PortalProvider>
       <YStack f={1} bg="$background">
-        <ScreenAtmosphere dim />
-        <ScreenHeaderFlashcards
-          rightAction={
-            <IconButton
-              icon={<Settings2 size="$1.5" color="$color" />}
-              variant="liquidGlass"
-              onPress={() => {
-                setSettingsSheetOpen(true);
-              }}
-            />
-          }
-          total={activeCards.length.toString()}
-          progress={currentIndex.toString()}
-          onClose={
-            isComplete
-              ? () => {
-                  restart(true);
-                  router.back();
-                }
-              : undefined
-          }
-        />
+        {!isComplete && <BackgroundMesh preset="flash" animated />}
+
+        {!isComplete && (
+          <ScreenHeaderFlashcards
+            title={currentModule?.name ?? ""}
+            known={knownPiles.length}
+            learning={stillLearningPiles.length}
+            litSide={litSide}
+            rightAction={
+              <IconButton
+                icon={<Settings2 size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                variant="liquidGlass"
+                onPress={() => setSettingsSheetOpen(true)}
+              />
+            }
+          />
+        )}
 
         <FlashcardsSettingsSheet
           open={settingsSheetOpen}
@@ -176,114 +153,51 @@ export default function FlashcardsGame() {
         />
 
         {flushing && !isComplete && (
-          <SyncingPill pos="absolute" top={insets.top + 84} right={19} zIndex={10} />
+          <SyncingPill pos="absolute" top={screen.top + 84} right={19} zIndex={10} />
         )}
 
         {isComplete ? (
           <FlashcardsComplete
+            onClose={() => {
+              restart(true);
+              router.back();
+            }}
             total={activeCards.length}
             known={knownPiles.length}
             stillLearning={stillLearningPiles.length}
           />
         ) : (
-          <YStack f={1} mt={12 * MOCKUP_SCALE} overflow="hidden">
-            <LinearGradient
-              colors={["rgba(248,113,113,0.4)", "rgba(248,113,113,0)"]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                top: "22%",
-                bottom: "24%",
-                left: -13 * MOCKUP_SCALE,
-                width: 50 * MOCKUP_SCALE,
-                zIndex: 2,
-              }}
-            />
-            <LinearGradient
-              colors={["rgba(163,230,53,0.45)", "rgba(163,230,53,0)"]}
-              start={{ x: 1, y: 0.5 }}
-              end={{ x: 0, y: 0.5 }}
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                top: "22%",
-                bottom: "24%",
-                right: -13 * MOCKUP_SCALE,
-                width: 50 * MOCKUP_SCALE,
-                zIndex: 2,
-              }}
-            />
-
-            {settings.sortByPiles && (
-              <XStack justifyContent="space-between" px="$5" mt="$3" zIndex={3}>
-                <StatusPill
-                  tone="learning"
-                  count={stillLearningPiles.length}
-                  label="learning"
-                />
-                <StatusPill
-                  tone="known"
-                  count={knownPiles.length}
-                  label="known"
-                />
-              </XStack>
-            )}
-
-            <YStack f={1} pos="relative">
+          <YStack f={1} px={16} pt={20} pb={20} ai="center" jc="center">
+            <YStack width="100%" f={1} maxHeight={500}>
               <FlashcardLg
                 card={activeCards[currentIndex]}
                 revertDirection={lastSwipeDirection}
-                showDefinitionFirst={
-                  settings.cardOrientation === "definition_first"
-                }
+                showDefinitionFirst={settings.cardOrientation === "definition_first"}
                 onStar={handleToggleStar}
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
+                onDecisionChange={setDecision}
                 revertKey={revertCount}
               />
-
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  {
-                    position: "absolute",
-                    left: 34 * MOCKUP_SCALE,
-                    bottom: 34 * MOCKUP_SCALE,
-                    zIndex: 4,
-                  },
-                  swipeHintAnimatedStyle,
-                ]}
-              >
-                <ArrowLeft size={16 * MOCKUP_SCALE} color="#FCA5A5" />
-              </Animated.View>
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  {
-                    position: "absolute",
-                    right: 34 * MOCKUP_SCALE,
-                    bottom: 34 * MOCKUP_SCALE,
-                    zIndex: 4,
-                  },
-                  swipeHintAnimatedStyle,
-                ]}
-              >
-                <ArrowRight size={16 * MOCKUP_SCALE} color="#A3E635" />
-              </Animated.View>
             </YStack>
+          </YStack>
+        )}
 
-            <YStack alignItems="center" mb="$5" gap={8 * MOCKUP_SCALE} zIndex={3}>
-              <IconButton
-                icon={<RotateCcw size="$1.5" color="$colorSecondary" />}
-                variant="glass"
-                size={40 * MOCKUP_SCALE}
-                disabled={currentIndex === 0}
-                opacity={currentIndex === 0 ? 0.3 : 1}
-                onPress={handleRevert}
-              />
-            </YStack>
+        {!isComplete && (
+          <YStack alignItems="center" pt={8} pb={screen.insets.bottom + 16} zIndex={3}>
+            <IconButton
+              icon={
+                <RotateCcw
+                  size={22}
+                  color={currentIndex === 0 ? "#2E3A44" : "#EAF7FF"}
+                  strokeWidth={2}
+                />
+              }
+              variant="liquidGlass"
+              size={52}
+              disabled={currentIndex === 0}
+              onPress={handleRevert}
+            />
           </YStack>
         )}
       </YStack>

@@ -9,11 +9,37 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { YStack, YStackProps } from "tamagui";
 
 const GLOW_PAD = 20;
+const FOCUS_IN_MS = 260;
+const FOCUS_OUT_MS = 180;
+const FOCUS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
+
+function useFocusProgress(focused: boolean) {
+  const reduced = useReducedMotion();
+  const progress = useSharedValue(focused ? 1 : 0);
+  useEffect(() => {
+    progress.value = reduced
+      ? focused
+        ? 1
+        : 0
+      : withTiming(focused ? 1 : 0, {
+          duration: focused ? FOCUS_IN_MS : FOCUS_OUT_MS,
+          easing: FOCUS_EASING,
+        });
+  }, [focused, reduced, progress]);
+  return progress;
+}
 
 export function OuterGlow({
   radius,
@@ -39,7 +65,11 @@ export function OuterGlow({
     if (innerW <= 0 || innerH <= 0) return null;
     const path = Skia.Path.Make();
     path.addRRect(
-      Skia.RRectXY(Skia.XYWHRect(GLOW_PAD, GLOW_PAD, innerW, innerH), radius, radius),
+      Skia.RRectXY(
+        Skia.XYWHRect(GLOW_PAD, GLOW_PAD, innerW, innerH),
+        radius,
+        radius,
+      ),
     );
     return path;
   }, [innerW, innerH, radius]);
@@ -91,19 +121,43 @@ export const INPUT_SIZE_STYLES: Record<
   lg: { height: controlHeight.lg, radius: 18, px: 19 },
 };
 
-const WELL_BORDERS: Record<InputShellState, { colors: string[]; positions: number[] }> = {
-  default: { colors: ["rgba(0,0,0,0.5)", "rgba(220,255,245,0.11)"], positions: [0, 1] },
-  focus: { colors: ["rgba(94,234,212,0.45)", "rgba(94,234,212,0.18)"], positions: [0, 1] },
-  error: { colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"], positions: [0, 1] },
-  good: { colors: ["rgba(163,230,53,0.4)", "rgba(163,230,53,0.15)"], positions: [0, 1] },
+const WELL_BORDERS: Record<
+  InputShellState,
+  { colors: string[]; positions: number[] }
+> = {
+  default: {
+    colors: [
+      "rgba(0, 0, 0, 0.1)",
+      "rgba(140, 161, 159, 0.14)",
+      "rgba(163, 187, 180, 0.18)",
+    ],
+    positions: [0, 0.8, 1],
+  },
+  focus: {
+    colors: [
+      "rgba(66, 242, 215, 0.67)",
+      "rgba(175, 246, 234, 0.45)",
+      "rgba(178, 242, 219, 0.45)",
+      "rgba(82, 227, 172, 0.6)",
+    ],
+    positions: [0, 0.3, 0.7, 1],
+  },
+  error: {
+    colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"],
+    positions: [0, 1],
+  },
+  good: {
+    colors: ["rgba(163,230,53,0.4)", "rgba(163,230,53,0.15)"],
+    positions: [0, 1],
+  },
 };
 
 const RINGS: Record<
   Exclude<InputShellState, "default">,
   { width: number; color: string }
 > = {
-  focus: { width: 1.5, color: "rgba(94,234,212,0.7)" },
-  error: { width: 1.5, color: "rgba(239,68,68,0.75)" },
+  focus: { width: 1.4, color: "rgba(94,234,212,0.15)" },
+  error: { width: 1.4, color: "rgba(239,68,68,0.75)" },
   good: { width: 1.3, color: "rgba(163,230,53,0.55)" },
 };
 
@@ -127,6 +181,18 @@ export function InputShell({
 }: InputShellProps) {
   const s = INPUT_SIZE_STYLES[size];
   const ring = state !== "default" ? RINGS[state] : null;
+  const focusProgress = useFocusProgress(state === "focus" && !disabled);
+  const focusGlowStyle = useAnimatedStyle(() => ({
+    opacity: focusProgress.value,
+    transform: [{ scale: 0.985 + 0.015 * focusProgress.value }],
+  }));
+  const focusRingStyle = useAnimatedStyle(() => ({
+    opacity: focusProgress.value,
+  }));
+  const underlineStyle = useAnimatedStyle(() => ({
+    opacity: focusProgress.value,
+    transform: [{ scaleX: 0.6 + 0.4 * focusProgress.value }],
+  }));
 
   if (variant === "underline") {
     return (
@@ -141,9 +207,23 @@ export function InputShell({
         <YStack fd="row" ai="center" gap={10}>
           {children}
         </YStack>
-        {state === "focus" ? (
-          <View
-            style={{
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 1,
+            backgroundColor:
+              state === "error"
+                ? "rgba(239,68,68,0.6)"
+                : "rgba(220,255,245,0.18)",
+          }}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
               position: "absolute",
               left: 0,
               right: 0,
@@ -153,28 +233,17 @@ export function InputShell({
               shadowOffset: { width: 0, height: 0 },
               shadowRadius: 7,
               shadowOpacity: 0.8,
-            }}
-          >
-            <LinearGradient
-              colors={["#2DD4BF", "#A3E635"]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={StyleSheet.absoluteFill}
-            />
-          </View>
-        ) : (
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 1,
-              backgroundColor:
-                state === "error" ? "rgba(239,68,68,0.6)" : "rgba(220,255,245,0.18)",
-            }}
+            },
+            underlineStyle,
+          ]}
+        >
+          <LinearGradient
+            colors={["#2DD4BF", "#A3E635"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
           />
-        )}
+        </Animated.View>
       </YStack>
     );
   }
@@ -186,10 +255,17 @@ export function InputShell({
       br={s.radius}
       pos="relative"
       opacity={disabled ? 0.42 : 1}
-      transform={[{ translateY: state === "focus" ? -1 : 0 }]}
       {...rest}
     >
-      <YStack pos="absolute" t={0} l={0} r={0} b={0} br={s.radius} overflow="hidden">
+      <YStack
+        pos="absolute"
+        t={0}
+        l={0}
+        r={0}
+        b={0}
+        br={s.radius}
+        overflow="hidden"
+      >
         {variant === "glass" ? (
           <LiquidGlass
             intensity={45}
@@ -200,18 +276,39 @@ export function InputShell({
         ) : (
           <>
             <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: state === "focus" ? "rgba(8,16,20,0.55)" : "rgba(4,7,10,0.5)" }]}
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor:
+                    state === "focus"
+                      ? "rgba(8,16,20,0.55)"
+                      : "rgba(4,7,10,0.5)",
+                },
+              ]}
             />
             <LinearGradient
               colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0)"]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={{ position: "absolute", top: 0, left: 0, right: 0, height: 9 }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 9,
+              }}
               pointerEvents="none"
             />
             <View
               pointerEvents="none"
-              style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, backgroundColor: "rgba(220,255,245,0.06)" }}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 1,
+                backgroundColor: "rgba(220,255,245,0.06)",
+              }}
             />
           </>
         )}
@@ -231,26 +328,39 @@ export function InputShell({
           positions={WELL_BORDERS[state].positions}
         />
       )}
-      {state === "focus" && !disabled && (
-        <OuterGlow radius={s.radius} color="rgba(45,212,191,0.4)" />
+      {!disabled && (
+        <Animated.View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, focusGlowStyle]}
+        >
+          <OuterGlow
+            radius={s.radius}
+            blur={7}
+            width={3.5}
+            color="rgba(45, 212, 190, 0.4)"
+          />
+        </Animated.View>
       )}
       {state === "error" && !disabled && (
         <OuterGlow radius={s.radius} color="rgba(239,68,68,0.4)" />
       )}
       {ring && (
-        <View
+        <Animated.View
           pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderRadius: s.radius,
-            borderWidth: ring.width,
-            borderColor: ring.color,
-            zIndex: 3,
-          }}
+          style={[
+            {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: s.radius,
+              borderWidth: ring.width,
+              borderColor: ring.color,
+              zIndex: 3,
+            },
+            state === "focus" ? focusRingStyle : null,
+          ]}
         />
       )}
       <YStack

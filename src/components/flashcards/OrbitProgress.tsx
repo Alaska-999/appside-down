@@ -1,263 +1,426 @@
-import { useEffect } from "react";
-import { View } from "react-native";
+import {
+  Blur,
+  Canvas,
+  Circle,
+  DashPathEffect,
+  Group,
+  LinearGradient as SkiaLinearGradient,
+  Path as SkiaPath,
+  Skia,
+  vec,
+} from "@shopify/react-native-skia";
+import { useEffect, useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
+  Easing,
+  SharedValue,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
+  withDelay,
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
 import Svg, {
-  Circle,
   Defs,
   Ellipse,
   FeGaussianBlur,
   Filter,
-  LinearGradient as SvgLinearGradient,
+  LinearGradient,
   Path,
   RadialGradient,
+  Rect,
   Stop,
 } from "react-native-svg";
 
-const MOCKUP_SCALE = 390 / 265;
-const VIEWBOX = 230;
-const CENTER = 115;
-const RADIUS = 100;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-const SIZE = VIEWBOX * MOCKUP_SCALE;
+const ORB_SIZE = 262;
+const CENTER = 131;
+const RADIUS = 116;
+const PLANET_SIZE = 130;
+const PLANET_OFFSET = (ORB_SIZE - PLANET_SIZE) / 2;
 
-function pointOnOrbit(fraction: number) {
-  const angle = (-90 + fraction * 360) * (Math.PI / 180);
-  return {
-    x: CENTER + RADIUS * Math.cos(angle),
-    y: CENTER + RADIUS * Math.sin(angle),
-  };
-}
+function Planet({ hot }: { hot: boolean }) {
+  const box = PLANET_SIZE;
+  const highlightW = box * 0.3;
+  const highlightH = box * 0.16;
+  const highlightCx = box * 0.15 + highlightW / 2;
+  const highlightCy = box * 0.11 + highlightH / 2;
 
-function Planet() {
-  const box = 120;
-  const r = box / 2;
   return (
     <View
       pointerEvents="none"
       style={{
         position: "absolute",
-        top: (CENTER - r) * MOCKUP_SCALE,
-        left: (CENTER - r) * MOCKUP_SCALE,
-        width: box * MOCKUP_SCALE,
-        height: box * MOCKUP_SCALE,
-        borderRadius: 999,
-        shadowColor: "#2dd4bf",
-        shadowOpacity: 0.55,
-        shadowRadius: 50 * MOCKUP_SCALE,
+        top: PLANET_OFFSET,
+        left: PLANET_OFFSET,
+        width: box,
+        height: box,
+        borderRadius: box / 2,
+        overflow: "hidden",
+        shadowColor: hot ? "rgba(190,242,100,0.45)" : "rgba(45,212,191,0.34)",
+        shadowOpacity: 1,
+        shadowRadius: hot ? 74 : 44,
         shadowOffset: { width: 0, height: 0 },
       }}
     >
       <Svg width="100%" height="100%" viewBox={`0 0 ${box} ${box}`}>
         <Defs>
-          <RadialGradient id="planetGrad" cx="34%" cy="30%" r="75%">
-            <Stop offset="0" stopColor="#5EEAD4" />
-            <Stop offset="0.26" stopColor="#2DD4BF" />
-            <Stop offset="0.55" stopColor="#0D9488" />
-            <Stop offset="0.82" stopColor="#0c3835" />
-            <Stop offset="1" stopColor="#0c3835" />
+          <RadialGradient id="finishPlanet" cx="34%" cy="30%" r="75%">
+            <Stop offset="0" stopColor="#4FDCC9" />
+            <Stop offset="0.24" stopColor="#1FA495" />
+            <Stop offset="0.54" stopColor="#0A625B" />
+            <Stop offset="0.84" stopColor="#051E1D" />
           </RadialGradient>
-          <Filter id="planetHighlightBlur" x="-60%" y="-60%" width="220%" height="220%">
-            <FeGaussianBlur stdDeviation={3.5} />
-          </Filter>
-          <Filter id="planetBandBlur" x="-60%" y="-60%" width="220%" height="220%">
-            <FeGaussianBlur stdDeviation={1.5} />
+          <LinearGradient id="finishTerm" x1="80%" y1="10%" x2="20%" y2="90%">
+            <Stop offset="0" stopColor="#01080A" stopOpacity={0.72} />
+            <Stop offset="0.54" stopColor="#01080A" stopOpacity={0} />
+          </LinearGradient>
+          <Filter id="finishHighlightBlur" x="-60%" y="-60%" width="220%" height="220%">
+            <FeGaussianBlur stdDeviation={4} />
           </Filter>
         </Defs>
-        <Circle cx={r} cy={r} r={r} fill="url(#planetGrad)" />
+        <Rect x={0} y={0} width={box} height={box} fill="url(#finishPlanet)" />
         <Ellipse
-          cx={37}
-          cy={22}
-          rx={19}
-          ry={10}
-          fill="rgba(255,255,255,0.55)"
-          filter="url(#planetHighlightBlur)"
-          transform={`rotate(-18 37 22)`}
+          cx={highlightCx}
+          cy={highlightCy}
+          rx={highlightW / 2}
+          ry={highlightH / 2}
+          fill="rgba(255,255,255,0.42)"
+          filter="url(#finishHighlightBlur)"
+          transform={`rotate(-18 ${highlightCx} ${highlightCy})`}
         />
-        <Ellipse
-          cx={r}
-          cy={46}
-          rx={54}
-          ry={5}
-          fill="rgba(94,234,212,0.14)"
-          filter="url(#planetBandBlur)"
-        />
-        <Ellipse
-          cx={r}
-          cy={72}
-          rx={54}
-          ry={5}
-          fill="rgba(94,234,212,0.14)"
-          opacity={0.6}
-          filter="url(#planetBandBlur)"
-        />
+        <Rect x={0} y={0} width={box} height={box} fill="url(#finishTerm)" />
       </Svg>
     </View>
   );
 }
 
 function SaturnRing() {
-  const cx = 85;
-  const cy = 22;
-  const outerRx = 85;
-  const outerRy = 22;
-  const innerRx = 71;
-  const innerRy = 16;
+  const width = 190;
+  const height = 48;
+  const cx = width / 2;
+  const cy = height / 2;
+  const outerRx = width / 2;
+  const outerRy = height / 2;
+  const innerRx = (width - 32) / 2;
+  const innerRy = (height - 12) / 2;
 
   return (
     <View
       pointerEvents="none"
       style={{
         position: "absolute",
-        top: 96 * MOCKUP_SCALE,
-        left: 30 * MOCKUP_SCALE,
-        width: 170 * MOCKUP_SCALE,
-        height: 44 * MOCKUP_SCALE,
+        top: 110,
+        left: 36,
+        width,
+        height,
+        transform: [{ rotate: "-16deg" }],
       }}
     >
-      <Svg width="100%" height="100%" viewBox="0 0 170 44">
+      <Svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
         <Path
           d={`M ${cx - outerRx} ${cy} A ${outerRx} ${outerRy} 0 0 1 ${cx + outerRx} ${cy}`}
-          stroke="rgba(163,230,53,0.32)"
+          stroke="rgba(163,230,53,0.26)"
           strokeWidth={2}
           fill="none"
-          transform={`rotate(-16 ${cx} ${cy})`}
         />
         <Path
           d={`M ${cx - innerRx} ${cy} A ${innerRx} ${innerRy} 0 0 1 ${cx + innerRx} ${cy}`}
-          stroke="rgba(94,234,212,0.22)"
+          stroke="rgba(94,234,212,0.18)"
           strokeWidth={1}
           fill="none"
-          transform={`rotate(-16 ${cx} ${cy})`}
         />
       </Svg>
     </View>
   );
 }
 
-interface OrbitProgressProps {
-  percent: number;
+function Shell({ delay, color }: { delay: number; color: string }) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0.85);
+
+  useEffect(() => {
+    scale.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(1.55, { duration: 4200, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        -1,
+        false,
+      ),
+    );
+    opacity.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(0, { duration: 4200, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        -1,
+        false,
+      ),
+    );
+  }, [delay, scale, opacity]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          top: PLANET_OFFSET,
+          left: PLANET_OFFSET,
+          width: PLANET_SIZE,
+          height: PLANET_SIZE,
+          borderRadius: PLANET_SIZE / 2,
+          borderWidth: 1,
+          borderColor: color,
+        },
+        style,
+      ]}
+    />
+  );
 }
 
-export function OrbitProgress({ percent }: OrbitProgressProps) {
-  const clamped = Math.min(1, Math.max(0, percent));
-  const dash = CIRCUMFERENCE * clamped;
-  const comet = pointOnOrbit(clamped);
-  const star = pointOnOrbit(clamped / 2);
-  const showStar = clamped > 0.04;
+function Shells() {
+  return (
+    <>
+      <Shell delay={0} color="rgba(94,234,212,0.5)" />
+      <Shell delay={1400} color="rgba(190,242,100,0.42)" />
+      <Shell delay={2800} color="rgba(94,234,212,0.3)" />
+    </>
+  );
+}
 
+function Flare({ delay, color }: { delay: number; color: string }) {
+  const scale = useSharedValue(0.52);
+  const opacity = useSharedValue(0.9);
+
+  useEffect(() => {
+    scale.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(1.28, { duration: 2600, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        -1,
+        false,
+      ),
+    );
+    opacity.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(0, { duration: 2600, easing: Easing.bezier(0.2, 0.7, 0.3, 1) }),
+        -1,
+        false,
+      ),
+    );
+  }, [delay, scale, opacity]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          top: PLANET_OFFSET,
+          left: PLANET_OFFSET,
+          width: PLANET_SIZE,
+          height: PLANET_SIZE,
+          borderRadius: PLANET_SIZE / 2,
+          borderWidth: 2,
+          borderColor: color,
+        },
+        style,
+      ]}
+    />
+  );
+}
+
+function Flares() {
+  return (
+    <>
+      <Flare delay={2600} color="rgba(190,242,100,0.85)" />
+      <Flare delay={3500} color="rgba(94,234,212,0.6)" />
+    </>
+  );
+}
+
+function CometDot() {
+  const size = 20;
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: -size / 2,
+        left: "50%",
+        marginLeft: -size / 2,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        overflow: "hidden",
+        shadowColor: "rgba(190,242,100,1)",
+        shadowOpacity: 1,
+        shadowRadius: size * 2.7,
+        shadowOffset: { width: 0, height: 0 },
+      }}
+    >
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <Defs>
+          <RadialGradient id="cometGrad" cx="35%" cy="35%" r="70%">
+            <Stop offset="0" stopColor="#FBFFF4" />
+            <Stop offset="0.55" stopColor="#BEF264" />
+            <Stop offset="0.8" stopColor="#A3E635" />
+          </RadialGradient>
+        </Defs>
+        <Rect x={0} y={0} width={size} height={size} fill="url(#cometGrad)" />
+      </Svg>
+    </View>
+  );
+}
+
+function TailDot({ offsetDeg, opacity }: { offsetDeg: number; opacity: number }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${offsetDeg}deg` }] }]}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: -4,
+          left: "50%",
+          marginLeft: -4,
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: "#BEF264",
+          opacity,
+          shadowColor: "rgba(190,242,100,0.8)",
+          shadowOpacity: 1,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 0 },
+        }}
+      />
+    </View>
+  );
+}
+
+function Comet({
+  progress,
+  fraction,
+  hot,
+}: {
+  progress: SharedValue<number>;
+  fraction: number;
+  hot: boolean;
+}) {
   const pulse = useSharedValue(1);
 
   useEffect(() => {
-    pulse.value = withRepeat(withTiming(1.3, { duration: 800 }), -1, true);
+    pulse.value = withRepeat(withTiming(1.26, { duration: 1800 }), -1, true);
   }, [pulse]);
 
-  const cometStyle = useAnimatedStyle(() => ({
+  const rotateStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${progress.value * fraction * 360}deg` }],
+  }));
+
+  const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulse.value }],
   }));
 
-  const cometSize = 16 * MOCKUP_SCALE;
-  const starSize = 6 * MOCKUP_SCALE;
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, rotateStyle]}>
+      <Animated.View style={pulseStyle}>
+        <CometDot />
+      </Animated.View>
+      {hot && (
+        <>
+          <TailDot offsetDeg={-7} opacity={0.55} />
+          <TailDot offsetDeg={-14} opacity={0.34} />
+          <TailDot offsetDeg={-22} opacity={0.18} />
+        </>
+      )}
+    </Animated.View>
+  );
+}
+
+function Arc({ progress, fraction }: { progress: SharedValue<number>; fraction: number }) {
+  const circlePath = useMemo(() => {
+    const path = Skia.Path.Make();
+    path.addCircle(CENTER, CENTER, RADIUS);
+    return path;
+  }, []);
+
+  const end = useDerivedValue(() => progress.value * fraction);
 
   return (
-    <View style={{ width: SIZE, height: SIZE, position: "relative" }}>
-      <Svg
-        width={SIZE}
-        height={SIZE}
-        viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
-        style={{ position: "absolute", transform: [{ rotate: "-90deg" }] }}
-      >
-        <Defs>
-          <SvgLinearGradient id="orbitGradient" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#2DD4BF" />
-            <Stop offset="1" stopColor="#A3E635" />
-          </SvgLinearGradient>
-          <SvgLinearGradient id="orbitTrail" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#2DD4BF" stopOpacity={0} />
-            <Stop offset="1" stopColor="#A3E635" />
-          </SvgLinearGradient>
-          <Filter id="orbitTrailBlur" x="-40%" y="-40%" width="180%" height="180%">
-            <FeGaussianBlur stdDeviation={4} />
-          </Filter>
-        </Defs>
+    <Canvas style={StyleSheet.absoluteFill}>
+      <Group transform={[{ rotate: -Math.PI / 2 }]} origin={vec(CENTER, CENTER)}>
         <Circle
           cx={CENTER}
           cy={CENTER}
           r={RADIUS}
-          fill="none"
-          stroke="rgba(220,255,245,0.08)"
+          style="stroke"
           strokeWidth={3}
-          strokeDasharray="4 8"
-        />
-        <Circle
-          cx={CENTER}
-          cy={CENTER}
-          r={RADIUS}
-          fill="none"
-          stroke="url(#orbitTrail)"
-          strokeWidth={7}
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${CIRCUMFERENCE}`}
-          opacity={0.35}
-          filter="url(#orbitTrailBlur)"
-        />
-        <Circle
-          cx={CENTER}
-          cy={CENTER}
-          r={RADIUS}
-          fill="none"
-          stroke="url(#orbitGradient)"
-          strokeWidth={4.5}
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${CIRCUMFERENCE}`}
-        />
-      </Svg>
+          color="rgba(220,255,245,0.07)"
+        >
+          <DashPathEffect intervals={[3, 9]} />
+        </Circle>
+        <SkiaPath
+          path={circlePath}
+          start={0}
+          end={end}
+          style="stroke"
+          strokeWidth={10}
+          strokeCap="round"
+          opacity={0.55}
+        >
+          <Blur blur={6} />
+          <SkiaLinearGradient
+            start={vec(0, 0)}
+            end={vec(ORB_SIZE, ORB_SIZE)}
+            colors={["#2DD4BF", "#BEF264"]}
+          />
+        </SkiaPath>
+        <SkiaPath
+          path={circlePath}
+          start={0}
+          end={end}
+          style="stroke"
+          strokeWidth={5.5}
+          strokeCap="round"
+        >
+          <SkiaLinearGradient
+            start={vec(0, 0)}
+            end={vec(ORB_SIZE, ORB_SIZE)}
+            colors={["#2DD4BF", "#BEF264"]}
+          />
+        </SkiaPath>
+      </Group>
+    </Canvas>
+  );
+}
 
-      <Planet />
+interface OrbitProgressProps {
+  progress: SharedValue<number>;
+  fraction: number;
+  hot?: boolean;
+}
+
+export function OrbitProgress({ progress, fraction, hot = false }: OrbitProgressProps) {
+  return (
+    <View style={{ width: ORB_SIZE, height: ORB_SIZE }}>
+      <Arc progress={progress} fraction={fraction} />
+      <Shells />
+      <Planet hot={hot} />
       <SaturnRing />
-
-      {showStar && (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: star.y * MOCKUP_SCALE - starSize / 2,
-            left: star.x * MOCKUP_SCALE - starSize / 2,
-            width: starSize,
-            height: starSize,
-            borderRadius: 999,
-            backgroundColor: "#5EEAD4",
-            shadowColor: "rgba(94,234,212,0.9)",
-            shadowOpacity: 1,
-            shadowRadius: 8 * MOCKUP_SCALE,
-            shadowOffset: { width: 0, height: 0 },
-          }}
-        />
-      )}
-
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          {
-            position: "absolute",
-            top: comet.y * MOCKUP_SCALE - cometSize / 2,
-            left: comet.x * MOCKUP_SCALE - cometSize / 2,
-            width: cometSize,
-            height: cometSize,
-            borderRadius: 999,
-            backgroundColor: "#A3E635",
-            shadowColor: "rgba(163,230,53,1)",
-            shadowOpacity: 1,
-            shadowRadius: 20 * MOCKUP_SCALE,
-            shadowOffset: { width: 0, height: 0 },
-          },
-          cometStyle,
-        ]}
-      />
+      {hot && <Flares />}
+      <Comet progress={progress} fraction={fraction} hot={hot} />
     </View>
   );
 }

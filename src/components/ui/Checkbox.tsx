@@ -5,18 +5,20 @@ import { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
-type ControlSize = "lg" | "md" | "sm";
+type ControlSize = "lg" | "md" | "sm" | "xs";
 
 const CHECKBOX_SIZES: Record<ControlSize, { box: number; radius: number; check: number }> = {
   lg: { box: 30, radius: 10, check: 17 },
   md: { box: 26, radius: 9, check: 15 },
   sm: { box: 22, radius: 8, check: 13 },
+  xs: { box: 24, radius: 8, check: 14 },
 };
 
 const RADIO_SIZES: Record<ControlSize, { box: number; dot: number }> = {
   lg: { box: 30, dot: 15 },
   md: { box: 26, dot: 13 },
   sm: { box: 22, dot: 11 },
+  xs: { box: 24, dot: 12 },
 };
 
 export function Checkbox({

@@ -9,6 +9,7 @@ import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { GlowTone } from "@/src/components/ui/GlowSurface";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
@@ -292,7 +293,11 @@ export default function Home() {
             }
             ListEmptyComponent={
               !searchList.initialLoading ? (
-                <Text color="$colorMuted">No public modules found</Text>
+                <SearchEmptyState
+                  query={debouncedSearch}
+                  noun="modules"
+                  onCreate={() => router.push("/module/create")}
+                />
               ) : null
             }
           />

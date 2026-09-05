@@ -43,6 +43,7 @@ export interface Tag {
     id: string;
     folderId: string;
     name: string;
+    moduleCount?: number;
 }
 
 export interface Folder {
@@ -71,7 +72,6 @@ export interface Module {
     isPublic: boolean
     itemsCount: number;
     description?: string | null;
-    tags?: string[];
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];

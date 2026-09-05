@@ -9,6 +9,7 @@ import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
@@ -19,7 +20,9 @@ import {
   AlertTriangle,
   ArrowDownAZ,
   ArrowDownUp,
+  Captions,
   Clock,
+  FolderPlus,
   Search,
   Star,
 } from "lucide-react-native";
@@ -171,9 +174,22 @@ const FoldersPane = memo(function FoldersPane({
             onButtonPress={retry}
           />
         ) : (
-          <Text color="$colorMuted">
-            {search ? "No folders match your search" : "No folders yet"}
-          </Text>
+          search ? (
+            <SearchEmptyState
+              query={search}
+              noun="folders"
+              onCreate={() => router.push("/folder/create")}
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={FolderPlus}
+              title="No folders yet"
+              subtitle="Group your modules by topic, course or exam."
+              buttonLabel="Create a folder"
+              onButtonPress={() => router.push("/folder/create")}
+            />
+          )
         )
       }
       ListFooterComponent={<LoadMoreFooter visible={loading && !initialLoading} />}
@@ -254,13 +270,29 @@ const ModulesPane = memo(function ModulesPane({
             onButtonPress={retry}
           />
         ) : (
-          <Text color="$colorMuted">
-            {search
-              ? "No modules match your search"
-              : sortOrder === "favs"
-                ? "No favorite modules yet"
-                : "No modules yet"}
-          </Text>
+          search ? (
+            <SearchEmptyState
+              query={search}
+              noun="modules"
+              onCreate={() => router.push("/module/create")}
+            />
+          ) : sortOrder === "favs" ? (
+            <StateCard
+              tone="empty"
+              icon={Star}
+              title="No favorites yet"
+              subtitle="Star a module and it will show up here."
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={Captions}
+              title="No modules yet"
+              subtitle="Your first deck is one tap away."
+              buttonLabel="Create a module"
+              onButtonPress={() => router.push("/module/create")}
+            />
+          )
         )
       }
       ListFooterComponent={<LoadMoreFooter visible={loading && !initialLoading} />}

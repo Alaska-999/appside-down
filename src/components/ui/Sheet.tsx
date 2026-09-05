@@ -2,8 +2,16 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronRight } from "lucide-react-native";
-import { Children, ComponentType, ReactNode, createContext, useContext, useEffect } from "react";
-import { Pressable, View } from "react-native";
+import {
+  Children,
+  ComponentType,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
+import { Keyboard, Pressable, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -13,6 +21,8 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Sheet, Text, useTheme, XStack, YStack } from "tamagui";
 
+const SHEET_SKIRT_HEIGHT = 600;
+
 const SHEET_RADIUS = {
   topLeft: 35,
   topRight: 35,
@@ -20,11 +30,19 @@ const SHEET_RADIUS = {
   bottomLeft: 0,
 };
 
+type SheetBlur = "default" | "strong";
+
+const SHEET_BLUR: Record<SheetBlur, number> = {
+  default: 45,
+  strong: 56,
+};
+
 interface AppSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title?: string;
   subtitle?: string;
+  blur?: SheetBlur;
   snapPoints?: number[];
   leftAction?: ReactNode;
   rightAction?: ReactNode;
@@ -36,6 +54,7 @@ export function AppSheet({
   onOpenChange,
   title,
   subtitle,
+  blur = "default",
   snapPoints,
   leftAction,
   rightAction,
@@ -43,6 +62,7 @@ export function AppSheet({
 }: AppSheetProps) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const touchStartY = useRef(0);
   const hasHeaderActions = Boolean(leftAction || rightAction);
   const fitContent = !snapPoints;
 
@@ -65,24 +85,59 @@ export function AppSheet({
         pt={14}
         px={24}
         pb={30 + insets.bottom}
-        overflow="hidden"
+        overflow="visible"
         pos="relative"
+        onTouchStart={(e) => {
+          touchStartY.current = e.nativeEvent.pageY;
+        }}
+        onTouchMove={(e) => {
+          if (e.nativeEvent.pageY - touchStartY.current > 12) Keyboard.dismiss();
+        }}
       >
-        {/* rgba(20, 27, 34, 0.3) */}
-        <LiquidGlass intensity={45} backgroundColor={theme.sheetBg.get()} />
-
         <View
           pointerEvents="none"
           style={{
             position: "absolute",
-            top: 0,
-            left: 18,
-            right: 18,
-            height: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.15)",
+            left: 0,
+            right: 0,
+            top: "100%",
+            marginTop: -1,
+            height: SHEET_SKIRT_HEIGHT,
           }}
-        />
-        <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
+        >
+          <LiquidGlass
+            intensity={SHEET_BLUR[blur]}
+            backgroundColor={theme.sheetBg.get()}
+          />
+        </View>
+        <YStack
+          pointerEvents="none"
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          btlr={35}
+          btrr={35}
+          overflow="hidden"
+        >
+          <LiquidGlass
+            intensity={SHEET_BLUR[blur]}
+            backgroundColor={theme.sheetBg.get()}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 18,
+              right: 18,
+              height: 1,
+              backgroundColor: "rgba(255, 255, 255, 0.18)",
+            }}
+          />
+          <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
+        </YStack>
 
         <Sheet.Handle
           bg="rgba(229, 251, 245, 0.4)"
@@ -146,7 +201,7 @@ export function AppSheet({
           </Text>
         )}
 
-        <YStack f={1} pos="relative" zIndex={1}>
+        <YStack f={1} pos="relative" zIndex={1} onPress={Keyboard.dismiss}>
           {children}
         </YStack>
       </Sheet.Frame>

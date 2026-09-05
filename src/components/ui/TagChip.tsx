@@ -2,7 +2,7 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { hapticTap } from "@/src/utils/haptics";
 import { Plus, X } from "lucide-react-native";
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type TagChipVariant = "default" | "on" | "add";
@@ -23,21 +23,29 @@ const CHIP_STYLES: Record<
   default: {
     textColor: "#B7CEDA",
     fill: "rgba(220,255,245,0.05)",
-    borderColors: ["rgba(255,255,255,0.44)", "rgba(255,255,255,0.04)", "rgba(150,220,255,0.2)"],
+    borderColors: [
+      "rgba(255,255,255,0.35)",
+      "rgba(255,255,255,0.04)",
+      "rgba(150,220,255,0.15)",
+    ],
     borderPositions: [0, 0.46, 1],
     glow: false,
   },
   on: {
-    textColor: "#EFFDF8",
-    fill: "rgba(220,255,245,0.05)",
-    borderColors: ["rgba(255,255,255,0.6)", "rgba(94,234,212,0.4)", "rgba(94,234,212,0.5)"],
-    borderPositions: [0, 0.6, 1],
+    textColor: "#5EEAD4",
+    fill: "rgba(45,212,191,0.14)",
+    borderColors: ["rgba(45,212,191,0.45)", "rgba(45,212,191,0.45)"],
+    borderPositions: [0, 1],
     glow: true,
   },
   add: {
     textColor: "#5EEAD4",
     fill: "rgba(45,212,191,0.1)",
-    borderColors: ["rgba(255,255,255,0.44)", "rgba(255,255,255,0.04)", "rgba(150,220,255,0.2)"],
+    borderColors: [
+      "rgba(255,255,255,0.44)",
+      "rgba(255,255,255,0.04)",
+      "rgba(150,220,255,0.2)",
+    ],
     borderPositions: [0, 0.46, 1],
     glow: false,
   },
@@ -45,21 +53,24 @@ const CHIP_STYLES: Record<
 
 export function TagChip({
   label,
+  count,
   variant = "default",
   onPress,
   onRemove,
 }: {
   label: string;
+  count?: number;
   variant?: TagChipVariant;
   onPress?: () => void;
   onRemove?: () => void;
 }) {
   const s = CHIP_STYLES[variant];
+  const countColor = variant === "on" ? "#8FA8B8" : "#5A6B7A";
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={label || (variant === "add" ? "Add tag" : undefined)}
       hitSlop={5}
       onPress={
         onPress
@@ -79,28 +90,25 @@ export function TagChip({
         br={CHIP_RADIUS}
         pos="relative"
         jc="center"
-        shadowColor={s.glow ? "rgba(94,234,212,1)" : "#000"}
+        shadowColor={s.glow ? "rgb(94, 234, 213)" : "#000"}
         shadowOffset={{ width: 0, height: s.glow ? 0 : 3 }}
-        shadowRadius={s.glow ? 7 : 6}
-        shadowOpacity={s.glow ? 0.7 : 0.8}
+        shadowRadius={s.glow ? 6 : 5}
+        shadowOpacity={0.35}
       >
-        <YStack pos="absolute" t={0} l={0} r={0} b={0} br={CHIP_RADIUS} overflow="hidden">
+        <YStack
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          br={CHIP_RADIUS}
+          overflow="hidden"
+        >
           <LiquidGlass
-            intensity={28}
+            intensity={10}
             tint="default"
             borderRadius={CHIP_RADIUS}
             backgroundColor={s.fill}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 8,
-              right: 8,
-              height: 1,
-              backgroundColor: s.glow ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.3)",
-            }}
           />
         </YStack>
         <GradientBorder
@@ -109,11 +117,20 @@ export function TagChip({
           colors={s.borderColors}
           positions={s.borderPositions}
         />
-        <XStack ai="center" gap={7} zIndex={2}>
-          {variant === "add" && <Plus size={14} color="#5EEAD4" strokeWidth={2.3} />}
-          <Text fontSize={12.5} fontWeight="600" color={s.textColor}>
-            {label}
-          </Text>
+        <XStack ai="center" gap={label ? 7 : 0} zIndex={2}>
+          {variant === "add" && (
+            <Plus size={14} color="#5EEAD4" strokeWidth={2.3} />
+          )}
+          {!!label && (
+            <Text fontSize={12.5} fontWeight="600" color={s.textColor}>
+              {label}
+            </Text>
+          )}
+          {count !== undefined && (
+            <Text fontSize={12.5} fontWeight="700" color={countColor}>
+              {count}
+            </Text>
+          )}
           {onRemove && (
             <Pressable
               accessibilityRole="button"

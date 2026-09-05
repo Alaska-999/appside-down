@@ -1,10 +1,10 @@
+import { FOLDER_ICON_GRADIENTS, FolderIcon } from "@/src/components/cards/FolderIcon";
 import { AppCard } from "@/src/components/ui/Card";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { hapticTap } from "@/src/utils/haptics";
-import { LinearGradient } from "expo-linear-gradient";
 import { ChevronRight, Plus, Settings, Star } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -45,12 +45,6 @@ const HEADER_HEIGHT = 80;
 const VISIBLE_MODULES = 4;
 const EASE = Easing.bezier(0.2, 0.8, 0.3, 1);
 
-const ICON_GRADIENTS: [string, string][] = [
-  ["#2DD4BF", "#0D9488"],
-  ["#BEF264", "#A3E635"],
-  ["#5EEAD4", "#16323A"],
-];
-
 const SWEEP_COLORS = [
   "rgba(94,234,212,0)",
   "rgba(94,234,212,1)",
@@ -59,11 +53,6 @@ const SWEEP_COLORS = [
   "rgba(190,242,100,0)",
 ];
 const SWEEP_POSITIONS = [0, 0.08, 0.14, 0.26, 1];
-
-const EMOJI_ICON = /^[\p{Extended_Pictographic}\p{Emoji_Presentation}‍️]{1,4}$/u;
-
-const isImageIcon = (icon?: string | null) =>
-  !!icon && icon.trim().length > 0 && !EMOJI_ICON.test(icon.trim());
 
 function StackShadow({ expanded }: { expanded: boolean }) {
   const reduced = useReducedMotion();
@@ -117,49 +106,6 @@ function StackShadow({ expanded }: { expanded: boolean }) {
   );
 }
 
-function FolderIcon({
-  folder,
-  gradient,
-}: {
-  folder: FolderCardProps["folder"];
-  gradient: [string, string];
-}) {
-  if (isImageIcon(folder.icon)) {
-    return (
-      <YStack w={52} h={52} br={17} overflow="hidden" bg="rgba(220,255,245,0.06)">
-        <Image
-          source={{ uri: folder.icon as string }}
-          style={{ width: "100%", height: "100%" }}
-          resizeMode="cover"
-          accessibilityLabel={folder.name}
-        />
-      </YStack>
-    );
-  }
-  return (
-    <LinearGradient
-      colors={gradient}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.86, y: 0.86 }}
-      style={{
-        width: 52,
-        height: 52,
-        borderRadius: 17,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {folder.icon ? (
-        <Text fontSize={21}>{folder.icon}</Text>
-      ) : (
-        <Text fontSize={21} fontWeight="800" color="#06231F">
-          {folder.name.slice(0, 1).toUpperCase()}
-        </Text>
-      )}
-    </LinearGradient>
-  );
-}
-
 function SubRow({
   module,
   onPress,
@@ -201,7 +147,7 @@ export function FolderCard({
   onSettings,
 }: FolderCardProps) {
   const [pressed, setPressed] = useState(false);
-  const gradient = ICON_GRADIENTS[index % ICON_GRADIENTS.length];
+  const gradient = FOLDER_ICON_GRADIENTS[index % FOLDER_ICON_GRADIENTS.length];
   const moduleCount =
     folder._count?.modules ??
     folder.modules?.length ??
@@ -231,7 +177,13 @@ export function FolderCard({
               onPressOut={() => setPressed(false)}
             >
               <XStack h={HEADER_HEIGHT} px={16} ai="center" gap={14}>
-                <FolderIcon folder={folder} gradient={gradient} />
+                <FolderIcon
+                  icon={folder.icon}
+                  name={folder.name}
+                  size={52}
+                  radius={17}
+                  gradient={gradient}
+                />
                 <YStack f={1} minWidth={0}>
                   <Text
                     fontSize={17}

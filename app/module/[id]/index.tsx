@@ -3,6 +3,7 @@ import { Toggle } from "@/src/components/common/Toggle";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
 import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
+import { EditModuleSheet } from "@/src/components/flashcards/EditModuleSheet";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
@@ -216,6 +217,7 @@ export default function ModuleScreen() {
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [editModuleOpen, setEditModuleOpen] = useState(false);
   const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -379,6 +381,11 @@ export default function ModuleScreen() {
     setMenuSheetOpen(false);
     setEditSheetMounted(true);
     setTimeout(() => setEditSheetOpen(true), 300);
+  };
+
+  const openEditModule = () => {
+    setMenuSheetOpen(false);
+    setTimeout(() => setEditModuleOpen(true), 300);
   };
 
   const handleSaved = (
@@ -720,7 +727,7 @@ export default function ModuleScreen() {
               <SheetRow
                 icon={Pencil}
                 label="Edit module"
-                onPress={openEditSheet}
+                onPress={openEditModule}
               />
               <SheetRow
                 icon={Captions}
@@ -770,6 +777,15 @@ export default function ModuleScreen() {
         message={toast ?? ""}
         onDismiss={() => setToast(null)}
       />
+
+      {moduleData && (
+        <EditModuleSheet
+          open={editModuleOpen}
+          onOpenChange={setEditModuleOpen}
+          module={moduleData}
+          onSaved={setModuleData}
+        />
+      )}
 
       {editSheetMounted && (
         <EditCardsSheet

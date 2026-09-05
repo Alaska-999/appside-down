@@ -1,135 +1,142 @@
+import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
 import { AppButton } from "@/src/components/ui/Button";
-import { GradientText } from "@/src/components/ui/GradientText";
-import { ScreenAtmosphere } from "@/src/components/ui/ScreenAtmosphere";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
+import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useGameStore } from "@/src/store/useGameStore";
+import { useRouter } from "expo-router";
+import { X } from "lucide-react-native";
 import { useEffect } from "react";
-import { DimensionValue } from "react-native";
-import Animated, {
+import { StyleSheet } from "react-native";
+import {
   Easing,
-  useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
-  withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 265;
 
 interface FlashcardsCompleteProps {
   total: number;
   known: number;
   stillLearning: number;
-}
-
-interface SparkSpec {
-  size: number;
-  top: DimensionValue;
-  left?: DimensionValue;
-  right?: DimensionValue;
-  color: string;
-  delay: number;
-}
-
-const SPARKS: SparkSpec[] = [
-  { size: 4, top: "10%", left: "14%", color: "#A3E635", delay: 0 },
-  { size: 5, top: "18%", right: "12%", color: "#5EEAD4", delay: 700 },
-  { size: 3, top: "46%", left: "8%", color: "#A3E635", delay: 1300 },
-];
-
-function Spark({ spark }: { spark: SparkSpec }) {
-  const opacity = useSharedValue(0.25);
-
-  useEffect(() => {
-    opacity.value = withDelay(
-      spark.delay,
-      withRepeat(
-        withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true,
-      ),
-    );
-  }, [opacity, spark.delay]);
-
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={[
-        {
-          position: "absolute",
-          top: spark.top,
-          left: spark.left,
-          right: spark.right,
-          width: spark.size * MOCKUP_SCALE,
-          height: spark.size * MOCKUP_SCALE,
-          borderRadius: 999,
-          backgroundColor: spark.color,
-          shadowColor: spark.color,
-          shadowOpacity: 0.8,
-          shadowRadius: 8 * MOCKUP_SCALE,
-          shadowOffset: { width: 0, height: 0 },
-        },
-        style,
-      ]}
-    />
-  );
+  onClose?: () => void;
 }
 
 export function FlashcardsComplete({
   total,
   known,
   stillLearning,
+  onClose,
 }: FlashcardsCompleteProps) {
   const restart = useGameStore((state) => state.restart);
-  const insets = useSafeAreaInsets();
-  const pct = total > 0 ? known / total : 0;
+  const router = useRouter();
+  const screen = useScreenInsets();
+  const reducedMotion = useReducedMotion();
+
+  const fraction = total > 0 ? known / total : 0;
+  const isFull = fraction >= 1;
+  const targetPct = Math.round(fraction * 100);
+  const duration = isFull ? 2400 : 1700;
+
+  const progress = useSharedValue(reducedMotion ? 1 : 0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      progress.value = 1;
+      return;
+    }
+    progress.value = 0;
+    progress.value = withDelay(
+      350,
+      withTiming(1, { duration, easing: Easing.bezier(0.2, 0.8, 0.3, 1) }),
+    );
+  }, [reducedMotion, duration, progress]);
 
   return (
-    <YStack f={1} pt={insets.top} pb={insets.bottom + 16}>
-      <ScreenAtmosphere halo />
+    <YStack f={1} pos="relative">
+      <BackgroundMesh preset="finish" />
 
-      {SPARKS.map((spark, index) => (
-        <Spark key={index} spark={spark} />
-      ))}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <OrbitSparks reducedMotion={reducedMotion} />
+      </View>
 
-      <YStack alignItems="center" pt={30 * MOCKUP_SCALE}>
-        <OrbitProgress percent={pct} />
-      </YStack>
+      <YStack f={1} pt={screen.top} pb={screen.bottom}>
+        <XStack px={16}>
+          <IconButton
+            variant="liquidGlass"
+            icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            onPress={onClose ?? (() => router.back())}
+            accessibilityLabel="Close"
+          />
+        </XStack>
+        <YStack f={1} ai="center" jc="center">
+          <OrbitProgress progress={progress} fraction={fraction} hot={isFull} />
+        </YStack>
 
-      <YStack alignItems="center" mt={12 * MOCKUP_SCALE} gap={2}>
-        <GradientText fontSize={50 * MOCKUP_SCALE}>
-          {`${Math.round(pct * 100)}%`}
-        </GradientText>
-        <Text fontSize={11 * MOCKUP_SCALE} color="$colorMuted" mt={3 * MOCKUP_SCALE}>
-          of orbit travelled
-        </Text>
-        <Text fontSize={19 * MOCKUP_SCALE} fontWeight="800" color="$color" mt={8 * MOCKUP_SCALE}>
-          Nice run! 🎉
-        </Text>
-      </YStack>
+        <YStack ai="center">
+          <AnimatedNumber
+            progress={progress}
+            from={0}
+            to={targetPct}
+            suffix="%"
+            gradientColors={["#5EEAD4", "#BEF264"]}
+            width={210}
+            height={76}
+            style={{
+              fontSize: 76,
+              fontWeight: "800",
+              letterSpacing: -3.04,
+              textAlign: "center",
+            }}
+          />
+          <Text
+            fontSize={12}
+            fontWeight="700"
+            letterSpacing={2.4}
+            textTransform="uppercase"
+            color="rgba(220,255,245,0.5)"
+            mt={8}
+          >
+            {isFull ? "orbit closed" : "of the orbit"}
+          </Text>
+        </YStack>
 
-      <XStack alignItems="center" jc="center" gap="$2" mt={12 * MOCKUP_SCALE}>
-        <StatusPill tone="known" count={known} label="known" />
-        <StatusPill tone="learning" count={stillLearning} label="learning" />
-      </XStack>
+        <XStack jc="center" gap={10} mt={15}>
+          <StatusPill kind="moon" tone="known" count={known} label="known" />
+          {!isFull && (
+            <StatusPill kind="moon" tone="learning" count={stillLearning} label="learning" />
+          )}
+        </XStack>
 
-      <View f={1} />
-
-      <YStack px="$5" gap="$3">
-        {stillLearning > 0 && (
-          <AppButton variant="primary" onPress={() => restart(true)}>
-            Keep reviewing {stillLearning}
-          </AppButton>
-        )}
-
-        <AppButton variant="secondary" onPress={() => restart()}>
-          Restart deck
-        </AppButton>
+        <YStack px={22} gap={10} pt={20}>
+          {isFull ? (
+            <>
+              <AppButton variant="primary" size="lg" onPress={() => restart()}>
+                Practise all again
+              </AppButton>
+              <AppButton variant="ghost" size="sm" onPress={() => router.back()}>
+                Back to module
+              </AppButton>
+            </>
+          ) : (
+            <>
+              <AppButton variant="primary" size="lg" onPress={() => restart(true)}>
+                Practise {stillLearning} cards
+              </AppButton>
+              <AppButton variant="secondary" size="md" onPress={() => restart()}>
+                Restart game
+              </AppButton>
+              <AppButton variant="ghost" size="sm" onPress={() => router.back()}>
+                Back to module
+              </AppButton>
+            </>
+          )}
+        </YStack>
       </YStack>
     </YStack>
   );

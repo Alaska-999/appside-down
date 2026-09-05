@@ -1,108 +1,183 @@
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
-import { useSwipeCard } from "@/src/hooks/useSwipeCard";
+import { SwipeDecision, useSwipeCard } from "@/src/hooks/useSwipeCard";
 import { Flashcard } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
-import { Star, Volume2 } from "@tamagui/lucide-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Star, Volume2 } from "lucide-react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
 
-const MOCKUP_SCALE = 390 / 235;
-const CARD_RADIUS = 22 * MOCKUP_SCALE;
-const BORDER_WIDTH = 1.5;
+const CARD_RADIUS = 32;
+
+const CALM_EDGE = {
+  width: 1.6,
+  angle: 158,
+  colors: [
+    "#9CFCEC",
+    "rgba(94,234,212,0.55)",
+    "rgba(94,234,212,0.08)",
+    "rgba(220,255,245,0.02)",
+    "rgba(163,230,53,0.16)",
+  ],
+  positions: [0, 0.18, 0.42, 0.7, 1],
+};
+
+const LIVE_EDGE = {
+  width: 2.2,
+  colors: ["#BEF264", "#5EEAD4", "rgba(94,234,212,0.25)", "#BEF264"],
+  positions: [0, 0.3, 0.58, 1],
+};
+
+const LEARNING_EDGE = {
+  width: 2.2,
+  colors: ["#818CF8", "#4338CA", "rgba(129,140,248,0.2)", "#818CF8"],
+  positions: [0, 0.34, 0.62, 1],
+};
+
+const STAMP_STYLES = {
+  know: {
+    solid: undefined as string | undefined,
+    color: "#0D1117",
+    borderColor: undefined as string | undefined,
+    shadowColor: "rgba(163,230,53,0.85)" as string | undefined,
+  },
+  learning: {
+    solid: "rgba(67,56,202,0.5)" as string | undefined,
+    color: "#C7D2FE",
+    borderColor: "rgba(129,140,248,0.7)" as string | undefined,
+    shadowColor: undefined as string | undefined,
+  },
+};
 
 interface FlashcardLgProps {
   card: Flashcard | undefined;
   revertDirection?: "left" | "right";
   direction?: "horizontal" | "vertical";
   showDefinitionFirst?: boolean;
-  onTts?: () => void;
   onStar?: () => void;
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
+  onDecisionChange?: (decision: SwipeDecision) => void;
   revertKey?: number;
 }
 
-function CardFace({ style, text }: { style: object; text: string }) {
+function Ghosts() {
   return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: CARD_RADIUS + BORDER_WIDTH,
-          shadowColor: "#2dd4bf",
-          shadowOpacity: 0.25,
-          shadowRadius: 34 * MOCKUP_SCALE,
-          shadowOffset: { width: 0, height: 0 },
-          elevation: 0,
-        },
-        style,
-      ]}
-    >
-      <LinearGradient
-        colors={["#2DD4BF", "rgba(99,102,241,0.7)", "#A3E635"]}
-        locations={[0, 0.45, 1]}
-        start={{ x: 0.18, y: 0.12 }}
-        end={{ x: 0.82, y: 0.88 }}
-        style={{
-          flex: 1,
-          borderRadius: CARD_RADIUS + BORDER_WIDTH,
-          padding: BORDER_WIDTH,
-        }}
-      >
-        <YStack
-          f={1}
-          br={CARD_RADIUS}
-          bg="rgba(13,17,26,0.96)"
-          overflow="hidden"
-          ai="center"
-          jc="center"
-          p={20 * MOCKUP_SCALE}
-        >
-          <LinearGradient
-            colors={["rgba(255,255,255,0.12)", "rgba(255,255,255,0)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 16,
-            }}
-            pointerEvents="none"
-          />
+    <>
+      <View pointerEvents="none" style={styles.ghostG2} />
+      <View pointerEvents="none" style={styles.ghost} />
+    </>
+  );
+}
 
-          <YStack alignItems="center" justifyContent="center">
-            <Text
-              fontSize={24 * MOCKUP_SCALE}
-              fontWeight="800"
-              color="$color"
-              textAlign="center"
-              numberOfLines={6}
-              ellipsizeMode="tail"
-            >
-              {text}
-            </Text>
-            <Text
-              fontSize={9.5 * MOCKUP_SCALE}
-              color="#5EEAD4"
-              tt="uppercase"
-              letterSpacing={1.4}
-              fontWeight="700"
-              mt={8 * MOCKUP_SCALE}
-            >
-              tap to flip
-            </Text>
-          </YStack>
+function Edge({ decision }: { decision: SwipeDecision }) {
+  if (decision === "learning") {
+    return (
+      <GradientBorder
+        radius={CARD_RADIUS}
+        width={LEARNING_EDGE.width}
+        sweep
+        sweepStartDeg={210}
+        colors={LEARNING_EDGE.colors}
+        positions={LEARNING_EDGE.positions}
+      />
+    );
+  }
+  if (decision === "dragRight" || decision === "dragLeft" || decision === "know") {
+    return (
+      <GradientBorder
+        radius={CARD_RADIUS}
+        width={LIVE_EDGE.width}
+        sweep
+        sweepStartDeg={210}
+        colors={LIVE_EDGE.colors}
+        positions={LIVE_EDGE.positions}
+      />
+    );
+  }
+  return (
+    <GradientBorder
+      radius={CARD_RADIUS}
+      width={CALM_EDGE.width}
+      angle={CALM_EDGE.angle}
+      colors={CALM_EDGE.colors}
+      positions={CALM_EDGE.positions}
+    />
+  );
+}
+
+function Stamp({ decision }: { decision: SwipeDecision }) {
+  if (decision !== "know" && decision !== "learning") return null;
+  const isKnow = decision === "know";
+  const style = STAMP_STYLES[decision];
+
+  return (
+    <YStack
+      pos="absolute"
+      top={70}
+      {...(isKnow ? { right: 26 } : { left: 26 })}
+      style={{ transform: [{ rotate: isKnow ? "9deg" : "-9deg" }] }}
+      br={14}
+      px={16}
+      py={9}
+      zIndex={6}
+      overflow="hidden"
+      pointerEvents="none"
+      bg={style.solid}
+      borderWidth={style.borderColor ? 1.4 : 0}
+      borderColor={style.borderColor}
+      shadowColor={style.shadowColor}
+      shadowOpacity={style.shadowColor ? 1 : 0}
+      shadowRadius={13}
+      shadowOffset={{ width: 0, height: 0 }}
+    >
+      {isKnow && (
+        <LinearGradient
+          colors={["#2DD4BF", "#A3E635"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0.4 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      <Text
+        fontSize={15}
+        fontWeight="700"
+        letterSpacing={1.2}
+        tt="uppercase"
+        color={style.color}
+        zIndex={1}
+      >
+        {isKnow ? "Know" : "Learning"}
+      </Text>
+    </YStack>
+  );
+}
+
+function CardFace({ style, text, weak }: { style: object; text: string; weak?: boolean }) {
+  return (
+    <Animated.View style={[styles.face, style]}>
+      <YStack f={1} br={CARD_RADIUS} overflow="hidden" bg="rgba(12,20,24,0.55)">
+        <LiquidGlass intensity={40} tint="default" borderRadius={CARD_RADIUS} />
+        <View pointerEvents="none" style={styles.topHighlight} />
+        <YStack f={1} ai="center" jc="center" pt={64} px={26} pb={30}>
+          <Text
+            fontSize={weak ? 25 : 32}
+            fontWeight={weak ? "400" : "600"}
+            letterSpacing={-0.32}
+            lineHeight={weak ? 32 : 39}
+            color={weak ? "#DCEBF2" : "$color"}
+            textAlign="center"
+            numberOfLines={8}
+            ellipsizeMode="tail"
+          >
+            {text}
+          </Text>
         </YStack>
-      </LinearGradient>
+      </YStack>
     </Animated.View>
   );
 }
@@ -112,10 +187,10 @@ export function FlashcardLg({
   revertDirection = "right",
   direction = "horizontal",
   showDefinitionFirst = false,
-  onTts,
   onStar,
   onSwipeLeft,
   onSwipeRight,
+  onDecisionChange,
   revertKey,
 }: FlashcardLgProps) {
   const front = showDefinitionFirst
@@ -124,91 +199,130 @@ export function FlashcardLg({
   const back = showDefinitionFirst
     ? cardSideText(card?.term)
     : cardSideText(card?.definition);
+
   const { flip, isFront, frontAnimatedStyle, backAnimatedStyle } = useFlipCard({
     direction,
     resetKey: card?.id,
   });
 
-  const iconsRow = (
-    <XStack
-      pos="absolute"
-      top={12 * MOCKUP_SCALE}
-      right={12 * MOCKUP_SCALE}
-      gap={12 * MOCKUP_SCALE}
-    >
-      {onTts && (
-        <Pressable hitSlop={12} onPress={onTts}>
-          <Volume2 size={16 * MOCKUP_SCALE} color="$colorMuted" />
-        </Pressable>
-      )}
-      <Pressable hitSlop={12} onPress={onStar}>
-        <Star
-          size={16 * MOCKUP_SCALE}
-          color={card?.isStarred ? "#A3E635" : "$colorMuted"}
-          fill={card?.isStarred ? "#A3E635" : "none"}
-        />
-      </Pressable>
-    </XStack>
-  );
-
-  const { gesture, cardAnimatedStyle, backgroundCardStyle } = useSwipeCard({
+  const { gesture, cardAnimatedStyle, decision } = useSwipeCard({
     onSwipeLeft,
     onSwipeRight,
     onTap: flip,
+    onDecisionChange,
     resetKey: card?.id,
     revertKey,
     revertDirection,
   });
 
+  const ttsColor = isFront ? "#3E4C57" : "#B7CEDA";
+
   return (
     <View style={styles.container}>
-      <GestureDetector gesture={gesture}>
-        <View style={styles.gestureArea}>
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              styles.backgroundCard,
-              backgroundCardStyle,
-            ]}
-          />
-          <Animated.View style={[styles.mainCard, cardAnimatedStyle]}>
-            <CardFace style={frontAnimatedStyle} text={front} />
-            <CardFace style={backAnimatedStyle} text={back} />
-          </Animated.View>
-        </View>
-      </GestureDetector>
+      <Ghosts />
 
-      <Animated.View
-        pointerEvents="box-none"
-        style={[StyleSheet.absoluteFill, cardAnimatedStyle]}
-      >
+      <GestureDetector gesture={gesture}>
         <Animated.View
-          pointerEvents={isFront ? "box-none" : "none"}
-          style={[StyleSheet.absoluteFill, frontAnimatedStyle]}
+          style={[StyleSheet.absoluteFill, styles.bigcardWrap, cardAnimatedStyle]}
         >
-          {iconsRow}
+          <CardFace style={frontAnimatedStyle} text={front} />
+          <CardFace style={backAnimatedStyle} text={back} weak />
+          <Edge decision={decision} />
+          <Stamp decision={decision} />
+
+          <XStack
+            pos="absolute"
+            top={0}
+            left={0}
+            right={0}
+            height={60}
+            ai="center"
+            jc="space-between"
+            px={12}
+            zIndex={5}
+          >
+            <YStack
+              w={40}
+              h={40}
+              br={20}
+              ai="center"
+              jc="center"
+              bg="rgba(220,255,245,0.05)"
+              onPress={onStar}
+              pressStyle={{ scale: 0.9 }}
+              hitSlop={4}
+            >
+              <Star
+                size={20}
+                color={card?.isStarred ? "#FCD34D" : "#8FA8B8"}
+                fill={card?.isStarred ? "rgba(252,211,77,0.85)" : "none"}
+                strokeWidth={1.8}
+              />
+            </YStack>
+            <YStack
+              w={40}
+              h={40}
+              br={20}
+              ai="center"
+              jc="center"
+              bg="rgba(220,255,245,0.05)"
+              hitSlop={4}
+            >
+              <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
+            </YStack>
+          </XStack>
         </Animated.View>
-        <Animated.View
-          pointerEvents={isFront ? "none" : "box-none"}
-          style={[StyleSheet.absoluteFill, backAnimatedStyle]}
-        >
-          {iconsRow}
-        </Animated.View>
-      </Animated.View>
+      </GestureDetector>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, margin: 20 },
-  gestureArea: { flex: 1 },
-  backgroundCard: {
-    borderRadius: 16,
+  container: { flex: 1, position: "relative" },
+  bigcardWrap: {
+    borderRadius: CARD_RADIUS,
+    zIndex: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 12,
   },
-  mainCard: { flex: 1, position: "relative" },
+  face: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: CARD_RADIUS,
+    backfaceVisibility: "hidden",
+  },
+  topHighlight: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.28)",
+  },
+  ghost: {
+    position: "absolute",
+    left: 11,
+    right: 11,
+    top: 14,
+    bottom: -14,
+    borderRadius: 30,
+    zIndex: 1,
+    backgroundColor: "rgba(14,24,28,0.5)",
+  },
+  ghostG2: {
+    position: "absolute",
+    left: 22,
+    right: 22,
+    top: 26,
+    bottom: -26,
+    borderRadius: 30,
+    zIndex: 0,
+    backgroundColor: "rgba(14,24,28,0.32)",
+  },
 });
