@@ -18,10 +18,11 @@ export const FOCUS_GLOW = {
   width: 3,
 };
 
-export const FOCUS_HIGHLIGHT = "rgba(255, 255, 255, 0.2)";
-
 export const FOCUS_TIMING = {
   inMs: 260,
   outMs: 180,
   easing: Easing.bezier(0.2, 0.8, 0.3, 1),
 };
+
+export const FOCUS_HIGHLIGHT = "rgba(255, 255, 255, 0.2)";
+

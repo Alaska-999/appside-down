@@ -1,5 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { WellInsetShadow } from "@/src/components/ui/Well";
+import { WELL_FILL_SOFT, WellInsetShadow } from "@/src/components/ui/Well";
 import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
@@ -39,35 +39,32 @@ export function PickRow({
       transition="press"
     >
       <YStack
-          pos="absolute"
-          t={0}
-          l={0}
-          r={0}
-          b={0}
-          br={ROW_RADIUS}
-          overflow="hidden"
+        pos="absolute"
+        t={0}
+        l={0}
+        r={0}
+        b={0}
+        br={ROW_RADIUS}
+        overflow="hidden"
+      >
+        <View
+          style={[StyleSheet.absoluteFill, { backgroundColor: WELL_FILL_SOFT }]}
+        />
+        <WellInsetShadow radius={ROW_RADIUS} />
+      </YStack>
+      <GradientBorder radius={ROW_RADIUS} preset="well" />
+      <XStack ai="center" gap={11} px={16} zIndex={2}>
+        <Icon size={19} color={ICON_MUTED} strokeWidth={1.9} />
+        <Text
+          f={1}
+          fontSize={15}
+          color={filled ? "$color" : "$mutedDim"}
+          numberOfLines={1}
         >
-          <View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: "rgba(4,8,10,0.65)" },
-            ]}
-          />
-          <WellInsetShadow radius={ROW_RADIUS} />
-        </YStack>
-        <GradientBorder radius={ROW_RADIUS} preset="well" />
-        <XStack ai="center" gap={11} px={16} zIndex={2}>
-          <Icon size={19} color={ICON_MUTED} strokeWidth={1.9} />
-          <Text
-            f={1}
-            fontSize={15}
-            color={filled ? "$color" : "$mutedDim"}
-            numberOfLines={1}
-          >
-            {value ?? placeholder}
-          </Text>
-          <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />
-        </XStack>
+          {value ?? placeholder}
+        </Text>
+        <ChevronRight size={16} color={ICON_SUBTLE} strokeWidth={2} />
+      </XStack>
     </YStack>
   );
 }

@@ -1,8 +1,4 @@
-import {
-  FocusRing,
-  OuterGlow,
-  useFocusProgress,
-} from "@/src/components/ui/FocusRing";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
@@ -216,9 +212,6 @@ export function InputShell({
         />
       )}
       {!disabled && <FocusRing radius={s.radius} progress={focusProgress} />}
-      {state === "error" && !disabled && (
-        <OuterGlow radius={s.radius} color="rgba(239,68,68,0.4)" />
-      )}
       <YStack
         f={1}
         zIndex={2}

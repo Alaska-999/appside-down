@@ -26,9 +26,10 @@ function TabIcon(
           width={30}
           height={30}
           br={10}
-          bg="rgba(255,255,255,0.08)"
+          bg="rgba(255,255,255,0.09)"
           ai="center"
           jc="center"
+          mb={6}
         >
           <Icon size={20} color={ICON_MUTED} strokeWidth={1.9} />
         </YStack>
@@ -47,6 +48,7 @@ function TabIcon(
         shadowOpacity={0.8}
         shadowRadius={9}
         shadowOffset={{ width: 0, height: 0 }}
+        mb={6}
       >
         <LinearGradient
           colors={[ICON_MINT, ICON_LIME]}
@@ -92,7 +94,7 @@ export default function TabsLayout() {
           },
           tabBarBackground: () => (
             <LiquidGlass
-              intensity={40}
+              intensity={32}
               borderRadius={22}
               borderWidth={1}
               borderColor={theme.borderColor.get()}
@@ -102,7 +104,7 @@ export default function TabsLayout() {
           tabBarItemStyle: {
             justifyContent: "center",
             alignItems: "center",
-            paddingTop: 8,
+            paddingTop: 11,
           },
           tabBarLabelStyle: { fontSize: 12, fontWeight: "500" },
           tabBarActiveTintColor: theme.color.get(),

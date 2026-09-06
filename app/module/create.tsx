@@ -85,22 +85,19 @@ export default function ModuleCreate() {
     },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
+    shouldFocusError: false,
   });
   const {
     control,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form;
   const [serverError, setServerError] = useServerError(form);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const name = useWatch({ control, name: "name" });
   const folderId = useWatch({ control, name: "folderId" });
   const isPublic = useWatch({ control, name: "isPublic" });
-
-  const flashcardsError =
-    errors.flashcards?.root?.message ??
-    (errors.flashcards as { message?: string } | undefined)?.message;
 
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -235,10 +232,21 @@ export default function ModuleCreate() {
             <YStack px="$screenX">
               <ModalFormHeader
                 title="New module"
+                saveVariant="primary"
                 onClose={() => router.back()}
-                saveEnabled={!!name?.trim()}
+                saveEnabled
                 saveLoading={isSubmitting}
-                onSave={() => handleSubmit(onSubmit)()}
+                onSave={() =>
+                  handleSubmit(onSubmit, (errors) =>
+                    setFormError(
+                      errors.name?.message ??
+                        errors.flashcards?.root?.message ??
+                        (errors.flashcards as { message?: string } | undefined)
+                          ?.message ??
+                        null,
+                    ),
+                  )()
+                }
               />
 
               <YStack mb={14}>
@@ -264,11 +272,6 @@ export default function ModuleCreate() {
                     hideError
                   />
                 </FieldGroup>
-                {errors.name && (
-                  <Text color="$dangerText" fontSize={11.5} mt={8} ml={4}>
-                    {errors.name.message}
-                  </Text>
-                )}
               </YStack>
 
               <YStack mb={50} gap={16}>
@@ -282,7 +285,7 @@ export default function ModuleCreate() {
                   <Globe size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />
                   <Text
                     f={1}
-                    fontSize={15}
+                    fontSize={14.5}
                     fontWeight="500"
                     color={ICON_MUTED_LIGHT}
                   >
@@ -297,11 +300,11 @@ export default function ModuleCreate() {
                 </XStack>
               </YStack>
 
-              <XStack ai="center" jc="space-between" mb={8}>
-                <Text fontSize={16} fontWeight="700" color="$color">
+              <XStack ai="center" jc="space-between" mb={10} pr={10} pl={6}>
+                <Text fontSize={16} fontWeight="600" color="$color">
                   Cards
                 </Text>
-                <Text fontSize={12.5} color="$textMuted">
+                <Text fontSize={14.5} color="$textMuted">
                   {fields.length}
                 </Text>
               </XStack>
@@ -334,12 +337,6 @@ export default function ModuleCreate() {
                   />
                 )}
               />
-
-              {flashcardsError && (
-                <Text color="$dangerText" fontSize={11.5} mt={8}>
-                  {flashcardsError}
-                </Text>
-              )}
             </YStack>
             <Animated.View style={spacerStyle} />
           </KeyboardAwareScrollView>
@@ -369,9 +366,14 @@ export default function ModuleCreate() {
         <KeyboardBar />
 
         <AppToast
-          open={!!serverError}
-          message={serverError ?? ""}
-          onDismiss={() => setServerError(null)}
+          placement="top"
+          open={!!(serverError ?? formError)}
+          message={serverError ?? formError ?? ""}
+          onDismiss={() => {
+            setServerError(null);
+            setFormError(null);
+          }}
+          size="lg"
         />
 
         <AppSheet
@@ -421,7 +423,10 @@ export default function ModuleCreate() {
             <AppButton variant="danger" onPress={confirmDiscard}>
               Discard
             </AppButton>
-            <AppButton variant="ghost" onPress={() => setDiscardOpen(false)}>
+            <AppButton
+              variant="secondary"
+              onPress={() => setDiscardOpen(false)}
+            >
               Keep editing
             </AppButton>
           </YStack>

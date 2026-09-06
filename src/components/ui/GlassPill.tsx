@@ -1,6 +1,10 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import {
+  ICON_ACCENT,
+  ICON_MINT_LIGHT,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType } from "react";
 import { View } from "react-native";
@@ -39,8 +43,8 @@ const TONE_STYLES: Record<GlassPillTone, ToneStyle> = {
     borderPositions: [0, 1],
     borderAngle: 150,
     topHighlight: false,
-    iconColorActive: ICON_ACCENT,
-    iconColorInactive: ICON_ACCENT,
+    iconColorActive: ICON_MINT_LIGHT,
+    iconColorInactive: ICON_MINT_LIGHT,
     textColorActive: "$mintLight",
     textColorInactive: "$mintLight",
     centerSelf: true,

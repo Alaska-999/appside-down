@@ -1,7 +1,7 @@
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_MUTED } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { GripHorizontal, Trash2 } from "lucide-react-native";
@@ -168,22 +168,16 @@ export function CardEditor<T extends FieldValues>({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: lit
-              ? "rgba(255, 255, 255, 0.25)"
-              : "rgba(255, 255, 255, 0.08)",
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
           }}
         />
       </YStack>
-      {lit ? (
-        <GradientBorder
-          radius={CARD_RADIUS}
-          angle={160}
-          colors={CARD_BORDER.colors}
-          positions={CARD_BORDER.positions}
-        />
-      ) : (
-        <GradientBorder radius={CARD_RADIUS} preset="surf" />
-      )}
+      <GradientBorder
+        radius={CARD_RADIUS}
+        angle={160}
+        colors={CARD_BORDER.colors}
+        positions={CARD_BORDER.positions}
+      />
       <FocusRing radius={CARD_RADIUS} progress={focusProgress} />
 
       <YStack px={16} pt={14} pb={12} zIndex={2}>
@@ -191,10 +185,10 @@ export function CardEditor<T extends FieldValues>({
           <Text
             f={1}
             fontSize={10.5}
-            fontWeight="700"
+            fontWeight="500"
             letterSpacing={0.63}
             textTransform="uppercase"
-            color={lit ? "$mintLight" : "$mutedDim"}
+            color={lit ? "$mintLight" : "$textMuted"}
           >
             Card {String(index + 1).padStart(2, "0")}
           </Text>
@@ -207,7 +201,7 @@ export function CardEditor<T extends FieldValues>({
               >
                 <GripHorizontal
                   size={18}
-                  color={dragging ? ICON_ACCENT : ICON_SUBTLE}
+                  color={dragging ? ICON_MINT : ICON_MUTED}
                   strokeWidth={1.9}
                 />
               </View>
@@ -223,7 +217,11 @@ export function CardEditor<T extends FieldValues>({
                 onRemove(index);
               }}
             >
-              <Trash2 size={18} color={ICON_SUBTLE} strokeWidth={1.9} />
+              <Trash2
+                size={18}
+                color={dragging ? ICON_MINT : ICON_MUTED}
+                strokeWidth={1.9}
+              />
             </Pressable>
           )}
         </XStack>

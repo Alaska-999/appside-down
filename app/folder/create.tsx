@@ -13,7 +13,7 @@ import { FolderForm, folderSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { YStack } from "tamagui";
 
@@ -32,13 +32,14 @@ export default function FolderCreate() {
     defaultValues: { name: "" },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
+    shouldFocusError: false,
   });
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
   } = form;
-  const name = useWatch({ control, name: "name" });
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -104,9 +105,13 @@ export default function FolderCreate() {
             <ModalFormHeader
               title="New folder"
               onClose={() => router.back()}
-              saveEnabled={!!name?.trim()}
+              saveEnabled
               saveLoading={isSubmitting}
-              onSave={() => handleSubmit(onSubmit)()}
+              onSave={() =>
+                handleSubmit(onSubmit, (errors) =>
+                  setFormError(errors.name?.message ?? null),
+                )()
+              }
             />
 
             <FolderFormFields
@@ -134,9 +139,13 @@ export default function FolderCreate() {
         <StatusBarScrim />
 
         <AppToast
-          open={!!serverError}
-          message={serverError ?? ""}
-          onDismiss={() => setServerError(null)}
+          placement="top"
+          open={!!(serverError ?? formError)}
+          message={serverError ?? formError ?? ""}
+          onDismiss={() => {
+            setServerError(null);
+            setFormError(null);
+          }}
         />
 
         <AppSheet
@@ -151,7 +160,10 @@ export default function FolderCreate() {
             <AppButton variant="danger" onPress={confirmDiscard}>
               Discard
             </AppButton>
-            <AppButton variant="ghost" onPress={() => setDiscardOpen(false)}>
+            <AppButton
+              variant="secondary"
+              onPress={() => setDiscardOpen(false)}
+            >
               Keep editing
             </AppButton>
           </YStack>

@@ -11,18 +11,18 @@ import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { ICON_DANGER } from "@/src/constants/iconColors";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
+import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ArrowUpFromLine, Plus, Tags, Trash2 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, YStack } from "tamagui";
 
@@ -54,7 +54,6 @@ export default function FolderEditScreen() {
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const form = useForm<{ name: string }>({ defaultValues: { name: "" } });
-  const nameValue = useWatch({ control: form.control, name: "name" });
 
   const [tagsModuleId, setTagsModuleId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -129,7 +128,11 @@ export default function FolderEditScreen() {
 
   const handleSave = async () => {
     const name = form.getValues("name").trim();
-    if (!folder || !name) return;
+    if (!folder) return;
+    if (!name) {
+      setToast("Name is required");
+      return;
+    }
     setSaving(true);
     try {
       await request("", {
@@ -307,9 +310,10 @@ export default function FolderEditScreen() {
           <ModalFormHeader
             title="Edit folder"
             onClose={() => router.back()}
-            saveEnabled={!!folder && !!nameValue?.trim()}
+            saveEnabled={!!folder}
             saveLoading={saving}
             onSave={handleSave}
+            saveVariant="primary"
           />
 
           {loading || !folder ? (
@@ -479,6 +483,7 @@ export default function FolderEditScreen() {
       </AppSheet>
 
       <AppToast
+        placement="top"
         open={!!toast}
         message={toast ?? ""}
         onDismiss={() => setToast(null)}

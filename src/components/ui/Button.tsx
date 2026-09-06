@@ -76,7 +76,7 @@ type VariantSpec = {
   >;
 };
 
-const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
+export const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   primary: {
     gradient: [ICON_MINT, ICON_LIME],
     gloss: true,

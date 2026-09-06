@@ -233,6 +233,10 @@ function SheetsDemo() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheetView, setSheetView] = useState<"menu" | "confirm">("menu");
   const [toastOpen, setToastOpen] = useState(false);
+  const [successToastOpen, setSuccessToastOpen] = useState(false);
+  const [neutralToastOpen, setNeutralToastOpen] = useState(false);
+  const [smToastOpen, setSmToastOpen] = useState(false);
+  const [lgToastOpen, setLgToastOpen] = useState(false);
 
   return (
     <>
@@ -248,7 +252,19 @@ function SheetsDemo() {
           Відкрити меню ⋯
         </AppButton>
         <AppButton variant="secondary" onPress={() => setToastOpen(true)}>
-          Показати тост
+          Показати тост · error
+        </AppButton>
+        <AppButton variant="secondary" onPress={() => setSuccessToastOpen(true)}>
+          Показати тост · success + Undo
+        </AppButton>
+        <AppButton variant="secondary" onPress={() => setNeutralToastOpen(true)}>
+          Показати тост · neutral
+        </AppButton>
+        <AppButton variant="secondary" onPress={() => setSmToastOpen(true)}>
+          Показати тост · sm
+        </AppButton>
+        <AppButton variant="secondary" onPress={() => setLgToastOpen(true)}>
+          Показати тост · lg
         </AppButton>
         <YStack
           h={140}
@@ -266,6 +282,34 @@ function SheetsDemo() {
             message="Session expired"
             description="Log in again to continue"
             onDismiss={() => setToastOpen(false)}
+          />
+          <AppToast
+            open={successToastOpen}
+            tone="success"
+            message="Tag deleted"
+            action={{ label: "Undo", onPress: () => {} }}
+            onDismiss={() => setSuccessToastOpen(false)}
+          />
+          <AppToast
+            open={neutralToastOpen}
+            tone="neutral"
+            message="Couldn't load modules"
+            description="Try again"
+            onDismiss={() => setNeutralToastOpen(false)}
+          />
+          <AppToast
+            open={smToastOpen}
+            size="sm"
+            message="Session expired"
+            onDismiss={() => setSmToastOpen(false)}
+          />
+          <AppToast
+            open={lgToastOpen}
+            size="lg"
+            tone="success"
+            message="Tag deleted"
+            action={{ label: "Undo", onPress: () => {} }}
+            onDismiss={() => setLgToastOpen(false)}
           />
         </YStack>
       </YStack>

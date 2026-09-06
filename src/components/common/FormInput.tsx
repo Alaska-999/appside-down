@@ -6,13 +6,15 @@ import {
 import { ICON_DANGER, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { AlertCircle, Eye, EyeOff } from "lucide-react-native";
 import { FieldGroupContext } from "@/src/components/ui/FieldGroup";
-import { forwardRef, ReactNode, Ref, useContext, useState } from "react";
+import { ReactNode, Ref, forwardRef, useContext, useState } from "react";
 import {
   Control,
   Controller,
   FieldValues,
   Path,
+  get,
   useFormContext,
+  useFormState,
 } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { Pressable } from "react-native";
@@ -78,6 +80,9 @@ function FormInputInner<T extends FieldValues>(
   const [focused, setFocused] = useState(false);
   const [secureVisible, setSecureVisible] = useState(false);
   const groupFocus = useContext(FieldGroupContext);
+  const { errors: formErrors } = useFormState({ control });
+  const error = get(formErrors, name) as { message?: string } | undefined;
+  const hasError = !!error;
   const shellVariant: InputShellVariant =
     variant === "bordered" ? "well" : variant;
   const text = TEXT_ROLE_STYLES[textRole];
@@ -86,7 +91,7 @@ function FormInputInner<T extends FieldValues>(
     <Controller
       control={control}
       name={name}
-      render={({ field, fieldState }) => {
+      render={({ field }) => {
         const value = (field.value as string) ?? "";
         const nearLimit =
           maxLength !== undefined &&
@@ -108,7 +113,13 @@ function FormInputInner<T extends FieldValues>(
             <InputShell
               variant={shellVariant}
               size={inputSize}
-              state={fieldState.error ? "error" : focused ? "focus" : "default"}
+              state={
+                hasError && !hideError
+                  ? "error"
+                  : focused
+                    ? "focus"
+                    : "default"
+              }
               multiline={multiline ?? undefined}
               disabled={Boolean(disabled)}
             >
@@ -142,7 +153,7 @@ function FormInputInner<T extends FieldValues>(
                 }}
                 value={value}
                 onChangeText={(text) => {
-                  if (fieldState.error) {
+                  if (hasError) {
                     formContext?.clearErrors(name);
                   }
                   onValueChange?.(text);
@@ -186,11 +197,11 @@ function FormInputInner<T extends FieldValues>(
                 </Text>
               )}
             </InputShell>
-            {!hideError && fieldState.error && (
+            {!hideError && error && (
               <XStack ai="center" gap={6}>
                 <AlertCircle size={13} color={ICON_DANGER} strokeWidth={2.2} />
                 <Text color="$dangerText" fontSize={11.5}>
-                  {fieldState.error.message}
+                  {error.message}
                 </Text>
               </XStack>
             )}

@@ -41,6 +41,7 @@ export function FolderFormFields<T extends FieldValues>({
           placeholder="Untitled folder"
           maxLength={40}
           showCounter
+          hideError
           autoFocus={autoFocusName}
         />
       </YStack>

@@ -9,6 +9,7 @@ interface ModalFormHeaderProps {
   onClose: () => void;
   saveEnabled: boolean;
   saveLoading: boolean;
+  saveVariant?: "liquid" | "soft" | "primary";
   onSave: () => void;
 }
 
@@ -17,20 +18,26 @@ export function ModalFormHeader({
   onClose,
   saveEnabled,
   saveLoading,
+  saveVariant,
   onSave,
 }: ModalFormHeaderProps) {
   return (
-    <XStack ai="center" gap={15} mb={18}>
+    <XStack ai="center" gap={15} mb={18} py={5}>
       <IconButton
         variant="liquidGlass"
-        icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+        icon={<X size={24} color={ICON_ON_GLASS} strokeWidth={1.9} />}
         onPress={onClose}
         accessibilityLabel="Close"
       />
-      <Text f={1} fontSize={18} fontWeight="800" color="$color">
+      <Text f={1} fontSize={20} fontWeight="800" color="$white">
         {title}
       </Text>
-      <SavePill enabled={saveEnabled} loading={saveLoading} onPress={onSave} />
+      <SavePill
+        enabled={saveEnabled}
+        loading={saveLoading}
+        onPress={onSave}
+        variant={saveVariant}
+      />
     </XStack>
   );
 }
