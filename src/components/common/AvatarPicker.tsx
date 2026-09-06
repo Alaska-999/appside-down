@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
+import { ICON_DANGER, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { Ban, Camera } from "@tamagui/lucide-icons";
@@ -130,7 +131,7 @@ export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
           icon={
             <Camera
               size={isDefaultSize ? "$1" : badgeIconSize}
-              color="$colorSecondary"
+              color={ICON_ON_GLASS}
             />
           }
           onPress={pickImage}
@@ -152,7 +153,7 @@ export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
             icon={
               <Ban
                 size={isDefaultSize ? "$1" : badgeIconSize}
-                color="$statusDanger"
+                color={ICON_DANGER}
               />
             }
             onPress={removeAvatar}

@@ -1,4 +1,5 @@
 import { IconButton } from "@/src/components/ui/IconButton";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { ChevronLeft } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
@@ -62,7 +63,7 @@ export function ScreenHeader({
     <XStack ai="center" gap={4} px="$screenX" pt={screen.top + 6} pb={10}>
       <IconButton
         variant="liquidGlass"
-        icon={<ChevronLeft size={20} strokeWidth={2} color="$color" />}
+        icon={<ChevronLeft size={20} strokeWidth={2} color={ICON_ON_GLASS} />}
         onPress={() => router.back()}
       />
 
