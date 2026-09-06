@@ -1,3 +1,5 @@
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { StarToggle } from "@/src/components/ui/StarToggle";
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
@@ -21,7 +23,6 @@ import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import {
   ICON_DANGER,
-  ICON_LIME_LIGHT,
   ICON_MINT_LIGHT,
   ICON_MUTED,
   ICON_ON_GLASS,
@@ -35,25 +36,7 @@ import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import {
-  AlertTriangle,
-  ArrowDownUp,
-  BookmarkCheck,
-  BookmarkPlus,
-  Captions,
-  ChevronLeft,
-  Clock,
-  Columns2,
-  FileText,
-  Globe,
-  GraduationCap,
-  Lock,
-  MoreHorizontal,
-  Pencil,
-  Sparkles,
-  Star,
-  Trash2,
-} from "lucide-react-native";
+import { AlertTriangle, ArrowDownUp, BookmarkCheck, BookmarkPlus, Captions, ChevronLeft, Clock, Columns2, FileText, Globe, GraduationCap, Lock, MoreHorizontal, Pencil, Sparkles, Trash2 } from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
 import { InteractionManager, Pressable, ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -151,45 +134,11 @@ function CardsHeader({
         )}
       </XStack>
       <XStack ai="center" gap={18}>
-        <Pressable
-          hitSlop={5}
-          accessibilityRole="button"
+        <StarToggle
+          active={starredOnly}
+          onPress={onToggleStarred}
           accessibilityLabel="Filter starred cards"
-          onPress={() => {
-            hapticTap();
-            onToggleStarred();
-          }}
-        >
-          <YStack
-            w={34}
-            h={34}
-            br={17}
-            ai="center"
-            jc="center"
-            bg={
-              starredOnly ? "rgba(163,230,53,0.05)" : "rgba(220,255,245,0.01)"
-            }
-            borderWidth={1}
-            borderColor={
-              starredOnly ? "rgba(190,242,100,0.42)" : "rgba(220,255,245,0.11)"
-            }
-            {...(starredOnly
-              ? {
-                  shadowColor: "rgb(197, 246, 114)",
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowRadius: 8,
-                  shadowOpacity: 0.5,
-                }
-              : null)}
-          >
-            <Star
-              size={16}
-              strokeWidth={1.8}
-              color={starredOnly ? ICON_LIME_LIGHT : ICON_MUTED}
-              fill={starredOnly ? "rgba(190,242,100,0.13)" : "transparent"}
-            />
-          </YStack>
-        </Pressable>
+        />
         <Pressable
           hitSlop={{ top: 14, bottom: 14, left: 10, right: 10 }}
           accessibilityRole="button"
@@ -474,17 +423,11 @@ export default function ModuleScreen() {
                 <IconButton
                   variant="liquidGlass"
                   icon={
-                    <Star
-                      size={22}
-                      strokeWidth={1.9}
-                      color={
-                        moduleData.isFavorite ? ICON_LIME_LIGHT : ICON_ON_GLASS
-                      }
-                      fill={
-                        moduleData.isFavorite
-                          ? "rgba(190,242,100,0.22)"
-                          : "transparent"
-                      }
+                    <StarGlyph
+                      mode="toggle"
+                      size="lg"
+                      active={moduleData.isFavorite}
+                      onGlass
                     />
                   }
                   onPress={handleToggleFavorite}
@@ -740,12 +683,6 @@ export default function ModuleScreen() {
                       >
                         {starredOnly && visibleCards.length === 0 ? (
                           <YStack ai="center" gap={8} pt={28}>
-                            <Star
-                              size={30}
-                              strokeWidth={1.4}
-                              color={ICON_LIME_LIGHT}
-                              fill="rgba(190,242,100,0.14)"
-                            />
                             <Text
                               fontSize={15}
                               fontWeight="600"

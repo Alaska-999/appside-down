@@ -1,5 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { StarToggle } from "@/src/components/ui/StarToggle";
 import {
   ICON_ACCENT,
   ICON_INDIGO,
@@ -7,9 +8,7 @@ import {
   ICON_LIME,
   ICON_LIME_LIGHT,
   ICON_MINT,
-  ICON_MUTED,
   ICON_MUTED_LIGHT,
-  ICON_WARNING,
 } from "@/src/constants/iconColors";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
 import {
@@ -29,7 +28,7 @@ import {
   rrect,
 } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
-import { Star, Volume2 } from "lucide-react-native";
+import { Volume2 } from "lucide-react-native";
 import { ReactNode, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -86,13 +85,23 @@ const CALM_EDGE = {
 
 const LIVE_EDGE = {
   width: 2.2,
-  colors: [ICON_LIME_LIGHT, ICON_ACCENT, "rgba(94,234,212,0.25)", ICON_LIME_LIGHT],
+  colors: [
+    ICON_LIME_LIGHT,
+    ICON_ACCENT,
+    "rgba(94,234,212,0.25)",
+    ICON_LIME_LIGHT,
+  ],
   positions: [0, 0.3, 0.58, 1],
 };
 
 const LEARNING_EDGE = {
   width: 2.2,
-  colors: [ICON_INDIGO_LIGHT, ICON_INDIGO, "rgba(129,140,248,0.2)", ICON_INDIGO_LIGHT],
+  colors: [
+    ICON_INDIGO_LIGHT,
+    ICON_INDIGO,
+    "rgba(129,140,248,0.2)",
+    ICON_INDIGO_LIGHT,
+  ],
   positions: [0, 0.34, 0.62, 1],
 };
 
@@ -461,20 +470,7 @@ export function FlashcardLg({
       p={1}
     >
       <GestureDetector gesture={taps.star}>
-        <YStack
-          w={40}
-          h={40}
-          br="$cardSoft"
-          ai="center"
-          jc="center"
-          bg="rgba(220,255,245,0.05)"
-        >
-          <Star
-            size={20}
-            color={card?.isStarred ? ICON_WARNING : ICON_MUTED}
-            strokeWidth={card?.isStarred ? 2.1 : 1.8}
-          />
-        </YStack>
+        <StarToggle active={!!card?.isStarred} />
       </GestureDetector>
       <GestureDetector gesture={taps.tts}>
         <YStack

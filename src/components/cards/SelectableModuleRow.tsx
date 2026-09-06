@@ -1,8 +1,9 @@
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { AppCard } from "@/src/components/ui/Card";
 import { Checkbox } from "@/src/components/ui/Checkbox";
-import { ICON_LIME_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
-import { Lock, Star } from "lucide-react-native";
+import { Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -79,12 +80,7 @@ export function SelectableModuleRow({
                 {itemsCount} card{itemsCount !== 1 ? "s" : ""}
               </Text>
               {starred && !locked && (
-                <Star
-                  size={12.5}
-                  color={ICON_LIME_LIGHT}
-                  fill={ICON_LIME_LIGHT}
-                  strokeWidth={1.9}
-                />
+                <StarGlyph />
               )}
               {locked && (
                 <Text fontSize={11} color="$mutedDim">

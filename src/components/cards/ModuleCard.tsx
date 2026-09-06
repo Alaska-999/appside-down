@@ -1,3 +1,4 @@
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { AppCard } from "@/src/components/ui/Card";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { Check, ChevronRight, Star, X } from "lucide-react-native";
+import { Check, ChevronRight, X } from "lucide-react-native";
 import { ReactNode, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -154,7 +155,7 @@ export function ModuleCard({
           </YStack>
 
           {module.isFavorite && !mastered && (
-            <Star size={14} color={ICON_LIME_LIGHT} fill={ICON_LIME_LIGHT} />
+            <StarGlyph />
           )}
 
           {trailing}

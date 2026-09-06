@@ -1,3 +1,4 @@
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderAddRow } from "@/src/components/cards/FolderEditRow";
 import { SelectableModuleRow } from "@/src/components/cards/SelectableModuleRow";
@@ -6,7 +7,6 @@ import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
@@ -20,7 +20,7 @@ import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { AlertTriangle, Captions, Plus, Star, X } from "lucide-react-native";
+import { AlertTriangle, Captions, Plus, X } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { FlatList, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -203,14 +203,7 @@ export default function AddModules() {
               label={chip.label}
               count={chip.count}
               leading={
-                chip.leading ? (
-                  <Star
-                    size={13}
-                    color={ICON_LIME_LIGHT}
-                    fill={ICON_LIME_LIGHT}
-                    strokeWidth={1.9}
-                  />
-                ) : undefined
+                chip.leading ? <StarGlyph /> : undefined
               }
               variant={filter === chip.key ? "on" : "default"}
               onPress={() => {

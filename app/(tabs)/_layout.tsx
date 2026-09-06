@@ -26,7 +26,7 @@ function TabIcon(
           width={30}
           height={30}
           br={10}
-          bg="rgba(255,255,255,0.09)"
+          bg="rgba(211, 211, 211, 0.1)"
           ai="center"
           jc="center"
           mb={6}

@@ -1,14 +1,10 @@
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { FOLDER_ICON_GRADIENTS, FolderIcon } from "@/src/components/cards/FolderIcon";
 import { AppCard } from "@/src/components/ui/Card";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  ICON_ACCENT,
-  ICON_LIME_LIGHT,
-  ICON_MUTED,
-  ICON_SUBTLE,
-} from "@/src/constants/iconColors";
+import { ICON_ACCENT, ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
-import { ChevronRight, Plus, Settings, Star } from "lucide-react-native";
+import { ChevronRight, Plus, Settings } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable } from "react-native";
 import Animated, {
@@ -130,7 +126,7 @@ function SubRow({
         <Text fontSize={14.5} fontWeight="600" color="$color" f={1} numberOfLines={1}>
           {module.name}
         </Text>
-        {module.isFavorite && <Star size={12} color={ICON_LIME_LIGHT} fill={ICON_LIME_LIGHT} />}
+        {module.isFavorite && <StarGlyph />}
         <Text fontSize={11.5} color="$textMuted">
           {module.itemsCount}
         </Text>
