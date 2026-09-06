@@ -64,6 +64,10 @@ export default function ModuleCreate() {
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [discardCardCount, setDiscardCardCount] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const stickyAdd =
+    screen.top + contentHeight + STICKY_ADD_CLEARANCE > viewportHeight;
   const navigation = useNavigation();
   const allowLeaveRef = useRef(false);
   const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(null);
@@ -216,7 +220,13 @@ export default function ModuleCreate() {
       <YStack f={1} bg="$background">
         <BackgroundMesh preset="formBright" />
 
-        <View style={{ flex: 1 }} onLayout={onViewportLayout}>
+        <View
+          style={{ flex: 1 }}
+          onLayout={(e) => {
+            setViewportHeight(e.nativeEvent.layout.height);
+            onViewportLayout(e);
+          }}
+        >
           <KeyboardAwareScrollView
             ref={scrollRef}
             innerViewRef={scrollInnerRef}
@@ -226,10 +236,14 @@ export default function ModuleCreate() {
             keyboardShouldPersistTaps="always"
             contentContainerStyle={{
               paddingTop: screen.top,
-              paddingBottom: screen.bottom + STICKY_ADD_CLEARANCE,
+              paddingBottom:
+                screen.bottom + (stickyAdd ? STICKY_ADD_CLEARANCE : 24),
             }}
           >
-            <YStack px="$screenX">
+            <YStack
+              px="$screenX"
+              onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
+            >
               <ModalFormHeader
                 title="New module"
                 saveVariant="primary"
@@ -338,30 +352,40 @@ export default function ModuleCreate() {
                 )}
               />
             </YStack>
+            {!stickyAdd && (
+              <YStack ai="center" mt={18}>
+                <AddPill
+                  label="Add card"
+                  onPress={() => append({ term: "", definition: "" })}
+                />
+              </YStack>
+            )}
             <Animated.View style={spacerStyle} />
           </KeyboardAwareScrollView>
         </View>
 
         <StatusBarScrim />
 
-        <Animated.View
-          pointerEvents="box-none"
-          style={[
-            {
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: screen.bottom,
-              alignItems: "center",
-            },
-            stickyAddStyle,
-          ]}
-        >
-          <AddPill
-            label="Add card"
-            onPress={() => append({ term: "", definition: "" })}
-          />
-        </Animated.View>
+        {stickyAdd && (
+          <Animated.View
+            pointerEvents="box-none"
+            style={[
+              {
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: screen.bottom,
+                alignItems: "center",
+              },
+              stickyAddStyle,
+            ]}
+          >
+            <AddPill
+              label="Add card"
+              onPress={() => append({ term: "", definition: "" })}
+            />
+          </Animated.View>
+        )}
 
         <KeyboardBar />
 

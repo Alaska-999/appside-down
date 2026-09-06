@@ -487,6 +487,7 @@ export default function FolderEditScreen() {
         open={!!toast}
         message={toast ?? ""}
         onDismiss={() => setToast(null)}
+        size="lg"
       />
     </YStack>
   );

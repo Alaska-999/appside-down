@@ -16,7 +16,7 @@ export type StateTone = "error" | "warn" | "empty";
 const TONE_HALO: Record<StateTone, string> = {
   error: "rgba(239,68,68,0.28)",
   warn: "rgba(241, 238, 61, 0.3)",
-  empty: "rgba(41, 223, 181, 0.35)",
+  empty: "rgba(47, 255, 207, 0.45)",
 };
 
 const TONE_ICON_COLOR: Record<StateTone, string> = {
@@ -80,8 +80,14 @@ export function StateCard({
   ...rest
 }: StateCardProps) {
   return (
-    <YStack f={1} ai="center" jc="center" px={14} {...rest}>
-      <YStack width={DISC_SIZE} height={DISC_SIZE} mb={22} pos="relative">
+    <YStack f={1} ai="center" jc="center" px={14} pt={15} {...rest}>
+      <YStack
+        width={DISC_SIZE}
+        height={DISC_SIZE}
+        mb={22}
+        pos="relative"
+        overflow="visible"
+      >
         <StateHalo color={TONE_HALO[tone]} />
         <YStack
           width={DISC_SIZE}

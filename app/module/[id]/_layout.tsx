@@ -4,6 +4,8 @@ export default function ModuleLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="edit" />
+      <Stack.Screen name="cards" />
       <Stack.Screen
         name="flashcards"
         options={{

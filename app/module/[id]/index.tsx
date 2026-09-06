@@ -1,8 +1,6 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
-import { EditCardsSheet } from "@/src/components/flashcards/EditCardsSheet";
-import { EditModuleSheet } from "@/src/components/flashcards/EditModuleSheet";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
@@ -226,9 +224,6 @@ export default function ModuleScreen() {
   const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [editSheetOpen, setEditSheetOpen] = useState(false);
-  const [editModuleOpen, setEditModuleOpen] = useState(false);
-  const [editSheetMounted, setEditSheetMounted] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const initGame = useGameStore((state) => state.initGame);
@@ -397,20 +392,12 @@ export default function ModuleScreen() {
 
   const openEditSheet = () => {
     setMenuSheetOpen(false);
-    setEditSheetMounted(true);
-    setTimeout(() => setEditSheetOpen(true), 300);
+    router.push({ pathname: "/module/[id]/cards", params: { id } });
   };
 
   const openEditModule = () => {
     setMenuSheetOpen(false);
-    setTimeout(() => setEditModuleOpen(true), 300);
-  };
-
-  const handleSaved = (updatedCards: Flashcard[]) => {
-    setFlashcards(updatedCards);
-    setModuleData((prev) =>
-      prev ? { ...prev, itemsCount: updatedCards.length } : prev,
-    );
+    router.push({ pathname: "/module/[id]/edit", params: { id } });
   };
 
   const closeMenu = (open: boolean) => {
@@ -836,29 +823,6 @@ export default function ModuleScreen() {
         message={toast ?? ""}
         onDismiss={() => setToast(null)}
       />
-
-      {moduleData && (
-        <EditModuleSheet
-          open={editModuleOpen}
-          onOpenChange={setEditModuleOpen}
-          module={moduleData}
-          onSaved={setModuleData}
-        />
-      )}
-
-      {editSheetMounted && (
-        <EditCardsSheet
-          open={editSheetOpen}
-          onOpenChange={setEditSheetOpen}
-          moduleId={id}
-          cards={flashcards.map((c) => ({
-            id: c.id,
-            term: c.term,
-            definition: c.definition,
-          }))}
-          onSaved={handleSaved}
-        />
-      )}
 
       <AppSheet
         open={sortSheetOpen}
