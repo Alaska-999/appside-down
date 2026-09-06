@@ -1,7 +1,9 @@
+import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import {
   WELL_BORDERS,
   WELL_FILL_SOFT,
+  WELL_FILL_SOFT_FOCUS,
   WellInsetShadow,
 } from "@/src/components/ui/Well";
 import {
@@ -18,7 +20,14 @@ export { ROW_HEIGHT as FOLDER_EDIT_ROW_HEIGHT };
 
 const ROWS_RADIUS = 20;
 
-export function FolderEditRows({ children }: { children: ReactNode[] }) {
+export function FolderEditRows({
+  children,
+  focused = false,
+}: {
+  children: ReactNode[];
+  focused?: boolean;
+}) {
+  const focusProgress = useFocusProgress(focused);
   return (
     <YStack br={ROWS_RADIUS} pos="relative">
       <YStack
@@ -29,7 +38,7 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
         b={0}
         br={ROWS_RADIUS}
         overflow="hidden"
-        bg={WELL_FILL_SOFT}
+        bg={focused ? WELL_FILL_SOFT_FOCUS : WELL_FILL_SOFT}
       >
         <WellInsetShadow radius={ROWS_RADIUS} />
       </YStack>
@@ -39,6 +48,7 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
         colors={WELL_BORDERS.default.colors}
         positions={WELL_BORDERS.default.positions}
       />
+      <FocusRing radius={ROWS_RADIUS} progress={focusProgress} />
       <YStack br={ROWS_RADIUS} overflow="hidden" zIndex={2}>
         {children.map((child, index) => (
           <Fragment key={index}>

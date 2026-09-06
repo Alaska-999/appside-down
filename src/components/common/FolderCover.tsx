@@ -32,10 +32,10 @@ import { Alert, Image, Linking, Pressable, View } from "react-native";
 import { Text, YStack } from "tamagui";
 import { GradientBorder } from "../ui/GradientBorder";
 
-const COVER_BOX = 100;
-const COVER_RADIUS = 28;
+const COVER_BOX = 112;
+const COVER_RADIUS = 30;
 const LENS_SIZE = 30;
-const EMPTY_LENS_SIZE = 44;
+const EMPTY_LENS_SIZE = 58;
 
 export async function pickCoverImage(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -243,11 +243,11 @@ export function FolderCover({
 
                 <IconButton
                   variant="liquidGlass"
-                  size={52}
+                  size={EMPTY_LENS_SIZE}
                   icon={
                     <GradientIcon
                       icon={Camera}
-                      size={25}
+                      size={27}
                       strokeWidth={1.25}
                       opacity={0.9}
                     />

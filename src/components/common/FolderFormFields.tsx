@@ -28,7 +28,7 @@ export function FolderFormFields<T extends FieldValues>({
 }) {
   return (
     <YStack gap={18}>
-      <YStack ai="center" pt={14} pb={6}>
+      <YStack ai="center" pt={10} pb={0} mb={-6}>
         <FolderCover imageUri={coverUri} onChange={onCoverChange} />
       </YStack>
 

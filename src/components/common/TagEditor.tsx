@@ -28,6 +28,7 @@ function TagInputRow({
   onCommit,
   onCancel,
   commitLabel,
+  onFocusChange,
 }: {
   inputRef: (node: TextInput | null) => void;
   value: string;
@@ -39,6 +40,7 @@ function TagInputRow({
   onCommit: () => void;
   onCancel?: () => void;
   commitLabel: string;
+  onFocusChange: (focused: boolean) => void;
 }) {
   return (
     <YStack px={16} pb={error ? 10 : 0}>
@@ -59,6 +61,8 @@ function TagInputRow({
           value={value}
           onChangeText={onChange}
           onSubmitEditing={onCommit}
+          onFocus={() => onFocusChange(true)}
+          onBlur={() => onFocusChange(false)}
         />
         <FolderEditIconAction
           icon={Check}
@@ -99,6 +103,7 @@ export function TagEditor({
   const [adding, setAdding] = useState(false);
   const [newValue, setNewValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
   const renameInputRef = useRef<TextInput | null>(null);
   const newInputRef = useRef<TextInput | null>(null);
 
@@ -123,11 +128,13 @@ export function TagEditor({
     setAdding(false);
     setNewValue("");
     setError(null);
+    setInputFocused(false);
   };
 
   const closeRename = () => {
     setRenamingId(null);
     setError(null);
+    setInputFocused(false);
   };
 
   const commitAdd = async () => {
@@ -157,7 +164,7 @@ export function TagEditor({
   };
 
   return (
-    <FolderEditRows>
+    <FolderEditRows focused={inputFocused}>
       {[
         ...tags.map((tag) =>
           renamingId === tag.id ? (
@@ -174,6 +181,7 @@ export function TagEditor({
               onCommit={commitRename}
               onCancel={closeRename}
               commitLabel="Save tag"
+              onFocusChange={setInputFocused}
             />
           ) : (
             <FolderTagEditRow
@@ -224,6 +232,7 @@ export function TagEditor({
             onChange={onChangeValue(setNewValue)}
             onCommit={commitAdd}
             commitLabel="Add tag"
+            onFocusChange={setInputFocused}
           />
         ) : (
           <FolderAddRow
