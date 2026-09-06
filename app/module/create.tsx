@@ -10,13 +10,13 @@ import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
 } from "@/src/components/ui/KeyboardBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { PickRow } from "@/src/components/ui/PickRow";
-import { ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
+import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
+import { ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useServerError } from "@/src/hooks/useServerError";
@@ -271,7 +271,7 @@ export default function ModuleCreate() {
                 )}
               </YStack>
 
-              <YStack mb={22} gap={12}>
+              <YStack mb={50} gap={16}>
                 <PickRow
                   icon={Folder}
                   value={selectedFolder?.name}
@@ -280,7 +280,12 @@ export default function ModuleCreate() {
                 />
                 <XStack ai="center" gap={12} px={4}>
                   <Globe size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />
-                  <Text f={1} fontSize={15} fontWeight="600" color="$color">
+                  <Text
+                    f={1}
+                    fontSize={15}
+                    fontWeight="500"
+                    color={ICON_MUTED_LIGHT}
+                  >
                     Public module
                   </Text>
                   <Toggle
@@ -292,7 +297,7 @@ export default function ModuleCreate() {
                 </XStack>
               </YStack>
 
-              <XStack ai="center" jc="space-between" mb={6}>
+              <XStack ai="center" jc="space-between" mb={8}>
                 <Text fontSize={16} fontWeight="700" color="$color">
                   Cards
                 </Text>

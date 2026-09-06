@@ -41,7 +41,7 @@ const SIZE_STYLES = {
     padding: 3,
     thumb: 21,
     travel: 19,
-    offTrack: "rgba(4,8,10,0.55)",
+    offTrack: "rgba(16, 30, 36, 0.6)",
     trackBorder: "rgba(220,255,245,0.07)",
     offThumb: ICON_MUTED,
     onThumb: ICON_TEXT,
@@ -51,7 +51,7 @@ const SIZE_STYLES = {
   sm: {
     width: 40,
     height: 24,
-    padding: 3,
+    padding: 4,
     thumb: 18,
     travel: 16,
     offTrack: "rgba(4,8,10,0.55)",
