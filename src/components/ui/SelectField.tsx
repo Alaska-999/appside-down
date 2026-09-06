@@ -198,7 +198,7 @@ export function SelectField({
                       ai="center"
                       jc="space-between"
                       px={16}
-                      py={12}
+                      py={13}
                       bg={selected ? "rgba(163,230,53,0.08)" : "transparent"}
                       onPress={() => handleSelect(option.value)}
                       pressStyle={{ bg: "rgba(220,255,245,0.08)" }}

@@ -20,9 +20,9 @@ import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import {
-  ICON_ACCENT,
   ICON_DANGER,
   ICON_LIME_LIGHT,
+  ICON_MINT_LIGHT,
   ICON_MUTED,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
@@ -150,8 +150,9 @@ function CardsHeader({
           </Text>
         )}
       </XStack>
-      <XStack ai="center" gap={13}>
+      <XStack ai="center" gap={18}>
         <Pressable
+          hitSlop={5}
           accessibilityRole="button"
           accessibilityLabel="Filter starred cards"
           onPress={() => {
@@ -166,7 +167,7 @@ function CardsHeader({
             ai="center"
             jc="center"
             bg={
-              starredOnly ? "rgba(163,230,53,0.16)" : "rgba(220,255,245,0.05)"
+              starredOnly ? "rgba(163,230,53,0.05)" : "rgba(220,255,245,0.01)"
             }
             borderWidth={1}
             borderColor={
@@ -174,10 +175,10 @@ function CardsHeader({
             }
             {...(starredOnly
               ? {
-                  shadowColor: "rgba(190,242,100,1)",
+                  shadowColor: "rgb(197, 246, 114)",
                   shadowOffset: { width: 0, height: 0 },
                   shadowRadius: 8,
-                  shadowOpacity: 0.75,
+                  shadowOpacity: 0.5,
                 }
               : null)}
           >
@@ -185,11 +186,12 @@ function CardsHeader({
               size={16}
               strokeWidth={1.8}
               color={starredOnly ? ICON_LIME_LIGHT : ICON_MUTED}
-              fill={starredOnly ? "rgba(190,242,100,0.85)" : "transparent"}
+              fill={starredOnly ? "rgba(190,242,100,0.13)" : "transparent"}
             />
           </YStack>
         </Pressable>
         <Pressable
+          hitSlop={{ top: 14, bottom: 14, left: 10, right: 10 }}
           accessibilityRole="button"
           accessibilityLabel="Sort cards"
           onPress={() => {
@@ -198,8 +200,8 @@ function CardsHeader({
           }}
         >
           <XStack ai="center" gap={6}>
-            <ArrowDownUp size={14} color={ICON_ACCENT} strokeWidth={2} />
-            <Text fontSize={12.5} fontWeight="600" color="$mintLight">
+            <ArrowDownUp size={16} color={ICON_MINT_LIGHT} strokeWidth={2} />
+            <Text fontSize={14.5} fontWeight="600" color="$mintLight">
               Sort
             </Text>
           </XStack>
@@ -219,6 +221,7 @@ export default function ModuleScreen() {
   const [notFound, setNotFound] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
   const [starredOnly, setStarredOnly] = useState(false);
+  const [fullListHeight, setFullListHeight] = useState(0);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
   const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
@@ -727,18 +730,53 @@ export default function ModuleScreen() {
                         onToggleStarred={() => setStarredOnly((v) => !v)}
                         onSort={() => setSortSheetOpen(true)}
                       />
-                      <YStack gap={9}>
-                        {visibleCards.map((card) => (
-                          <CardRow
-                            key={card.id}
-                            term={cardSideText(card.term)}
-                            definition={cardSideText(card.definition)}
-                            starred={card.isStarred}
-                            onToggleStar={
-                              isOwner ? () => handleToggleStar(card) : undefined
-                            }
-                          />
-                        ))}
+                      <YStack
+                        gap={9}
+                        minHeight={starredOnly ? fullListHeight : undefined}
+                        onLayout={(e) => {
+                          if (!starredOnly)
+                            setFullListHeight(e.nativeEvent.layout.height);
+                        }}
+                      >
+                        {starredOnly && visibleCards.length === 0 ? (
+                          <YStack ai="center" gap={8} pt={28}>
+                            <Star
+                              size={30}
+                              strokeWidth={1.4}
+                              color={ICON_LIME_LIGHT}
+                              fill="rgba(190,242,100,0.14)"
+                            />
+                            <Text
+                              fontSize={15}
+                              fontWeight="600"
+                              color="$color"
+                              textAlign="center"
+                            >
+                              No starred cards yet
+                            </Text>
+                            <Text
+                              fontSize={12.5}
+                              color="$textMuted"
+                              textAlign="center"
+                            >
+                              Star a card and it will show up here
+                            </Text>
+                          </YStack>
+                        ) : (
+                          visibleCards.map((card) => (
+                            <CardRow
+                              key={card.id}
+                              term={cardSideText(card.term)}
+                              definition={cardSideText(card.definition)}
+                              starred={card.isStarred}
+                              onToggleStar={
+                                isOwner
+                                  ? () => handleToggleStar(card)
+                                  : undefined
+                              }
+                            />
+                          ))
+                        )}
                       </YStack>
                     </>
                   )}
@@ -810,7 +848,10 @@ export default function ModuleScreen() {
               >
                 Delete module
               </AppButton>
-              <AppButton variant="ghost" onPress={() => setMenuView("menu")}>
+              <AppButton
+                variant="secondary"
+                onPress={() => setMenuView("menu")}
+              >
                 Cancel
               </AppButton>
             </YStack>

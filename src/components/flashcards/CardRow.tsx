@@ -54,7 +54,7 @@ export function CardRow({
         </YStack>
         {onToggleStar && (
           <Pressable
-            hitSlop={10}
+            hitSlop={13}
             accessibilityRole="button"
             accessibilityLabel={starred ? "Unstar card" : "Star card"}
             onPress={() => {
@@ -63,7 +63,7 @@ export function CardRow({
             }}
           >
             <Star
-              size={16}
+              size={18}
               strokeWidth={1.7}
               color={starred ? ICON_LIME_LIGHT : "#3E4C57"}
               fill={starred ? "rgba(190,242,100,0.25)" : "transparent"}

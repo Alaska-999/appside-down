@@ -200,7 +200,7 @@ export function CardEditor<T extends FieldValues>({
                 style={{ paddingHorizontal: 4, paddingVertical: 6 }}
               >
                 <GripHorizontal
-                  size={18}
+                  size={20}
                   color={dragging ? ICON_MINT : ICON_MUTED}
                   strokeWidth={1.9}
                 />
@@ -209,7 +209,7 @@ export function CardEditor<T extends FieldValues>({
           )}
           {canRemove && (
             <Pressable
-              hitSlop={10}
+              hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={`Delete card ${index + 1}`}
               onPress={() => {
@@ -218,7 +218,7 @@ export function CardEditor<T extends FieldValues>({
               }}
             >
               <Trash2
-                size={18}
+                size={20}
                 color={dragging ? ICON_MINT : ICON_MUTED}
                 strokeWidth={1.9}
               />

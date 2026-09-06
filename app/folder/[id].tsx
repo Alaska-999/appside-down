@@ -280,7 +280,7 @@ export default function FolderScreen() {
             </YStack>
           </XStack>
 
-          <XStack gap={7} flexWrap="wrap" mb={22}>
+          <XStack gap={10} flexWrap="wrap" mb={22}>
             <TagChip
               label="All"
               count={folder.modules.length}

@@ -108,7 +108,7 @@ export function FolderEditIconAction({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      hitSlop={8}
+      hitSlop={4}
       onPress={() => {
         hapticTap();
         onPress();
@@ -155,7 +155,7 @@ export function FolderTagEditRow({
           {count}
         </Text>
       )}
-      <XStack ai="center" gap={8}>
+      <XStack ai="center" gap={12}>
         {actions}
       </XStack>
     </XStack>
@@ -201,7 +201,7 @@ export function FolderModuleEditRow({
           </Text>
         )}
       </YStack>
-      <XStack ai="center" gap={8}>
+      <XStack ai="center" gap={12}>
         {actions}
       </XStack>
     </XStack>

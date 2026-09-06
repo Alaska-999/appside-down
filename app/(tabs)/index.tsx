@@ -1,8 +1,11 @@
+import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { API_BASE_URL } from "@/src/api/config";
 import { StreakCard } from "@/src/components/cards/StreakCard";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
+import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
-import { AvatarRing } from "@/src/components/ui/AvatarRing";
+import { GlowTone } from "@/src/components/ui/GlowSurface";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
@@ -10,8 +13,6 @@ import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
-import { GlowTone } from "@/src/components/ui/GlowSurface";
 import {
   ICON_ACCENT,
   ICON_BASE,
@@ -24,18 +25,22 @@ import {
 } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
-import { hapticTap } from "@/src/utils/haptics";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
+import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { AlertTriangle, BookmarkCheck, Layers, Sparkles } from "lucide-react-native";
+import {
+  AlertTriangle,
+  BookmarkCheck,
+  Layers,
+  Sparkles,
+} from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { FlatList, Pressable, RefreshControl, StyleSheet } from "react-native";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 type PublicModuleResult = {
@@ -104,7 +109,14 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
             {saves > 0 ? ` · ${saves} save${saves !== 1 ? "s" : ""}` : ""}
           </Text>
           {module.savedCopyId && (
-            <XStack ai="center" gap={4} px={8} py={2} br={999} bg="$mintGlassBg">
+            <XStack
+              ai="center"
+              gap={4}
+              px={8}
+              py={2}
+              br={999}
+              bg="$mintGlassBg"
+            >
               <BookmarkCheck size={12} color={ICON_ACCENT} strokeWidth={2} />
               <Text fontSize={11} fontWeight="700" color="$mintLight">
                 Saved
@@ -132,8 +144,11 @@ function SectionHeader({
         {title}
       </Text>
       {onSeeAll && (
-        <Pressable onPress={onSeeAll} hitSlop={10}>
-          <Text fontSize={12.5} fontWeight="600" color="$mintLight">
+        <Pressable
+          onPress={onSeeAll}
+          hitSlop={{ top: 14, bottom: 14, left: 12, right: 12 }}
+        >
+          <Text fontSize={14.5} fontWeight="600" color="$mintLight">
             See all →
           </Text>
         </Pressable>
@@ -146,7 +161,8 @@ export default function Home() {
   const screen = useScreenInsets();
   const theme = useTheme();
   const mint = theme.accentGradientStart.get();
-  const tabBarClearance = TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
+  const tabBarClearance =
+    TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -266,7 +282,7 @@ export default function Home() {
             <YStack f={1}>
               <Text
                 fontSize={14}
-                color="$colorMuted"
+                color="$mutedLight"
                 onLongPress={() => router.push("/showcase")}
               >
                 Welcome back,
@@ -360,7 +376,12 @@ export default function Home() {
                     onButtonPress={() => fetchData()}
                   />
                 ) : featuredModule && featuredStats ? (
-                  <AppCard variant="progressLit" size="lg" lit={featuredStats.progress} minHeight={186}>
+                  <AppCard
+                    variant="progressLit"
+                    size="lg"
+                    lit={featuredStats.progress}
+                    minHeight={186}
+                  >
                     <Text
                       fontSize={11}
                       fontWeight="700"
@@ -382,7 +403,8 @@ export default function Home() {
                       {featuredModule.name}
                     </Text>
                     <Text fontSize={13} color="rgba(220,255,245,0.7)" mt={5}>
-                      {featuredStats.known} of {featuredStats.total} cards learned
+                      {featuredStats.known} of {featuredStats.total} cards
+                      learned
                     </Text>
                     <XStack ai="flex-end" jc="space-between" gap={12} mt="auto">
                       <YStack f={1}>
@@ -420,12 +442,26 @@ export default function Home() {
                     pos="relative"
                   >
                     <YStack pos="absolute" t={14} r={14}>
-                      <Layers size={15} color="rgba(255,255,255,0.5)" strokeWidth={1.9} />
+                      <Layers
+                        size={15}
+                        color="rgba(255,255,255,0.5)"
+                        strokeWidth={1.9}
+                      />
                     </YStack>
-                    <Text fontSize={28} fontWeight="900" letterSpacing={-0.56} color="$color">
+                    <Text
+                      fontSize={28}
+                      fontWeight="900"
+                      letterSpacing={-0.56}
+                      color="$color"
+                    >
                       {stats?.totalModules ?? 0}
                     </Text>
-                    <Text fontSize={11.5} color="$colorMuted" fontWeight="500" mt={5}>
+                    <Text
+                      fontSize={11.5}
+                      color="$colorMuted"
+                      fontWeight="500"
+                      mt={5}
+                    >
                       modules
                     </Text>
                   </AppCard>
@@ -440,12 +476,26 @@ export default function Home() {
                     pos="relative"
                   >
                     <YStack pos="absolute" t={14} r={14}>
-                      <Sparkles size={15} color="rgba(255,255,255,0.5)" strokeWidth={1.9} />
+                      <Sparkles
+                        size={15}
+                        color="rgba(255,255,255,0.5)"
+                        strokeWidth={1.9}
+                      />
                     </YStack>
-                    <Text fontSize={28} fontWeight="900" letterSpacing={-0.56} color="$color">
+                    <Text
+                      fontSize={28}
+                      fontWeight="900"
+                      letterSpacing={-0.56}
+                      color="$color"
+                    >
                       {stats?.cardsLearned ?? 0}
                     </Text>
-                    <Text fontSize={11.5} color="$colorMuted" fontWeight="500" mt={5}>
+                    <Text
+                      fontSize={11.5}
+                      color="$colorMuted"
+                      fontWeight="500"
+                      mt={5}
+                    >
                       cards learned
                     </Text>
                   </AppCard>
@@ -484,38 +534,44 @@ export default function Home() {
                             openModule(m.id);
                           }}
                         >
-                            <LinearGradient
-                              colors={
-                                RECENT_MONOGRAM_GRADIENTS[i % RECENT_MONOGRAM_GRADIENTS.length]
-                              }
-                              start={{ x: 0, y: 0 }}
-                              end={{ x: 1, y: 1 }}
-                              style={{
-                                width: 38,
-                                height: 38,
-                                borderRadius: 12,
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
+                          <LinearGradient
+                            colors={
+                              RECENT_MONOGRAM_GRADIENTS[
+                                i % RECENT_MONOGRAM_GRADIENTS.length
+                              ]
+                            }
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: 12,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              fontSize={15}
+                              fontWeight="800"
+                              color="#06231F"
                             >
-                              <Text fontSize={15} fontWeight="800" color="#06231F">
-                                {m.name.slice(0, 1).toUpperCase()}
-                              </Text>
-                            </LinearGradient>
-                            <YStack>
-                              <Text
-                                fontSize={14}
-                                fontWeight="700"
-                                lineHeight={17.5}
-                                color="$color"
-                                numberOfLines={2}
-                              >
-                                {m.name}
-                              </Text>
-                              <Text fontSize={11} color="$colorMuted" mt={4}>
-                                {count} card{count !== 1 ? "s" : ""}
-                              </Text>
-                            </YStack>
+                              {m.name.slice(0, 1).toUpperCase()}
+                            </Text>
+                          </LinearGradient>
+                          <YStack>
+                            <Text
+                              fontSize={14}
+                              fontWeight="700"
+                              lineHeight={17.5}
+                              color="$color"
+                              numberOfLines={2}
+                            >
+                              {m.name}
+                            </Text>
+                            <Text fontSize={11} color="$colorMuted" mt={4}>
+                              {count} card{count !== 1 ? "s" : ""}
+                            </Text>
+                          </YStack>
                         </AppCard>
                       );
                     })}
@@ -544,41 +600,56 @@ export default function Home() {
                             openModule(m.id);
                           }}
                         >
-                            <AppCard
-                              variant="media"
-                              minHeight={122}
-                              cover={
-                                <LinearGradient
-                                  colors={DISCOVER_COVERS[i % DISCOVER_COVERS.length]}
-                                  start={{ x: 0.2, y: 0 }}
-                                  end={{ x: 0.8, y: 1 }}
-                                  style={StyleSheet.absoluteFill}
-                                />
-                              }
+                          <AppCard
+                            variant="media"
+                            minHeight={122}
+                            cover={
+                              <LinearGradient
+                                colors={
+                                  DISCOVER_COVERS[i % DISCOVER_COVERS.length]
+                                }
+                                start={{ x: 0.2, y: 0 }}
+                                end={{ x: 0.8, y: 1 }}
+                                style={StyleSheet.absoluteFill}
+                              />
+                            }
+                          >
+                            <Text
+                              fontSize={16}
+                              fontWeight="700"
+                              letterSpacing={-0.16}
+                              color="$color"
                             >
-                              <Text fontSize={16} fontWeight="700" letterSpacing={-0.16} color="$color">
-                                {m.name}
-                              </Text>
-                              {author && (
-                                <Text fontSize={11.5} color="rgba(220,255,245,0.72)" mt={3}>
-                                  @{author}
-                                </Text>
-                              )}
-                            </AppCard>
-                            <YStack pos="absolute" t={13} r={13}>
-                              <XStack
-                                bg="rgba(8,9,12,0.55)"
-                                borderWidth={1}
-                                borderColor="rgba(255,255,255,0.18)"
-                                br={999}
-                                px={9}
-                                py={3}
+                              {m.name}
+                            </Text>
+                            {author && (
+                              <Text
+                                fontSize={11.5}
+                                color="rgba(220,255,245,0.72)"
+                                mt={3}
                               >
-                                <Text fontSize={10.5} color="$text" fontWeight="600">
-                                  {count} cards
-                                </Text>
-                              </XStack>
-                            </YStack>
+                                @{author}
+                              </Text>
+                            )}
+                          </AppCard>
+                          <YStack pos="absolute" t={13} r={13}>
+                            <XStack
+                              bg="rgba(8,9,12,0.55)"
+                              borderWidth={1}
+                              borderColor="rgba(255,255,255,0.18)"
+                              br={999}
+                              px={9}
+                              py={3}
+                            >
+                              <Text
+                                fontSize={10.5}
+                                color="$text"
+                                fontWeight="600"
+                              >
+                                {count} cards
+                              </Text>
+                            </XStack>
+                          </YStack>
                         </YStack>
                       );
                     })}

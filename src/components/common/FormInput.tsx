@@ -174,7 +174,7 @@ function FormInputInner<T extends FieldValues>(
               {secureToggle ? (
                 <Pressable
                   onPress={() => setSecureVisible((prev) => !prev)}
-                  hitSlop={8}
+                  hitSlop={13}
                 >
                   {secureVisible ? (
                     <EyeOff size={19} color={ICON_SUBTLE} strokeWidth={1.9} />

@@ -18,6 +18,8 @@ import { Button, ButtonProps, YStack, YStackProps } from "tamagui";
 
 type IconButtonVariant = "glass" | "acc" | "liquidGlass" | "badge" | "danger";
 
+const MIN_TAP_TARGET = 44;
+
 type IconButtonLayoutProps = Pick<
   ButtonProps,
   | "mt"
@@ -248,10 +250,14 @@ export function IconButton({
     );
   }
 
+  const legacySize = size ?? 36;
   return (
     <Button
       circular
       size="$3"
+      w={legacySize}
+      h={legacySize}
+      hitSlop={Math.max(0, Math.ceil((MIN_TAP_TARGET - legacySize) / 2))}
       icon={icon}
       onPress={handlePress}
       pressStyle={{ scale: 0.92 }}

@@ -1,6 +1,5 @@
 import { GradientIcon } from "@/src/components/ui/GradientIcon";
 import { IconButton } from "@/src/components/ui/IconButton";
-import { Grain } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import {
   ICON_BASE,
@@ -16,7 +15,6 @@ import {
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import {
-  Blur,
   Canvas,
   Circle,
   Group,
@@ -73,7 +71,7 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
       </Rect>
 
       <Group>
-        <Blur blur={7} />
+        {/* <Blur blur={1} /> */}
         <Circle cx={box * 0.95} cy={box * 0.02} r={box * 0.95}>
           <RadialGradient
             c={vec(box * 0.95, box * 0.02)}
@@ -131,8 +129,6 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
           positions={[0, 1]}
         />
       </Rect>
-
-      <Grain w={box} h={box} amount={0.1} />
     </Canvas>
   );
 }
@@ -230,13 +226,13 @@ export function FolderCover({
               >
                 <GradientBorder
                   radius={COVER_RADIUS}
-                  angle={150}
+                  angle={140}
                   width={1.3}
                   colors={[
                     withAlpha(ICON_WHITE, 0.7),
-                    withAlpha(ICON_LIME, 0.55),
-                    withAlpha(ICON_MINT, 0.22),
-                    withAlpha(ICON_TEAL, 0.55),
+                    withAlpha(ICON_LIME, 0.67),
+                    withAlpha(ICON_MINT, 0.38),
+                    withAlpha(ICON_TEAL, 0.6),
                   ]}
                   positions={[0, 0.32, 0.68, 1]}
                 />
@@ -245,12 +241,7 @@ export function FolderCover({
                   variant="liquidGlass"
                   size={EMPTY_LENS_SIZE}
                   icon={
-                    <GradientIcon
-                      icon={Camera}
-                      size={27}
-                      strokeWidth={1.25}
-                      opacity={0.9}
-                    />
+                    <GradientIcon icon={Camera} size={27} strokeWidth={1.3} />
                   }
                   accessibilityLabel="Add cover"
                   onPress={onPress}

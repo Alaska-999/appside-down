@@ -1,5 +1,8 @@
+import {
+  ICON_LIME_LIGHT,
+  ICON_MINT_LIGHT,
+} from "@/src/constants/iconColors";
 import { Sora_800ExtraBold } from "@expo-google-fonts/sora";
-import { ICON_ACCENT, ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import {
   Canvas,
   LinearGradient,
@@ -17,7 +20,7 @@ interface GradientTextProps {
 export function GradientText({
   children,
   fontSize,
-  colors = [ICON_ACCENT, ICON_LIME_LIGHT],
+  colors = [ICON_MINT_LIGHT, ICON_LIME_LIGHT],
 }: GradientTextProps) {
   const font = useFont(Sora_800ExtraBold, fontSize);
 
@@ -34,7 +37,11 @@ export function GradientText({
   return (
     <Canvas style={{ width, height }}>
       <SkiaText text={children} x={0} y={baseline} font={font}>
-        <LinearGradient start={vec(0, 0)} end={vec(advanceWidth, 0)} colors={colors} />
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(advanceWidth, 0)}
+          colors={colors}
+        />
       </SkiaText>
     </Canvas>
   );

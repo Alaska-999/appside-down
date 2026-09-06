@@ -59,7 +59,7 @@ export function SearchField({
       />
       {showClear && value.length > 0 && (
         <YStack
-          hitSlop={13}
+          hitSlop={{ top: 13, bottom: 13, right: 13, left: 6 }}
           onPress={() => onChangeText("")}
           pressStyle={{ opacity: 0.6, scale: 0.97 }}
           transition="press"

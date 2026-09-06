@@ -448,7 +448,10 @@ export default function FolderEditScreen() {
           >
             Delete folder
           </AppButton>
-          <AppButton variant="ghost" onPress={() => setConfirmDelete(false)}>
+          <AppButton
+            variant="secondary"
+            onPress={() => setConfirmDelete(false)}
+          >
             Cancel
           </AppButton>
         </YStack>

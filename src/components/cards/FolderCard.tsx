@@ -126,7 +126,7 @@ function SubRow({
         onPress?.();
       }}
     >
-      <XStack ai="center" gap={12} p={12} br={15}>
+      <XStack ai="center" gap={12} px={12} py={13} br={15}>
         <Text fontSize={14.5} fontWeight="600" color="$color" f={1} numberOfLines={1}>
           {module.name}
         </Text>
@@ -264,7 +264,8 @@ export function FolderCard({
                     ai="center"
                     jc="center"
                     gap={8}
-                    p={11}
+                    px={11}
+                    py={13}
                     mt={4}
                     br={15}
                     borderWidth={1}

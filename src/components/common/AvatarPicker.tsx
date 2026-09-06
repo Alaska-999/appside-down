@@ -1,27 +1,27 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
-import { ICON_DANGER, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { IconButton } from "@/src/components/ui/IconButton";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Ban, Camera } from "@tamagui/lucide-icons";
+import { Ban, Camera } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { Alert, Linking } from "react-native";
-import { Button, Spinner, YStack } from "tamagui";
+import { Spinner, YStack } from "tamagui";
 
 interface AvatarPickerProps {
   size?: number;
   onError?: (message: string) => void;
 }
 
-export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
+const CAMERA_BADGE = 30;
+const REMOVE_BADGE = 26;
+const BADGE_OFFSET = -4;
+
+export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
   const { user } = useAuthStore();
   const [uploading, setUploading] = useState(false);
-  const isDefaultSize = size === 120;
-  const scale = size / 120;
-  const badgeSize = Math.round(36 * scale);
-  const badgeIconSize = Math.round(16 * scale);
-  const badgeOffset = Math.round(-6 * scale);
 
   const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
     setUploading(true);
@@ -93,7 +93,7 @@ export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
   };
 
   return (
-    <YStack ai="center" gap="$2" py={isDefaultSize ? "$4" : 0}>
+    <YStack ai="center">
       <YStack width={size} height={size} pos="relative">
         <UserAvatar
           avatarUrl={user?.avatarUrl}
@@ -118,47 +118,29 @@ export function AvatarPicker({ size = 120, onError }: AvatarPickerProps) {
           </YStack>
         )}
 
-        <Button
+        <IconButton
+          variant="badge"
+          size={CAMERA_BADGE}
           pos="absolute"
-          right={isDefaultSize ? "$-2" : badgeOffset}
-          bottom={isDefaultSize ? "$4" : badgeOffset}
-          circular
-          size={isDefaultSize ? "$3" : badgeSize}
-          bg="$background"
-          bw={2}
-          borderColor="$borderColor"
-          elevation="$2"
-          icon={
-            <Camera
-              size={isDefaultSize ? "$1" : badgeIconSize}
-              color={ICON_ON_GLASS}
-            />
-          }
+          right={BADGE_OFFSET}
+          bottom={BADGE_OFFSET}
+          icon={<Camera size={15} color={ICON_ON_GLASS} strokeWidth={2} />}
           onPress={pickImage}
           disabled={uploading}
-          pressStyle={{ scale: 0.9 }}
+          accessibilityLabel="Change photo"
         />
 
         {user?.avatarUrl && (
-          <Button
+          <IconButton
+            variant="danger"
+            size={REMOVE_BADGE}
             pos="absolute"
-            right={isDefaultSize ? "$-2" : badgeOffset}
-            top={isDefaultSize ? "$4" : badgeOffset}
-            circular
-            size={isDefaultSize ? "$3" : badgeSize}
-            bg="$background"
-            bw={2}
-            borderColor="$borderColor"
-            elevation="$2"
-            icon={
-              <Ban
-                size={isDefaultSize ? "$1" : badgeIconSize}
-                color={ICON_DANGER}
-              />
-            }
+            right={BADGE_OFFSET}
+            top={BADGE_OFFSET}
+            icon={<Ban size={13} color={ICON_ON_GLASS} strokeWidth={2.2} />}
             onPress={removeAvatar}
             disabled={uploading}
-            pressStyle={{ scale: 0.9 }}
+            accessibilityLabel="Remove photo"
           />
         )}
       </YStack>
