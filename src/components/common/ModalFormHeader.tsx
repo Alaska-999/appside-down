@@ -1,5 +1,6 @@
 import { IconButton } from "@/src/components/ui/IconButton";
 import { SavePill } from "@/src/components/ui/SavePill";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { X } from "lucide-react-native";
 import { Text, XStack } from "tamagui";
 
@@ -19,14 +20,14 @@ export function ModalFormHeader({
   onSave,
 }: ModalFormHeaderProps) {
   return (
-    <XStack ai="center" gap={10} mb={18}>
+    <XStack ai="center" gap={15} mb={18}>
       <IconButton
         variant="liquidGlass"
-        icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+        icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
         onPress={onClose}
         accessibilityLabel="Close"
       />
-      <Text f={1} fontSize={19} fontWeight="800" color="$color">
+      <Text f={1} fontSize={18} fontWeight="800" color="$color">
         {title}
       </Text>
       <SavePill enabled={saveEnabled} loading={saveLoading} onPress={onSave} />

@@ -24,6 +24,7 @@ import {
 } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { hapticTap } from "@/src/utils/haptics";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -469,16 +470,20 @@ export default function Home() {
                     {recentModules.map((m, i) => {
                       const count = m._count?.flashcards ?? 0;
                       return (
-                        <Pressable key={m.id} onPress={() => openModule(m.id)}>
-                          <AppCard
-                            variant="glow"
-                            tone={RECENT_TONES[i % RECENT_TONES.length]}
-                            width={142}
-                            height={132}
-                            px={15}
-                            py={15}
-                            jc="space-between"
-                          >
+                        <AppCard
+                          key={m.id}
+                          variant="glow"
+                          tone={RECENT_TONES[i % RECENT_TONES.length]}
+                          width={142}
+                          height={132}
+                          px={15}
+                          py={15}
+                          jc="space-between"
+                          onPress={() => {
+                            hapticTap();
+                            openModule(m.id);
+                          }}
+                        >
                             <LinearGradient
                               colors={
                                 RECENT_MONOGRAM_GRADIENTS[i % RECENT_MONOGRAM_GRADIENTS.length]
@@ -511,8 +516,7 @@ export default function Home() {
                                 {count} card{count !== 1 ? "s" : ""}
                               </Text>
                             </YStack>
-                          </AppCard>
-                        </Pressable>
+                        </AppCard>
                       );
                     })}
                   </ScrollView>
@@ -530,8 +534,16 @@ export default function Home() {
                       const count = m._count?.flashcards ?? 0;
                       const author = m.author?.username ?? m.authorUsername;
                       return (
-                        <Pressable key={m.id} onPress={() => openModule(m.id)}>
-                          <YStack pos="relative">
+                        <YStack
+                          key={m.id}
+                          pos="relative"
+                          pressStyle={{ scale: 0.982, opacity: 0.9 }}
+                          transition="press"
+                          onPress={() => {
+                            hapticTap();
+                            openModule(m.id);
+                          }}
+                        >
                             <AppCard
                               variant="media"
                               minHeight={122}
@@ -567,8 +579,7 @@ export default function Home() {
                                 </Text>
                               </XStack>
                             </YStack>
-                          </YStack>
-                        </Pressable>
+                        </YStack>
                       );
                     })}
                   </YStack>

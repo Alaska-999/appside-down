@@ -1,10 +1,25 @@
+import { GradientIcon } from "@/src/components/ui/GradientIcon";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { Grain } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { ICON_MINT, ICON_ON_GLASS } from "@/src/constants/iconColors";
-import { hapticTap } from "@/src/utils/haptics";
 import {
+  ICON_BASE,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT,
+  ICON_MINT_LIGHT,
+  ICON_MINT_TINT_DARK,
+  ICON_ON_GLASS,
+  ICON_TEAL,
+  ICON_WHITE,
+} from "@/src/constants/iconColors";
+import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
+import {
+  Blur,
   Canvas,
   Circle,
+  Group,
   LinearGradient,
   RadialGradient,
   Rect,
@@ -15,6 +30,7 @@ import { Camera, ImagePlus, Pencil, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Image, Linking, Pressable, View } from "react-native";
 import { Text, YStack } from "tamagui";
+import { GradientBorder } from "../ui/GradientBorder";
 
 const COVER_BOX = 100;
 const COVER_RADIUS = 28;
@@ -49,65 +65,74 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
     <Canvas style={{ width: box, height: box, borderRadius: radius }}>
       <Rect x={0} y={0} width={box} height={box}>
         <LinearGradient
-          start={vec(0, 0)}
-          end={vec(box * 0.5, box)}
-          colors={["#142827", "#0b1618", "#070c0f"]}
-          positions={[0, 0.5, 1]}
+          start={vec(box, 0)}
+          end={vec(0, box)}
+          colors={[ICON_TEAL, ICON_MINT_TINT_DARK, ICON_BASE]}
+          positions={[0, 0.4, 1]}
         />
       </Rect>
 
-      <Circle cx={box * 0.2} cy={box * 0.2} r={box * 0.7}>
-        <RadialGradient
-          c={vec(box * 0.2, box * 0.2)}
-          r={box * 0.5}
-          colors={["rgba(94,234,212,0.2)", "rgba(94,234,212,0.0)"]}
+      <Group>
+        <Blur blur={7} />
+        <Circle cx={box * 0.95} cy={box * 0.02} r={box * 0.95}>
+          <RadialGradient
+            c={vec(box * 0.95, box * 0.02)}
+            r={box * 0.78}
+            colors={[
+              withAlpha(ICON_LIME_LIGHT, 0.5),
+              withAlpha(ICON_LIME, 0.14),
+              withAlpha(ICON_LIME, 0),
+            ]}
+            positions={[0, 0.3, 1]}
+          />
+        </Circle>
+
+        <Circle cx={box * 0.95} cy={box * 0.02} r={box * 0.3}>
+          <RadialGradient
+            c={vec(box * 0.95, box * 0.02)}
+            r={box * 0.26}
+            colors={[
+              withAlpha(ICON_WHITE, 0.7),
+              withAlpha(ICON_WHITE, 0.2),
+              withAlpha(ICON_WHITE, 0),
+            ]}
+            positions={[0, 0.3, 1]}
+          />
+        </Circle>
+
+        <Circle cx={box * 0.12} cy={box * 0.72} r={box * 0.7}>
+          <RadialGradient
+            c={vec(box * 0.12, box * 0.72)}
+            r={box * 0.66}
+            colors={[
+              withAlpha(ICON_MINT_LIGHT, 0.3),
+              withAlpha(ICON_MINT, 0.07),
+              withAlpha(ICON_MINT, 0),
+            ]}
+            positions={[0, 0.35, 1]}
+          />
+        </Circle>
+
+        <Circle cx={box * 0.05} cy={box * 1.05} r={box * 0.7}>
+          <RadialGradient
+            c={vec(box * 0.05, box * 1.05)}
+            r={box * 0.68}
+            colors={["rgba(0,0,0,0.75)", "rgba(0,0,0,0.3)", "rgba(0,0,0,0)"]}
+            positions={[0, 0.35, 1]}
+          />
+        </Circle>
+      </Group>
+
+      <Rect x={0} y={0} width={box} height={box * 0.35}>
+        <LinearGradient
+          start={vec(0, 0)}
+          end={vec(0, box * 0.35)}
+          colors={[withAlpha(ICON_WHITE, 0.18), withAlpha(ICON_WHITE, 0)]}
           positions={[0, 1]}
         />
-      </Circle>
+      </Rect>
 
-      <Circle cx={box * 0.2} cy={box * 0.2} r={box * 0.3}>
-        <RadialGradient
-          c={vec(box * 0.2, box * 0.2)}
-          r={box * 0.25}
-          colors={[
-            "rgba(214, 245, 240, 0.21)",
-            "rgba(94,234,212,0.15)",
-            "rgba(94,234,212,0.0)",
-          ]}
-          positions={[0, 0.25, 1]}
-        />
-      </Circle>
-
-      <Circle cx={box * 0.8} cy={box * 0.8} r={box * 0.5}>
-        <RadialGradient
-          c={vec(box * 0.8, box * 0.8)}
-          r={box * 0.45}
-          colors={["rgba(163,230,53,0.25)", "rgba(163,230,53,0.0)"]}
-          positions={[0, 1]}
-        />
-      </Circle>
-
-      <Circle cx={box * 0.75} cy={box * 0.75} r={box * 0.3}>
-        <RadialGradient
-          c={vec(box * 0.75, box * 0.75)}
-          r={box * 0.25}
-          colors={[
-            "rgba(246, 250, 220, 0.16)",
-            "rgba(180, 255, 94, 0.1)",
-            "rgba(180, 255, 94, 0.0)",
-          ]}
-          positions={[0, 0.25, 1]}
-        />
-      </Circle>
-
-      <Circle cx={box * 0.2} cy={box * 0.9} r={box * 0.55}>
-        <RadialGradient
-          c={vec(box * 0.2, box * 0.9)}
-          r={box * 0.5}
-          colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.0)"]}
-          positions={[0, 1]}
-        />
-      </Circle>
+      <Grain w={box} h={box} amount={0.1} />
     </Canvas>
   );
 }
@@ -202,14 +227,30 @@ export function FolderCover({
                 br={COVER_RADIUS}
                 ai="center"
                 jc="center"
-                borderWidth={1.3}
-                borderColor="rgba(94,234,212,0.45)"
               >
+                <GradientBorder
+                  radius={COVER_RADIUS}
+                  angle={150}
+                  width={1.3}
+                  colors={[
+                    withAlpha(ICON_WHITE, 0.7),
+                    withAlpha(ICON_LIME, 0.55),
+                    withAlpha(ICON_MINT, 0.22),
+                    withAlpha(ICON_TEAL, 0.55),
+                  ]}
+                  positions={[0, 0.32, 0.68, 1]}
+                />
+
                 <IconButton
                   variant="liquidGlass"
                   size={52}
                   icon={
-                    <Camera size={24} color={ICON_MINT} strokeWidth={1.5} />
+                    <GradientIcon
+                      icon={Camera}
+                      size={25}
+                      strokeWidth={1.25}
+                      opacity={0.9}
+                    />
                   }
                   accessibilityLabel="Add cover"
                   onPress={onPress}
@@ -218,7 +259,7 @@ export function FolderCover({
             )}
           </YStack>
           {!imageUri && (
-            <Text fontSize={11.5} color="$mutedDim">
+            <Text fontSize={11.5} color="$colorMuted">
               Tap to add cover
             </Text>
           )}

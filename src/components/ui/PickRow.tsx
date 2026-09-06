@@ -1,5 +1,5 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { WellInsetShadow } from "@/src/components/ui/InputShell";
+import { WellInsetShadow } from "@/src/components/ui/Well";
 import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";

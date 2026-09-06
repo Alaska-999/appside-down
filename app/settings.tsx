@@ -8,6 +8,7 @@ import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
+import { ICON_ROSE_SOFT } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { usePreferencesStore } from "@/src/store/usePreferencesStore";
@@ -123,7 +124,7 @@ export default function SettingsScreen() {
                 label="Push notifications"
                 right={
                   <Toggle
-                    size="md"
+                    size="lg"
                     value={pushNotificationsEnabled}
                     onToggle={togglePushNotifications}
                   />
@@ -133,7 +134,7 @@ export default function SettingsScreen() {
                 label="Sound effects"
                 right={
                   <Toggle
-                    size="md"
+                    size="lg"
                     value={soundEffectsEnabled}
                     onToggle={toggleSoundEffects}
                   />
@@ -143,7 +144,7 @@ export default function SettingsScreen() {
                 label="Haptic feedback"
                 right={
                   <Toggle
-                    size="md"
+                    size="lg"
                     value={hapticFeedbackEnabled}
                     onToggle={toggleHapticFeedback}
                   />
@@ -169,10 +170,10 @@ export default function SettingsScreen() {
           <YStack gap={9}>
             <AppButton
               variant="secondary"
-              icon={<LogOut size={18} color="$statusDanger" />}
+              icon={<LogOut size={18} color={ICON_ROSE_SOFT} />}
               onPress={logout}
             >
-              <Text color="$statusDanger" fontWeight="600">
+              <Text color="$roseSoft" fontWeight="600">
                 Log Out
               </Text>
             </AppButton>

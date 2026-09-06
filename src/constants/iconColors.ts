@@ -19,3 +19,6 @@ export const ICON_WHITE = "#FFFFFF";
 export const ICON_MUTED_LIGHT = "#B7CEDA";
 export const ICON_MINT_TINT_DARK = "#06231F";
 export const ICON_BASE_DEEP = "#11141F";
+export const ICON_ROSE_SOFT = "#FCA5A5";
+
+

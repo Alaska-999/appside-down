@@ -58,7 +58,7 @@ export function StreakCard({
                 </>
               )}
             </YStack>
-            <Text fontSize={10} fontWeight="600" color={isNow ? "$mintLight" : "#6E8496"}>
+            <Text fontSize={10.5} fontWeight="600" color={isNow ? "$mintLight" : "$colorMuted"}>
               {label}
             </Text>
           </YStack>

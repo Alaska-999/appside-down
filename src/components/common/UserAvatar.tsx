@@ -15,7 +15,7 @@ export function UserAvatar({
   size,
   onPress,
 }: UserAvatarProps) {
-  const fontSize = Math.round(size / 2.2);
+  const fontSize = Math.round(size * 0.43);
 
   if (!avatarUrl) {
     return (
@@ -24,11 +24,11 @@ export function UserAvatar({
           width={size}
           height={size}
           br={size / 2}
-          bg="$backgroundStrong"
+          bg="#141A1F"
           ai="center"
           jc="center"
         >
-          <Text color="$colorSecondary" fontSize={fontSize} fontWeight="800">
+          <Text color="$colorMuted" fontSize={fontSize} fontWeight="800">
             {getInitials(username)}
           </Text>
         </YStack>
@@ -39,8 +39,8 @@ export function UserAvatar({
   return (
     <Avatar size={size} circular onPress={onPress}>
       <Avatar.Image src={avatarUrl} accessibilityLabel="User avatar" />
-      <Avatar.Fallback bg="$backgroundStrong" jc="center" ai="center">
-        <Text color="$colorSecondary" fontSize={fontSize} fontWeight="800">
+      <Avatar.Fallback bg="#141A1F" jc="center" ai="center">
+        <Text color="$colorMuted" fontSize={fontSize} fontWeight="800">
           {getInitials(username)}
         </Text>
       </Avatar.Fallback>

@@ -60,6 +60,7 @@ type VariantSpec = {
   ringColor?: string;
   innerBloom?: { color: string; spread: number; blur: number };
   liquidInsets?: boolean;
+  disabledOpacity?: number;
   shadow?: {
     color: string;
     offset: { width: number; height: number };
@@ -118,7 +119,7 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     pressedBg: "rgba(220,255,245,0.03)",
   },
   danger: {
-    bg: "rgba(239,68,68,0.18)",
+    bg: "rgba(239,68,68,0.16)",
     borderAngle: 150,
     borderColors: ["rgba(239,68,68,0.6)", "rgba(239,68,68,0.16)"],
     textColor: "$roseSoft",
@@ -143,17 +144,20 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     },
     textColor: "$mintLight",
   },
+
   liquid: {
-    bg: "rgba(255,255,255,0.055)",
+    bg: "rgba(220,255,245,0.04)",
     blurIntensity: 10,
     liquidGlass: true,
     liquidInsets: true,
-    innerBloom: { color: "rgba(255,255,255,0.08)", spread: 18, blur: 12 },
-    borderAngle: 155,
+    innerBloom: { color: "rgba(255,255,255,0.08)", spread: 15, blur: 10 },
+
+    disabledOpacity: 0.45,
+    borderAngle: 160,
     borderColors: [
-      "rgba(255,255,255,0.85)",
-      "rgba(255,255,255,0.08)",
-      "rgba(255,255,255,0.4)",
+      "rgba(195, 219, 237, 0.4)",
+      "rgba(255,255,255,0.05)",
+      "rgba(195, 232, 234, 0.24)",
     ],
     borderPositions: [0, 0.46, 1],
     shadow: {
@@ -289,6 +293,7 @@ interface AppButtonProps {
   sheen?: boolean | "dark";
   flood?: boolean;
   split?: ReactNode;
+  textColor?: string;
   children: ReactNode;
 }
 
@@ -302,6 +307,7 @@ export function AppButton({
   sheen,
   flood,
   split,
+  textColor: textColorOverride,
   children,
 }: AppButtonProps) {
   const theme = useTheme();
@@ -312,8 +318,16 @@ export function AppButton({
   const verticalHitSlop = Math.max(0, (MIN_TAP_TARGET - height) / 2);
   const reduced = useReducedMotion();
   const pressScale = useSharedValue(1);
+  const targetOpacity = disabled ? (spec.disabledOpacity ?? 0.34) : 1;
+  const stateOpacity = useSharedValue(targetOpacity);
+  useEffect(() => {
+    stateOpacity.value = reduced
+      ? targetOpacity
+      : withTiming(targetOpacity, { duration: 240, easing: PRESS_EASING });
+  }, [targetOpacity, reduced, stateOpacity]);
   const pressAnimStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pressScale.value }],
+    opacity: stateOpacity.value,
   }));
 
   const resolveColor = (c: string) =>
@@ -348,13 +362,14 @@ export function AppButton({
       {({ pressed }) => {
         const floodActive = Boolean(flood) && pressed && !isBlocked;
         const textColor =
-          variant === "danger"
+          textColorOverride ??
+          (variant === "danger"
             ? "$roseSoft"
             : floodActive
               ? "$nearBlack"
               : pressed && spec.pressedTextColor
                 ? spec.pressedTextColor
-                : spec.textColor;
+                : spec.textColor);
         const shadowProps =
           spec.shadow && !disabled
             ? {
@@ -369,7 +384,6 @@ export function AppButton({
           <Animated.View style={pressAnimStyle}>
             <YStack
               br={radius}
-              opacity={disabled ? 0.34 : 1}
               borderWidth={spec.ringWidth}
               borderColor={spec.ringColor}
               {...shadowProps}
@@ -436,17 +450,17 @@ export function AppButton({
                     blur={spec.innerBloom.blur}
                   />
                 )}
-                {spec.liquidInsets && (
+                {spec.liquidInsets && !disabled && (
                   <>
                     <View
                       pointerEvents="none"
                       style={{
                         position: "absolute",
                         top: 0,
-                        left: 12,
-                        right: 12,
-                        height: 1.2,
-                        backgroundColor: "rgba(255,255,255,0.6)",
+                        left: 10,
+                        right: 10,
+                        height: 1,
+                        backgroundColor: "rgba(255,255,255,0.34)",
                       }}
                     />
                     <View
@@ -454,10 +468,10 @@ export function AppButton({
                       style={{
                         position: "absolute",
                         bottom: 0,
-                        left: 12,
-                        right: 12,
-                        height: 1.2,
-                        backgroundColor: "rgba(255,255,255,0.18)",
+                        left: 10,
+                        right: 10,
+                        height: 1,
+                        backgroundColor: "rgba(120,220,255,0.16)",
                       }}
                     />
                   </>

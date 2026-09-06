@@ -96,10 +96,10 @@ export function TagChip({
         br={CHIP_RADIUS}
         pos="relative"
         jc="center"
-        shadowColor={s.glow ? "rgb(94, 234, 213)" : "#000"}
+        shadowColor={s.glow ? "$mintGlassBorder" : "#000"}
         shadowOffset={{ width: 0, height: s.glow ? 0 : 3 }}
-        shadowRadius={s.glow ? 7 : 5}
-        shadowOpacity={s.glow ? 0.55 : 0.35}
+        shadowRadius={4}
+        shadowOpacity={0.4}
       >
         <YStack
           pos="absolute"

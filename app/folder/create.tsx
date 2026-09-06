@@ -88,7 +88,7 @@ export default function FolderCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="form" />
+        <BackgroundMesh preset="formBright" />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}

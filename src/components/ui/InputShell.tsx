@@ -1,67 +1,25 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
   FocusRing,
   OuterGlow,
   useFocusProgress,
 } from "@/src/components/ui/FocusRing";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  WELL_BORDERS,
+  WellInsetShadow,
+  WellState,
+} from "@/src/components/ui/Well";
 import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { controlHeight } from "@/tamagui.config";
-import { Canvas, RoundedRect, Shadow } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode, useState } from "react";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { YStack, YStackProps } from "tamagui";
 
-const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.55)" };
-
-export function WellInsetShadow({
-  radius,
-  shadow = WELL_INSET_SHADOW,
-}: {
-  radius: number;
-  shadow?: { dy: number; blur: number; color: string };
-}) {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    if (width !== size.width || height !== size.height)
-      setSize({ width, height });
-  };
-  return (
-    <View
-      pointerEvents="none"
-      style={StyleSheet.absoluteFill}
-      onLayout={onLayout}
-    >
-      {size.width > 0 && (
-        <Canvas style={StyleSheet.absoluteFill}>
-          <RoundedRect
-            x={0}
-            y={0}
-            width={size.width}
-            height={size.height}
-            r={radius}
-            color="black"
-          >
-            <Shadow
-              dx={0}
-              dy={shadow.dy}
-              blur={shadow.blur}
-              color={shadow.color}
-              inner
-              shadowOnly
-            />
-          </RoundedRect>
-        </Canvas>
-      )}
-    </View>
-  );
-}
-
 export type InputShellVariant = "well" | "glass" | "underline" | "plain";
-export type InputShellState = "default" | "focus" | "error" | "good";
+export type InputShellState = WellState;
 export type InputShellSize = "sm" | "md" | "lg";
 
 export const INPUT_SIZE_STYLES: Record<
@@ -71,36 +29,6 @@ export const INPUT_SIZE_STYLES: Record<
   sm: { height: controlHeight.sm, radius: 13, px: 13 },
   md: { height: controlHeight.md, radius: 16, px: 16 },
   lg: { height: controlHeight.lg, radius: 18, px: 19 },
-};
-
-export const WELL_BORDERS: Record<
-  InputShellState,
-  { colors: string[]; positions: number[] }
-> = {
-  default: {
-    colors: [
-      "rgba(0, 0, 0, 0.1)",
-      "rgba(140, 161, 159, 0.14)",
-      "rgba(163, 187, 180, 0.18)",
-    ],
-    positions: [0, 0.8, 1],
-  },
-  focus: {
-    colors: [
-      "rgba(0, 0, 0, 0.1)",
-      "rgba(140, 161, 159, 0.14)",
-      "rgba(163, 187, 180, 0.18)",
-    ],
-    positions: [0, 0.8, 1],
-  },
-  error: {
-    colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"],
-    positions: [0, 1],
-  },
-  good: {
-    colors: ["rgba(163,230,53,0.4)", "rgba(163,230,53,0.15)"],
-    positions: [0, 1],
-  },
 };
 
 type InputShellLayoutProps = Pick<
@@ -240,7 +168,7 @@ export function InputShell({
             intensity={45}
             tint="default"
             borderRadius={s.radius}
-            backgroundColor="rgba(220,255,245,0.06)"
+            backgroundColor="rgba(148, 186, 175, 0.06)"
           />
         ) : (
           <>

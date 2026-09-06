@@ -230,11 +230,12 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           {
             blur: 32,
             blobs: ribBlobs(-0.27 * w, -0.11 * h, 0.58 * w, 1.22 * h, [
-              [0.6, 0.12, 0.42, 0.4, "rgba(94,234,212,0.48)", 0.69],
-              [0.4, 0.48, 0.4, 0.3, "rgba(45,212,191,0.37)", 0.71],
+              [0.6, 0.12, 0.38, 0.4, "rgba(94,234,212,0.44)", 0.7],
+              [0.4, 0.48, 0.4, 0.3, "rgba(45,212,191,0.37)", 0.72],
               [0.62, 0.84, 0.36, 0.3, "rgba(13, 148, 123, 0.35)", 0.7],
             ]),
           },
+
           {
             blur: 38,
             blobs: ribBlobs(0.62 * w, -0.1 * h, 0.63 * w, 0.29 * h, [
@@ -693,7 +694,7 @@ function Vignette({
   );
 }
 
-function Grain({ w, h, amount }: { w: number; h: number; amount: number }) {
+export function Grain({ w, h, amount }: { w: number; h: number; amount: number }) {
   const paint = useMemo(() => {
     const p = Skia.Paint();
     p.setAlphaf(amount * 0.55);

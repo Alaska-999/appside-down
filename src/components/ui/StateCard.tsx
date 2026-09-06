@@ -15,8 +15,8 @@ export type StateTone = "error" | "warn" | "empty";
 
 const TONE_HALO: Record<StateTone, string> = {
   error: "rgba(239,68,68,0.28)",
-  warn: "rgba(252,211,77,0.26)",
-  empty: "rgba(45,212,191,0.35)",
+  warn: "rgba(241, 238, 61, 0.3)",
+  empty: "rgba(41, 223, 181, 0.35)",
 };
 
 const TONE_ICON_COLOR: Record<StateTone, string> = {

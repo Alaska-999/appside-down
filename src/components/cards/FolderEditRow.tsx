@@ -4,6 +4,8 @@ import {
   ICON_MINT_LIGHT,
   ICON_MUTED_LIGHT,
 } from "@/src/constants/iconColors";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { WELL_BORDERS, WellInsetShadow } from "@/src/components/ui/Well";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType, Fragment, ReactNode } from "react";
 import { Pressable, View } from "react-native";
@@ -11,22 +13,44 @@ import { Text, XStack, YStack } from "tamagui";
 
 export { ROW_HEIGHT as FOLDER_EDIT_ROW_HEIGHT };
 
+const ROWS_RADIUS = 20;
+
 export function FolderEditRows({ children }: { children: ReactNode[] }) {
   return (
-    <YStack br="$cardSoft" overflow="hidden" bg="$glassBg">
-      {children.map((child, index) => (
-        <Fragment key={index}>
-          {index > 0 && (
-            <View
-              style={{
-                height: 1,
-                backgroundColor: "rgba(220,255,245,0.08)",
-              }}
-            />
-          )}
-          {child}
-        </Fragment>
-      ))}
+    <YStack br={ROWS_RADIUS} pos="relative">
+      <YStack
+        pos="absolute"
+        t={0}
+        l={0}
+        r={0}
+        b={0}
+        br={ROWS_RADIUS}
+        overflow="hidden"
+        bg="rgba(4,8,10,0.5)"
+      >
+        <WellInsetShadow radius={ROWS_RADIUS} />
+      </YStack>
+      <GradientBorder
+        radius={ROWS_RADIUS}
+        angle={180}
+        colors={WELL_BORDERS.default.colors}
+        positions={WELL_BORDERS.default.positions}
+      />
+      <YStack br={ROWS_RADIUS} overflow="hidden" zIndex={2}>
+        {children.map((child, index) => (
+          <Fragment key={index}>
+            {index > 0 && (
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: "rgba(220,255,245,0.08)",
+                }}
+              />
+            )}
+            {child}
+          </Fragment>
+        ))}
+      </YStack>
     </YStack>
   );
 }
