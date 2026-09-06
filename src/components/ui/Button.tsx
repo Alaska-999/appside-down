@@ -92,10 +92,10 @@ const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
     gloss: true,
     textColor: "$color",
     shadow: {
-      color: "rgba(13,148,136,1)",
-      offset: { width: 0, height: 5 },
-      radius: 10,
-      opacity: 0.55,
+      color: "rgb(45,212,191)",
+      offset: { width: 0, height: 1 },
+      radius: 5,
+      opacity: 0.35,
     },
   },
 

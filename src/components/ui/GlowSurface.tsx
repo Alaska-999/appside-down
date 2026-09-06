@@ -259,7 +259,7 @@ export function GlowSurface({
         <GradientBorder radius={radius} preset="surf" />
       )}
       <YStack
-        f={1}
+        fg={1}
         zIndex={2}
         fd={fd}
         ai={ai}

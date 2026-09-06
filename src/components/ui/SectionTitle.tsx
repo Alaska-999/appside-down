@@ -29,10 +29,10 @@ const TONE_STYLES: Record<SectionTitleTone, Partial<TextProps>> = {
     mt: 3,
   },
   eyebrow: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "$colorSecondary",
-    letterSpacing: 0,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "$colorMuted",
+    letterSpacing: 0.99,
     mt: 0,
   },
 };

@@ -5,8 +5,7 @@ import {
   FolderEditRows,
   FolderModuleEditRow,
 } from "@/src/components/cards/FolderEditRow";
-import { FolderCover } from "@/src/components/common/FolderCover";
-import { FormInput } from "@/src/components/common/FormInput";
+import { FolderFormFields } from "@/src/components/common/FolderFormFields";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
@@ -322,24 +321,12 @@ export default function FolderEditScreen() {
               <Skeleton height={160} borderRadius="$cardSoft" />
             </YStack>
           ) : (
-            <YStack gap={18}>
-              <YStack ai="center" pt={14} pb={6}>
-                <FolderCover imageUri={coverUri} onChange={setCoverUri} />
-              </YStack>
-
-              <YStack>
-                <FieldLabel label="Name" />
-                <FormInput
-                  control={form.control}
-                  name="name"
-                  placeholder="Untitled folder"
-                  maxLength={40}
-                  showCounter
-                />
-              </YStack>
-
-              <YStack>
-                <FieldLabel label="Tags" />
+            <FolderFormFields
+              control={form.control}
+              nameField="name"
+              coverUri={coverUri}
+              onCoverChange={setCoverUri}
+              tagEditor={
                 <TagEditor
                   mode="manage"
                   tags={folder.tags.map((tag) => ({
@@ -350,8 +337,8 @@ export default function FolderEditScreen() {
                   onRename={handleRenameTag}
                   onRemove={(tag) => setConfirmTag(tag)}
                 />
-              </YStack>
-
+              }
+            >
               <YStack>
                 <FieldLabel label="Modules" hint={String(moduleCount)} />
                 <FolderEditRows>
@@ -405,7 +392,7 @@ export default function FolderEditScreen() {
                   onPress={() => setConfirmDelete(true)}
                 />
               </SheetRows>
-            </YStack>
+            </FolderFormFields>
           )}
         </YStack>
       </KeyboardAwareScrollView>

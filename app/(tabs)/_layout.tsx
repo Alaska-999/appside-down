@@ -95,7 +95,7 @@ export default function TabsLayout() {
               intensity={40}
               borderRadius={22}
               borderWidth={1}
-              borderColor={theme.glassBorder.get()}
+              borderColor={theme.borderColor.get()}
               backgroundColor={theme.tabBarBg.get()}
             />
           ),

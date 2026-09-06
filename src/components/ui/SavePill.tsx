@@ -1,5 +1,5 @@
 import { AppButton } from "@/src/components/ui/Button";
-import { ICON_NEAR_BLACK } from "@/src/constants/iconColors";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { Check } from "lucide-react-native";
 
 export function SavePill({
@@ -15,14 +15,25 @@ export function SavePill({
 }) {
   return (
     <AppButton
-      variant="primary"
+      variant="soft"
       size="sm"
-      icon={<Check size={17} color={ICON_NEAR_BLACK} strokeWidth={2.4} />}
+      icon={<Check size={17} color={ICON_LIME_LIGHT} strokeWidth={3} />}
       onPress={onPress}
       loading={loading}
       disabled={!enabled}
     >
       {label}
     </AppButton>
+
+    // <AppButton
+    //   variant="glass"
+    //   size="sm"
+    //   icon={<Check size={17} color={ICON_LIME} strokeWidth={3} />}
+    //   onPress={onPress}
+    //   loading={loading}
+    //   disabled={!enabled}
+    // >
+    //   {label}
+    // </AppButton>
   );
 }

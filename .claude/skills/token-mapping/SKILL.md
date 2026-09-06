@@ -13,7 +13,7 @@ The equally real opposite failure mode: forcing everything into named tokens eve
 
 ## Token categories already established in `tamagui.config.ts`
 
-- `tokens.color` — base palette (e.g. `mint`, `lime`, `nearBlack`, `heroLime`). Per-theme semantic roles (`accentGradientStart/End`, `glassBg`, `glassBorder`, `glowColor`, `colorMuted`, etc.) live in the `light`/`dark` theme objects and reference these base colors — don't reference a base color directly from a component; go through the semantic theme token so light/dark both resolve correctly.
+- `tokens.color` — base palette (e.g. `mint`, `lime`, `nearBlack`, `heroLime`). Per-theme semantic roles (`accentGradientStart/End`, `glassBg`, `borderColor`, `glowColor`, `colorMuted`, etc.) live in the `light`/`dark` theme objects and reference these base colors — don't reference a base color directly from a component; go through the semantic theme token so light/dark both resolve correctly.
 - `tokens.space` — custom semantic spacing (`screenX`, `section`, `cardPad`) alongside Tamagui's default `$0`-`$20` scale. These already match elements-v1 exactly (16/22/19).
 - `tokens.radius` — custom semantic radii (`card: 23`, `cardSoft: 20`, `control: 16`) alongside the default `0`-`12` scale. Pills use raw `br={999}`.
 - **Mode scales from elements-v1**: `glow 0…4` (скільки уваги) and `vivid 0…4` (наскільки живе) are element MODES, not free-form props — they belong as variant tables inside components (per the "elements with modes" architecture), with any shared numeric recipe values (glow radii, opacities) tokenized once.
@@ -32,4 +32,4 @@ The equally real opposite failure mode: forcing everything into named tokens eve
 
 ## Common mistake to avoid
 
-Don't rename or repurpose an existing token's *value* to fix one component without checking every other consumer first (`grep -rn '\$tokenName\b' src app`) — tokens in this codebase are shared across screens, and a value change for one screen's sake can silently shift another already-approved screen's appearance.
+Don't rename or repurpose an existing token's _value_ to fix one component without checking every other consumer first (`grep -rn '\$tokenName\b' src app`) — tokens in this codebase are shared across screens, and a value change for one screen's sake can silently shift another already-approved screen's appearance.

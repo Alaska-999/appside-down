@@ -1,5 +1,9 @@
 import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
 import {
+  MeshGradientBackground,
+  MeshVariant,
+} from "@/src/components/ui/MeshGradientBackground";
+import {
   ICON_BASE_DEEP,
   ICON_HERO_LIME,
   ICON_MUTED,
@@ -8,10 +12,6 @@ import {
   ICON_TEXT,
   ICON_WHITE,
 } from "@/src/constants/iconColors";
-import {
-  MeshGradientBackground,
-  MeshVariant,
-} from "@/src/components/ui/MeshGradientBackground";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config, { controlHeight } from "@/tamagui.config";
@@ -23,7 +23,6 @@ import {
   Sora_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/sora";
-import "@tamagui/native/setup-expo-linear-gradient";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter, useSegments } from "expo-router";

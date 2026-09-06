@@ -1,4 +1,5 @@
 import {
+  FOLDER_EDIT_ROW_HEIGHT,
   FolderAddRow,
   FolderEditIconAction,
   FolderEditRows,
@@ -22,7 +23,6 @@ function TagInputRow({
   placeholder,
   color,
   error,
-  py,
   selectTextOnFocus,
   onChange,
   onCommit,
@@ -34,7 +34,6 @@ function TagInputRow({
   placeholder?: string;
   color: string;
   error: string | null;
-  py: number;
   selectTextOnFocus?: boolean;
   onChange: (value: string) => void;
   onCommit: () => void;
@@ -42,14 +41,15 @@ function TagInputRow({
   commitLabel: string;
 }) {
   return (
-    <YStack px={16} py={py} gap={6}>
-      <XStack ai="center" gap={10}>
+    <YStack px={16} pb={error ? 10 : 0}>
+      <XStack ai="center" gap={10} h={FOLDER_EDIT_ROW_HEIGHT}>
         <Input
           ref={(node: TamaguiElement | null) =>
             inputRef(node as unknown as TextInput | null)
           }
           f={1}
           unstyled
+          h={FOLDER_EDIT_ROW_HEIGHT}
           fontSize={15}
           fontWeight="600"
           color={color}
@@ -169,7 +169,6 @@ export function TagEditor({
               value={renameValue}
               color="$color"
               error={error}
-              py={15}
               selectTextOnFocus
               onChange={onChangeValue(setRenameValue)}
               onCommit={commitRename}
@@ -222,7 +221,6 @@ export function TagEditor({
             placeholder="New tag"
             color="$mintLight"
             error={error}
-            py={15}
             onChange={onChangeValue(setNewValue)}
             onCommit={commitAdd}
             commitLabel="Add tag"

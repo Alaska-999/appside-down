@@ -1,42 +1,43 @@
+import { FormInput } from "@/src/components/common/FormInput";
+import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
+import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
+import { CodeInput } from "@/src/components/ui/CodeInput";
+import { FilterChip } from "@/src/components/ui/FilterChip";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { AppFab, IconButton } from "@/src/components/ui/IconButton";
-import { Skeleton } from "@/src/components/ui/Skeleton";
+import { ProgressBar } from "@/src/components/ui/ProgressBar";
+import { ProgressRing } from "@/src/components/ui/ProgressRing";
+import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import {
   BackgroundMesh,
   BackgroundPreset,
   BgDebugMode,
 } from "@/src/components/ui/ScreenBackground";
-import { FormInput } from "@/src/components/common/FormInput";
-import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { Toggle } from "@/src/components/ui/Toggle";
-import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
-import { FilterChip } from "@/src/components/ui/FilterChip";
-import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
-import { ProgressBar } from "@/src/components/ui/ProgressBar";
-import { ProgressRing } from "@/src/components/ui/ProgressRing";
-import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
-import { CodeInput } from "@/src/components/ui/CodeInput";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { SelectField } from "@/src/components/ui/SelectField";
-import { AppSheet, SheetCrossfade, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import {
+  AppSheet,
+  SheetCrossfade,
+  SheetRow,
+  SheetRows,
+} from "@/src/components/ui/Sheet";
+import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
-import { TYPE } from "@/src/constants/type";
+import { Toggle } from "@/src/components/ui/Toggle";
 import {
   ICON_BASE,
   ICON_LIME_LIGHT,
   ICON_NEAR_BLACK,
   ICON_TEAL,
 } from "@/src/constants/iconColors";
+import { TYPE } from "@/src/constants/type";
 import { useDelayedLoading } from "@/src/hooks/useDelayedLoading";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Image, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import {
   AlertTriangle,
   ArrowRight,
@@ -51,6 +52,10 @@ import {
   WifiOff,
   X,
 } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Image, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
@@ -99,12 +104,16 @@ function ControlsDemo() {
           onPress={() => setCb(!cb)}
         />
         <OptionRow
-          control={<Radio selected={radio === 0} onSelect={() => setRadio(0)} />}
+          control={
+            <Radio selected={radio === 0} onSelect={() => setRadio(0)} />
+          }
           label="Term first"
           onPress={() => setRadio(0)}
         />
         <OptionRow
-          control={<Radio selected={radio === 1} onSelect={() => setRadio(1)} />}
+          control={
+            <Radio selected={radio === 1} onSelect={() => setRadio(1)} />
+          }
           label="Definition first"
           onPress={() => setRadio(1)}
         />
@@ -137,7 +146,13 @@ function ControlsDemo() {
 
 function FieldsDemo() {
   const { control, setError } = useForm({
-    defaultValues: { name: "", bio: "", email: "broken@", code: "", off: "off" },
+    defaultValues: {
+      name: "",
+      bio: "",
+      email: "broken@",
+      code: "",
+      off: "off",
+    },
   });
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState<string | null>(null);
@@ -166,8 +181,18 @@ function FieldsDemo() {
 
       <YStack gap={10}>
         <Label>glass · underline · select · search</Label>
-        <FormInput control={control} name="name" variant="glass" placeholder="Glass field" />
-        <FormInput control={control} name="name" variant="underline" placeholder="Underline field" />
+        <FormInput
+          control={control}
+          name="name"
+          variant="glass"
+          placeholder="Glass field"
+        />
+        <FormInput
+          control={control}
+          name="name"
+          variant="underline"
+          placeholder="Underline field"
+        />
         <SelectField
           value={folder}
           placeholder="Folder"
@@ -189,7 +214,11 @@ function FieldsDemo() {
           ]}
           onChange={setTags}
         />
-        <SearchField value={search} onChangeText={setSearch} placeholder="Search modules..." />
+        <SearchField
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search modules..."
+        />
       </YStack>
 
       <YStack gap={10}>
@@ -221,7 +250,14 @@ function SheetsDemo() {
         <AppButton variant="secondary" onPress={() => setToastOpen(true)}>
           Показати тост
         </AppButton>
-        <YStack h={140} br="$cardSoft" bg="$surfaceCard" ai="center" jc="center" overflow="hidden">
+        <YStack
+          h={140}
+          br="$cardSoft"
+          bg="$surfaceCard"
+          ai="center"
+          jc="center"
+          overflow="hidden"
+        >
           <Text {...TYPE.meta} color="$colorMuted">
             тост з’явиться тут знизу
           </Text>
@@ -243,7 +279,12 @@ function SheetsDemo() {
           {sheetView === "menu" ? (
             <SheetRows>
               <SheetRow icon={Pencil} label="Edit module" onPress={() => {}} />
-              <SheetRow icon={FileText} label="Edit cards" hint="200" onPress={() => {}} />
+              <SheetRow
+                icon={FileText}
+                label="Edit cards"
+                hint="200"
+                onPress={() => {}}
+              />
               <SheetRow
                 icon={Trash2}
                 label="Delete module"
@@ -285,7 +326,9 @@ function StatesDemo() {
             title="No connection"
             subtitle="Check your Wi-Fi or mobile data and try again."
             buttonLabel="Try again"
-            buttonIcon={<RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />}
+            buttonIcon={
+              <RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />
+            }
             onButtonPress={() => {}}
           />
         </YStack>
@@ -306,7 +349,9 @@ function StatesDemo() {
             title="Something broke on our side"
             subtitle="Not your fault. Give it a second and try again."
             buttonLabel="Try again"
-            buttonIcon={<RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />}
+            buttonIcon={
+              <RotateCcw size={18} color={ICON_NEAR_BLACK} strokeWidth={2.2} />
+            }
             onButtonPress={() => {}}
           />
         </YStack>
@@ -316,9 +361,17 @@ function StatesDemo() {
             icon={Search}
             title="Nothing found"
             subtitle={
-              <Text fontSize={13.5} color="#7F97A6" textAlign="center" lineHeight={21.6}>
-                No modules match <Text color="#DCEBF2" fontWeight="700">“mitochondira”</Text>. Check the
-                spelling — or make it yourself.
+              <Text
+                fontSize={13.5}
+                color="#7F97A6"
+                textAlign="center"
+                lineHeight={21.6}
+              >
+                No modules match{" "}
+                <Text color="#DCEBF2" fontWeight="700">
+                  “mitochondira”
+                </Text>
+                . Check the spelling — or make it yourself.
               </Text>
             }
             buttonLabel="Create a module"
@@ -329,22 +382,21 @@ function StatesDemo() {
 
       <YStack gap={10}>
         <Label>Skeleton states-мода · useDelayedLoading 250мс</Label>
-        <AppButton variant="secondary" onPress={() => setLoading((prev) => !prev)}>
+        <AppButton
+          variant="secondary"
+          onPress={() => setLoading((prev) => !prev)}
+        >
           {loading ? "Зупинити завантаження" : "Імітувати завантаження"}
         </AppButton>
         <YStack h={54} br="$control" overflow="hidden">
           {showSkeleton ? (
             <Skeleton variant="states" height={54} borderRadius="$control" />
           ) : (
-            <XStack
-              h={54}
-              br="$control"
-              bg="$surfaceCard"
-              ai="center"
-              px={16}
-            >
+            <XStack h={54} br="$control" bg="$surfaceCard" ai="center" px={16}>
               <Text {...TYPE.body} color="$colorMuted">
-                {loading ? "завантажується (ще менше 250мс, скелетон не показуємо)" : "кеш показано одразу"}
+                {loading
+                  ? "завантажується (ще менше 250мс, скелетон не показуємо)"
+                  : "кеш показано одразу"}
               </Text>
             </XStack>
           )}
@@ -356,7 +408,12 @@ function StatesDemo() {
 
 function Label(props: { children: string }) {
   return (
-    <Text {...TYPE.micro} color="$colorMuted" textTransform="uppercase" letterSpacing={1}>
+    <Text
+      {...TYPE.micro}
+      color="$colorMuted"
+      textTransform="uppercase"
+      letterSpacing={1}
+    >
       {props.children}
     </Text>
   );
@@ -422,7 +479,13 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>Фонові меші · тап відкриває на повний екран</Label>
           <Pressable onPress={() => setBgIndex(0)}>
-            <YStack h={52} br="$control" bg="$surfaceCard" jc="center" ai="center">
+            <YStack
+              h={52}
+              br="$control"
+              bg="$surfaceCard"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={16} preset="surf" />
               <Text {...TYPE.card} color="$color">
                 7 пресетів фону
@@ -435,22 +498,38 @@ export default function Showcase() {
           <Label>Картки · glow-тони (лампа зліва-згори)</Label>
           <XStack gap={10}>
             <AppCard f={1} size="lg" variant="glow" tone="mint" gap={6}>
-              <Text {...TYPE.card} color="$color">mint</Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Модуль у роботі</Text>
+              <Text {...TYPE.card} color="$color">
+                mint
+              </Text>
+              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+                Модуль у роботі
+              </Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="glow" tone="teal" gap={6}>
-              <Text {...TYPE.card} color="$color">teal</Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Статистика</Text>
+              <Text {...TYPE.card} color="$color">
+                teal
+              </Text>
+              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+                Статистика
+              </Text>
             </AppCard>
           </XStack>
           <XStack gap={10}>
             <AppCard f={1} size="lg" variant="glow" tone="lime" gap={6}>
-              <Text {...TYPE.card} color="$color">lime</Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Завершено</Text>
+              <Text {...TYPE.card} color="$color">
+                lime
+              </Text>
+              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+                Завершено
+              </Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="glow" tone="indigo" gap={6}>
-              <Text {...TYPE.card} color="$color">indigo</Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Щойно створено</Text>
+              <Text {...TYPE.card} color="$color">
+                indigo
+              </Text>
+              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+                Щойно створено
+              </Text>
             </AppCard>
           </XStack>
         </YStack>
@@ -459,16 +538,37 @@ export default function Showcase() {
           <Label>glow 0…4</Label>
           <XStack gap={8}>
             {([0, 1, 2, 3, 4] as const).map((g) => (
-              <AppCard key={g} f={1} variant="glow" glow={g} px={0} py={14} ai="center">
-                <Text {...TYPE.micro} color="$color">{g}</Text>
+              <AppCard
+                key={g}
+                f={1}
+                variant="glow"
+                glow={g}
+                px={0}
+                py={14}
+                ai="center"
+              >
+                <Text {...TYPE.micro} color="$color">
+                  {g}
+                </Text>
               </AppCard>
             ))}
           </XStack>
           <Label>vivid 0…4</Label>
           <XStack gap={8}>
             {([0, 1, 2, 3, 4] as const).map((v) => (
-              <AppCard key={v} f={1} variant="glow" glow={3} vivid={v} px={0} py={14} ai="center">
-                <Text {...TYPE.micro} color="$color">{v}</Text>
+              <AppCard
+                key={v}
+                f={1}
+                variant="glow"
+                glow={3}
+                vivid={v}
+                px={0}
+                py={14}
+                ai="center"
+              >
+                <Text {...TYPE.micro} color="$color">
+                  {v}
+                </Text>
               </AppCard>
             ))}
           </XStack>
@@ -478,10 +578,14 @@ export default function Showcase() {
           <Label>glass · liquid · accent</Label>
           <XStack gap={10}>
             <AppCard f={1} size="lg" variant="glass" gap={6}>
-              <Text {...TYPE.card} color="$color">glass</Text>
+              <Text {...TYPE.card} color="$color">
+                glass
+              </Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="liquid" gap={6}>
-              <Text {...TYPE.card} color="$white">liquid</Text>
+              <Text {...TYPE.card} color="$white">
+                liquid
+              </Text>
             </AppCard>
           </XStack>
           <Label>Тест заломлення · скроль фото під склом</Label>
@@ -503,14 +607,22 @@ export default function Showcase() {
               pointerEvents="none"
             >
               <AppCard w={230} size="lg" variant="liquid" ai="center" gap={4}>
-                <Text {...TYPE.card} color="$white">liquid</Text>
-                <Text {...TYPE.meta} color="rgba(255,255,255,0.8)">скроль фото під карткою</Text>
+                <Text {...TYPE.card} color="$white">
+                  liquid
+                </Text>
+                <Text {...TYPE.meta} color="rgba(255,255,255,0.8)">
+                  скроль фото під карткою
+                </Text>
               </AppCard>
             </YStack>
           </YStack>
           <AppCard size="lg" variant="accent" gap={6}>
-            <Text {...TYPE.card} color="$nearBlack">accent</Text>
-            <Text {...TYPE.meta} color="rgba(13,17,23,0.68)">Градієнтна картка-приманка</Text>
+            <Text {...TYPE.card} color="$nearBlack">
+              accent
+            </Text>
+            <Text {...TYPE.meta} color="rgba(13,17,23,0.68)">
+              Градієнтна картка-приманка
+            </Text>
           </AppCard>
         </YStack>
 
@@ -518,24 +630,45 @@ export default function Showcase() {
           <Label>neon · well</Label>
           <XStack gap={10}>
             <AppCard f={1} size="lg" variant="neon" gap={6}>
-              <Text {...TYPE.card} color="$color">neon</Text>
+              <Text {...TYPE.card} color="$color">
+                neon
+              </Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="well" gap={6}>
-              <Text {...TYPE.card} color="$color">well</Text>
-              <Text {...TYPE.meta} color="$placeholderColor">Поглинає світло</Text>
+              <Text {...TYPE.card} color="$color">
+                well
+              </Text>
+              <Text {...TYPE.meta} color="$placeholderColor">
+                Поглинає світло
+              </Text>
             </AppCard>
           </XStack>
         </YStack>
 
         <YStack gap={10}>
           <Label>progressLit 62% · sweep</Label>
-          <AppCard size="lg" variant="progressLit" lit={0.62} gap={6} minHeight={120} jc="flex-end">
-            <Text {...TYPE.card} color="$color">progress-lit</Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Світло знизу = прогрес</Text>
+          <AppCard
+            size="lg"
+            variant="progressLit"
+            lit={0.62}
+            gap={6}
+            minHeight={120}
+            jc="flex-end"
+          >
+            <Text {...TYPE.card} color="$color">
+              progress-lit
+            </Text>
+            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              Світло знизу = прогрес
+            </Text>
           </AppCard>
           <AppCard size="lg" variant="sweep" animateSweep gap={6}>
-            <Text {...TYPE.card} color="$color">sweep</Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Єдиний рух цього екрана</Text>
+            <Text {...TYPE.card} color="$color">
+              sweep
+            </Text>
+            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              Єдиний рух цього екрана
+            </Text>
           </AppCard>
         </YStack>
 
@@ -550,23 +683,41 @@ export default function Showcase() {
                 colors={["#1BA88F", ICON_TEAL, ICON_BASE]}
                 start={{ x: 0.2, y: 0 }}
                 end={{ x: 0.8, y: 1 }}
-                style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                }}
               />
             }
           >
-            <Text {...TYPE.card} color="$color">media</Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Cover + скрим</Text>
+            <Text {...TYPE.card} color="$color">
+              media
+            </Text>
+            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              Cover + скрим
+            </Text>
           </AppCard>
           <AppCard size="lg" variant="glow" stack gap={6}>
-            <Text {...TYPE.card} color="$color">stack</Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">Дві плашки ззаду</Text>
+            <Text {...TYPE.card} color="$color">
+              stack
+            </Text>
+            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              Дві плашки ззаду
+            </Text>
           </AppCard>
           <XStack gap={10}>
             <AppCard f={1} size="lg" variant="glow" selected gap={6}>
-              <Text {...TYPE.card} color="$color">selected</Text>
+              <Text {...TYPE.card} color="$color">
+                selected
+              </Text>
             </AppCard>
             <AppCard f={1} size="lg" variant="glow" locked gap={6}>
-              <Text {...TYPE.card} color="$color">locked</Text>
+              <Text {...TYPE.card} color="$color">
+                locked
+              </Text>
             </AppCard>
           </XStack>
         </YStack>
@@ -576,16 +727,28 @@ export default function Showcase() {
           <AppButton variant="primary">Primary</AppButton>
           <AppButton variant="soft">Soft</AppButton>
           <XStack gap={10}>
-            <YStack f={1}><AppButton variant="secondary">Secondary</AppButton></YStack>
-            <YStack f={1}><AppButton variant="outline">Outline</AppButton></YStack>
+            <YStack f={1}>
+              <AppButton variant="secondary">Secondary</AppButton>
+            </YStack>
+            <YStack f={1}>
+              <AppButton variant="outline">Outline</AppButton>
+            </YStack>
           </XStack>
           <XStack gap={10}>
-            <YStack f={1}><AppButton variant="ghost">Ghost</AppButton></YStack>
-            <YStack f={1}><AppButton variant="danger">Delete</AppButton></YStack>
+            <YStack f={1}>
+              <AppButton variant="ghost">Ghost</AppButton>
+            </YStack>
+            <YStack f={1}>
+              <AppButton variant="danger">Delete</AppButton>
+            </YStack>
           </XStack>
           <XStack gap={10}>
-            <YStack f={1}><AppButton variant="glass">Glass</AppButton></YStack>
-            <YStack f={1}><AppButton variant="neon">Neon</AppButton></YStack>
+            <YStack f={1}>
+              <AppButton variant="glass">Glass</AppButton>
+            </YStack>
+            <YStack f={1}>
+              <AppButton variant="neon">Neon</AppButton>
+            </YStack>
           </XStack>
           <AppButton variant="liquid">Liquid</AppButton>
         </YStack>
@@ -593,21 +756,43 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>Розміри · ефекти · стани</Label>
           <XStack gap={10} ai="center">
-            <AppButton variant="primary" size="sm">sm 42</AppButton>
-            <YStack f={1}><AppButton variant="primary" size="lg">lg 60</AppButton></YStack>
+            <AppButton variant="primary" size="sm">
+              sm 42
+            </AppButton>
+            <YStack f={1}>
+              <AppButton variant="primary" size="lg">
+                lg 60
+              </AppButton>
+            </YStack>
           </XStack>
-          <AppButton variant="primary" sheen>Continue · sheen</AppButton>
-          <AppButton variant="secondary" sheen="dark">Sheen dark</AppButton>
-          <AppButton variant="secondary" flood>Flood · затисни</AppButton>
+          <AppButton variant="primary" sheen>
+            Continue · sheen
+          </AppButton>
+          <AppButton variant="secondary" sheen="dark">
+            Sheen dark
+          </AppButton>
+          <AppButton variant="secondary" flood>
+            Flood · затисни
+          </AppButton>
           <AppButton
             variant="primary"
-            split={<ArrowRight size={16} color={ICON_LIME_LIGHT} strokeWidth={2.2} />}
+            split={
+              <ArrowRight size={16} color={ICON_LIME_LIGHT} strokeWidth={2.2} />
+            }
           >
             Split
           </AppButton>
           <XStack gap={10}>
-            <YStack f={1}><AppButton variant="primary" loading>Loading</AppButton></YStack>
-            <YStack f={1}><AppButton variant="primary" disabled>Disabled</AppButton></YStack>
+            <YStack f={1}>
+              <AppButton variant="primary" loading>
+                Loading
+              </AppButton>
+            </YStack>
+            <YStack f={1}>
+              <AppButton variant="primary" disabled>
+                Disabled
+              </AppButton>
+            </YStack>
           </XStack>
         </YStack>
 
@@ -620,9 +805,15 @@ export default function Showcase() {
             />
             <IconButton
               variant="acc"
-              icon={<Plus size={22} color={ICON_NEAR_BLACK} strokeWidth={2.1} />}
+              icon={
+                <Plus size={22} color={ICON_NEAR_BLACK} strokeWidth={2.1} />
+              }
             />
-            <AppFab icon={<Plus size={26} color={ICON_NEAR_BLACK} strokeWidth={1.6} />} />
+            <AppFab
+              icon={
+                <Plus size={26} color={ICON_NEAR_BLACK} strokeWidth={1.6} />
+              }
+            />
           </XStack>
         </YStack>
 
@@ -637,7 +828,11 @@ export default function Showcase() {
                   <AnimatedNumber
                     to={64}
                     suffix="%"
-                    style={{ fontSize: 30, fontWeight: "800", fontFamily: "Sora_800ExtraBold" }}
+                    style={{
+                      fontSize: 30,
+                      fontWeight: "800",
+                      fontFamily: "Sora_800ExtraBold",
+                    }}
                   />
                 </XStack>
                 <Text {...TYPE.meta} color="$colorMuted">
@@ -646,14 +841,32 @@ export default function Showcase() {
               </YStack>
             </XStack>
           </AppCard>
-          <YStack h={74} br="$card" bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+          <YStack
+            h={74}
+            br="$card"
+            bg="$surfaceCard"
+            overflow="hidden"
+            jc="center"
+            px={16}
+          >
             <GradientBorder radius={23} preset="surf" />
-            <Text {...TYPE.card} color="$color">Рядок з underline 29%</Text>
+            <Text {...TYPE.card} color="$color">
+              Рядок з underline 29%
+            </Text>
             <ProgressUnderline progress={0.29} />
           </YStack>
-          <YStack h={74} br="$card" bg="$surfaceCard" overflow="hidden" jc="center" px={16}>
+          <YStack
+            h={74}
+            br="$card"
+            bg="$surfaceCard"
+            overflow="hidden"
+            jc="center"
+            px={16}
+          >
             <GradientBorder radius={23} preset="surf" />
-            <Text {...TYPE.card} color="$color">Dim-варіант 62%</Text>
+            <Text {...TYPE.card} color="$color">
+              Dim-варіант 62%
+            </Text>
             <ProgressUnderline progress={0.62} dim />
           </YStack>
         </YStack>
@@ -688,30 +901,66 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>glow mint / teal / lime / indigo · 138deg</Label>
           <XStack gap={10}>
-            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
+            <YStack
+              f={1}
+              h={84}
+              br="$card"
+              bg="$surfaceCard"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={23} preset="glowMint" />
-              <Text {...TYPE.micro} color="$color">mint</Text>
+              <Text {...TYPE.micro} color="$color">
+                mint
+              </Text>
             </YStack>
-            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
+            <YStack
+              f={1}
+              h={84}
+              br="$card"
+              bg="$surfaceCard"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={23} preset="glowTeal" />
-              <Text {...TYPE.micro} color="$color">teal</Text>
+              <Text {...TYPE.micro} color="$color">
+                teal
+              </Text>
             </YStack>
           </XStack>
           <XStack gap={10}>
-            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
+            <YStack
+              f={1}
+              h={84}
+              br="$card"
+              bg="$surfaceCard"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={23} preset="glowLime" />
-              <Text {...TYPE.micro} color="$color">lime</Text>
+              <Text {...TYPE.micro} color="$color">
+                lime
+              </Text>
             </YStack>
-            <YStack f={1} h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
+            <YStack
+              f={1}
+              h={84}
+              br="$card"
+              bg="$surfaceCard"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={23} preset="glowIndigo" />
-              <Text {...TYPE.micro} color="$color">indigo</Text>
+              <Text {...TYPE.micro} color="$color">
+                indigo
+              </Text>
             </YStack>
           </XStack>
         </YStack>
 
         <YStack gap={10}>
           <Label>liquid · 155deg · r20</Label>
-          <YStack h={84} br="$cardSoft" bg="$surfaceGlass" jc="center" ai="center">
+          <YStack h={84} br="$cardSoft" bg="$glassBg" jc="center" ai="center">
             <GradientBorder radius={20} preset="liquid" />
             <Text {...TYPE.card} color="$color">
               Liquid border
@@ -743,7 +992,14 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>lens · 160deg · 44 circle</Label>
           <XStack gap={16} ai="center">
-            <YStack w={44} h={44} br={22} bg="$surfaceGlassFaint" jc="center" ai="center">
+            <YStack
+              w={44}
+              h={44}
+              br={22}
+              bg="$surfaceGlassFaint"
+              jc="center"
+              ai="center"
+            >
               <GradientBorder radius={22} preset="lens" />
               <X size={18} color="#EAF7FF" strokeWidth={1.9} />
             </YStack>
@@ -767,7 +1023,9 @@ export default function Showcase() {
           <Label>sweep (conic) · r23</Label>
           <YStack h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
             <GradientBorder radius={23} preset="glowMint" sweep />
-            <Text {...TYPE.micro} color="$color">SweepGradient</Text>
+            <Text {...TYPE.micro} color="$color">
+              SweepGradient
+            </Text>
           </YStack>
         </YStack>
 
@@ -775,7 +1033,9 @@ export default function Showcase() {
           <Label>width 2.2 · r23</Label>
           <YStack h={84} br="$card" bg="$surfaceCard" jc="center" ai="center">
             <GradientBorder radius={23} preset="glowLime" width={2.2} />
-            <Text {...TYPE.micro} color="$color">товстий кант</Text>
+            <Text {...TYPE.micro} color="$color">
+              товстий кант
+            </Text>
           </YStack>
         </YStack>
       </ScrollView>

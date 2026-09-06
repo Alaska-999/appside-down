@@ -37,7 +37,7 @@ export function Badge({ tone = "neutral", icon, children }: BadgeProps) {
       br={999}
       bg={bg}
       borderWidth={1}
-      borderColor={borderColor ?? "$glassBorder"}
+      borderColor={borderColor ?? "$borderColor"}
     >
       {icon}
       <Text fontSize={TEXT.badge} fontWeight="600" color={color}>

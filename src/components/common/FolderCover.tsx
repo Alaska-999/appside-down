@@ -1,6 +1,6 @@
 import { IconButton } from "@/src/components/ui/IconButton";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { ICON_MINT_LIGHT, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import {
   Canvas,
@@ -16,7 +16,7 @@ import { useState } from "react";
 import { Alert, Image, Linking, Pressable, View } from "react-native";
 import { Text, YStack } from "tamagui";
 
-const COVER_BOX = 96;
+const COVER_BOX = 100;
 const COVER_RADIUS = 28;
 const LENS_SIZE = 30;
 const EMPTY_LENS_SIZE = 44;
@@ -50,24 +50,62 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
       <Rect x={0} y={0} width={box} height={box}>
         <LinearGradient
           start={vec(0, 0)}
-          end={vec(box * 0.64, box)}
-          colors={["#1f4a48", "#0f2629"]}
+          end={vec(box * 0.5, box)}
+          colors={["#142827", "#0b1618", "#070c0f"]}
+          positions={[0, 0.5, 1]}
         />
       </Rect>
-      <Circle cx={box * 0.3} cy={box * 0.2} r={box * 0.7}>
+
+      <Circle cx={box * 0.2} cy={box * 0.2} r={box * 0.7}>
         <RadialGradient
-          c={vec(box * 0.3, box * 0.2)}
-          r={box * 0.7}
-          colors={["rgba(94,234,212,0.55)", "rgba(94,234,212,0)"]}
-          positions={[0, 0.9]}
+          c={vec(box * 0.2, box * 0.2)}
+          r={box * 0.5}
+          colors={["rgba(94,234,212,0.2)", "rgba(94,234,212,0.0)"]}
+          positions={[0, 1]}
         />
       </Circle>
-      <Circle cx={box * 0.76} cy={box * 0.74} r={box * 0.6}>
+
+      <Circle cx={box * 0.2} cy={box * 0.2} r={box * 0.3}>
         <RadialGradient
-          c={vec(box * 0.76, box * 0.74)}
-          r={box * 0.6}
-          colors={["rgba(163,230,53,0.38)", "rgba(163,230,53,0)"]}
-          positions={[0, 0.9]}
+          c={vec(box * 0.2, box * 0.2)}
+          r={box * 0.25}
+          colors={[
+            "rgba(214, 245, 240, 0.21)",
+            "rgba(94,234,212,0.15)",
+            "rgba(94,234,212,0.0)",
+          ]}
+          positions={[0, 0.25, 1]}
+        />
+      </Circle>
+
+      <Circle cx={box * 0.8} cy={box * 0.8} r={box * 0.5}>
+        <RadialGradient
+          c={vec(box * 0.8, box * 0.8)}
+          r={box * 0.45}
+          colors={["rgba(163,230,53,0.25)", "rgba(163,230,53,0.0)"]}
+          positions={[0, 1]}
+        />
+      </Circle>
+
+      <Circle cx={box * 0.75} cy={box * 0.75} r={box * 0.3}>
+        <RadialGradient
+          c={vec(box * 0.75, box * 0.75)}
+          r={box * 0.25}
+          colors={[
+            "rgba(246, 250, 220, 0.16)",
+            "rgba(180, 255, 94, 0.1)",
+            "rgba(180, 255, 94, 0.0)",
+          ]}
+          positions={[0, 0.25, 1]}
+        />
+      </Circle>
+
+      <Circle cx={box * 0.2} cy={box * 0.9} r={box * 0.55}>
+        <RadialGradient
+          c={vec(box * 0.2, box * 0.9)}
+          r={box * 0.5}
+          colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.0)"]}
+          positions={[0, 1]}
         />
       </Circle>
     </Canvas>
@@ -145,7 +183,7 @@ export function FolderCover({
             {imageUri ? (
               <YStack pos="absolute" r={-6} b={-6}>
                 <IconButton
-                  variant="liquidGlass"
+                  variant="glass"
                   size={LENS_SIZE}
                   icon={
                     <Pencil size={14} color={ICON_ON_GLASS} strokeWidth={2} />
@@ -164,15 +202,14 @@ export function FolderCover({
                 br={COVER_RADIUS}
                 ai="center"
                 jc="center"
-                borderWidth={1.5}
-                borderStyle="dashed"
-                borderColor="rgba(94,234,212,0.7)"
+                borderWidth={1.3}
+                borderColor="rgba(94,234,212,0.45)"
               >
                 <IconButton
                   variant="liquidGlass"
-                  size={EMPTY_LENS_SIZE}
+                  size={52}
                   icon={
-                    <Camera size={20} color={ICON_MINT_LIGHT} strokeWidth={2} />
+                    <Camera size={24} color={ICON_MINT} strokeWidth={1.5} />
                   }
                   accessibilityLabel="Add cover"
                   onPress={onPress}

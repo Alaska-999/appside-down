@@ -1,10 +1,8 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { FolderCover } from "@/src/components/common/FolderCover";
-import { FormInput } from "@/src/components/common/FormInput";
+import { FolderFormFields } from "@/src/components/common/FolderFormFields";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
-import { FieldLabel } from "@/src/components/ui/FieldLabel";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -17,7 +15,7 @@ import { router, useNavigation } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { Text, YStack } from "tamagui";
+import { YStack } from "tamagui";
 
 export default function FolderCreate() {
   const screen = useScreenInsets();
@@ -111,25 +109,15 @@ export default function FolderCreate() {
               onSave={() => handleSubmit(onSubmit)()}
             />
 
-            <YStack ai="center" pt={14} pb={24}>
-              <FolderCover imageUri={coverUri} onChange={setCoverUri} />
-            </YStack>
-
-            <YStack gap={18}>
-              <YStack>
-                <FieldLabel label="Name" />
-                <FormInput
-                  control={control}
-                  name="name"
-                  placeholder="Untitled folder"
-                  maxLength={40}
-                  showCounter
-                  autoFocus
-                />
-              </YStack>
-
-              <YStack>
-                <FieldLabel label="Tags" hint="optional" />
+            <FolderFormFields
+              control={control}
+              nameField="name"
+              coverUri={coverUri}
+              onCoverChange={setCoverUri}
+              autoFocusName
+              tagsHint="optional"
+              tagsFootnote="Tags work as subfolders inside this folder"
+              tagEditor={
                 <TagEditor
                   mode="draft"
                   tags={tags.map((tag) => ({ id: tag, name: tag }))}
@@ -138,11 +126,8 @@ export default function FolderCreate() {
                     setTags((prev) => prev.filter((t) => t !== tag.name))
                   }
                 />
-                <Text fontSize={11.5} color="$mutedDim" mt={8} ml={4}>
-                  Tags work as subfolders inside this folder
-                </Text>
-              </YStack>
-            </YStack>
+              }
+            />
           </YStack>
         </KeyboardAwareScrollView>
 

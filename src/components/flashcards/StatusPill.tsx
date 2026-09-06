@@ -129,7 +129,7 @@ export function StatusPill({
       py={9}
       bg="$glassBgSubtle"
       borderWidth={1}
-      borderColor="$glassBorderSubtle"
+      borderColor="$glassBgStrong"
     >
       <XStack
         width={9}

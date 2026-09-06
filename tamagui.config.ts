@@ -154,8 +154,8 @@ const appConfig = createTamagui({
             iconMuted: '#6E8496',
             iconOnGlass: tokens.color.iconOnGlass,
 
-            borderColor: 'rgba(220,255,245,0.13)',
-            hairline: 'rgba(220,255,245,0.08)',
+
+
             placeholderColor: tokens.color.textMuted,
 
             accentGradientStart: tokens.color.mint,
@@ -167,24 +167,28 @@ const appConfig = createTamagui({
             gradientHeroEnd: tokens.color.heroLime,
             progressAccent: tokens.color.indigoAccent,
 
+            borderColor: 'rgba(220,255,245,0.13)',
+            accentBorderSoft: 'rgba(163,230,53,0.4)',
+            mintGlassBorder: 'rgba(45,212,191,0.28)',
+
+
             surfaceCard: 'rgba(20,28,34,0.55)',
             surfaceWell: 'rgba(4,7,10,0.5)',
-            surfaceGlass: 'rgba(220,255,245,0.06)',
+
             surfaceGlassFaint: 'rgba(220,255,245,0.03)',
             tabBarBg: 'rgba(14,26,28,0.62)',
-            sheetBg: 'rgba(20,27,34,0.4)',
+            sheetBg: 'rgba(20,27,34,0.38)',
+            mintGlassBg: 'rgba(45,212,191,0.14)',
+
 
             glassBg: 'rgba(220,255,245,0.06)',
             glassBgSubtle: 'rgba(220,255,245,0.03)',
             glassBgStrong: 'rgba(220,255,245,0.08)',
-            glassBorder: 'rgba(220,255,245,0.13)',
-            glassBorderSubtle: 'rgba(220,255,245,0.08)',
-            accentBorderSoft: 'rgba(163,230,53,0.4)',
+
             glowColor: 'rgba(45,212,191,0.5)',
             glowSoft: 'rgba(45,212,191,0.1)',
             glowHero: 'rgba(13,148,136,0.3)',
-            mintGlassBg: 'rgba(45,212,191,0.14)',
-            mintGlassBorder: 'rgba(45,212,191,0.28)',
+
             onAccentText: tokens.color.nearBlack,
             onAccentTextMuted: tokens.color.onAccentTextMuted,
 

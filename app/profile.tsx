@@ -1,82 +1,33 @@
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { StreakCard } from "@/src/components/cards/StreakCard";
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
-import { ICON_MUTED_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { GlassRow, GlassRows } from "@/src/components/ui/GlassRows";
+import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { BellRing, ChevronRight, Settings } from "@tamagui/lucide-icons";
+import { BellRing, Settings } from "lucide-react-native";
 import { router } from "expo-router";
-import { ReactNode } from "react";
-import { Pressable, View } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
-
-function AccountRow({
-  icon,
-  label,
-  onPress,
-  disabled,
-  isFirst,
-  right,
-}: {
-  icon: ReactNode;
-  label: string;
-  onPress?: () => void;
-  disabled?: boolean;
-  isFirst?: boolean;
-  right?: ReactNode;
-}) {
-  const content = (
-    <XStack ai="center" gap={13} px={17} py={15} pos="relative" opacity={disabled ? 0.45 : 1}>
-      {!isFirst && (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: 48,
-            right: 0,
-            top: 0,
-            height: 1,
-            backgroundColor: "rgba(220,255,245,0.09)",
-          }}
-        />
-      )}
-      {icon}
-      <Text f={1} fontSize={16} fontWeight="600" color="$color">
-        {label}
-      </Text>
-      {right ??
-        (onPress && !disabled && (
-          <ChevronRight size={16} color={ICON_SUBTLE} />
-        ))}
-    </XStack>
-  );
-
-  if (!onPress || disabled) {
-    return content;
-  }
-
-  return <Pressable onPress={onPress}>{content}</Pressable>;
-}
+import { Text, YStack } from "tamagui";
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
   const todayIndex = (new Date().getDay() + 6) % 7;
 
   return (
-    <YStack f={1} bg="$background">
+    <ScreenBackground preset="home">
       <ScreenHeader title="Profile" />
 
-      <YStack f={1} px="$screenX" gap="$7" pt="$2">
-        <YStack ai="center" mt="$2" mb="$1">
+      <YStack f={1} px="$screenX" gap={20} pt="$2">
+        <YStack ai="center" pt={8} pb={2}>
           <UserAvatar
             avatarUrl={user?.avatarUrl}
             username={user?.username}
             size={102}
           />
-          <Text fontSize={23} fontWeight="800" color="$color" mt="$3">
+          <Text fontSize={23} fontWeight="800" color="$color" mt={12}>
             {user?.username ?? "Unknown"}
           </Text>
-          <Text fontSize={14} color="$colorMuted" mt="$1">
+          <Text fontSize={14} color="$colorMuted" mt={3}>
             {user?.email}
           </Text>
         </YStack>
@@ -84,43 +35,20 @@ export default function ProfileScreen() {
         <StreakCard
           currentStreak={user?.streak?.currentStreak ?? 0}
           todayIndex={todayIndex}
-          glow
         />
 
-        <YStack gap="$2">
-          <Text
-            fontSize={11}
-            fontWeight="700"
-            letterSpacing={0.99}
-            textTransform="uppercase"
-            color="$colorMuted"
-            px={4}
-          >
+        <YStack gap={8}>
+          <SectionTitle tone="eyebrow" px={4}>
             Account
-          </Text>
-          <GlowSurface
-            radius={20}
-            fill="$surfaceCard"
-            blurIntensity={0}
-            lampAlpha={0.16}
-            borderAngle={138}
-            borderColors={[
-              "rgba(94,234,212,0.36)",
-              "rgba(94,234,212,0.05)",
-              "rgba(220,255,245,0.03)",
-            ]}
-            borderPositions={[0, 0.46, 1]}
-            p={0}
-            overflow="hidden"
-          >
-            <AccountRow
-              icon={<Settings size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />}
+          </SectionTitle>
+          <GlassRows>
+            <GlassRow
+              icon={Settings}
               label="Settings"
               onPress={() => router.push("/settings")}
-              isFirst
             />
-            <AccountRow
-              icon={<BellRing size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />}
+            <GlassRow
+              icon={BellRing}
               label="Activity"
               disabled
               right={
@@ -129,9 +57,9 @@ export default function ProfileScreen() {
                 </Text>
               }
             />
-          </GlowSurface>
+          </GlassRows>
         </YStack>
       </YStack>
-    </YStack>
+    </ScreenBackground>
   );
 }

@@ -1,4 +1,3 @@
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import {
   ICON_LIME,
@@ -16,14 +15,12 @@ interface StreakCardProps {
   currentStreak: number;
   todayIndex: number;
   dayLabels?: string[];
-  glow?: boolean;
 }
 
 export function StreakCard({
   currentStreak,
   todayIndex,
   dayLabels = DEFAULT_DAY_LABELS,
-  glow = false,
 }: StreakCardProps) {
   const days = (
     <XStack jc="space-between">
@@ -69,36 +66,6 @@ export function StreakCard({
       })}
     </XStack>
   );
-
-  if (glow) {
-    return (
-      <GlowSurface
-        radius={23}
-        fill="$surfaceCard"
-        blurIntensity={0}
-        lampAlpha={0.16}
-        borderAngle={138}
-        borderColors={[
-          "rgba(94,234,212,0.36)",
-          "rgba(94,234,212,0.05)",
-          "rgba(220,255,245,0.03)",
-        ]}
-        borderPositions={[0, 0.46, 1]}
-        p={16}
-        px={17}
-      >
-        <XStack ai="baseline" gap={6} mb={15}>
-          <Text fontSize={26} fontWeight="900" letterSpacing={-0.5} color="$color">
-            {currentStreak}
-          </Text>
-          <Text fontSize={12.5} fontWeight="600" color="$colorMuted">
-            day streak
-          </Text>
-        </XStack>
-        {days}
-      </GlowSurface>
-    );
-  }
 
   return (
     <YStack br="$card" overflow="hidden" pos="relative" bg="$surfaceCard" p={16} px={17}>

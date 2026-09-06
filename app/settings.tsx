@@ -1,101 +1,24 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { AppCard } from "@/src/components/ui/Card";
-import { GlowTone } from "@/src/components/ui/GlowSurface";
-import { Toggle } from "@/src/components/ui/Toggle";
 import { AppButton } from "@/src/components/ui/Button";
+import { GlassCard, GlassRow, GlassRows } from "@/src/components/ui/GlassRows";
+import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { AppToast } from "@/src/components/ui/Toast";
-import { usePreferencesStore } from "@/src/store/usePreferencesStore";
+import { Toggle } from "@/src/components/ui/Toggle";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { controlHeight } from "@/tamagui.config";
-import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
+import { LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { Children, ReactNode, useState } from "react";
-import { Pressable } from "react-native";
+import { useState } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
-
-function Eyebrow({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      fontSize={11}
-      fontWeight="700"
-      letterSpacing={0.99}
-      textTransform="uppercase"
-      color="$colorMuted"
-      px="$1"
-    >
-      {children}
-    </Text>
-  );
-}
-
-function Rows({ tone, children }: { tone: GlowTone; children: ReactNode }) {
-  const items = Children.toArray(children);
-  return (
-    <AppCard variant="glow" tone={tone} px={0} py={0}>
-      {items.map((child, index) => (
-        <YStack key={index} pos="relative">
-          {index > 0 && (
-            <YStack
-              pos="absolute"
-              t={0}
-              l={48}
-              r={0}
-              h={1}
-              bg="rgba(220,255,245,0.09)"
-            />
-          )}
-          {child}
-        </YStack>
-      ))}
-    </AppCard>
-  );
-}
-
-function SettingsRow({
-  label,
-  value,
-  onPress,
-  disabled,
-  right,
-}: {
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  disabled?: boolean;
-  right?: ReactNode;
-}) {
-  const content = (
-    <XStack ai="center" jc="space-between" px={17} py={14} opacity={disabled ? 0.45 : 1}>
-      <YStack f={1} gap="$1">
-        <Text fontSize={16} fontWeight="600" color="$color">
-          {label}
-        </Text>
-        {value && (
-          <Text fontSize={14} color="$colorMuted" mt={1}>
-            {value}
-          </Text>
-        )}
-      </YStack>
-      {right ??
-        (onPress && !disabled && (
-          <ChevronRight size={16} color="$mutedDim" />
-        ))}
-    </XStack>
-  );
-
-  if (!onPress || disabled) {
-    return content;
-  }
-
-  return <Pressable onPress={onPress}>{content}</Pressable>;
-}
 
 export default function SettingsScreen() {
   const screen = useScreenInsets();
@@ -117,10 +40,9 @@ export default function SettingsScreen() {
 
   const logout = async () => {
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/auth/logout`,
-        { method: "POST" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+      });
       if (!res.ok) {
         console.error("Logout request failed");
       }
@@ -141,13 +63,10 @@ export default function SettingsScreen() {
     setDeleteError(null);
     setIsDeleting(true);
     try {
-      const response = await protectedFetch(
-        `${API_BASE_URL}/auth/account`,
-        {
-          method: "DELETE",
-          body: JSON.stringify({ password: deletePassword }),
-        },
-      );
+      const response = await protectedFetch(`${API_BASE_URL}/auth/account`, {
+        method: "DELETE",
+        body: JSON.stringify({ password: deletePassword }),
+      });
 
       if (response.status === 403) {
         setDeleteError("Incorrect password");
@@ -169,12 +88,12 @@ export default function SettingsScreen() {
   };
 
   return (
-    <YStack f={1} bg="$background">
+    <ScreenBackground preset="home">
       <ScreenHeader title="Settings" />
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <YStack px="$4" gap="$5" pt="$2" pb={screen.bottom}>
-          <AppCard variant="glow" tone="mint" px={16} py={16}>
+        <YStack px="$screenX" gap={18} pt="$2" pb={screen.bottom}>
+          <GlassCard p={16}>
             <XStack ai="center" gap={14}>
               <AvatarPicker size={66} onError={setToast} />
               <YStack f={1}>
@@ -186,19 +105,21 @@ export default function SettingsScreen() {
                 </Text>
               </YStack>
             </XStack>
-          </AppCard>
+          </GlassCard>
 
-          <Rows tone="mint">
-            <SettingsRow
+          <GlassRows>
+            <GlassRow
               label="Create password"
               onPress={() => router.push("/change-password")}
             />
-          </Rows>
+          </GlassRows>
 
           <YStack gap="$2">
-            <Eyebrow>Preferences</Eyebrow>
-            <Rows tone="lime">
-              <SettingsRow
+            <SectionTitle tone="eyebrow" px={4}>
+              Preferences
+            </SectionTitle>
+            <GlassRows>
+              <GlassRow
                 label="Push notifications"
                 right={
                   <Toggle
@@ -208,7 +129,7 @@ export default function SettingsScreen() {
                   />
                 }
               />
-              <SettingsRow
+              <GlassRow
                 label="Sound effects"
                 right={
                   <Toggle
@@ -218,7 +139,7 @@ export default function SettingsScreen() {
                   />
                 }
               />
-              <SettingsRow
+              <GlassRow
                 label="Haptic feedback"
                 right={
                   <Toggle
@@ -228,19 +149,21 @@ export default function SettingsScreen() {
                   />
                 }
               />
-            </Rows>
+            </GlassRows>
           </YStack>
 
           <YStack gap="$2">
-            <Eyebrow>About</Eyebrow>
-            <Rows tone="indigo">
-              <SettingsRow label="Privacy policy" disabled />
-              <SettingsRow label="Terms of service" disabled />
-              <SettingsRow
+            <SectionTitle tone="eyebrow" px={4}>
+              About
+            </SectionTitle>
+            <GlassRows>
+              <GlassRow label="Privacy policy" disabled />
+              <GlassRow label="Terms of service" disabled />
+              <GlassRow
                 label="Version"
                 value={Constants.expoConfig?.version ?? "unknown"}
               />
-            </Rows>
+            </GlassRows>
           </YStack>
 
           <YStack gap={9}>
@@ -253,7 +176,10 @@ export default function SettingsScreen() {
                 Log Out
               </Text>
             </AppButton>
-            <AppButton variant="danger" onPress={() => setDeleteSheetOpen(true)}>
+            <AppButton
+              variant="danger"
+              onPress={() => setDeleteSheetOpen(true)}
+            >
               Delete account
             </AppButton>
           </YStack>
@@ -291,7 +217,7 @@ export default function SettingsScreen() {
               br="$control"
               bg="$glassBg"
               borderWidth={1}
-              borderColor="$glassBorder"
+              borderColor="$borderColor"
               placeholderTextColor="$colorSecondary"
               color="$color"
               secureTextEntry
@@ -332,6 +258,6 @@ export default function SettingsScreen() {
         message={toast ?? ""}
         onDismiss={() => setToast(null)}
       />
-    </YStack>
+    </ScreenBackground>
   );
 }

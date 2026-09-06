@@ -9,17 +9,18 @@ import { ComponentType, Fragment, ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
+export { ROW_HEIGHT as FOLDER_EDIT_ROW_HEIGHT };
+
 export function FolderEditRows({ children }: { children: ReactNode[] }) {
   return (
-    <YStack br="$cardSoft" overflow="hidden" bg="rgba(220,255,245,0.045)">
+    <YStack br="$cardSoft" overflow="hidden" bg="$glassBg">
       {children.map((child, index) => (
         <Fragment key={index}>
           {index > 0 && (
             <View
               style={{
-                marginLeft: 52,
                 height: 1,
-                backgroundColor: "rgba(220,255,245,0.09)",
+                backgroundColor: "rgba(220,255,245,0.08)",
               }}
             />
           )}
@@ -31,20 +32,24 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
 }
 
 const ACTION_SIZE = 36;
+const ROW_HEIGHT = 56;
 
 const ICON_ACTION_TONE = {
   neutral: {
     bg: "rgba(220,255,245,0.055)",
+    pressedBg: "rgba(220,255,245,0.16)",
     border: "rgba(220,255,245,0.11)",
     icon: ICON_MUTED_LIGHT,
   },
   danger: {
     bg: "rgba(239,68,68,0.1)",
+    pressedBg: "rgba(239,68,68,0.24)",
     border: "rgba(239,68,68,0.3)",
     icon: ICON_DANGER,
   },
   accent: {
     bg: "rgba(45,212,191,0.1)",
+    pressedBg: "rgba(45,212,191,0.24)",
     border: "rgba(45,212,191,0.3)",
     icon: ICON_ACCENT,
   },
@@ -98,7 +103,7 @@ export function FolderTagEditRow({
   actions: ReactNode;
 }) {
   return (
-    <XStack ai="center" gap={12} px={16} h={52}>
+    <XStack ai="center" gap={12} px={16} h={ROW_HEIGHT}>
       <Text
         fontSize={15}
         fontWeight="600"
@@ -184,7 +189,7 @@ export function FolderAddRow({
         onPress();
       }}
     >
-      <XStack ai="center" gap={10} px={16} h={52}>
+      <XStack ai="center" gap={10} px={16} h={ROW_HEIGHT}>
         <Icon size={19} color={ICON_MINT_LIGHT} strokeWidth={2.2} />
         <Text fontSize={15} fontWeight="600" color="$mintLight">
           {label}
