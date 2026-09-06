@@ -1,5 +1,20 @@
 import { GlowSurface } from "@/src/components/ui/GlowSurface";
-import { ICON_ACCENT, ICON_MUTED } from "@/src/constants/iconColors";
+import {
+  ICON_ACCENT,
+  ICON_MINT_LIGHT,
+  ICON_MUTED,
+  ICON_PURE_BLACK,
+} from "@/src/constants/iconColors";
+import {
+  GLASS_BORDER_MID,
+  GLASS_BORDER_TOP,
+  GLASS_SHEEN_SOFT,
+  SKY_GLOW,
+  SKY_GLOW_FAINT,
+  SKY_GLOW_SOFT,
+  WHITE_SHEEN_MED,
+} from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType } from "react";
 import { View } from "react-native";
@@ -9,11 +24,7 @@ const TILE_RADIUS = 20;
 
 const TILE_BORDER = {
   borderAngle: 160,
-  borderColors: [
-    "rgba(255,255,255,0.48)",
-    "rgba(255,255,255,0.05)",
-    "rgba(150,220,255,0.24)",
-  ],
+  borderColors: [GLASS_BORDER_TOP, GLASS_BORDER_MID, SKY_GLOW],
   borderPositions: [0, 0.44, 1],
 };
 
@@ -28,9 +39,7 @@ function EdgeHighlights({ live }: { live?: boolean }) {
           left: 10,
           right: 10,
           height: 1,
-          backgroundColor: live
-            ? "rgba(255,255,255,0.42)"
-            : "rgba(255,255,255,0.32)",
+          backgroundColor: live ? WHITE_SHEEN_MED : GLASS_SHEEN_SOFT,
         }}
       />
       <View
@@ -41,9 +50,7 @@ function EdgeHighlights({ live }: { live?: boolean }) {
           left: 10,
           right: 10,
           height: 1,
-          backgroundColor: live
-            ? "rgba(120,220,255,0.2)"
-            : "rgba(120,220,255,0.16)",
+          backgroundColor: live ? SKY_GLOW_SOFT : SKY_GLOW_FAINT,
         }}
       />
     </>
@@ -60,9 +67,9 @@ function SoonPill() {
       px={7}
       py={3}
       br={999}
-      bg="rgba(220,255,245,0.07)"
+      bg="$glassBorderFaint"
       borderWidth={1}
-      borderColor="rgba(220,255,245,0.12)"
+      borderColor="$borderColor"
     >
       <Text fontSize={9} fontWeight="700" letterSpacing={0.72} color="$textMuted">
         SOON
@@ -94,9 +101,9 @@ export function ModeTile({
         p={15}
         jc="space-between"
         minHeight={94}
-        fill="rgba(220,255,245,0.045)"
+        fill={SURFACE_GLASS_BG}
         blurIntensity={30}
-        shadowColor={live ? "rgba(94,234,212,1)" : "#000"}
+        shadowColor={live ? ICON_MINT_LIGHT : ICON_PURE_BLACK}
         shadowOffset={{ width: 0, height: live ? 0 : 4 }}
         shadowRadius={7}
         shadowOpacity={live ? 0.45 : 0.8}

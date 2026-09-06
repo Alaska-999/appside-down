@@ -1,6 +1,11 @@
 import { FormInput } from "@/src/components/common/FormInput";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
+import {
+  AvatarPlaceholder,
+  AVATAR_PLACEHOLDER_VARIANTS,
+} from "@/src/components/ui/AvatarPlaceholder";
+import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
 import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
@@ -32,8 +37,15 @@ import {
   ICON_BASE,
   ICON_LIME_LIGHT,
   ICON_NEAR_BLACK,
+  ICON_ON_GLASS,
   ICON_TEAL,
+  ICON_TEAL_BRIGHT,
 } from "@/src/constants/iconColors";
+import {
+  SURFACE_WHITE_STRONG,
+  TEXT_MINT_META,
+} from "@/src/constants/surfaceAlpha";
+import { TEXT_DARK_ON_ACCENT } from "@/src/constants/rawColors";
 import { TYPE } from "@/src/constants/type";
 import { useDelayedLoading } from "@/src/hooks/useDelayedLoading";
 import { LinearGradient } from "expo-linear-gradient";
@@ -407,12 +419,12 @@ function StatesDemo() {
             subtitle={
               <Text
                 fontSize={13.5}
-                color="#7F97A6"
+                color="$textMuted"
                 textAlign="center"
                 lineHeight={21.6}
               >
                 No modules match{" "}
-                <Text color="#DCEBF2" fontWeight="700">
+                <Text color={ICON_ON_GLASS} fontWeight="700">
                   “mitochondira”
                 </Text>
                 . Check the spelling — or make it yourself.
@@ -521,6 +533,28 @@ export default function Showcase() {
         </Pressable>
 
         <YStack gap={10}>
+          <Label>Аватар-плейсхолдер · Home 50 з кільцем · Profile 102</Label>
+          <XStack flexWrap="wrap" rowGap={18}>
+            {AVATAR_PLACEHOLDER_VARIANTS.map((variant) => (
+              <YStack key={variant} w="50%" ai="center" gap={8}>
+                <XStack ai="center" gap={12}>
+                  <AvatarRing username="Kristina" variant={variant} />
+                  <AvatarPlaceholder
+                    label="KR"
+                    size={102}
+                    fontSize={44}
+                    variant={variant}
+                  />
+                </XStack>
+                <Text {...TYPE.micro} color="$colorMuted">
+                  {variant}
+                </Text>
+              </YStack>
+            ))}
+          </XStack>
+        </YStack>
+
+        <YStack gap={10}>
           <Label>Фонові меші · тап відкриває на повний екран</Label>
           <Pressable onPress={() => setBgIndex(0)}>
             <YStack
@@ -545,7 +579,7 @@ export default function Showcase() {
               <Text {...TYPE.card} color="$color">
                 mint
               </Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              <Text {...TYPE.meta} color={TEXT_MINT_META}>
                 Модуль у роботі
               </Text>
             </AppCard>
@@ -553,7 +587,7 @@ export default function Showcase() {
               <Text {...TYPE.card} color="$color">
                 teal
               </Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              <Text {...TYPE.meta} color={TEXT_MINT_META}>
                 Статистика
               </Text>
             </AppCard>
@@ -563,7 +597,7 @@ export default function Showcase() {
               <Text {...TYPE.card} color="$color">
                 lime
               </Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              <Text {...TYPE.meta} color={TEXT_MINT_META}>
                 Завершено
               </Text>
             </AppCard>
@@ -571,7 +605,7 @@ export default function Showcase() {
               <Text {...TYPE.card} color="$color">
                 indigo
               </Text>
-              <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+              <Text {...TYPE.meta} color={TEXT_MINT_META}>
                 Щойно створено
               </Text>
             </AppCard>
@@ -654,7 +688,7 @@ export default function Showcase() {
                 <Text {...TYPE.card} color="$white">
                   liquid
                 </Text>
-                <Text {...TYPE.meta} color="rgba(255,255,255,0.8)">
+                <Text {...TYPE.meta} color={SURFACE_WHITE_STRONG}>
                   скроль фото під карткою
                 </Text>
               </AppCard>
@@ -664,7 +698,7 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$nearBlack">
               accent
             </Text>
-            <Text {...TYPE.meta} color="rgba(13,17,23,0.68)">
+            <Text {...TYPE.meta} color={TEXT_DARK_ON_ACCENT}>
               Градієнтна картка-приманка
             </Text>
           </AppCard>
@@ -702,7 +736,7 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$color">
               progress-lit
             </Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+            <Text {...TYPE.meta} color={TEXT_MINT_META}>
               Світло знизу = прогрес
             </Text>
           </AppCard>
@@ -710,7 +744,7 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$color">
               sweep
             </Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+            <Text {...TYPE.meta} color={TEXT_MINT_META}>
               Єдиний рух цього екрана
             </Text>
           </AppCard>
@@ -724,7 +758,7 @@ export default function Showcase() {
             minHeight={176}
             cover={
               <LinearGradient
-                colors={["#1BA88F", ICON_TEAL, ICON_BASE]}
+                colors={[ICON_TEAL_BRIGHT, ICON_TEAL, ICON_BASE]}
                 start={{ x: 0.2, y: 0 }}
                 end={{ x: 0.8, y: 1 }}
                 style={{
@@ -740,7 +774,7 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$color">
               media
             </Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+            <Text {...TYPE.meta} color={TEXT_MINT_META}>
               Cover + скрим
             </Text>
           </AppCard>
@@ -748,7 +782,7 @@ export default function Showcase() {
             <Text {...TYPE.card} color="$color">
               stack
             </Text>
-            <Text {...TYPE.meta} color="rgba(220,255,245,0.64)">
+            <Text {...TYPE.meta} color={TEXT_MINT_META}>
               Дві плашки ззаду
             </Text>
           </AppCard>
@@ -845,7 +879,7 @@ export default function Showcase() {
           <XStack gap={16} ai="center">
             <IconButton
               variant="glass"
-              icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
             />
             <IconButton
               variant="acc"
@@ -1019,15 +1053,15 @@ export default function Showcase() {
             <XStack f={1} ai="center" jc="center" gap={16}>
               <IconButton
                 variant="liquidGlass"
-                icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               />
               <IconButton
                 variant="liquidGlass"
-                icon={<Settings2 size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                icon={<Settings2 size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               />
               <IconButton
                 variant="liquidGlass"
-                icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               />
             </XStack>
           </YStack>
@@ -1045,7 +1079,7 @@ export default function Showcase() {
               ai="center"
             >
               <GradientBorder radius={22} preset="lens" />
-              <X size={18} color="#EAF7FF" strokeWidth={1.9} />
+              <X size={18} color={ICON_ON_GLASS} strokeWidth={1.9} />
             </YStack>
             <Text {...TYPE.meta} color="$colorMuted">
               44×44, кант 1px по колу

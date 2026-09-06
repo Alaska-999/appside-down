@@ -24,9 +24,14 @@ import { Toggle } from "@/src/components/ui/Toggle";
 import {
   ICON_DANGER,
   ICON_MINT_LIGHT,
+  ICON_MINT_TINT_DARK,
   ICON_MUTED,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
+import {
+  SURFACE_MINT_GLASS_BG,
+  SURFACE_MINT_GLASS_BORDER,
+} from "@/src/constants/surfaceAlpha";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
@@ -552,9 +557,9 @@ export default function ModuleScreen() {
                       px={10}
                       py={4}
                       br={999}
-                      bg="rgba(45,212,191,0.13)"
+                      bg={SURFACE_MINT_GLASS_BG}
                       borderWidth={1}
-                      borderColor="rgba(45,212,191,0.32)"
+                      borderColor={SURFACE_MINT_GLASS_BORDER}
                     >
                       <Text fontSize={10.5} fontWeight="600" color="$mintLight">
                         Public
@@ -617,10 +622,10 @@ export default function ModuleScreen() {
                     px={16}
                     py={13}
                     br={18}
-                    bg="rgba(220,255,245,0.035)"
+                    bg="$glassBgSubtle"
                     borderWidth={1}
                     borderStyle="dashed"
-                    borderColor="rgba(220,255,245,0.13)"
+                    borderColor="$borderColor"
                   >
                     <Lock size={16} color={ICON_MUTED} strokeWidth={1.8} />
                     <Text fontSize={12.5} color="$textMuted">
@@ -662,7 +667,7 @@ export default function ModuleScreen() {
                       <AppButton
                         variant="primary"
                         size="lg"
-                        icon={<BookmarkPlus size={18} color="#06231F" />}
+                        icon={<BookmarkPlus size={18} color={ICON_MINT_TINT_DARK} />}
                         loading={saving}
                         onPress={handleSaveToLibrary}
                       >

@@ -1,5 +1,5 @@
 import { InputShell } from "@/src/components/ui/InputShell";
-import { ICON_MUTED } from "@/src/constants/iconColors";
+import { ICON_MUTED, ICON_MUTED_DARK } from "@/src/constants/iconColors";
 import { Search, X } from "@tamagui/lucide-icons";
 import { useState } from "react";
 import { Input, YStack, YStackProps } from "tamagui";
@@ -41,7 +41,7 @@ export function SearchField({
 
   return (
     <InputShell state={focused ? "focus" : "default"} {...rest}>
-      <Search size={18} color="#6E8496" />
+      <Search size={18} color={ICON_MUTED_DARK} />
       <Input
         f={1}
         h="100%"

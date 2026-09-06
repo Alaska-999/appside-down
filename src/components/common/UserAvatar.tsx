@@ -1,6 +1,7 @@
+import { AvatarPlaceholder } from "@/src/components/ui/AvatarPlaceholder";
 import { getInitials } from "@/src/utils/getInitials";
 import { Pressable } from "react-native";
-import { Avatar, Text, YStack } from "tamagui";
+import { Avatar } from "tamagui";
 
 interface UserAvatarProps {
   avatarUrl?: string | null;
@@ -16,22 +17,25 @@ export function UserAvatar({
   onPress,
 }: UserAvatarProps) {
   const fontSize = Math.round(size * 0.43);
+  const label = getInitials(username);
 
   if (!avatarUrl) {
     return (
       <Pressable onPress={onPress} disabled={!onPress}>
-        <YStack
-          width={size}
-          height={size}
-          br={size / 2}
-          bg="#141A1F"
-          ai="center"
-          jc="center"
-        >
-          <Text color="$colorMuted" fontSize={fontSize} fontWeight="800">
-            {getInitials(username)}
-          </Text>
-        </YStack>
+        <AvatarPlaceholder
+          label={label}
+          size={size}
+          fontSize={fontSize}
+          variant="frostLight"
+          // variant="frostMuted"
+
+          // variant="frostVeilMint"
+          // variant="frostVeilSoft"
+          // variant="limeGlassLit"
+          // variant="mintGlass"
+          // variant="mintGlassLit"
+          // variant="tealDeep"
+        />
       </Pressable>
     );
   }
@@ -39,10 +43,8 @@ export function UserAvatar({
   return (
     <Avatar size={size} circular onPress={onPress}>
       <Avatar.Image src={avatarUrl} accessibilityLabel="User avatar" />
-      <Avatar.Fallback bg="#141A1F" jc="center" ai="center">
-        <Text color="$colorMuted" fontSize={fontSize} fontWeight="800">
-          {getInitials(username)}
-        </Text>
+      <Avatar.Fallback>
+        <AvatarPlaceholder label={label} size={size} fontSize={fontSize} />
       </Avatar.Fallback>
     </Avatar>
   );

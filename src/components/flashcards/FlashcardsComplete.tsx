@@ -13,6 +13,8 @@ import {
   ICON_LIME_LIGHT,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import { TEXT_MINT_MED } from "@/src/constants/surfaceAlpha";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useRouter } from "expo-router";
@@ -20,7 +22,6 @@ import { X } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import {
-  Easing,
   useReducedMotion,
   useSharedValue,
   withDelay,
@@ -74,7 +75,7 @@ export function FlashcardsComplete({
     progress.value = 0;
     progress.value = withDelay(
       350,
-      withTiming(1, { duration, easing: Easing.bezier(0.2, 0.8, 0.3, 1) }),
+      withTiming(1, { duration, easing: EASE_STANDARD }),
     );
   }, [reducedMotion, duration, progress]);
 
@@ -125,7 +126,7 @@ export function FlashcardsComplete({
             fontWeight="700"
             letterSpacing={2.4}
             textTransform="uppercase"
-            color="rgba(220,255,245,0.5)"
+            color={TEXT_MINT_MED}
             mt={8}
           >
             {isFull ? "orbit closed" : "of the orbit"}

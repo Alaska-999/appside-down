@@ -10,7 +10,14 @@ import {
   WellInsetShadow,
   WellState,
 } from "@/src/components/ui/Well";
-import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import { ICON_MINT_LIGHT, ICON_STATUS_DANGER } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { INPUT_GLASS_TINT } from "@/src/constants/rawColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BORDER_FAINT,
+} from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { controlHeight } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
@@ -100,8 +107,8 @@ export function InputShell({
             height: 1,
             backgroundColor:
               state === "error"
-                ? "rgba(239,68,68,0.6)"
-                : "rgba(220,255,245,0.18)",
+                ? withAlpha(ICON_STATUS_DANGER, 0.6)
+                : SURFACE_BORDER,
           }}
         />
         <Animated.View
@@ -113,7 +120,7 @@ export function InputShell({
               right: 0,
               bottom: 0,
               height: 2,
-              shadowColor: "rgba(94,234,212,1)",
+              shadowColor: ICON_MINT_LIGHT,
               shadowOffset: { width: 0, height: 0 },
               shadowRadius: 7,
               shadowOpacity: 0.8,
@@ -122,7 +129,7 @@ export function InputShell({
           ]}
         >
           <LinearGradient
-            colors={[ICON_MINT, ICON_LIME]}
+            colors={GRADIENT_PRIMARY}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}
@@ -173,7 +180,7 @@ export function InputShell({
             intensity={45}
             tint="default"
             borderRadius={s.radius}
-            backgroundColor="rgba(148, 186, 175, 0.06)"
+            backgroundColor={INPUT_GLASS_TINT}
           />
         ) : (
           <>
@@ -200,7 +207,7 @@ export function InputShell({
         <GradientBorder
           radius={s.radius}
           angle={150}
-          colors={["rgba(220,255,245,0.26)", "rgba(220,255,245,0.07)"]}
+          colors={[SURFACE_BORDER, SURFACE_GLASS_BORDER_FAINT]}
           positions={[0, 1]}
         />
       ) : (

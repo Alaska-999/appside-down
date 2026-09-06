@@ -1,15 +1,26 @@
+import { WELL_EDGE_TAIL } from "@/src/constants/focus";
+import { ICON_LIME, ICON_STATUS_DANGER } from "@/src/constants/iconColors";
+import { WELL_BORDER_TOP, WELL_INSET_SHADOW_COLOR } from "@/src/constants/rawColors";
+import {
+  SURFACE_ACCENT_BORDER_SOFT,
+  SURFACE_WELL,
+  SURFACE_WELL_FOCUS,
+  SURFACE_WELL_SOFT,
+  SURFACE_WELL_SOFT_FOCUS,
+} from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { Canvas, RoundedRect, Shadow } from "@shopify/react-native-skia";
 import { useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
 export type WellState = "default" | "focus" | "error" | "good";
 
-export const WELL_FILL = "rgba(4,8,10,0.5)";
-export const WELL_FILL_FOCUS = "rgba(4,8,10,0.65)";
-export const WELL_FILL_SOFT = "rgba(13,20,23,0.55)";
-export const WELL_FILL_SOFT_FOCUS = "rgba(9,15,18,0.7)";
+export const WELL_FILL = SURFACE_WELL;
+export const WELL_FILL_FOCUS = SURFACE_WELL_FOCUS;
+export const WELL_FILL_SOFT = SURFACE_WELL_SOFT;
+export const WELL_FILL_SOFT_FOCUS = SURFACE_WELL_SOFT_FOCUS;
 
-const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.55)" };
+const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: WELL_INSET_SHADOW_COLOR };
 
 export function WellInsetShadow({
   radius,
@@ -55,32 +66,23 @@ export function WellInsetShadow({
   );
 }
 
+const WELL_DEFAULT_BORDER = {
+  colors: [WELL_BORDER_TOP, ...WELL_EDGE_TAIL.colors],
+  positions: [0, ...WELL_EDGE_TAIL.positions],
+};
+
 export const WELL_BORDERS: Record<
   WellState,
   { colors: string[]; positions: number[] }
 > = {
-  default: {
-    colors: [
-      "rgba(0, 0, 0, 0.65)",
-      "rgba(140, 161, 159, 0.14)",
-      "rgba(163, 187, 180, 0.18)",
-    ],
-    positions: [0, 0.8, 1],
-  },
-  focus: {
-    colors: [
-      "rgba(0, 0, 0, 0.65)",
-      "rgba(140, 161, 159, 0.14)",
-      "rgba(163, 187, 180, 0.18)",
-    ],
-    positions: [0, 0.8, 1],
-  },
+  default: WELL_DEFAULT_BORDER,
+  focus: WELL_DEFAULT_BORDER,
   error: {
-    colors: ["rgba(239,68,68,0.5)", "rgba(239,68,68,0.2)"],
+    colors: [withAlpha(ICON_STATUS_DANGER, 0.5), withAlpha(ICON_STATUS_DANGER, 0.2)],
     positions: [0, 1],
   },
   good: {
-    colors: ["rgba(163,230,53,0.4)", "rgba(163,230,53,0.15)"],
+    colors: [SURFACE_ACCENT_BORDER_SOFT, withAlpha(ICON_LIME, 0.15)],
     positions: [0, 1],
   },
 };

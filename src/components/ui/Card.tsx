@@ -9,10 +9,47 @@ import {
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
-  ICON_ACCENT,
   ICON_LIME,
+  ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_MINT_TINT_DARK,
+  ICON_PURE_BLACK,
 } from "@/src/constants/iconColors";
+import { GRADIENT_ACCENT_LIME } from "@/src/constants/gradients";
+import {
+  SURFACE_BORDER,
+  SURFACE_CARD,
+  SURFACE_CARD_DECK_BOTTOM,
+  SURFACE_CARD_DECK_TOP,
+  SURFACE_CARD_SWEEP,
+  SURFACE_GLASS_BG,
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_GLASS_BG_STRONG,
+  SURFACE_GLASS_BORDER_FAINT,
+  SURFACE_ROW_BG_PRESSED,
+  SURFACE_ROW_GOLD_FILL,
+  SURFACE_ROW_GOLD_FILL_PRESSED,
+  SURFACE_WHITE_BORDER,
+  SURFACE_WHITE_STRONG,
+} from "@/src/constants/surfaceAlpha";
+import {
+  BLACK_SCRIM_SOFT,
+  BLACK_SCRIM_WELL,
+  GLASS_BORDER_ACCENT,
+  GLASS_BORDER_BOTTOM,
+  GLASS_BORDER_MID,
+  GLASS_SHEEN_SOFT,
+  GLASS_SHEEN_STRONG,
+  MINT_FADE_MID,
+  MINT_FADE_TRANSPARENT,
+  SCRIM_BASE_30,
+  SCRIM_BASE_STRONG,
+  SCRIM_BASE_TRANSPARENT,
+  SCRIM_BASE_MAX,
+  TRANSPARENT_BLACK,
+} from "@/src/constants/rawColors";
+import { EDGE_MINT_FAINT, RING_GLOW_BORDER } from "@/src/constants/focus";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
 import { ReactNode, useEffect } from "react";
@@ -100,13 +137,10 @@ const SIZE_STYLES: Record<CardSize, { px: number; py: number; br: number }> = {
   lg: { px: 19, py: 19, br: 23 },
 };
 
+
 const ROW_BORDER = {
   borderAngle: 140,
-  borderColors: [
-    "rgba(220,255,245,0.24)",
-    "rgba(220,255,245,0.05)",
-    "rgba(220,255,245,0.02)",
-  ],
+  borderColors: [SURFACE_BORDER, SURFACE_GLASS_BG, SURFACE_GLASS_BG_FAINT],
   borderPositions: [0, 0.48, 1],
 };
 
@@ -127,37 +161,37 @@ const SURFACE_VARIANTS: Record<
 > = {
   surface: {},
   row: {
-    fill: "rgba(20,28,34,0.55)",
+    fill: SURFACE_CARD,
     blurIntensity: 45,
     lampGeometry: LAMP_ROW,
     ...ROW_BORDER,
   },
   rowGold: {
-    fill: "rgba(20,28,22,0.6)",
+    fill: SURFACE_ROW_GOLD_FILL,
     blurIntensity: 45,
     lampGeometry: LAMP_ROW,
     ...ROW_BORDER,
   },
   glass: {
-    fill: "rgba(220,255,245,0.06)",
+    fill: SURFACE_GLASS_BG,
     blurIntensity: 65,
     borderAngle: 140,
     borderColors: [
-      "rgba(255,255,255,0.45)",
-      "rgba(255,255,255,0.06)",
-      "rgba(255,255,255,0.03)",
+      GLASS_BORDER_ACCENT,
+      GLASS_BORDER_MID,
+      GLASS_BORDER_BOTTOM,
     ],
     borderPositions: [0, 0.42, 1],
   },
   liquid: {
-    fill: "rgba(255,255,255,0.05)",
+    fill: GLASS_BORDER_MID,
     blurIntensity: 12,
     liquidGlass: true,
     borderAngle: 155,
     borderColors: [
-      "rgba(255,255,255,0.8)",
-      "rgba(255,255,255,0.06)",
-      "rgba(255,255,255,0.32)",
+      SURFACE_WHITE_STRONG,
+      GLASS_BORDER_MID,
+      GLASS_SHEEN_SOFT,
     ],
     borderPositions: [0, 0.46, 1],
   },
@@ -165,17 +199,17 @@ const SURFACE_VARIANTS: Record<
     fill: "$surfaceWell",
     blurIntensity: 0,
     borderAngle: 180,
-    borderColors: ["rgba(0,0,0,0.45)", "rgba(220,255,245,0.1)"],
+    borderColors: [BLACK_SCRIM_SOFT, SURFACE_GLASS_BG_STRONG],
     borderPositions: [0, 1],
   },
   progressLit: {
-    fill: "rgba(20,28,34,0.5)",
+    fill: SURFACE_CARD_DECK_TOP,
     borderAngle: 200,
-    borderColors: ["rgba(220,255,245,0.16)", "rgba(94,234,212,0.42)"],
+    borderColors: [SURFACE_BORDER, EDGE_MINT_FAINT],
     borderPositions: [0, 1],
   },
   sweep: {
-    fill: "rgba(20,28,34,0.5)",
+    fill: SURFACE_CARD_SWEEP,
   },
   media: {},
 };
@@ -216,10 +250,10 @@ function SweepBand({ animate }: { animate: boolean }) {
     >
       <LinearGradient
         colors={[
-          "rgba(45,212,191,0)",
-          "rgba(45,212,191,0.34)",
-          "rgba(163,230,53,0.28)",
-          "rgba(163,230,53,0)",
+          MINT_FADE_TRANSPARENT,
+          MINT_FADE_MID,
+          withAlpha(ICON_LIME, 0.28),
+          withAlpha(ICON_LIME, 0),
         ]}
         locations={[0.34, 0.47, 0.54, 0.66]}
         start={{ x: 0, y: 0.4 }}
@@ -243,8 +277,8 @@ function SelectedRing({ radius }: { radius: number }) {
           bottom: -2,
           borderRadius: radius + 2,
           borderWidth: 2,
-          borderColor: "rgba(94,234,212,0.85)",
-          shadowColor: "rgba(45,212,191,1)",
+          borderColor: RING_GLOW_BORDER,
+          shadowColor: ICON_MINT,
           shadowOffset: { width: 0, height: 8 },
           shadowRadius: 17,
           shadowOpacity: 0.5,
@@ -256,7 +290,7 @@ function SelectedRing({ radius }: { radius: number }) {
         style={{ position: "absolute", top: 14, right: 14, zIndex: 5 }}
       >
         <LinearGradient
-          colors={[ICON_ACCENT, ICON_LIME]}
+          colors={GRADIENT_ACCENT_LIME}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.76, y: 0.64 }}
           style={{
@@ -312,7 +346,7 @@ export function AppCard(props: CardProps) {
         br={sizeStyle.br}
         overflow="hidden"
         pos="relative"
-        shadowColor="rgba(94,234,212,1)"
+        shadowColor={ICON_MINT_LIGHT}
         shadowOffset={{ width: 0, height: 10 }}
         shadowRadius={20}
         shadowOpacity={0.6}
@@ -320,7 +354,7 @@ export function AppCard(props: CardProps) {
         {...rest}
       >
         <LinearGradient
-          colors={[ICON_ACCENT, ICON_LIME]}
+          colors={GRADIENT_ACCENT_LIME}
           start={{ x: 0, y: 0 }}
           end={{ x: 0.85, y: 0.85 }}
           style={StyleSheet.absoluteFill}
@@ -328,7 +362,7 @@ export function AppCard(props: CardProps) {
         <GradientBorder
           radius={sizeStyle.br}
           angle={140}
-          colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0.05)"]}
+          colors={[GLASS_BORDER_ACCENT, GLASS_BORDER_MID]}
           positions={[0, 1]}
         />
         <YStack f={1} zIndex={2} px={sizeStyle.px} py={sizeStyle.py}>
@@ -343,8 +377,8 @@ export function AppCard(props: CardProps) {
         br={sizeStyle.br}
         pos="relative"
         borderWidth={1.4}
-        borderColor="rgba(94,234,212,0.85)"
-        shadowColor="rgba(45,212,191,1)"
+        borderColor={RING_GLOW_BORDER}
+        shadowColor={ICON_MINT}
         shadowOffset={{ width: 0, height: 0 }}
         shadowRadius={15}
         shadowOpacity={0.55}
@@ -364,10 +398,10 @@ export function AppCard(props: CardProps) {
             intensity={28}
             tint="default"
             borderRadius={sizeStyle.br - 1.4}
-            backgroundColor="rgba(8,9,12,0.3)"
+            backgroundColor={SCRIM_BASE_30}
           />
           <InnerBloom
-            color="rgba(45,212,191,0.22)"
+            color={withAlpha(ICON_MINT, 0.22)}
             radius={sizeStyle.br}
             spread={22}
             blur={17}
@@ -400,11 +434,11 @@ export function AppCard(props: CardProps) {
             fill:
               variant === "rowGold"
                 ? pressed
-                  ? "rgba(20,28,22,0.65)"
-                  : "rgba(20,28,22,0.6)"
+                  ? SURFACE_ROW_GOLD_FILL_PRESSED
+                  : SURFACE_ROW_GOLD_FILL
                 : pressed
-                  ? "rgba(20,28,34,0.6)"
-                  : "rgba(20,28,34,0.55)",
+                  ? SURFACE_ROW_BG_PRESSED
+                  : SURFACE_CARD,
           }
         : null),
     };
@@ -420,7 +454,7 @@ export function AppCard(props: CardProps) {
               left: 10,
               right: 10,
               height: 1.2,
-              backgroundColor: "rgba(255,255,255,0.6)",
+              backgroundColor: GLASS_SHEEN_STRONG,
             }}
           />
           <View
@@ -431,7 +465,7 @@ export function AppCard(props: CardProps) {
               left: 10,
               right: 10,
               height: 1.2,
-              backgroundColor: "rgba(255,255,255,0.16)",
+              backgroundColor: SURFACE_WHITE_BORDER,
             }}
           />
         </>
@@ -448,9 +482,9 @@ export function AppCard(props: CardProps) {
         >
           <LinearGradient
             colors={[
-              "rgba(45,212,191,0)",
-              "rgba(45,212,191,0.09)",
-              "rgba(45,212,191,0.34)",
+              withAlpha(ICON_MINT, 0),
+              withAlpha(ICON_MINT, 0.09),
+              withAlpha(ICON_MINT, 0.34),
             ]}
             locations={[0, 0.44, 1]}
             start={{ x: 0.5, y: 0 }}
@@ -461,7 +495,7 @@ export function AppCard(props: CardProps) {
       ) : variant === "well" ? (
         <>
           <LinearGradient
-            colors={["rgba(0,0,0,0.62)", "rgba(0,0,0,0)"]}
+            colors={[BLACK_SCRIM_WELL, TRANSPARENT_BLACK]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={{
@@ -481,7 +515,7 @@ export function AppCard(props: CardProps) {
               left: 0,
               right: 0,
               height: 1,
-              backgroundColor: "rgba(220,255,245,0.07)",
+              backgroundColor: SURFACE_GLASS_BORDER_FAINT,
             }}
           />
         </>
@@ -491,7 +525,7 @@ export function AppCard(props: CardProps) {
         <>
           {cover}
           <LinearGradient
-            colors={["rgba(8,9,12,0)", "rgba(8,9,12,0.6)", "rgba(8,9,12,0.95)"]}
+            colors={[SCRIM_BASE_TRANSPARENT, SCRIM_BASE_STRONG, SCRIM_BASE_MAX]}
             locations={[0.24, 0.62, 1]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
@@ -504,7 +538,7 @@ export function AppCard(props: CardProps) {
     const liquidShadow =
       variant === "liquid"
         ? {
-            shadowColor: "#000",
+            shadowColor: ICON_PURE_BLACK,
             shadowOffset: { width: 0, height: 12 },
             shadowRadius: 17,
             shadowOpacity: 0.55,
@@ -548,9 +582,9 @@ export function AppCard(props: CardProps) {
         r={14}
         h={38}
         br="$cardSoft"
-        bg="rgba(24,34,38,0.42)"
+        bg={SURFACE_CARD_DECK_TOP}
         borderWidth={1}
-        borderColor="rgba(220,255,245,0.09)"
+        borderColor="$glassBgStrong"
       />
       <YStack
         pos="absolute"
@@ -559,9 +593,9 @@ export function AppCard(props: CardProps) {
         r={7}
         h={38}
         br="$cardSoft"
-        bg="rgba(24,34,38,0.62)"
+        bg={SURFACE_CARD_DECK_BOTTOM}
         borderWidth={1}
-        borderColor="rgba(220,255,245,0.12)"
+        borderColor="$borderColor"
       />
       <YStack zIndex={3}>{card}</YStack>
     </YStack>

@@ -2,8 +2,15 @@ import { Lamp } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
-import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { EDGE_MINT_FAINT } from "@/src/constants/focus";
+import {
+  SURFACE_GLASS_BG,
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_ROW_BG,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { ChevronRight } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, StyleSheet, useWindowDimensions } from "react-native";
@@ -21,11 +28,7 @@ const ROW_RADIUS = 23;
 const LAMP_L1 = { rx: 1.2, ry: 0.92, cx: 0.06, cy: -0.12 };
 const LAMP_L2 = { rx: 1.2, ry: 0.92, cx: 0.94, cy: 1.12 };
 
-const BORDER_COLORS = [
-  "rgba(94,234,212,0.42)",
-  "rgba(220,255,245,0.06)",
-  "rgba(220,255,245,0.03)",
-];
+const BORDER_COLORS = [EDGE_MINT_FAINT, SURFACE_GLASS_BG, SURFACE_GLASS_BG_FAINT];
 const BORDER_POSITIONS = [0, 0.46, 1];
 
 export function FolderModuleRow({
@@ -84,14 +87,14 @@ export function FolderModuleRow({
         br={ROW_RADIUS}
         overflow="hidden"
         pos="relative"
-        bg="rgba(20,28,34,0.44)"
+        bg={SURFACE_ROW_BG}
       >
         <Animated.View
           pointerEvents="none"
           style={[StyleSheet.absoluteFill, styleTopLeft]}
         >
           <Lamp
-            color="rgba(45,212,191,0.2)"
+            color={withAlpha(ICON_MINT, 0.2)}
             edge={0.56}
             geometry={LAMP_L1}
           />
@@ -101,7 +104,7 @@ export function FolderModuleRow({
           style={[StyleSheet.absoluteFill, styleBottomRight]}
         >
           <Lamp
-            color="rgba(45,212,191,0.2)"
+            color={withAlpha(ICON_MINT, 0.2)}
             edge={0.56}
             geometry={LAMP_L2}
           />
@@ -157,9 +160,9 @@ export function FolderModuleRow({
                   px={7}
                   py={2}
                   br={999}
-                  bg="rgba(220,255,245,0.07)"
+                  bg="$glassBorderFaint"
                   borderWidth={1}
-                  borderColor="rgba(220,255,245,0.11)"
+                  borderColor="$borderColor"
                 >
                   <Text fontSize={10} fontWeight="700" color="$textMuted">
                     {tag}

@@ -9,6 +9,7 @@ import {
   RoundedRect,
   vec,
 } from "@shopify/react-native-skia";
+import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
 import { ReactNode, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { YStack, YStackProps, useTheme } from "tamagui";
@@ -219,7 +220,7 @@ export function GlowSurface({
       ? [
           toneRgba(t.border, Math.min(borderAlpha, 1), sat),
           toneRgba(t.border, Math.min(borderAlpha, 1) * 0.14, sat),
-          "rgba(220,255,245,0.03)",
+          SURFACE_GLASS_BG_FAINT,
         ]
       : undefined);
   const resolvedBorderPositions = borderPositions ?? (resolvedBorderColors ? [0, 0.46, 1] : undefined);

@@ -1,5 +1,6 @@
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { IconButton } from "@/src/components/ui/IconButton";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
@@ -28,7 +29,7 @@ export function ScreenHeaderFlashcards({
   return (
     <XStack ai="center" gap={12} px="$4" pt={screen.top + 6} pb={8}>
       <IconButton
-        icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+        icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
         variant="liquidGlass"
         onPress={() => (onClose ? onClose() : router.back())}
       />

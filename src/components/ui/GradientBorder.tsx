@@ -43,9 +43,9 @@ const PRESETS: Record<
   surf: {
     angle: 140,
     colors: [
-      "rgba(220,255,245,0.24)",
-      "rgba(220,255,245,0.05)",
-      "rgba(220,255,245,0.02)",
+      "rgba(220,255,245,0.13)",
+      "rgba(220,255,245,0.06)",
+      "rgba(220,255,245,0.03)",
     ],
     positions: [0, 0.48, 1],
   },
@@ -105,7 +105,7 @@ const PRESETS: Record<
   },
   well: {
     angle: 180,
-    colors: ["rgba(0,0,0,0.5)", "rgba(220,255,245,0.11)"],
+    colors: ["rgba(0,0,0,0.5)", "rgba(220,255,245,0.13)"],
     positions: [0, 1],
   },
   sheet: {

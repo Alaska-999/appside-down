@@ -1,7 +1,16 @@
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_MINT, ICON_MUTED } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_MUTED, ICON_PURE_BLACK } from "@/src/constants/iconColors";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
+import {
+  CARD_EDITOR_DIVIDER_END,
+  CARD_EDITOR_EDGE_BLUE,
+  CARD_EDITOR_EDGE_SOFT,
+  GLASS_BORDER_TOP,
+  WHITE_BLOOM_FAINT,
+} from "@/src/constants/rawColors";
+import { SURFACE_BORDER } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { GripHorizontal, Trash2 } from "lucide-react-native";
@@ -13,12 +22,7 @@ import { Input, Text, XStack, YStack } from "tamagui";
 
 const CARD_RADIUS = 20;
 const CARD_BORDER = {
-  colors: [
-    "rgba(255, 255, 255, 0.45)",
-    "rgba(218, 248, 244, 0.15)",
-    "rgba(182, 247, 239, 0.04)",
-    "rgba(150, 243, 255, 0.12)",
-  ],
+  colors: [GLASS_BORDER_TOP, SURFACE_BORDER, CARD_EDITOR_EDGE_SOFT, CARD_EDITOR_EDGE_BLUE],
   positions: [0, 0.3, 0.8, 1],
 };
 
@@ -145,7 +149,7 @@ export function CardEditor<T extends FieldValues>({
       ref={cardRef as never}
       br={CARD_RADIUS}
       pos="relative"
-      shadowColor="#000"
+      shadowColor={ICON_PURE_BLACK}
       shadowOffset={{ width: 0, height: dragging ? 10 : 4 }}
       shadowRadius={dragging ? 14 : 7}
       shadowOpacity={0.8}
@@ -168,7 +172,7 @@ export function CardEditor<T extends FieldValues>({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.25)",
+            backgroundColor: FOCUS_HIGHLIGHT,
           }}
         />
       </YStack>
@@ -238,7 +242,7 @@ export function CardEditor<T extends FieldValues>({
         />
         <LinearGradient
           pointerEvents="none"
-          colors={["rgba(243, 255, 251, 0.09)", "rgba(188, 252, 234, 0.3)"]}
+          colors={[WHITE_BLOOM_FAINT, CARD_EDITOR_DIVIDER_END]}
           start={{ x: 1, y: 0.5 }}
           end={{ x: 0, y: 0.5 }}
           style={{ height: 1, marginTop: 6 }}

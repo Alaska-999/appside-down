@@ -17,7 +17,7 @@ export function AuthHeading({ title, titleHighlight, subtitle }: AuthHeadingProp
         </Text>
         <GradientText fontSize={44}>{titleHighlight}</GradientText>
       </YStack>
-      <Text fontSize={13.5} color="#7F97A6" lineHeight={20.9} mb={26}>
+      <Text fontSize={13.5} color="$textMuted" lineHeight={20.9} mb={26}>
         {subtitle}
       </Text>
     </YStack>

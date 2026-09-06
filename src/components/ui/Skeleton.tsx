@@ -1,3 +1,7 @@
+import { ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import { GLASS_SHEEN_SUBTLE } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
@@ -24,8 +28,8 @@ const VARIANT_STYLES: Record<
   SkeletonVariant,
   { bg: string; shimmerColor: string; highlight: boolean }
 > = {
-  default: { bg: "$glassBgStrong", shimmerColor: "rgba(94,234,212,0.16)", highlight: false },
-  states: { bg: "rgba(220,255,245,0.045)", shimmerColor: "rgba(220,255,245,0.09)", highlight: true },
+  default: { bg: "$glassBgStrong", shimmerColor: withAlpha(ICON_MINT_LIGHT, 0.16), highlight: false },
+  states: { bg: "$glassBg", shimmerColor: SURFACE_GLASS_BG_STRONG, highlight: true },
 };
 
 function useShimmerProgress() {
@@ -90,7 +94,7 @@ export function Skeleton({
             left: 0,
             right: 0,
             height: 1,
-            backgroundColor: "rgba(255,255,255,0.12)",
+            backgroundColor: GLASS_SHEEN_SUBTLE,
           }}
         />
       )}

@@ -15,6 +15,7 @@ import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -77,6 +78,15 @@ const MemoModuleCard = memo(
   (prev, next) => prev.module === next.module,
 );
 
+const MemoFolderCard = memo(
+  FolderCard,
+  (prev, next) =>
+    prev.folder === next.folder &&
+    prev.expanded === next.expanded &&
+    prev.modules === next.modules &&
+    prev.modulesLoading === next.modulesLoading,
+);
+
 const LIST_STYLE = { flex: 1 } as const;
 
 const keyById = (item: { id: string }) => item.id;
@@ -124,7 +134,7 @@ const FoldersPane = memo(function FoldersPane({
     ({ item, index }: { item: Folder; index: number }) => {
       const state = folderModules[item.id];
       return (
-        <FolderCard
+        <MemoFolderCard
           folder={item}
           index={index}
           expanded={expandedId === item.id}
@@ -441,14 +451,14 @@ export default function Library() {
             <XStack gap={8}>
               <IconButton
                 variant="liquidGlass"
-                icon={<Search size={22} color="#EAF7FF" strokeWidth={1.9} />}
+                icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
                 onPress={toggleSearch}
                 accessibilityLabel="Search library"
               />
               <IconButton
                 variant="liquidGlass"
                 icon={
-                  <ArrowDownUp size={22} color="#EAF7FF" strokeWidth={1.9} />
+                  <ArrowDownUp size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
                 }
                 onPress={() => setSortSheetOpen(true)}
                 accessibilityLabel="Sort library"
@@ -472,7 +482,6 @@ export default function Library() {
               options={["Folders", "Modules"]}
               selected={tabs.index}
               onChange={tabs.onChange}
-              // tone="glass"
             />
           </YStack>
           <YStack h={22} />

@@ -3,7 +3,7 @@ import { FolderIcon } from "@/src/components/cards/FolderIcon";
 import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { ICON_MINT, ICON_TEAL } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_ON_GLASS, ICON_TEAL } from "@/src/constants/iconColors";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -148,7 +148,7 @@ export default function FolderScreen() {
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               onPress={() => router.back()}
             />
           </XStack>
@@ -181,7 +181,7 @@ export default function FolderScreen() {
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               onPress={() => router.back()}
             />
           </XStack>
@@ -208,7 +208,7 @@ export default function FolderScreen() {
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               onPress={() => router.back()}
             />
           </XStack>
@@ -241,14 +241,14 @@ export default function FolderScreen() {
           <XStack jc="space-between" ai="center" mb={20}>
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
               onPress={() => router.back()}
               accessibilityLabel="Back"
             />
             <IconButton
               variant="liquidGlass"
               icon={
-                <MoreHorizontal size={22} color="#EAF7FF" strokeWidth={1.9} />
+                <MoreHorizontal size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
               }
               onPress={openEditScreen}
               accessibilityLabel="Edit folder"

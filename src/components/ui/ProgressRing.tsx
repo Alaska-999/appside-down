@@ -5,11 +5,12 @@ import {
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
-import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import { ICON_LIME, ICON_MINT, ICON_NEAR_BLACK } from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import { SURFACE_BORDER } from "@/src/constants/surfaceAlpha";
 import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import {
-  Easing,
   useDerivedValue,
   useSharedValue,
   withTiming,
@@ -27,8 +28,8 @@ interface ProgressRingProps {
   duration?: number;
 }
 
-const TRACK = "rgba(220,255,245,0.12)";
-const HOLE = "#0E1618";
+const TRACK = SURFACE_BORDER;
+const HOLE = ICON_NEAR_BLACK;
 
 export function ProgressRing({
   progress,
@@ -48,7 +49,7 @@ export function ProgressRing({
   useEffect(() => {
     animatedProgress.value = withTiming(clamped, {
       duration: animated ? duration : 0,
-      easing: Easing.bezier(0.2, 0.8, 0.3, 1),
+      easing: EASE_STANDARD,
     });
   }, [clamped, animated, duration, animatedProgress]);
 

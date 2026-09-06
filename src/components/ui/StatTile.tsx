@@ -1,4 +1,12 @@
 import { GlowSurface, LAMP_TILE } from "@/src/components/ui/GlowSurface";
+import { ICON_ON_GLASS, ICON_PURE_BLACK } from "@/src/constants/iconColors";
+import {
+  GLASS_BORDER_BOTTOM,
+  GLASS_BORDER_TOP,
+  GLASS_SHEEN_TOP_LINE,
+  SKY_GLOW_SOFT,
+} from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
 import { View } from "react-native";
 import { Text } from "tamagui";
 
@@ -12,7 +20,7 @@ function TopHighlight() {
         left: 9,
         right: 9,
         height: 1,
-        backgroundColor: "rgba(255,255,255,0.3)",
+        backgroundColor: GLASS_SHEEN_TOP_LINE,
       }}
     />
   );
@@ -27,30 +35,26 @@ const TONE_STYLES: Record<
   known: {
     tone: "lime",
     lampAlpha: 0.3,
-    fill: "rgba(220,255,245,0.04)",
+    fill: SURFACE_GLASS_BG_FAINT,
     color: "$limeLight",
   },
   learning: {
     tone: "mint",
     lampAlpha: 0.3,
-    fill: "rgba(220,255,245,0.04)",
+    fill: SURFACE_GLASS_BG_FAINT,
     color: "$mintLight",
   },
   new: {
     tone: "neutral",
     lampAlpha: 0.1,
-    fill: "rgba(220,255,245,0.035)",
-    color: "#E4F2F8",
+    fill: SURFACE_GLASS_BG_FAINT,
+    color: ICON_ON_GLASS,
   },
 };
 
 const TILE_BORDER = {
   borderAngle: 160,
-  borderColors: [
-    "rgba(255,255,255,0.46)",
-    "rgba(255,255,255,0.04)",
-    "rgba(150,220,255,0.2)",
-  ],
+  borderColors: [GLASS_BORDER_TOP, GLASS_BORDER_BOTTOM, SKY_GLOW_SOFT],
   borderPositions: [0, 0.46, 1],
 };
 
@@ -77,7 +81,7 @@ export function StatTile({
       lampEdge={0.6}
       fill={style.fill}
       blurIntensity={30}
-      shadowColor="#000"
+      shadowColor={ICON_PURE_BLACK}
       shadowOffset={{ width: 0, height: 4 }}
       shadowRadius={7}
       shadowOpacity={0.8}

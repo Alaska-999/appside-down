@@ -1,3 +1,8 @@
+import {
+  SCRIM_BASE_HEAVY,
+  SCRIM_BASE_SOFT,
+  SCRIM_BASE_TRANSPARENT,
+} from "@/src/constants/rawColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -10,11 +15,7 @@ export function StatusBarScrim() {
   return (
     <LinearGradient
       pointerEvents="none"
-      colors={[
-        "rgba(8,9,12,0.85)",
-        "rgba(8,9,12,0.55)",
-        "rgba(8,9,12,0)",
-      ]}
+      colors={[SCRIM_BASE_HEAVY, SCRIM_BASE_SOFT, SCRIM_BASE_TRANSPARENT]}
       locations={[0, 0.55, 1]}
       style={{
         position: "absolute",

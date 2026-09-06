@@ -5,7 +5,15 @@ import {
   ICON_DANGER,
   ICON_LIME_LIGHT,
   ICON_MUTED,
+  ICON_PURE_BLACK,
 } from "@/src/constants/iconColors";
+import {
+  TEXT_ROSE_PALE,
+  TOAST_ERROR_BG,
+  TOAST_SUCCESS_BG,
+} from "@/src/constants/rawColors";
+import { SURFACE_CARD } from "@/src/constants/surfaceAlpha";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { Pressable } from "react-native";
@@ -82,8 +90,8 @@ const TONE_STYLES: Record<
   }
 > = {
   error: {
-    bg: "rgba(40,14,18,0.8)",
-    textColor: "#FFE4E6",
+    bg: TOAST_ERROR_BG,
+    textColor: TEXT_ROSE_PALE,
     icon: AlertCircle,
     iconColor: ICON_DANGER,
     border: {
@@ -92,7 +100,7 @@ const TONE_STYLES: Record<
     },
   },
   success: {
-    bg: "rgba(6,35,31,0.82)",
+    bg: TOAST_SUCCESS_BG,
     textColor: "$text",
     icon: CheckCircle2,
     iconColor: ICON_LIME_LIGHT,
@@ -102,7 +110,7 @@ const TONE_STYLES: Record<
     },
   },
   neutral: {
-    bg: "rgba(20,28,34,0.55)",
+    bg: SURFACE_CARD,
     textColor: "$text",
     icon: Info,
     iconColor: ICON_MUTED,
@@ -219,7 +227,7 @@ export function AppToast({
           px={s.px}
           py={s.py}
           overflow="hidden"
-          shadowColor="#000"
+          shadowColor={ICON_PURE_BLACK}
           shadowOffset={{ width: 0, height: 14 }}
           shadowRadius={17}
           shadowOpacity={0.5}
@@ -244,7 +252,7 @@ export function AppToast({
               left: s.px + 2,
               right: s.px + 2,
               height: 1,
-              backgroundColor: "rgba(255,255,255,0.2)",
+              backgroundColor: FOCUS_HIGHLIGHT,
             }}
           />
           <Icon size={s.icon} color={t.iconColor} strokeWidth={2.2} />

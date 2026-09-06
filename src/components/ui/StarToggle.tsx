@@ -1,5 +1,7 @@
 import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { Pressable } from "react-native";
 import { YStack } from "tamagui";
 
@@ -13,8 +15,8 @@ const SIZE_STYLES: Record<
   lg: { box: 40, glyph: "lg" },
 };
 const MIN_TAP_TARGET = 44;
-const ACTIVE_BG = "rgba(190,242,100,0.1)";
-const IDLE_BG = "rgba(220,255,245,0.05)";
+const ACTIVE_BG = withAlpha(ICON_LIME_LIGHT, 0.1);
+const IDLE_BG = "$glassBg";
 
 interface StarToggleProps {
   active: boolean;

@@ -1,6 +1,7 @@
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { screenGutter } from "@/tamagui.config";
 import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
@@ -27,7 +28,7 @@ export function AuthScreenShell({
         <YStack pos="absolute" top={insets.top + 8} left={screenGutter} zIndex={10}>
           <IconButton
             variant="liquidGlass"
-            icon={<ChevronLeft size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
             onPress={() => router.back()}
           />
         </YStack>

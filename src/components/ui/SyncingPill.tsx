@@ -1,4 +1,5 @@
 import { ICON_MINT } from "@/src/constants/iconColors";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { useEffect } from "react";
 import Animated, {
   Easing,
@@ -43,7 +44,7 @@ export function SyncingPill({ ...rest }: SyncingPillLayoutProps) {
       gap={9.36}
       bg="$glowSoft"
       borderWidth={1}
-      borderColor="rgba(45,212,191,0.25)"
+      borderColor={withAlpha(ICON_MINT, 0.25)}
       br={999}
       px={15.6}
       py={7.8}

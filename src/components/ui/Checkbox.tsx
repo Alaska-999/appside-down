@@ -1,10 +1,14 @@
 import {
   ICON_HERO_LIME,
-  ICON_LIME,
   ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_NEAR_BLACK,
 } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { BLACK_SCRIM_35 } from "@/src/constants/rawColors";
+import { SURFACE_WELL } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
 import { ReactNode } from "react";
@@ -54,9 +58,9 @@ export function Checkbox({
       ai="center"
       jc="center"
       overflow="hidden"
-      bg={checked ? undefined : "rgba(4,7,10,0.5)"}
+      bg={checked ? undefined : SURFACE_WELL}
       borderWidth={checked ? 0 : 1}
-      borderColor="rgba(220,255,245,0.12)"
+      borderColor="$borderColor"
       onPress={handlePress}
       disabled={disabled}
       hitSlop={Math.ceil((44 - s.box) / 2)}
@@ -67,7 +71,7 @@ export function Checkbox({
       transition="press"
       {...(checked
         ? {
-            shadowColor: "rgba(45,212,191,1)",
+            shadowColor: ICON_MINT,
             shadowOffset: { width: 0, height: 0 },
             shadowRadius: 8,
             shadowOpacity: 0.7,
@@ -93,7 +97,7 @@ export function Checkbox({
             left: 0,
             right: 0,
             height: 7,
-            backgroundColor: "rgba(0,0,0,0.35)",
+            backgroundColor: BLACK_SCRIM_35,
           }}
         />
       )}
@@ -126,10 +130,10 @@ export function Radio({
       br={s.box / 2}
       ai="center"
       jc="center"
-      bg="rgba(4,7,10,0.5)"
+      bg={SURFACE_WELL}
       borderWidth={selected ? 1.4 : 1}
       borderColor={
-        selected ? "rgba(94,234,212,0.7)" : "rgba(220,255,245,0.12)"
+        selected ? withAlpha(ICON_MINT_LIGHT, 0.7) : "$borderColor"
       }
       onPress={handlePress}
       disabled={disabled}
@@ -147,14 +151,14 @@ export function Radio({
             height: s.dot,
             borderRadius: s.dot / 2,
             overflow: "hidden",
-            shadowColor: "rgba(94,234,212,1)",
+            shadowColor: ICON_MINT_LIGHT,
             shadowOffset: { width: 0, height: 0 },
             shadowRadius: 6,
             shadowOpacity: 0.9,
           }}
         >
           <LinearGradient
-            colors={[ICON_MINT, ICON_LIME]}
+            colors={GRADIENT_PRIMARY}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.9, y: 0.9 }}
             style={StyleSheet.absoluteFill}

@@ -3,8 +3,14 @@ import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
   ICON_ACCENT,
   ICON_DANGER,
+  ICON_PURE_BLACK,
+  ICON_STATUS_DANGER,
   ICON_WARNING,
 } from "@/src/constants/iconColors";
+import { TRANSPARENT_WHITE } from "@/src/constants/rawColors";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
+import { SURFACE_GLASS_BG } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { BlurMask, Canvas, Circle } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { ComponentType, ReactNode } from "react";
@@ -14,9 +20,9 @@ import { Text, YStack, YStackProps } from "tamagui";
 export type StateTone = "error" | "warn" | "empty";
 
 const TONE_HALO: Record<StateTone, string> = {
-  error: "rgba(239,68,68,0.28)",
-  warn: "rgba(241, 238, 61, 0.3)",
-  empty: "rgba(47, 255, 207, 0.45)",
+  error: withAlpha(ICON_STATUS_DANGER, 0.28),
+  warn: withAlpha(ICON_WARNING, 0.3),
+  empty: withAlpha(ICON_ACCENT, 0.45),
 };
 
 const TONE_ICON_COLOR: Record<StateTone, string> = {
@@ -97,18 +103,18 @@ export function StateCard({
           ai="center"
           jc="center"
           pos="relative"
-          shadowColor="#000"
+          shadowColor={ICON_PURE_BLACK}
           shadowOffset={{ width: 0, height: 4 }}
           shadowRadius={9}
           shadowOpacity={0.8}
         >
           <LiquidGlass
             intensity={28}
-            backgroundColor="rgba(220,255,245,0.05)"
+            backgroundColor={SURFACE_GLASS_BG}
             borderRadius={DISC_SIZE / 2}
           />
           <LinearGradient
-            colors={["rgba(255,255,255,0.22)", "rgba(255,255,255,0)"]}
+            colors={[FOCUS_HIGHLIGHT, TRANSPARENT_WHITE]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 0.6 }}
             style={StyleSheet.absoluteFill}
@@ -132,7 +138,7 @@ export function StateCard({
         typeof subtitle === "string" ? (
           <Text
             fontSize={13.5}
-            color="#7F97A6"
+            color="$textMuted"
             textAlign="center"
             lineHeight={21.6}
             maxWidth={280}

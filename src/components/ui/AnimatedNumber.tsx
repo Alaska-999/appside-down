@@ -1,10 +1,10 @@
 import MaskedView from "@react-native-masked-view/masked-view";
-import { ICON_TEXT } from "@/src/constants/iconColors";
+import { ICON_PURE_BLACK, ICON_TEXT } from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
 import { TextInput, TextStyle } from "react-native";
 import Animated, {
-  Easing,
   SharedValue,
   useAnimatedProps,
   useSharedValue,
@@ -48,7 +48,7 @@ export function AnimatedNumber({
     value.value = from;
     value.value = withDelay(
       delay,
-      withTiming(to, { duration, easing: Easing.bezier(0.2, 0.8, 0.3, 1) }),
+      withTiming(to, { duration, easing: EASE_STANDARD }),
     );
   }, [to, from, duration, delay, value, progress]);
 
@@ -63,7 +63,7 @@ export function AnimatedNumber({
       editable={false}
       underlineColorAndroid="transparent"
       animatedProps={animatedProps}
-      style={[{ padding: 0, color: gradientColors ? "#000000" : ICON_TEXT }, style]}
+      style={[{ padding: 0, color: gradientColors ? ICON_PURE_BLACK : ICON_TEXT }, style]}
     />
   );
 

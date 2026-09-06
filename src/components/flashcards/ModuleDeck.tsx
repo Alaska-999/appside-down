@@ -1,14 +1,18 @@
 import { Lamp } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { ICON_MINT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import { MODULE_DECK_EDGE_LIME } from "@/src/constants/rawColors";
+import { SURFACE_ROW_BG_PRESSED } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
   interpolate,
   runOnJS,
   SharedValue,
@@ -29,7 +33,6 @@ const NEIGHBOUR_OPACITY = 0.4;
 const SWIPE_THRESHOLD = 60;
 const SLIDE_DURATION = 420;
 const FLIP_DURATION = 700;
-const EASE = Easing.bezier(0.2, 0.85, 0.3, 1);
 
 export type DeckCard = { id: string; term: string; definition: string };
 
@@ -53,16 +56,16 @@ function CardSurface({ children }: { children: ReactNode }) {
         intensity={45}
         tint="default"
         borderRadius={CARD_RADIUS}
-        backgroundColor="rgba(20,28,34,0.6)"
+        backgroundColor={SURFACE_ROW_BG_PRESSED}
       />
-      <Lamp color="rgba(45,212,191,0.25)" />
+      <Lamp color={withAlpha(ICON_MINT, 0.25)} />
       <GradientBorder
         radius={CARD_RADIUS}
         angle={160}
         colors={[
-          "rgba(225, 247, 191, 0.6)",
-          "rgba(94, 234, 212, 0.35)",
-          "rgba(94, 234, 212, 0.05)",
+          MODULE_DECK_EDGE_LIME,
+          withAlpha(ICON_MINT_LIGHT, 0.35),
+          withAlpha(ICON_MINT_LIGHT, 0.05),
         ]}
         positions={[0, 0.2, 0.9]}
       />
@@ -104,13 +107,16 @@ function DeckCardView({
     setHasBack(true);
     spin.value = withTiming(spin.value < 90 ? 180 : 0, {
       duration: FLIP_DURATION,
-      easing: EASE,
+      easing: EASE_STANDARD,
     });
   }, [spin]);
 
   useEffect(() => {
     if (!interactive) {
-      spin.value = withTiming(0, { duration: FLIP_DURATION, easing: EASE });
+      spin.value = withTiming(0, {
+        duration: FLIP_DURATION,
+        easing: EASE_STANDARD,
+      });
     }
   }, [interactive, spin]);
 
@@ -203,12 +209,12 @@ function Dots({ count, index }: { count: number; index: number }) {
             w={on ? 18 : 5}
             h={5}
             br={on ? 3 : 999}
-            bg={on ? undefined : "rgba(220,255,245,0.2)"}
+            bg={on ? undefined : "$borderColor"}
             overflow="hidden"
           >
             {on && (
               <LinearGradient
-                colors={[ICON_MINT, ICON_LIME]}
+                colors={GRADIENT_PRIMARY}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={StyleSheet.absoluteFill}
@@ -248,7 +254,7 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
 
       progress.value = withTiming(target, {
         duration: target === index ? 240 : SLIDE_DURATION,
-        easing: EASE,
+        easing: EASE_STANDARD,
       });
     })
     .onFinalize(() => {

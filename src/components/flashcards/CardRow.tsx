@@ -1,6 +1,11 @@
 import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_ROW_BG,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -33,13 +38,13 @@ export function CardRow({
           intensity={38}
           tint="default"
           borderRadius={ROW_RADIUS}
-          backgroundColor="rgba(20,28,34,0.44)"
+          backgroundColor={SURFACE_ROW_BG}
         />
       </YStack>
       <GradientBorder
         radius={ROW_RADIUS}
         angle={140}
-        colors={["rgba(220,255,245,0.18)", "rgba(220,255,245,0.04)"]}
+        colors={[SURFACE_BORDER, SURFACE_GLASS_BG_FAINT]}
         positions={[0, 1]}
       />
       <XStack zIndex={2} px={16} py={14} ai="center" gap={12}>

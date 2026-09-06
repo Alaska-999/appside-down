@@ -21,8 +21,15 @@ import {
   ICON_LIME,
   ICON_LIME_LIGHT,
   ICON_MINT,
+  ICON_MINT_TINT_DARK,
   ICON_TEAL,
+  ICON_TEAL_BRIGHT,
 } from "@/src/constants/iconColors";
+import {
+  SURFACE_WHITE_BORDER,
+  TEXT_MINT_STRONG,
+} from "@/src/constants/surfaceAlpha";
+import { GLASS_BORDER_TOP, SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -83,7 +90,7 @@ const RECENT_MONOGRAM_GRADIENTS: [string, string][] = [
   [ICON_ACCENT, ICON_TEAL],
 ];
 const DISCOVER_COVERS: [string, string][] = [
-  ["#1BA88F", ICON_BASE],
+  [ICON_TEAL_BRIGHT, ICON_BASE],
   [ICON_HERO_LIME, ICON_BASE],
   [ICON_TEAL, ICON_BASE],
   [ICON_INDIGO, ICON_BASE],
@@ -402,7 +409,7 @@ export default function Home() {
                     >
                       {featuredModule.name}
                     </Text>
-                    <Text fontSize={13} color="rgba(220,255,245,0.7)" mt={5}>
+                    <Text fontSize={13} color={TEXT_MINT_STRONG} mt={5}>
                       {featuredStats.known} of {featuredStats.total} cards
                       learned
                     </Text>
@@ -444,7 +451,7 @@ export default function Home() {
                     <YStack pos="absolute" t={14} r={14}>
                       <Layers
                         size={15}
-                        color="rgba(255,255,255,0.5)"
+                        color={GLASS_BORDER_TOP}
                         strokeWidth={1.9}
                       />
                     </YStack>
@@ -478,7 +485,7 @@ export default function Home() {
                     <YStack pos="absolute" t={14} r={14}>
                       <Sparkles
                         size={15}
-                        color="rgba(255,255,255,0.5)"
+                        color={GLASS_BORDER_TOP}
                         strokeWidth={1.9}
                       />
                     </YStack>
@@ -553,7 +560,7 @@ export default function Home() {
                             <Text
                               fontSize={15}
                               fontWeight="800"
-                              color="#06231F"
+                              color={ICON_MINT_TINT_DARK}
                             >
                               {m.name.slice(0, 1).toUpperCase()}
                             </Text>
@@ -625,7 +632,7 @@ export default function Home() {
                             {author && (
                               <Text
                                 fontSize={11.5}
-                                color="rgba(220,255,245,0.72)"
+                                color={TEXT_MINT_STRONG}
                                 mt={3}
                               >
                                 @{author}
@@ -634,9 +641,9 @@ export default function Home() {
                           </AppCard>
                           <YStack pos="absolute" t={13} r={13}>
                             <XStack
-                              bg="rgba(8,9,12,0.55)"
+                              bg={SCRIM_BASE_SOFT}
                               borderWidth={1}
-                              borderColor="rgba(255,255,255,0.18)"
+                              borderColor={SURFACE_WHITE_BORDER}
                               br={999}
                               px={9}
                               py={3}

@@ -2,8 +2,23 @@ import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { FOLDER_ICON_GRADIENTS, FolderIcon } from "@/src/components/cards/FolderIcon";
 import { AppCard } from "@/src/components/ui/Card";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { ICON_ACCENT, ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
+import {
+  ICON_ACCENT,
+  ICON_LIME_LIGHT,
+  ICON_MINT_LIGHT,
+  ICON_MUTED,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import {
+  SURFACE_BORDER,
+  SURFACE_CARD_DECK_BOTTOM,
+  SURFACE_CARD_DECK_TOP,
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_GLASS_BG_STRONG,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { ChevronRight, Plus, Settings } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable } from "react-native";
@@ -11,7 +26,6 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
 
@@ -45,14 +59,14 @@ interface FolderCardProps {
 const CARD_RADIUS = 23;
 const HEADER_HEIGHT = 80;
 const VISIBLE_MODULES = 4;
-const EASE = Easing.bezier(0.2, 0.8, 0.3, 1);
+const EASE = EASE_STANDARD;
 
 const SWEEP_COLORS = [
-  "rgba(94,234,212,0)",
-  "rgba(94,234,212,1)",
-  "rgba(190,242,100,0.9)",
-  "rgba(190,242,100,0)",
-  "rgba(190,242,100,0)",
+  withAlpha(ICON_MINT_LIGHT, 0),
+  withAlpha(ICON_MINT_LIGHT, 1),
+  withAlpha(ICON_LIME_LIGHT, 0.9),
+  withAlpha(ICON_LIME_LIGHT, 0),
+  withAlpha(ICON_LIME_LIGHT, 0),
 ];
 const SWEEP_POSITIONS = [0, 0.08, 0.14, 0.26, 1];
 
@@ -80,9 +94,9 @@ function StackShadow({ expanded }: { expanded: boolean }) {
             right: 14,
             height: 36,
             borderRadius: 20,
-            backgroundColor: "rgba(24,34,38,0.42)",
+            backgroundColor: SURFACE_CARD_DECK_TOP,
             borderWidth: 1,
-            borderColor: "rgba(220,255,245,0.09)",
+            borderColor: SURFACE_GLASS_BG_STRONG,
           },
           backStyle,
         ]}
@@ -97,9 +111,9 @@ function StackShadow({ expanded }: { expanded: boolean }) {
             right: 7,
             height: 36,
             borderRadius: 20,
-            backgroundColor: "rgba(24,34,38,0.62)",
+            backgroundColor: SURFACE_CARD_DECK_BOTTOM,
             borderWidth: 1,
-            borderColor: "rgba(220,255,245,0.12)",
+            borderColor: SURFACE_BORDER,
           },
           frontStyle,
         ]}
@@ -232,7 +246,7 @@ export function FolderCard({
                 px={10}
                 pb={10}
                 borderTopWidth={1}
-                borderTopColor="rgba(220,255,245,0.09)"
+                borderTopColor="$glassBgStrong"
               >
                 <YStack pt={8} gap={4}>
                   {modulesLoading && !visible.length ? (
@@ -266,7 +280,7 @@ export function FolderCard({
                     br={15}
                     borderWidth={1}
                     borderStyle="dashed"
-                    borderColor="rgba(220,255,245,0.18)"
+                    borderColor="$borderColor"
                   >
                     <Plus size={14} color={ICON_ACCENT} strokeWidth={2.2} />
                     <Text fontSize={12.5} fontWeight="600" color="$mintLight">
@@ -288,7 +302,7 @@ export function FolderCard({
                     py={13}
                     mt={6}
                     borderTopWidth={1}
-                    borderTopColor="rgba(220,255,245,0.08)"
+                    borderTopColor="$glassBgStrong"
                   >
                     <Settings size={18} color={ICON_MUTED} strokeWidth={1.8} />
                     <Text fontSize={13} fontWeight="600" color="$textMuted" f={1}>
@@ -307,7 +321,7 @@ export function FolderCard({
                 radius={CARD_RADIUS}
                 width={1.4}
                 angle={140}
-                colors={["rgba(220,255,245,0.18)", "rgba(220,255,245,0.04)"]}
+                colors={[SURFACE_BORDER, SURFACE_GLASS_BG_FAINT]}
                 positions={[0, 1]}
               />
               <GradientBorder

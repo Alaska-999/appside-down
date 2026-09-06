@@ -7,6 +7,17 @@ import {
   ICON_TEXT,
   ICON_WHITE,
 } from "@/src/constants/iconColors";
+import {
+  TOGGLE_OFF_TRACK_COOL,
+  TOGGLE_OFF_TRACK_DEEP,
+  TOGGLE_OFF_TRACK_WARM,
+  TRANSPARENT_BLACK,
+} from "@/src/constants/rawColors";
+import {
+  SURFACE_GLASS_BG_STRONG,
+  SURFACE_GLASS_BORDER_FAINT,
+  SURFACE_GLOW_COLOR,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect } from "react";
@@ -28,8 +39,8 @@ const SIZE_STYLES = {
     padding: 3,
     thumb: 25,
     travel: 21,
-    offTrack: "rgba(255, 227, 220, 0.13)",
-    trackBorder: "rgba(0,0,0,0)",
+    offTrack: TOGGLE_OFF_TRACK_WARM,
+    trackBorder: TRANSPARENT_BLACK,
     offThumb: ICON_WHITE,
     onThumb: ICON_WHITE,
     gradient: [ICON_TEAL, ICON_LIME] as [string, string],
@@ -41,8 +52,8 @@ const SIZE_STYLES = {
     padding: 3,
     thumb: 21,
     travel: 19,
-    offTrack: "rgba(16, 30, 36, 0.6)",
-    trackBorder: "rgba(220,255,245,0.07)",
+    offTrack: TOGGLE_OFF_TRACK_COOL,
+    trackBorder: SURFACE_GLASS_BORDER_FAINT,
     offThumb: ICON_MUTED,
     onThumb: ICON_TEXT,
     gradient: [ICON_TEAL, ICON_MINT] as [string, string],
@@ -54,8 +65,8 @@ const SIZE_STYLES = {
     padding: 4,
     thumb: 18,
     travel: 16,
-    offTrack: "rgba(4,8,10,0.55)",
-    trackBorder: "rgba(220,255,245,0.1)",
+    offTrack: TOGGLE_OFF_TRACK_DEEP,
+    trackBorder: SURFACE_GLASS_BG_STRONG,
     offThumb: ICON_MUTED,
     onThumb: ICON_TEXT,
     gradient: [ICON_TEAL, ICON_MINT] as [string, string],
@@ -92,12 +103,12 @@ export function Toggle({
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      [s.offTrack, "rgba(0,0,0,0)"],
+      [s.offTrack, TRANSPARENT_BLACK],
     ),
     borderColor: interpolateColor(
       progress.value,
       [0, 1],
-      [s.trackBorder, "rgba(0,0,0,0)"],
+      [s.trackBorder, TRANSPARENT_BLACK],
     ),
     shadowOpacity: progress.value * 0.75,
   }));
@@ -141,7 +152,7 @@ export function Toggle({
             borderWidth: 1,
             justifyContent: "center",
             overflow: "visible",
-            shadowColor: "rgba(45,212,191,0.5)",
+            shadowColor: SURFACE_GLOW_COLOR,
             shadowOffset: { width: 0, height: 0 },
             shadowRadius: 4,
           },

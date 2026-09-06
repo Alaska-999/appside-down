@@ -3,13 +3,27 @@ import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { StarToggle } from "@/src/components/ui/StarToggle";
 import {
   ICON_ACCENT,
+  ICON_BASE_TOP,
   ICON_INDIGO,
   ICON_INDIGO_LIGHT,
   ICON_LIME,
   ICON_LIME_LIGHT,
-  ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_MUTED_LIGHT,
+  ICON_PURE_BLACK,
+  ICON_SLATE_DIM,
+  ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import {
+  FLASHCARD_EDGE_CYAN,
+  FLASHCARD_FACE_BG,
+  LEARNING_SHADE_BG,
+  TEXT_INDIGO_LIGHT,
+  TOP_HIGHLIGHT_LINE,
+} from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
 import {
   DEAD_ZONE,
@@ -52,7 +66,7 @@ const KNOW_GLOW = {
   margin: 64,
   spread: -14,
   blur: 30,
-  color: "rgba(163,230,53,0.65)",
+  color: withAlpha(ICON_LIME, 0.65),
 };
 
 function useActionTaps(onStar?: () => void) {
@@ -74,11 +88,11 @@ const CALM_EDGE = {
   width: 1.6,
   angle: 158,
   colors: [
-    "#9CFCEC",
-    "rgba(94,234,212,0.55)",
-    "rgba(94,234,212,0.08)",
-    "rgba(220,255,245,0.02)",
-    "rgba(163,230,53,0.16)",
+    FLASHCARD_EDGE_CYAN,
+    withAlpha(ICON_MINT_LIGHT, 0.55),
+    withAlpha(ICON_MINT_LIGHT, 0.08),
+    SURFACE_GLASS_BG_FAINT,
+    withAlpha(ICON_LIME, 0.16),
   ],
   positions: [0, 0.18, 0.42, 0.7, 1],
 };
@@ -88,7 +102,7 @@ const LIVE_EDGE = {
   colors: [
     ICON_LIME_LIGHT,
     ICON_ACCENT,
-    "rgba(94,234,212,0.25)",
+    withAlpha(ICON_MINT_LIGHT, 0.25),
     ICON_LIME_LIGHT,
   ],
   positions: [0, 0.3, 0.58, 1],
@@ -99,7 +113,7 @@ const LEARNING_EDGE = {
   colors: [
     ICON_INDIGO_LIGHT,
     ICON_INDIGO,
-    "rgba(129,140,248,0.2)",
+    withAlpha(ICON_INDIGO_LIGHT, 0.2),
     ICON_INDIGO_LIGHT,
   ],
   positions: [0, 0.34, 0.62, 1],
@@ -110,12 +124,12 @@ const STAMP_STYLES = {
     solid: undefined as string | undefined,
     color: "$nearBlack",
     borderColor: undefined as string | undefined,
-    shadowColor: "rgba(163,230,53,0.85)" as string | undefined,
+    shadowColor: withAlpha(ICON_LIME, 0.85) as string | undefined,
   },
   learning: {
-    solid: "rgba(67,56,202,0.5)" as string | undefined,
-    color: "#C7D2FE",
-    borderColor: "rgba(129,140,248,0.7)" as string | undefined,
+    solid: withAlpha(ICON_INDIGO, 0.5) as string | undefined,
+    color: TEXT_INDIGO_LIGHT,
+    borderColor: withAlpha(ICON_INDIGO_LIGHT, 0.7) as string | undefined,
     shadowColor: undefined as string | undefined,
   },
 };
@@ -217,7 +231,7 @@ function StampFace({
     >
       {isKnow && (
         <LinearGradient
-          colors={[ICON_MINT, ICON_LIME]}
+          colors={GRADIENT_PRIMARY}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0.4 }}
           style={StyleSheet.absoluteFill}
@@ -381,7 +395,7 @@ function CardFace({
       <YStack f={1} br={CARD_RADIUS} overflow="hidden">
         <LiquidGlass
           intensity={22}
-          backgroundColor="rgba(12,20,24,.5)"
+          backgroundColor={FLASHCARD_FACE_BG}
           borderRadius={CARD_RADIUS}
         />
         <LearningShade translateX={translateX} />
@@ -393,7 +407,7 @@ function CardFace({
             fontWeight={weak ? "400" : "600"}
             letterSpacing={-0.32}
             lineHeight={weak ? 32 : 39}
-            color={weak ? "#DCEBF2" : "$color"}
+            color={weak ? ICON_ON_GLASS : "$color"}
             textAlign="center"
             numberOfLines={8}
             ellipsizeMode="tail"
@@ -479,7 +493,7 @@ export function FlashcardLg({
           br="$cardSoft"
           ai="center"
           jc="center"
-          bg="rgba(220,255,245,0.05)"
+          bg="$glassBg"
         >
           <Volume2 size={20} color={ttsColor} strokeWidth={1.8} />
         </YStack>
@@ -505,7 +519,7 @@ export function FlashcardLg({
             style={frontAnimatedStyle}
             text={front}
             active={isFront}
-            actions={renderActions(frontTaps, "#3E4C57")}
+            actions={renderActions(frontTaps, ICON_SLATE_DIM)}
             decision={decision}
             translateX={translateX}
           />
@@ -532,7 +546,7 @@ const styles = StyleSheet.create({
   bigcardWrap: {
     borderRadius: CARD_RADIUS,
     zIndex: 2,
-    shadowColor: "#000",
+    shadowColor: ICON_PURE_BLACK,
     shadowOffset: { width: 0, height: 18 },
     shadowOpacity: 0.5,
     shadowRadius: 30,
@@ -548,7 +562,7 @@ const styles = StyleSheet.create({
     backfaceVisibility: "hidden",
   },
   learningShade: {
-    backgroundColor: "rgb(0, 10, 5)",
+    backgroundColor: LEARNING_SHADE_BG,
   },
   topHighlight: {
     position: "absolute",
@@ -556,7 +570,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.28)",
+    backgroundColor: TOP_HIGHLIGHT_LINE,
   },
   ghost: {
     position: "absolute",
@@ -566,7 +580,7 @@ const styles = StyleSheet.create({
     bottom: -14,
     borderRadius: 30,
     zIndex: 1,
-    backgroundColor: "rgba(14,24,28,0.45)",
+    backgroundColor: withAlpha(ICON_BASE_TOP, 0.45),
   },
   ghostG2: {
     position: "absolute",
@@ -576,7 +590,7 @@ const styles = StyleSheet.create({
     bottom: -27,
     borderRadius: 30,
     zIndex: 0,
-    backgroundColor: "rgba(14,24,28,0.32)",
+    backgroundColor: withAlpha(ICON_BASE_TOP, 0.32),
   },
   stamp: {
     position: "absolute",

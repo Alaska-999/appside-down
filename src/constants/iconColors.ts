@@ -18,7 +18,14 @@ export const ICON_HERO_LIME = "#65A30D";
 export const ICON_WHITE = "#FFFFFF";
 export const ICON_MUTED_LIGHT = "#B7CEDA";
 export const ICON_MINT_TINT_DARK = "#06231F";
-export const ICON_BASE_DEEP = "#11141F";
+export const ICON_BASE_DEEP = "#0D1117";
 export const ICON_ROSE_SOFT = "#FCA5A5";
+export const ICON_STATUS_DANGER = "#EF4444";
+export const ICON_TEAL_BRIGHT = "#1BA88F";
+export const ICON_PURE_BLACK = "#000000";
+export const ICON_BASE_TOP = "#0D1117";
+export const ICON_MUTED_DARK = "#6E8496";
+export const ICON_SLATE_DIM = "#3E4C57";
+export const ICON_INDIGO_PALE = "#A5B4FC";
 
 

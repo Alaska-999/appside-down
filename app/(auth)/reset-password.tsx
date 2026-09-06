@@ -4,7 +4,7 @@ import { FormInput } from "@/src/components/common/FormInput";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
-import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_SUBTLE, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
 import { getErrorMessage } from "@/src/utils/apiError";
 import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
@@ -110,7 +110,7 @@ export default function ResetPassword() {
           subtitle={
             <>
               Code sent to{" "}
-              <Text color="#DCEBF2" fontWeight="600">
+              <Text color={ICON_ON_GLASS} fontWeight="600">
                 {email}
               </Text>
             </>
@@ -137,7 +137,7 @@ export default function ResetPassword() {
               ) : resendCooldown > 0 ? (
                 <>
                   Resend in{" "}
-                  <Text fontSize={12.5} color="#7F97A6" fontWeight="600">
+                  <Text fontSize={12.5} color="$textMuted" fontWeight="600">
                     {formatCooldown(resendCooldown)}
                   </Text>
                 </>

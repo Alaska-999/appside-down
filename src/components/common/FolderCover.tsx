@@ -9,9 +9,16 @@ import {
   ICON_MINT_LIGHT,
   ICON_MINT_TINT_DARK,
   ICON_ON_GLASS,
+  ICON_PURE_BLACK,
   ICON_TEAL,
   ICON_WHITE,
 } from "@/src/constants/iconColors";
+import {
+  BLACK_SCRIM_DEEP,
+  BLACK_SCRIM_LIGHT,
+  TRANSPARENT_BLACK,
+} from "@/src/constants/rawColors";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import {
@@ -115,7 +122,7 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
           <RadialGradient
             c={vec(box * 0.05, box * 1.05)}
             r={box * 0.68}
-            colors={["rgba(0,0,0,0.75)", "rgba(0,0,0,0.3)", "rgba(0,0,0,0)"]}
+            colors={[BLACK_SCRIM_DEEP, BLACK_SCRIM_LIGHT, TRANSPARENT_BLACK]}
             positions={[0, 0.35, 1]}
           />
         </Circle>
@@ -170,7 +177,7 @@ export function FolderCover({
               h={COVER_BOX}
               br={COVER_RADIUS}
               overflow="hidden"
-              shadowColor="#000"
+              shadowColor={ICON_PURE_BLACK}
               shadowOpacity={0.9}
               shadowRadius={15}
               shadowOffset={{ width: 0, height: 12 }}
@@ -197,7 +204,7 @@ export function FolderCover({
                   left: 8,
                   right: 8,
                   height: 1,
-                  backgroundColor: "rgba(255,255,255,0.25)",
+                  backgroundColor: FOCUS_HIGHLIGHT,
                 }}
               />
             </YStack>

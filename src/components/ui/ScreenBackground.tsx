@@ -34,7 +34,8 @@ export type BackgroundPreset =
   | "auth"
   | "finish"
   | "finishCold"
-  | "finishWarm";
+  | "finishWarm"
+  | "finishWarm2";
 
 type Blob = {
   cx: number;
@@ -112,7 +113,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         layers: [
           {
-            blur: 24,
+            blur: 40,
             saturate: 1.1,
             blobs: [
               {
@@ -520,6 +521,76 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         grain: 0.07,
       };
+
+    case "finishWarm2":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#081F1A", "#06110C", "#030603", "#020302"],
+          positions: [0, 0.4, 0.74, 1],
+        },
+        layers: [
+          {
+            blur: 40,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(163,230,53,0.15)",
+                edge: 0.64,
+              },
+            ],
+          },
+
+          {
+            blur: 60,
+            blobs: [
+              {
+                cx: w - 30,
+                cy: -10,
+                rx: 220,
+                ry: 220,
+                color: "rgba(163, 251, 30, 0.35)",
+                edge: 0.8,
+              },
+            ],
+          },
+          {
+            blur: 45,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 40,
+                rx: 70,
+                ry: 70,
+                color: "rgba(248, 254, 182, 0.7)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(190,242,100,0.1)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
+          positions: [0, 0.4, 0.66, 1],
+        },
+        grain: 0.07,
+      };
   }
 }
 
@@ -694,7 +765,15 @@ function Vignette({
   );
 }
 
-export function Grain({ w, h, amount }: { w: number; h: number; amount: number }) {
+export function Grain({
+  w,
+  h,
+  amount,
+}: {
+  w: number;
+  h: number;
+  amount: number;
+}) {
   const paint = useMemo(() => {
     const p = Skia.Paint();
     p.setAlphaf(amount * 0.55);

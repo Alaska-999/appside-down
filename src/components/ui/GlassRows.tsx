@@ -1,5 +1,6 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { ICON_MUTED_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";
 import { Children, ComponentType, ReactNode } from "react";
@@ -7,8 +8,8 @@ import { View } from "react-native";
 import { Text, XStack, YStack, YStackProps } from "tamagui";
 
 const GLASS_RADIUS = 20;
-const GLASS_FILL = "rgba(220,255,245,0.045)";
-const DIVIDER = "rgba(220,255,245,0.09)";
+const GLASS_FILL = "$glassBg";
+const DIVIDER = SURFACE_GLASS_BG_STRONG;
 const DIVIDER_INSET = 48;
 
 type GlassCardLayoutProps = Pick<YStackProps, "p" | "px" | "py" | "gap" | "ai" | "fd">;
@@ -75,7 +76,7 @@ export function GlassRow({
           hapticTap();
           onPress();
         },
-        pressStyle: { bg: "rgba(220,255,245,0.05)" },
+        pressStyle: { bg: "$glassBg" },
         accessibilityRole: "button" as const,
         accessibilityLabel: label,
       })}

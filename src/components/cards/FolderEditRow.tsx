@@ -9,9 +9,13 @@ import {
 import {
   ICON_ACCENT,
   ICON_DANGER,
+  ICON_MINT,
   ICON_MUTED_LIGHT,
+  ICON_STATUS_DANGER,
 } from "@/src/constants/iconColors";
+import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { ComponentType, Fragment, ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -56,7 +60,7 @@ export function FolderEditRows({
               <View
                 style={{
                   height: 1,
-                  backgroundColor: "rgba(220,255,245,0.08)",
+                  backgroundColor: SURFACE_GLASS_BG_STRONG,
                 }}
               />
             )}
@@ -73,21 +77,21 @@ const ROW_HEIGHT = 56;
 
 const ICON_ACTION_TONE = {
   neutral: {
-    bg: "rgba(220,255,245,0.055)",
-    pressedBg: "rgba(220,255,245,0.16)",
-    border: "rgba(220,255,245,0.11)",
+    bg: "$glassBg",
+    pressedBg: "$borderColor",
+    border: "$borderColor",
     icon: ICON_MUTED_LIGHT,
   },
   danger: {
-    bg: "rgba(239,68,68,0.1)",
-    pressedBg: "rgba(239,68,68,0.24)",
-    border: "rgba(239,68,68,0.3)",
+    bg: withAlpha(ICON_STATUS_DANGER, 0.1),
+    pressedBg: withAlpha(ICON_STATUS_DANGER, 0.24),
+    border: withAlpha(ICON_STATUS_DANGER, 0.3),
     icon: ICON_DANGER,
   },
   accent: {
-    bg: "rgba(45,212,191,0.1)",
-    pressedBg: "rgba(45,212,191,0.24)",
-    border: "rgba(45,212,191,0.3)",
+    bg: withAlpha(ICON_MINT, 0.1),
+    pressedBg: withAlpha(ICON_MINT, 0.24),
+    border: withAlpha(ICON_MINT, 0.3),
     icon: ICON_ACCENT,
   },
 } as const;
@@ -185,9 +189,9 @@ export function FolderModuleEditRow({
                 px={7}
                 py={2}
                 br={999}
-                bg="rgba(220,255,245,0.07)"
+                bg="$glassBorderFaint"
                 borderWidth={1}
-                borderColor="rgba(220,255,245,0.11)"
+                borderColor="$borderColor"
               >
                 <Text fontSize={10} fontWeight="700" color="$textMuted">
                   {tag}

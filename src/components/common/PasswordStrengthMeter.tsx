@@ -29,12 +29,12 @@ export function PasswordStrengthMeter({ password }: { password: string }) {
             f={1}
             height={3}
             br={2}
-            bg={on ? "$limeLight" : "rgba(220,255,245,0.1)"}
+            bg={on ? "$limeLight" : "$glassBgStrong"}
           />
         ))}
       </XStack>
       {hint && (
-        <Text fontSize={11.5} color="#7F97A6">
+        <Text fontSize={11.5} color="$textMuted">
           {hint}
         </Text>
       )}

@@ -2,10 +2,15 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
   ICON_ACCENT,
+  ICON_MINT,
   ICON_MINT_LIGHT,
+  ICON_PURE_BLACK,
   ICON_SUBTLE,
 } from "@/src/constants/iconColors";
+import { GLASS_PILL_MINT_EDGE, GLASS_SHEEN_MED } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { ComponentType } from "react";
 import { View } from "react-native";
 import { Spinner, Text, XStack, YStack } from "tamagui";
@@ -37,9 +42,9 @@ interface ToneStyle {
 
 const TONE_STYLES: Record<GlassPillTone, ToneStyle> = {
   accent: {
-    glassBg: "rgba(45,212,191,0.15)",
+    glassBg: withAlpha(ICON_MINT, 0.15),
     glassIntensity: 35,
-    borderColors: ["rgba(45,212,191,0.7)", "rgba(70, 210, 191, 0.35)"],
+    borderColors: [withAlpha(ICON_MINT, 0.7), GLASS_PILL_MINT_EDGE],
     borderPositions: [0, 1],
     borderAngle: 150,
     topHighlight: false,
@@ -50,11 +55,11 @@ const TONE_STYLES: Record<GlassPillTone, ToneStyle> = {
     centerSelf: true,
   },
   save: {
-    glassBg: "rgba(220,255,245,0.05)",
+    glassBg: SURFACE_GLASS_BG,
     glassIntensity: 25,
     borderPreset: "lens",
     shadow: {
-      color: "#000",
+      color: ICON_PURE_BLACK,
       offset: { width: 0, height: 3 },
       radius: 5,
       opacity: 0.7,
@@ -176,7 +181,7 @@ export function GlassPill({
                 left: 8,
                 right: 8,
                 height: 1,
-                backgroundColor: "rgba(255,255,255,0.34)",
+                backgroundColor: GLASS_SHEEN_MED,
               }}
             />
           )}

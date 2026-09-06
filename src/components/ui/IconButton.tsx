@@ -1,7 +1,24 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_ACCENT, ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import {
+  GRADIENT_ACCENT_LIME,
+  GRADIENT_PRIMARY,
+} from "@/src/constants/gradients";
+import { ICON_MINT, ICON_MINT_LIGHT, ICON_PURE_BLACK } from "@/src/constants/iconColors";
+import {
+  GLASS_BORDER_BOTTOM,
+  LIQUID_LENS_LINE_BOTTOM,
+  LIQUID_LENS_LINE_SIDE,
+  LIQUID_LENS_TINT,
+} from "@/src/constants/rawColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_GLASS_BORDER_FAINT,
+} from "@/src/constants/surfaceAlpha";
+import { usePressScale } from "@/src/hooks/usePressScale";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { BlurMask, Canvas, Circle } from "@shopify/react-native-skia";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactElement, useEffect } from "react";
@@ -66,8 +83,6 @@ const LEGACY_VARIANT_STYLES: Record<
   },
 };
 
-const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
-
 export function IconButton({
   icon,
   variant = "glass",
@@ -75,11 +90,7 @@ export function IconButton({
   onPress,
   ...rest
 }: IconButtonProps) {
-  const reduced = useReducedMotion();
-  const pressScale = useSharedValue(1);
-  const pressStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pressScale.value }],
-  }));
+  const press = usePressScale(0.92);
 
   const handlePress = () => {
     hapticTap();
@@ -100,7 +111,7 @@ export function IconButton({
         pressStyle={{ scale: 0.92 }}
         transition="press"
         accessibilityRole="button"
-        shadowColor="#000"
+        shadowColor={ICON_PURE_BLACK}
         shadowOffset={{ width: 0, height: 3 }}
         shadowRadius={5}
         shadowOpacity={0.5}
@@ -125,7 +136,7 @@ export function IconButton({
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: "rgba(157, 166, 174, 0.05)",
+              backgroundColor: LIQUID_LENS_TINT,
             }}
           />
           <View
@@ -136,7 +147,7 @@ export function IconButton({
               left: 8,
               right: 8,
               height: 1,
-              backgroundColor: "rgba(255, 255, 255, 0.04)",
+              backgroundColor: GLASS_BORDER_BOTTOM,
             }}
           />
           <View
@@ -147,7 +158,7 @@ export function IconButton({
               left: 8,
               right: 8,
               height: 1,
-              backgroundColor: "rgba(204, 237, 249, 0.03)",
+              backgroundColor: LIQUID_LENS_LINE_BOTTOM,
             }}
           />
           <View
@@ -158,7 +169,7 @@ export function IconButton({
               top: 7,
               bottom: 7,
               width: 1,
-              backgroundColor: "rgba(160, 214, 239, 0.06)",
+              backgroundColor: LIQUID_LENS_LINE_SIDE,
             }}
           />
         </YStack>
@@ -174,20 +185,12 @@ export function IconButton({
     return (
       <Pressable
         onPress={handlePress}
-        onPressIn={() => {
-          pressScale.value = reduced
-            ? 0.92
-            : withTiming(0.92, { duration: 130, easing: PRESS_EASING });
-        }}
-        onPressOut={() => {
-          pressScale.value = reduced
-            ? 1
-            : withTiming(1, { duration: 240, easing: PRESS_EASING });
-        }}
+        onPressIn={press.onPressIn}
+        onPressOut={press.onPressOut}
         hitSlop={Math.max(0, (44 - resolvedSize) / 2)}
       >
         {({ pressed }) => (
-          <Animated.View style={pressStyle}>
+          <Animated.View style={press.style}>
             <YStack
               w={resolvedSize}
               h={resolvedSize}
@@ -197,7 +200,7 @@ export function IconButton({
               pos="relative"
               {...(variant === "acc"
                 ? {
-                    shadowColor: "rgba(45,212,191,1)",
+                    shadowColor: ICON_MINT,
                     shadowOffset: { width: 0, height: 4 },
                     shadowRadius: 8,
                     shadowOpacity: 0.5,
@@ -216,7 +219,7 @@ export function IconButton({
               >
                 {variant === "acc" ? (
                   <LinearGradient
-                    colors={[ICON_MINT, ICON_LIME]}
+                    colors={GRADIENT_PRIMARY}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 0.9, y: 0.9 }}
                     style={StyleSheet.absoluteFill}
@@ -228,8 +231,8 @@ export function IconButton({
                     borderRadius={radius}
                     backgroundColor={
                       pressed
-                        ? "rgba(220,255,245,0.13)"
-                        : "rgba(220,255,245,0.07)"
+                        ? SURFACE_BORDER
+                        : SURFACE_GLASS_BORDER_FAINT
                     }
                   />
                 )}
@@ -238,7 +241,7 @@ export function IconButton({
                 <GradientBorder
                   radius={radius}
                   angle={150}
-                  colors={["rgba(220,255,245,0.34)", "rgba(220,255,245,0.04)"]}
+                  colors={[SURFACE_BORDER, SURFACE_GLASS_BG_FAINT]}
                   positions={[0, 1]}
                 />
               )}
@@ -280,10 +283,7 @@ export function AppFab({
   const reduced = useReducedMotion();
   const pulse = useSharedValue(0);
   const runHalo = halo && !reduced;
-  const fabPressScale = useSharedValue(1);
-  const fabPressStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: fabPressScale.value }],
-  }));
+  const press = usePressScale(0.9);
   useEffect(() => {
     if (runHalo) {
       pulse.value = withRepeat(
@@ -321,7 +321,7 @@ export function AppFab({
           ]}
         >
           <Canvas style={StyleSheet.absoluteFill}>
-            <Circle cx={58} cy={58} r={44} color="rgba(92,234,212,0.32)">
+            <Circle cx={58} cy={58} r={44} color={withAlpha(ICON_MINT_LIGHT, 0.32)}>
               <BlurMask blur={16} style="normal" />
             </Circle>
           </Canvas>
@@ -329,18 +329,10 @@ export function AppFab({
       )}
       <Pressable
         onPress={handlePress}
-        onPressIn={() => {
-          fabPressScale.value = reduced
-            ? 0.9
-            : withTiming(0.9, { duration: 130, easing: PRESS_EASING });
-        }}
-        onPressOut={() => {
-          fabPressScale.value = reduced
-            ? 1
-            : withTiming(1, { duration: 240, easing: PRESS_EASING });
-        }}
+        onPressIn={press.onPressIn}
+        onPressOut={press.onPressOut}
       >
-        <Animated.View style={fabPressStyle}>
+        <Animated.View style={press.style}>
           <YStack
             w={62}
             h={62}
@@ -349,13 +341,13 @@ export function AppFab({
             ai="center"
             jc="center"
             overflow="hidden"
-            shadowColor="rgba(92,234,212,1)"
+            shadowColor={ICON_MINT_LIGHT}
             shadowOffset={{ width: 0, height: 8 }}
             shadowRadius={15}
             shadowOpacity={0.7}
           >
             <LinearGradient
-              colors={[ICON_ACCENT, ICON_LIME]}
+              colors={GRADIENT_ACCENT_LIME}
               start={{ x: 0, y: 0 }}
               end={{ x: 0.9, y: 0.9 }}
               style={StyleSheet.absoluteFill}

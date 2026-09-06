@@ -2,12 +2,39 @@ import { InnerBloom } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
-  ICON_HERO_LIME,
   ICON_LIME,
+  ICON_LIME_LIGHT,
   ICON_MINT,
-  ICON_TEAL,
+  ICON_MINT_LIGHT,
+  ICON_PURE_BLACK,
+  ICON_STATUS_DANGER,
 } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY, GRADIENT_SOFT } from "@/src/constants/gradients";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import {
+  BLACK_SCRIM_SOFT,
+  BUTTON_SECONDARY_BORDER,
+  GLASS_BORDER_MID,
+  GLASS_SHEEN_MED,
+  GLASS_SHEEN_STRONG,
+  GLOSS_TOP_LINE,
+  LIQUID_BORDER_ICE,
+  LIQUID_BORDER_TEAL_ICE,
+  MINT_FADE_TRANSPARENT,
+  SCRIM_BASE_HEAVY,
+  SKY_GLOW_FAINT,
+  TRANSPARENT_WHITE,
+  WHITE_BLOOM_FAINT,
+} from "@/src/constants/rawColors";
+import { RING_GLOW_BORDER } from "@/src/constants/focus";
+import {
+  SURFACE_GLASS_BG_FAINT,
+  SURFACE_GLOW_COLOR,
+  SURFACE_GLOW_SOFT,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { usePressScale } from "@/src/hooks/usePressScale";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { controlHeight } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useEffect } from "react";
@@ -45,7 +72,6 @@ const SIZE_STYLES: Record<
 };
 
 const MIN_TAP_TARGET = 44;
-const PRESS_EASING = Easing.bezier(0.2, 0.8, 0.3, 1);
 
 type VariantSpec = {
   bg?: string;
@@ -78,22 +104,22 @@ type VariantSpec = {
 
 export const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   primary: {
-    gradient: [ICON_MINT, ICON_LIME],
+    gradient: GRADIENT_PRIMARY,
     gloss: true,
     textColor: "$onAccentText",
     shadow: {
-      color: "rgb(45,212,191)",
+      color: ICON_MINT,
       offset: { width: 0, height: 1 },
       radius: 5,
       opacity: 0.35,
     },
   },
   soft: {
-    gradient: [ICON_TEAL, ICON_HERO_LIME],
+    gradient: GRADIENT_SOFT,
     gloss: true,
     textColor: "$color",
     shadow: {
-      color: "rgb(45,212,191)",
+      color: ICON_MINT,
       offset: { width: 0, height: 1 },
       radius: 5,
       opacity: 0.35,
@@ -101,43 +127,46 @@ export const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   },
 
   secondary: {
-    bg: "rgba(227, 241, 246, 0.04)",
+    bg: SURFACE_GLASS_BG_FAINT,
     blurIntensity: 12,
     borderAngle: 135,
-    borderColors: ["rgba(227, 241, 246, 0.35)", "rgba(94, 234, 212, 0.1)"],
+    borderColors: [BUTTON_SECONDARY_BORDER, withAlpha(ICON_MINT_LIGHT, 0.1)],
     textColor: "$color",
   },
   outline: {
-    bg: "rgba(45,212,191,0.05)",
+    bg: withAlpha(ICON_MINT, 0.05),
     borderAngle: 150,
-    borderColors: ["rgba(163,230,53,0.6)", "rgba(163,230,53,0.18)"],
+    borderColors: [withAlpha(ICON_LIME, 0.6), withAlpha(ICON_LIME, 0.18)],
     textColor: "$limeLight",
   },
   ghost: {
     textColor: "$colorMuted",
     pressedTextColor: "$iconMuted",
-    pressedBg: "rgba(220,255,245,0.03)",
+    pressedBg: "$glassBgSubtle",
   },
   danger: {
-    bg: "rgba(239,68,68,0.16)",
+    bg: withAlpha(ICON_STATUS_DANGER, 0.16),
     borderAngle: 150,
-    borderColors: ["rgba(239,68,68,0.6)", "rgba(239,68,68,0.16)"],
+    borderColors: [
+      withAlpha(ICON_STATUS_DANGER, 0.6),
+      withAlpha(ICON_STATUS_DANGER, 0.16),
+    ],
     textColor: "$roseSoft",
   },
   glass: {
-    bg: "rgba(45,212,191,0.12)",
+    bg: withAlpha(ICON_MINT, 0.12),
     blurIntensity: 45,
     borderAngle: 150,
-    borderColors: ["rgba(45,212,191,0.5)", "rgba(45,212,191,0.1)"],
+    borderColors: [SURFACE_GLOW_COLOR, SURFACE_GLOW_SOFT],
     textColor: "$mintLight",
   },
   neon: {
-    bg: "rgba(45,212,191,0.05)",
+    bg: withAlpha(ICON_MINT, 0.05),
     ringWidth: 1.5,
-    ringColor: "rgba(94,234,212,0.85)",
-    innerBloom: { color: "rgba(45,212,191,0.16)", spread: 18, blur: 12 },
+    ringColor: RING_GLOW_BORDER,
+    innerBloom: { color: withAlpha(ICON_MINT, 0.16), spread: 18, blur: 12 },
     shadow: {
-      color: "rgba(45,212,191,1)",
+      color: ICON_MINT,
       offset: { width: 0, height: 0 },
       radius: 13,
       opacity: 0.45,
@@ -146,29 +175,25 @@ export const VARIANT_STYLES: Record<ButtonVariant, VariantSpec> = {
   },
 
   liquid: {
-    bg: "rgba(220,255,245,0.04)",
+    bg: SURFACE_GLASS_BG_FAINT,
     blurIntensity: 10,
     liquidGlass: true,
     liquidInsets: true,
-    innerBloom: { color: "rgba(255,255,255,0.08)", spread: 15, blur: 10 },
+    innerBloom: { color: WHITE_BLOOM_FAINT, spread: 15, blur: 10 },
 
     disabledOpacity: 0.45,
     borderAngle: 160,
-    borderColors: [
-      "rgba(195, 219, 237, 0.4)",
-      "rgba(255,255,255,0.05)",
-      "rgba(195, 232, 234, 0.24)",
-    ],
+    borderColors: [LIQUID_BORDER_ICE, GLASS_BORDER_MID, LIQUID_BORDER_TEAL_ICE],
     borderPositions: [0, 0.46, 1],
     shadow: {
-      color: "#000",
+      color: ICON_PURE_BLACK,
       offset: { width: 0, height: 10 },
       radius: 15,
       opacity: 0.5,
     },
     textColor: "$white",
     textShadow: {
-      textShadowColor: "rgba(0,0,0,0.45)",
+      textShadowColor: BLACK_SCRIM_SOFT,
       textShadowOffset: { width: 0, height: 1 },
       textShadowRadius: 8,
     },
@@ -218,15 +243,11 @@ function Sheen({ dark, height }: { dark: boolean; height: number }) {
         colors={
           dark
             ? [
-                "rgba(94,234,212,0)",
-                "rgba(94,234,212,0.42)",
-                "rgba(94,234,212,0)",
+                withAlpha(ICON_MINT_LIGHT, 0),
+                withAlpha(ICON_MINT_LIGHT, 0.42),
+                withAlpha(ICON_MINT_LIGHT, 0),
               ]
-            : [
-                "rgba(255,255,255,0)",
-                "rgba(255,255,255,0.6)",
-                "rgba(255,255,255,0)",
-              ]
+            : [TRANSPARENT_WHITE, GLASS_SHEEN_STRONG, TRANSPARENT_WHITE]
         }
         start={{ x: 0, y: 0.4 }}
         end={{ x: 1, y: 0.6 }}
@@ -270,9 +291,9 @@ function Flood({ pressed }: { pressed: boolean }) {
     >
       <LinearGradient
         colors={[
-          "rgba(190,242,100,0.95)",
-          "rgba(45,212,191,0.55)",
-          "rgba(45,212,191,0)",
+          withAlpha(ICON_LIME_LIGHT, 0.95),
+          withAlpha(ICON_MINT, 0.55),
+          MINT_FADE_TRANSPARENT,
         ]}
         locations={[0, 0.58, 0.72]}
         start={{ x: 0.5, y: 0.5 }}
@@ -317,16 +338,15 @@ export function AppButton({
   const isBlocked = disabled || loading;
   const verticalHitSlop = Math.max(0, (MIN_TAP_TARGET - height) / 2);
   const reduced = useReducedMotion();
-  const pressScale = useSharedValue(1);
+  const press = usePressScale(0.965);
   const targetOpacity = disabled ? (spec.disabledOpacity ?? 0.34) : 1;
   const stateOpacity = useSharedValue(targetOpacity);
   useEffect(() => {
     stateOpacity.value = reduced
       ? targetOpacity
-      : withTiming(targetOpacity, { duration: 240, easing: PRESS_EASING });
+      : withTiming(targetOpacity, { duration: 240, easing: EASE_STANDARD });
   }, [targetOpacity, reduced, stateOpacity]);
-  const pressAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pressScale.value }],
+  const opacityStyle = useAnimatedStyle(() => ({
     opacity: stateOpacity.value,
   }));
 
@@ -348,15 +368,11 @@ export function AppButton({
       hitSlop={{ top: verticalHitSlop, bottom: verticalHitSlop }}
       onPressIn={() => {
         if (isBlocked) return;
-        pressScale.value = reduced
-          ? 0.965
-          : withTiming(0.965, { duration: 130, easing: PRESS_EASING });
+        press.onPressIn();
       }}
       onPressOut={() => {
         if (isBlocked) return;
-        pressScale.value = reduced
-          ? 1
-          : withTiming(1, { duration: 240, easing: PRESS_EASING });
+        press.onPressOut();
       }}
     >
       {({ pressed }) => {
@@ -381,7 +397,7 @@ export function AppButton({
             : null;
 
         return (
-          <Animated.View style={pressAnimStyle}>
+          <Animated.View style={[press.style, opacityStyle]}>
             <YStack
               br={radius}
               borderWidth={spec.ringWidth}
@@ -431,7 +447,7 @@ export function AppButton({
                   )}
                 {spec.gloss && (
                   <LinearGradient
-                    colors={["rgba(255,255,255,0.26)", "rgba(255,255,255,0)"]}
+                    colors={[GLOSS_TOP_LINE, TRANSPARENT_WHITE]}
                     locations={[0, 0.52]}
                     start={{ x: 0.5, y: 0 }}
                     end={{ x: 0.5, y: 1 }}
@@ -460,7 +476,7 @@ export function AppButton({
                         left: 10,
                         right: 10,
                         height: 1,
-                        backgroundColor: "rgba(255,255,255,0.34)",
+                        backgroundColor: GLASS_SHEEN_MED,
                       }}
                     />
                     <View
@@ -471,7 +487,7 @@ export function AppButton({
                         left: 10,
                         right: 10,
                         height: 1,
-                        backgroundColor: "rgba(120,220,255,0.16)",
+                        backgroundColor: SKY_GLOW_FAINT,
                       }}
                     />
                   </>
@@ -498,7 +514,7 @@ export function AppButton({
                     br="$cardSoft"
                     ai="center"
                     jc="center"
-                    bg="rgba(8,9,12,0.82)"
+                    bg={SCRIM_BASE_HEAVY}
                     zIndex={5}
                     transform={[{ translateX: pressed ? 4 : 0 }]}
                   >

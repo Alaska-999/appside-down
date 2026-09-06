@@ -1,9 +1,8 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  ICON_LIME,
-  ICON_MINT,
-  ICON_MINT_TINT_DARK,
-} from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_MINT_LIGHT, ICON_MINT_TINT_DARK } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { SURFACE_MINT_GLASS_BG } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
 import { StyleSheet } from "react-native";
@@ -38,10 +37,10 @@ export function StreakCard({
               jc="center"
               overflow="hidden"
               pos="relative"
-              bg={isOn ? undefined : isNow ? "rgba(45,212,191,0.14)" : "rgba(220,255,245,0.06)"}
+              bg={isOn ? undefined : isNow ? SURFACE_MINT_GLASS_BG : "$glassBg"}
               borderWidth={isNow ? 1.5 : isOn ? 0 : 1}
-              borderColor={isNow ? "rgba(94,234,212,0.9)" : "rgba(220,255,245,0.09)"}
-              shadowColor="rgba(45,212,191,1)"
+              borderColor={isNow ? withAlpha(ICON_MINT_LIGHT, 0.9) : "$glassBgStrong"}
+              shadowColor={ICON_MINT}
               shadowOffset={{ width: 0, height: 0 }}
               shadowRadius={isOn ? 7 : isNow ? 8 : 0}
               shadowOpacity={isOn ? 0.8 : isNow ? 0.7 : 0}
@@ -49,7 +48,7 @@ export function StreakCard({
               {isOn && (
                 <>
                   <LinearGradient
-                    colors={[ICON_MINT, ICON_LIME]}
+                    colors={GRADIENT_PRIMARY}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={StyleSheet.absoluteFill}

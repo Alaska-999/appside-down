@@ -3,7 +3,7 @@ import {
   InputShellSize,
   InputShellVariant,
 } from "@/src/components/ui/InputShell";
-import { ICON_DANGER, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_DANGER, ICON_SUBTLE, ICON_WARNING } from "@/src/constants/iconColors";
 import { AlertCircle, Eye, EyeOff } from "lucide-react-native";
 import { FieldGroupContext } from "@/src/components/ui/FieldGroup";
 import { ReactNode, Ref, forwardRef, useContext, useState } from "react";
@@ -105,7 +105,7 @@ function FormInputInner<T extends FieldValues>(
                 fontWeight="700"
                 letterSpacing={0.55}
                 textTransform="uppercase"
-                color="#7F97A6"
+                color="$textMuted"
               >
                 {label}
               </Text>
@@ -191,7 +191,7 @@ function FormInputInner<T extends FieldValues>(
                   mt={multiline ? "auto" : undefined}
                   pt={multiline ? 8 : undefined}
                   fontSize={multiline ? 10.5 : 11.5}
-                  color={nearLimit ? "#FCD34D" : "$mutedDim"}
+                  color={nearLimit ? ICON_WARNING : "$mutedDim"}
                 >
                   {value.length}/{maxLength}
                 </Text>

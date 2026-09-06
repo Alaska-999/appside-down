@@ -6,6 +6,19 @@ import {
   ICON_MUTED_LIGHT,
   ICON_SUBTLE,
 } from "@/src/constants/iconColors";
+import {
+  SHEET_HANDLE_BG,
+  SHEET_LAMP_MINT,
+  SHEET_OVERLAY_BG,
+  SHEET_ROW_BG_DARK,
+  SHEET_ROW_BG_LIGHT,
+  SHEET_ROW_BG_SURFACE,
+  SHEET_ROW_PRESSED_DARK,
+  SHEET_ROW_PRESSED_LIGHT,
+  SHEET_ROW_PRESSED_SURFACE,
+} from "@/src/constants/rawColors";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
+import { SURFACE_BORDER } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronRight } from "lucide-react-native";
 import {
@@ -91,7 +104,7 @@ export function AppSheet({
       dismissOnSnapToBottom
       moveOnKeyboardChange={!growWithKeyboard}
     >
-      <Sheet.Overlay bg="rgba(3,5,8,0.42)" />
+      <Sheet.Overlay bg={SHEET_OVERLAY_BG} />
 
       <Sheet.Frame
         bg="transparent"
@@ -143,7 +156,7 @@ export function AppSheet({
             backgroundColor={theme.sheetBg.get()}
           />
 
-          <Lamp color="rgba(137, 230, 213, 0.2)" edge={0.4} />
+          <Lamp color={SHEET_LAMP_MINT} edge={0.4} />
           <View
             pointerEvents="none"
             style={{
@@ -152,14 +165,14 @@ export function AppSheet({
               left: 32,
               right: 32,
               height: 1,
-              backgroundColor: "rgba(255, 255, 255, 0.25)",
+              backgroundColor: FOCUS_HIGHLIGHT,
             }}
           />
           <GradientBorder radius={SHEET_RADIUS} preset="sheet" />
         </YStack>
 
         <Sheet.Handle
-          bg="rgba(229, 251, 245, 0.4)"
+          bg={SHEET_HANDLE_BG}
           w={54}
           h={5}
           br={4}
@@ -236,14 +249,14 @@ export function AppSheet({
 type SheetRowTone = "light" | "dark" | "surface";
 
 const ROW_BG: Record<SheetRowTone, string> = {
-  dark: "rgba(5, 13, 21, 0.39)",
-  light: "rgba(31, 40, 44, 0.75)",
-  surface: "rgba(133, 155, 152, 0.07)",
+  dark: SHEET_ROW_BG_DARK,
+  light: SHEET_ROW_BG_LIGHT,
+  surface: SHEET_ROW_BG_SURFACE,
 };
 const ROW_PRESSED_BG: Record<SheetRowTone, string> = {
-  dark: "rgba(4, 10, 16, 0.73)",
-  light: "rgba(44, 50, 50, 0.3)",
-  surface: "rgba(46, 66, 63, 0.06)",
+  dark: SHEET_ROW_PRESSED_DARK,
+  light: SHEET_ROW_PRESSED_LIGHT,
+  surface: SHEET_ROW_PRESSED_SURFACE,
 };
 
 const SheetRowsContext = createContext<{ tone: SheetRowTone }>({
@@ -350,7 +363,7 @@ export function SheetRows({
                 <View
                   style={{
                     height: 1,
-                    backgroundColor: "rgba(220,255,245,0.12)",
+                    backgroundColor: SURFACE_BORDER,
                   }}
                 />
               )}

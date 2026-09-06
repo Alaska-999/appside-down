@@ -3,6 +3,7 @@ import {
   ICON_MUTED,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
+import { STAR_GLYPH_ACTIVE_FILL } from "@/src/constants/rawColors";
 import { Star } from "lucide-react-native";
 
 type StarGlyphMode = "indicator" | "toggle";
@@ -15,7 +16,7 @@ const SIZE_STYLES: Record<StarGlyphSize, { size: number }> = {
 };
 
 const STROKE = 1.8;
-const ACTIVE_FILL = "rgba(183, 249, 68, 0.1)";
+const ACTIVE_FILL = STAR_GLYPH_ACTIVE_FILL;
 
 interface StarGlyphProps {
   mode?: StarGlyphMode;

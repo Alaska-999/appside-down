@@ -1,11 +1,13 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
-  ICON_LIME,
   ICON_MINT,
   ICON_MUTED,
   ICON_NEAR_BLACK,
+  ICON_PURE_BLACK,
 } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { TAB_ICON_INACTIVE_BG } from "@/src/constants/rawColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Tabs } from "expo-router";
 import { BookOpen, House, PlusCircle } from "lucide-react-native";
@@ -26,7 +28,7 @@ function TabIcon(
           width={30}
           height={30}
           br={10}
-          bg="rgba(211, 211, 211, 0.1)"
+          bg={TAB_ICON_INACTIVE_BG}
           ai="center"
           jc="center"
           mb={6}
@@ -44,14 +46,14 @@ function TabIcon(
         overflow="hidden"
         ai="center"
         jc="center"
-        shadowColor="rgba(45,212,191,1)"
+        shadowColor={ICON_MINT}
         shadowOpacity={0.8}
         shadowRadius={9}
         shadowOffset={{ width: 0, height: 0 }}
         mb={6}
       >
         <LinearGradient
-          colors={[ICON_MINT, ICON_LIME]}
+          colors={GRADIENT_PRIMARY}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
@@ -87,7 +89,7 @@ export default function TabsLayout() {
             backgroundColor: "transparent",
             borderTopWidth: 0,
             elevation: 10,
-            shadowColor: "#000",
+            shadowColor: ICON_PURE_BLACK,
             shadowOpacity: 0.4,
             shadowRadius: 17,
             shadowOffset: { width: 0, height: 14 },

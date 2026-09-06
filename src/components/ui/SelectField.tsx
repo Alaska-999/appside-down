@@ -1,12 +1,23 @@
 import { InputShell, InputShellSize } from "@/src/components/ui/InputShell";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
+import {
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MUTED_DARK,
+  ICON_PURE_BLACK,
+} from "@/src/constants/iconColors";
+import { EASE_STANDARD } from "@/src/constants/motion";
+import { SELECT_MENU_BG } from "@/src/constants/rawColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BG,
+} from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { Check, ChevronDown } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { Modal, Pressable, View } from "react-native";
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useReducedMotion,
@@ -39,7 +50,7 @@ type SelectFieldProps = (SingleSelectProps | MultiSelectProps) & {
   disabled?: boolean;
 };
 
-const EASE = Easing.bezier(0.2, 0.8, 0.3, 1);
+const EASE = EASE_STANDARD;
 
 export function SelectField({
   value,
@@ -151,7 +162,7 @@ export function SelectField({
             </Text>
             <ChevronDown
               size={18}
-              color="#6E8496"
+              color={ICON_MUTED_DARK}
               style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
             />
           </InputShell>
@@ -177,8 +188,8 @@ export function SelectField({
                   borderRadius: 16,
                   overflow: "hidden",
                   borderWidth: 1,
-                  borderColor: "rgba(220,255,245,0.13)",
-                  shadowColor: "#000",
+                  borderColor: SURFACE_BORDER,
+                  shadowColor: ICON_PURE_BLACK,
                   shadowOffset: { width: 0, height: 18 },
                   shadowRadius: 22,
                   shadowOpacity: 0.55,
@@ -186,22 +197,22 @@ export function SelectField({
                 menuStyle,
               ]}
             >
-              <LiquidGlass intensity={60} backgroundColor="rgba(14,22,26,0.85)" />
+              <LiquidGlass intensity={60} backgroundColor={SELECT_MENU_BG} />
               {options.map((option, index) => {
                 const selected = isSelected(option.value);
                 return (
                   <View key={option.value}>
                     {index > 0 && (
-                      <View style={{ height: 1, backgroundColor: "rgba(220,255,245,0.06)" }} />
+                      <View style={{ height: 1, backgroundColor: SURFACE_GLASS_BG }} />
                     )}
                     <XStack
                       ai="center"
                       jc="space-between"
                       px={16}
                       py={13}
-                      bg={selected ? "rgba(163,230,53,0.08)" : "transparent"}
+                      bg={selected ? withAlpha(ICON_LIME, 0.08) : "transparent"}
                       onPress={() => handleSelect(option.value)}
-                      pressStyle={{ bg: "rgba(220,255,245,0.08)" }}
+                      pressStyle={{ bg: "$glassBgStrong" }}
                       transition="press"
                     >
                       <Text fontSize={14.5} color={selected ? "$limeLight" : "$color"}>

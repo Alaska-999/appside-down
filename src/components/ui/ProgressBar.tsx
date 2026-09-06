@@ -7,7 +7,10 @@ import {
   RoundedRect,
   Skia,
 } from "@shopify/react-native-skia";
-import { ICON_LIME_LIGHT, ICON_MINT } from "@/src/constants/iconColors";
+import { ICON_LIME_LIGHT, ICON_MINT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import { SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BORDER_FAINT } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
@@ -55,7 +58,7 @@ export function ProgressBar({
             width={width}
             height={BAR_HEIGHT}
             r={BAR_HEIGHT / 2}
-            color="rgba(220,255,245,0.07)"
+            color={SURFACE_GLASS_BORDER_FAINT}
           />
           <Group clip={clip}>
             {knownW > 0 && (
@@ -65,11 +68,11 @@ export function ProgressBar({
               <Rect x={knownW} y={4} width={learningW} height={BAR_HEIGHT} color={ICON_MINT} />
             )}
             {knownW > 0 && learningW > 0 && (
-              <Rect x={knownW} y={4} width={1} height={BAR_HEIGHT} color="rgba(8,9,12,0.55)" />
+              <Rect x={knownW} y={4} width={1} height={BAR_HEIGHT} color={SCRIM_BASE_SOFT} />
             )}
           </Group>
           {learningW > 0 && (
-            <Circle cx={headX} cy={4 + BAR_HEIGHT / 2} r={4} color="rgba(94,234,212,0.9)">
+            <Circle cx={headX} cy={4 + BAR_HEIGHT / 2} r={4} color={withAlpha(ICON_MINT_LIGHT, 0.9)}>
               <BlurMask blur={3} style="normal" />
             </Circle>
           )}

@@ -4,11 +4,15 @@ import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
 import {
   ICON_LIME,
   ICON_LIME_LIGHT,
-  ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_MUTED,
   ICON_SUBTLE,
 } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { TEXT_LIME_PALEST } from "@/src/constants/rawColors";
+import { SURFACE_BORDER, SURFACE_GLASS_BORDER_FAINT } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, ChevronRight, X } from "lucide-react-native";
 import { ReactNode, useState } from "react";
@@ -44,8 +48,8 @@ function MasteredTick() {
       br={10}
       ai="center"
       jc="center"
-      bg="rgba(163,230,53,0.16)"
-      shadowColor="rgba(190,242,100,1)"
+      bg={withAlpha(ICON_LIME, 0.16)}
+      shadowColor={ICON_LIME_LIGHT}
       shadowOffset={{ width: 0, height: 0 }}
       shadowRadius={6}
       shadowOpacity={0.6}
@@ -67,7 +71,7 @@ function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
         bottom: 0,
         height: 2,
         zIndex: 4,
-        backgroundColor: "rgba(220,255,245,0.07)",
+        backgroundColor: SURFACE_GLASS_BORDER_FAINT,
       }}
     >
       <View
@@ -76,9 +80,9 @@ function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
           width: `${Math.max(0, Math.min(1, ratio)) * 100}%`,
           overflow: "hidden",
           ...(dim
-            ? { backgroundColor: "rgba(220,255,245,0.22)" }
+            ? { backgroundColor: SURFACE_BORDER }
             : {
-                shadowColor: "rgba(94,234,212,1)",
+                shadowColor: ICON_MINT_LIGHT,
                 shadowOffset: { width: 0, height: 0 },
                 shadowRadius: 3.5,
                 shadowOpacity: 0.6,
@@ -87,7 +91,7 @@ function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
       >
         {!dim && (
           <LinearGradient
-            colors={[ICON_MINT, ICON_LIME]}
+            colors={GRADIENT_PRIMARY}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}
@@ -141,7 +145,7 @@ export function ModuleCard({
                 fontSize={16}
                 fontWeight="700"
                 letterSpacing={-0.16}
-                color={mastered ? "#F4FFDC" : "$color"}
+                color={mastered ? TEXT_LIME_PALEST : "$color"}
                 numberOfLines={1}
                 flexShrink={1}
               >

@@ -1,5 +1,9 @@
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { ICON_MINT } from "@/src/constants/iconColors";
+import { BLACK_SCRIM_LIGHT, FOREST_SHADE, FOREST_SHADE_TRANSPARENT } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_FAINT, SURFACE_WELL } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode, useEffect, useState } from "react";
@@ -70,7 +74,7 @@ export function SegmentedControl({
       gap={GAP}
       position="relative"
       overflow={t.glass ? "visible" : "hidden"}
-      bg="rgba(4,7,10,0.5)"
+      bg={SURFACE_WELL}
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
       <View
@@ -83,7 +87,7 @@ export function SegmentedControl({
           height: 8,
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          backgroundColor: "rgba(0,0,0,0.3)",
+          backgroundColor: BLACK_SCRIM_LIGHT,
         }}
       />
       {containerWidth > 0 && (
@@ -97,7 +101,7 @@ export function SegmentedControl({
               bottom: PADDING,
               borderRadius: 13,
               overflow: t.glass ? "visible" : "hidden",
-              shadowColor: "rgba(45,212,191,1)",
+              shadowColor: ICON_MINT,
               shadowOffset: { width: 0, height: 0 },
               shadowRadius: t.glass ? 6 : 4,
               shadowOpacity: t.glass ? 0 : 0.45,
@@ -110,20 +114,20 @@ export function SegmentedControl({
               <LiquidGlass
                 intensity={25}
                 borderRadius={13}
-                backgroundColor="rgba(220,255,245,0.03)"
+                backgroundColor={SURFACE_GLASS_BG_FAINT}
               />
               <FocusRing radius={13} progress={glowProgress} />
             </>
           ) : (
             <>
               <LinearGradient
-                colors={["#2DD4BF", "#A3E635"]}
+                colors={GRADIENT_PRIMARY}
                 start={{ x: 0, y: 0.4 }}
                 end={{ x: 1, y: 0.6 }}
                 style={StyleSheet.absoluteFill}
               />
               <LinearGradient
-                colors={["rgba(2,60,44,0)", "rgba(2,60,44,0.4)"]}
+                colors={[FOREST_SHADE_TRANSPARENT, FOREST_SHADE]}
                 start={{ x: 0.5, y: 0.35 }}
                 end={{ x: 0.5, y: 1 }}
                 style={StyleSheet.absoluteFill}
@@ -149,7 +153,7 @@ export function SegmentedControl({
               <Text
                 fontSize={13.5}
                 fontWeight="600"
-                color={active ? t.activeText : "#8FA8B8"}
+                color={active ? t.activeText : "$textMuted"}
               >
                 {option}
               </Text>

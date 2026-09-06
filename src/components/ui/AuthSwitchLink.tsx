@@ -13,7 +13,7 @@ export function AuthSwitchLink({ href, prompt, action }: AuthSwitchLinkProps) {
   return (
     <Link href={href} asChild>
       <Pressable hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}>
-        <Text fontSize={13.5} color="#7F97A6" textAlign="center">
+        <Text fontSize={13.5} color="$textMuted" textAlign="center">
           {prompt}{" "}
           <Text color="$mintLight" fontWeight="700">
             {action}

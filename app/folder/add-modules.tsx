@@ -13,6 +13,13 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
+import {
+  SCRIM_BASE_MAX,
+  SCRIM_BASE_TRANSPARENT,
+  LIQUID_GLASS_DARK_BG,
+} from "@/src/constants/rawColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
@@ -181,7 +188,7 @@ export default function AddModules() {
         <XStack px="$screenX" mb={18} ai="center" gap={10}>
           <IconButton
             variant="liquidGlass"
-            icon={<X size={22} color="#EAF7FF" strokeWidth={1.9} />}
+            icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
             onPress={() => router.back()}
             accessibilityLabel="Close"
           />
@@ -307,7 +314,7 @@ export default function AddModules() {
 
       <LinearGradient
         pointerEvents="none"
-        colors={["rgba(8,9,12,0)", "rgba(8,9,12,0.9)"]}
+        colors={[SCRIM_BASE_TRANSPARENT, SCRIM_BASE_MAX]}
         style={{
           position: "absolute",
           left: 0,
@@ -326,7 +333,7 @@ export default function AddModules() {
         pb={Math.max(screen.insets.bottom, 18) + 16}
         overflow="hidden"
       >
-        <LiquidGlass intensity={60} backgroundColor="rgba(14,22,26,0.92)" />
+        <LiquidGlass intensity={60} backgroundColor={LIQUID_GLASS_DARK_BG} />
         <View
           pointerEvents="none"
           style={{
@@ -335,7 +342,7 @@ export default function AddModules() {
             left: 0,
             right: 0,
             height: 1,
-            backgroundColor: "rgba(220,255,245,0.1)",
+            backgroundColor: SURFACE_GLASS_BG_STRONG,
           }}
         />
         <AppButton

@@ -1,8 +1,8 @@
+import { EASE_STANDARD } from "@/src/constants/motion";
 import { ReactNode, useState } from "react";
 import { LayoutChangeEvent } from "react-native";
 import { Gesture, GestureType } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -11,7 +11,7 @@ import Animated, {
 import { YStack } from "tamagui";
 
 const GAP = 10;
-const EASE = Easing.bezier(0.2, 0.8, 0.3, 1);
+const EASE = EASE_STANDARD;
 
 type RenderItem = (args: {
   index: number;

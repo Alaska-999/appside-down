@@ -3,6 +3,7 @@ import { AppButton } from "@/src/components/ui/Button";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_DANGER } from "@/src/constants/iconColors";
+import { BLACK_SCRIM_FAINT } from "@/src/constants/rawColors";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Layers, RotateCcw, Shuffle, Volume2 } from "lucide-react-native";
 import { Text, View, XStack, YStack } from "tamagui";
@@ -19,7 +20,7 @@ function SoonBadge() {
       px={8}
       py={3}
       borderWidth={1}
-      borderColor="rgba(220,255,245,0.18)"
+      borderColor="$borderColor"
     >
       <Text
         fontSize={9.5}
@@ -110,7 +111,7 @@ export function FlashcardsSettingsSheet({
           />
         </YStack>
 
-        <View bg="rgba(0, 0, 0, 0.1)" br={"50%"}>
+        <View bg={BLACK_SCRIM_FAINT} br={"50%"}>
           <AppButton
             variant="danger"
             size="md"

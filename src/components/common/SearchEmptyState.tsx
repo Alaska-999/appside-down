@@ -1,4 +1,5 @@
 import { StateCard } from "@/src/components/ui/StateCard";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { Search } from "lucide-react-native";
 import { Text, YStackProps } from "tamagui";
 
@@ -33,7 +34,7 @@ export function SearchEmptyState({
       subtitle={
         <Text>
           No {noun} match{" "}
-          <Text color="#DCEBF2" fontWeight="700">
+          <Text color={ICON_ON_GLASS} fontWeight="700">
             “{query}”
           </Text>
           . Check the spelling — or make it yourself.

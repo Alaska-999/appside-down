@@ -1,5 +1,8 @@
-import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { ICON_MINT } from "@/src/constants/iconColors";
+import { SURFACE_MINT_GLASS_BG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
 import { StyleSheet } from "react-native";
@@ -12,15 +15,15 @@ const CHIP_STYLES: Record<
   { bg?: string; textColor: string; borderColor?: string; fontWeight: "400" | "600" }
 > = {
   default: {
-    bg: "rgba(220,255,245,0.06)",
+    bg: "$glassBg",
     textColor: "$textMuted",
-    borderColor: "rgba(220,255,245,0.11)",
+    borderColor: "$borderColor",
     fontWeight: "400",
   },
   on: {
-    bg: "rgba(45,212,191,0.14)",
+    bg: SURFACE_MINT_GLASS_BG,
     textColor: "$mintLight",
-    borderColor: "rgba(45,212,191,0.45)",
+    borderColor: withAlpha(ICON_MINT, 0.45),
     fontWeight: "400",
   },
   solid: {
@@ -67,7 +70,7 @@ export function FilterChip({
         : null)}
       {...(variant !== "default"
         ? {
-            shadowColor: "rgba(45,212,191,1)",
+            shadowColor: ICON_MINT,
             shadowOffset: { width: 0, height: 0 },
             shadowRadius: 8,
             shadowOpacity: 0.55,
@@ -76,7 +79,7 @@ export function FilterChip({
     >
       {variant === "solid" && (
         <LinearGradient
-          colors={[ICON_MINT, ICON_LIME]}
+          colors={GRADIENT_PRIMARY}
           start={{ x: 0, y: 0.4 }}
           end={{ x: 1, y: 0.6 }}
           style={StyleSheet.absoluteFill}

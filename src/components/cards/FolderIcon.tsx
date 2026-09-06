@@ -5,6 +5,7 @@ import {
   ICON_MINT,
   ICON_TEAL,
 } from "@/src/constants/iconColors";
+import { FOLDER_ICON_ACCENT_DEEP } from "@/src/constants/rawColors";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "react-native";
 import { Text, YStack } from "tamagui";
@@ -12,7 +13,7 @@ import { Text, YStack } from "tamagui";
 export const FOLDER_ICON_GRADIENTS: [string, string][] = [
   [ICON_MINT, ICON_TEAL],
   [ICON_LIME_LIGHT, ICON_LIME],
-  [ICON_ACCENT, "#16323A"],
+  [ICON_ACCENT, FOLDER_ICON_ACCENT_DEEP],
 ];
 
 const EMOJI_ICON = /^[\p{Extended_Pictographic}\p{Emoji_Presentation}‍️]{1,4}$/u;
@@ -40,7 +41,7 @@ export function FolderIcon({
         h={size}
         br={radius}
         overflow="hidden"
-        bg="rgba(220,255,245,0.06)"
+        bg="$glassBg"
       >
         <Image
           source={{ uri: icon as string }}

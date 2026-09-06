@@ -3,7 +3,25 @@ import {
   ICON_LIME,
   ICON_LIME_LIGHT,
   ICON_MINT,
+  ICON_MINT_LIGHT,
 } from "@/src/constants/iconColors";
+import {
+  COMET_CORE_COLD,
+  COMET_CORE_WARM,
+  MINT_FADE_MID,
+  PLANET_LIME_BRIGHT,
+  PLANET_LIME_DEEP,
+  PLANET_LIME_DARKEST,
+  PLANET_LIME_MID,
+  PLANET_MINT_BRIGHT,
+  PLANET_MINT_DARKEST,
+  PLANET_MINT_DEEP,
+  PLANET_MINT_MID,
+  PLANET_TERMINATOR,
+  WHITE_SHEEN_MED,
+} from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BORDER_FAINT } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import {
   Blur,
   Canvas,
@@ -55,30 +73,30 @@ const PLANET_TONES: Record<
 > = {
   default: {
     stops: [
-      [0, "#4FDCC9"],
-      [0.24, "#1FA495"],
-      [0.54, "#0A625B"],
-      [0.84, "#051E1D"],
+      [0, PLANET_MINT_BRIGHT],
+      [0.24, PLANET_MINT_MID],
+      [0.54, PLANET_MINT_DEEP],
+      [0.84, PLANET_MINT_DARKEST],
     ],
-    glowColor: "rgba(45,212,191,0.34)",
+    glowColor: MINT_FADE_MID,
   },
   cold: {
     stops: [
-      [0, "#4FDCC9"],
-      [0.24, "#1FA495"],
-      [0.54, "#0A625B"],
-      [0.84, "#051E1D"],
+      [0, PLANET_MINT_BRIGHT],
+      [0.24, PLANET_MINT_MID],
+      [0.54, PLANET_MINT_DEEP],
+      [0.84, PLANET_MINT_DARKEST],
     ],
-    glowColor: "rgba(45,212,191,0.34)",
+    glowColor: MINT_FADE_MID,
   },
   warm: {
     stops: [
-      [0, "#B9F27A"],
-      [0.22, "#6BB84A"],
-      [0.52, "#2C6E4E"],
-      [0.84, "#06201A"],
+      [0, PLANET_LIME_BRIGHT],
+      [0.22, PLANET_LIME_MID],
+      [0.52, PLANET_LIME_DEEP],
+      [0.84, PLANET_LIME_DARKEST],
     ],
-    glowColor: "rgba(163,230,53,0.3)",
+    glowColor: withAlpha(ICON_LIME, 0.3),
   },
 };
 
@@ -88,32 +106,32 @@ const COMET_TONES: Record<
 > = {
   default: {
     stops: [
-      [0, "#FBFFF4"],
+      [0, COMET_CORE_COLD],
       [0.55, ICON_LIME_LIGHT],
       [0.8, ICON_LIME],
     ],
-    glow1: "rgba(190,242,100,1)",
-    glow2: "rgba(163,230,53,0.55)",
+    glow1: ICON_LIME_LIGHT,
+    glow2: withAlpha(ICON_LIME, 0.55),
     tail: ICON_LIME_LIGHT,
   },
   cold: {
     stops: [
-      [0, "#FBFFF4"],
+      [0, COMET_CORE_COLD],
       [0.55, ICON_LIME_LIGHT],
       [0.8, ICON_LIME],
     ],
-    glow1: "rgba(190,242,100,1)",
-    glow2: "rgba(163,230,53,0.55)",
+    glow1: ICON_LIME_LIGHT,
+    glow2: withAlpha(ICON_LIME, 0.55),
     tail: ICON_LIME_LIGHT,
   },
   warm: {
     stops: [
-      [0, "#FBFFFE"],
+      [0, COMET_CORE_WARM],
       [0.55, ICON_ACCENT],
       [0.8, ICON_MINT],
     ],
-    glow1: "rgba(94,234,212,1)",
-    glow2: "rgba(45,212,191,0.55)",
+    glow1: ICON_MINT_LIGHT,
+    glow2: withAlpha(ICON_MINT, 0.55),
     tail: ICON_ACCENT,
   },
 };
@@ -167,7 +185,7 @@ function Planet({
           height: box,
           borderRadius: box / 2,
           overflow: "hidden",
-          shadowColor: hot ? "rgba(190,242,100,0.45)" : glowColor,
+          shadowColor: hot ? withAlpha(ICON_LIME_LIGHT, 0.45) : glowColor,
           shadowOpacity: 1,
           shadowRadius: hot ? 74 : 44,
           shadowOffset: { width: 0, height: 0 },
@@ -183,8 +201,8 @@ function Planet({
             ))}
           </RadialGradient>
           <LinearGradient id="finishTerm" x1="80%" y1="10%" x2="20%" y2="90%">
-            <Stop offset="0" stopColor="#01080A" stopOpacity={0.72} />
-            <Stop offset="0.54" stopColor="#01080A" stopOpacity={0} />
+            <Stop offset="0" stopColor={PLANET_TERMINATOR} stopOpacity={0.72} />
+            <Stop offset="0.54" stopColor={PLANET_TERMINATOR} stopOpacity={0} />
           </LinearGradient>
           <Filter
             id="finishHighlightBlur"
@@ -202,7 +220,7 @@ function Planet({
           cy={highlightCy}
           rx={highlightW / 2}
           ry={highlightH / 2}
-          fill="rgba(255,255,255,0.42)"
+          fill={WHITE_SHEEN_MED}
           filter="url(#finishHighlightBlur)"
           transform={`rotate(-18 ${highlightCx} ${highlightCy})`}
         />
@@ -237,13 +255,13 @@ function SaturnRing() {
       <Svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
         <Path
           d={`M ${cx - outerRx} ${cy} A ${outerRx} ${outerRy} 0 0 1 ${cx + outerRx} ${cy}`}
-          stroke="rgba(163,230,53,0.26)"
+          stroke={withAlpha(ICON_LIME, 0.26)}
           strokeWidth={2}
           fill="none"
         />
         <Path
           d={`M ${cx - innerRx} ${cy} A ${innerRx} ${innerRy} 0 0 1 ${cx + innerRx} ${cy}`}
-          stroke="rgba(94,234,212,0.18)"
+          stroke={withAlpha(ICON_MINT_LIGHT, 0.18)}
           strokeWidth={1}
           fill="none"
         />
@@ -320,17 +338,17 @@ function Shells({ reducedMotion }: { reducedMotion: boolean }) {
     <>
       <Shell
         delay={0}
-        color="rgba(94,234,212,0.5)"
+        color={withAlpha(ICON_MINT_LIGHT, 0.5)}
         reducedMotion={reducedMotion}
       />
       <Shell
         delay={1400}
-        color="rgba(190,242,100,0.42)"
+        color={withAlpha(ICON_LIME_LIGHT, 0.42)}
         reducedMotion={reducedMotion}
       />
       <Shell
         delay={2800}
-        color="rgba(94,234,212,0.3)"
+        color={withAlpha(ICON_MINT_LIGHT, 0.3)}
         reducedMotion={reducedMotion}
       />
     </>
@@ -405,12 +423,12 @@ function Flares({ reducedMotion }: { reducedMotion: boolean }) {
     <>
       <Flare
         delay={2600}
-        color="rgba(190,242,100,0.85)"
+        color={withAlpha(ICON_LIME_LIGHT, 0.85)}
         reducedMotion={reducedMotion}
       />
       <Flare
         delay={3500}
-        color="rgba(94,234,212,0.6)"
+        color={withAlpha(ICON_MINT_LIGHT, 0.6)}
         reducedMotion={reducedMotion}
       />
     </>
@@ -561,7 +579,7 @@ function Arc({
           r={RADIUS}
           style="stroke"
           strokeWidth={3}
-          color="rgba(220,255,245,0.07)"
+          color={SURFACE_GLASS_BORDER_FAINT}
         >
           <DashPathEffect intervals={[3, 9]} />
         </Circle>

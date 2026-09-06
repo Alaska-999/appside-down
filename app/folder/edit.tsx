@@ -294,7 +294,8 @@ export default function FolderEditScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="folder" />
+      {/* <BackgroundMesh preset="folder" /> */}
+      <BackgroundMesh preset="finishWarm2" />
 
       <KeyboardAwareScrollView
         style={{ flex: 1 }}

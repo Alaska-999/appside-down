@@ -1,4 +1,15 @@
-import { ICON_TEXT } from "@/src/constants/iconColors";
+import {
+  ICON_LIME,
+  ICON_MINT_LIGHT,
+  ICON_STATUS_DANGER,
+  ICON_TEXT,
+} from "@/src/constants/iconColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BG_STRONG,
+  SURFACE_WELL,
+} from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { useEffect, useRef, useState } from "react";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import type { TextInput as RNTextInput } from "react-native";
@@ -20,11 +31,11 @@ const CELL_SIZES = {
 } as const;
 
 const CELL_BORDERS: Record<CodeCellState, { width: number; color: string }> = {
-  empty: { width: 1, color: "rgba(220,255,245,0.1)" },
-  on: { width: 1.4, color: "rgba(220,255,245,0.24)" },
-  cur: { width: 1.6, color: "rgba(94,234,212,0.8)" },
-  bad: { width: 1.5, color: "rgba(239,68,68,0.7)" },
-  good: { width: 1.4, color: "rgba(163,230,53,0.6)" },
+  empty: { width: 1, color: SURFACE_GLASS_BG_STRONG },
+  on: { width: 1.4, color: SURFACE_BORDER },
+  cur: { width: 1.6, color: withAlpha(ICON_MINT_LIGHT, 0.8) },
+  bad: { width: 1.5, color: withAlpha(ICON_STATUS_DANGER, 0.7) },
+  good: { width: 1.4, color: withAlpha(ICON_LIME, 0.6) },
 };
 
 const CELL_TEXT: Record<CodeCellState, string> = {
@@ -125,7 +136,7 @@ export function CodeInput<T extends FieldValues>({
                         width={cell.width}
                         height={cell.height}
                         br={cell.radius}
-                        bg="rgba(4,7,10,0.5)"
+                        bg={SURFACE_WELL}
                         borderWidth={border.width}
                         borderColor={border.color}
                         ai="center"

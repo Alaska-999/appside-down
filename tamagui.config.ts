@@ -24,7 +24,7 @@ const tokens = createTokens({
         textMuted: '#8FA8B8',
         nearBlack: '#0D1117',
         base: '#08090C',
-        baseTop: '#0E1A1E',
+        baseTop: '#0D1117',
 
         amber: '#F59E0B',
         blue: '#0284C7',
@@ -34,7 +34,7 @@ const tokens = createTokens({
 
         mutedDim: '#5A6B7A',
         iconOnGlass: '#EAF7FF',
-        backgroundDeep: '#11141F',
+        backgroundDeep: '#0D1117',
         mintTintDark: '#06231F',
         indigoLight: '#818CF8',
         mutedLight: '#B7CEDA',
@@ -184,6 +184,7 @@ const appConfig = createTamagui({
             glassBg: 'rgba(220,255,245,0.06)',
             glassBgSubtle: 'rgba(220,255,245,0.03)',
             glassBgStrong: 'rgba(220,255,245,0.08)',
+            glassBorderFaint: 'rgba(220,255,245,0.07)',
 
             glowColor: 'rgba(45,212,191,0.5)',
             glowSoft: 'rgba(45,212,191,0.1)',

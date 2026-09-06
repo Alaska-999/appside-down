@@ -1,23 +1,26 @@
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { WellInsetShadow } from "@/src/components/ui/Well";
+import { WELL_EDGE_TAIL } from "@/src/constants/focus";
+import { BLACK_SCRIM_60, BLACK_SCRIM_FAINT } from "@/src/constants/rawColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BG,
+  SURFACE_WELL,
+} from "@/src/constants/surfaceAlpha";
 import { Children, createContext, ReactNode, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { YStack } from "tamagui";
 
 const GROUP_RADIUS = 20;
-const GROUP_BG = "rgba(4,8,10,0.5)";
-const GROUP_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.6)" };
-const GROUP_BOTTOM_LINE = "rgba(220,255,245,0.05)";
+const GROUP_BG = SURFACE_WELL;
+const GROUP_INSET_SHADOW = { dy: 2, blur: 4, color: BLACK_SCRIM_60 };
+const GROUP_BOTTOM_LINE = SURFACE_GLASS_BG;
 const GROUP_BORDER = {
-  colors: [
-    "rgba(0,0,0,0.1)",
-    "rgba(140,161,159,0.14)",
-    "rgba(163,187,180,0.18)",
-  ],
-  positions: [0, 0.8, 1],
+  colors: [BLACK_SCRIM_FAINT, ...WELL_EDGE_TAIL.colors],
+  positions: [0, ...WELL_EDGE_TAIL.positions],
 };
-const DIVIDER = "rgba(220,255,245,0.12)";
+const DIVIDER = SURFACE_BORDER;
 
 export const FieldGroupContext = createContext<
   ((focused: boolean) => void) | null

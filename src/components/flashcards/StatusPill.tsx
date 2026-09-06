@@ -1,5 +1,18 @@
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
+import {
+  ICON_INDIGO,
+  ICON_INDIGO_LIGHT,
+  ICON_INDIGO_PALE,
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+} from "@/src/constants/iconColors";
+import {
+  TEXT_INDIGO_LIGHT,
+  TEXT_INDIGO_PALE,
+  TEXT_LIME_PALE,
+  TEXT_LIME_PALEST,
+} from "@/src/constants/rawColors";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { Check, RotateCcw } from "lucide-react-native";
 import { useEffect } from "react";
 import Animated, {
@@ -12,8 +25,8 @@ import { Text, XStack } from "tamagui";
 type StatusPillTone = "known" | "learning";
 
 const DOT_STYLES: Record<StatusPillTone, { color: string; glow: string }> = {
-  known: { color: "$lime", glow: "rgba(163,230,53,0.85)" },
-  learning: { color: "$indigoLight", glow: "rgba(129,140,248,0.75)" },
+  known: { color: "$lime", glow: withAlpha(ICON_LIME, 0.85) },
+  learning: { color: "$indigoLight", glow: withAlpha(ICON_INDIGO_LIGHT, 0.75) },
 };
 
 const GAME_STYLES: Record<
@@ -30,24 +43,24 @@ const GAME_STYLES: Record<
   }
 > = {
   known: {
-    text: "#D7F99A",
-    textLit: "#F2FFD9",
-    bg: "rgba(163,230,53,0.14)",
-    bgLit: "rgba(163,230,53,0.26)",
-    border: "rgba(190,242,100,0.28)",
-    borderLit: "rgba(190,242,100,0.6)",
+    text: TEXT_LIME_PALE,
+    textLit: TEXT_LIME_PALEST,
+    bg: withAlpha(ICON_LIME, 0.14),
+    bgLit: withAlpha(ICON_LIME, 0.26),
+    border: withAlpha(ICON_LIME_LIGHT, 0.28),
+    borderLit: withAlpha(ICON_LIME_LIGHT, 0.6),
     icon: ICON_LIME_LIGHT,
-    glow: "rgba(190,242,100,0.9)",
+    glow: withAlpha(ICON_LIME_LIGHT, 0.9),
   },
   learning: {
-    text: "#C7D2FE",
-    textLit: "#E0E7FF",
-    bg: "rgba(67,56,202,0.42)",
-    bgLit: "rgba(67,56,202,0.72)",
-    border: "rgba(67,56,202,0.9)",
-    borderLit: "rgba(129,140,248,0.7)",
-    icon: "#A5B4FC",
-    glow: "rgba(67,56,202,1)",
+    text: TEXT_INDIGO_LIGHT,
+    textLit: TEXT_INDIGO_PALE,
+    bg: withAlpha(ICON_INDIGO, 0.42),
+    bgLit: withAlpha(ICON_INDIGO, 0.72),
+    border: withAlpha(ICON_INDIGO, 0.9),
+    borderLit: withAlpha(ICON_INDIGO_LIGHT, 0.7),
+    icon: ICON_INDIGO_PALE,
+    glow: ICON_INDIGO,
   },
 };
 

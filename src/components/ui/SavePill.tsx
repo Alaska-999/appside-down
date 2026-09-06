@@ -3,6 +3,7 @@ import {
   ICON_LIME,
   ICON_LIME_LIGHT,
 } from "@/src/constants/iconColors";
+import { ICON_DISABLED_GRAY } from "@/src/constants/rawColors";
 import { Check } from "lucide-react-native";
 import { AppButton } from "./Button";
 
@@ -56,23 +57,16 @@ export function SavePill({
       icon={
         <Check
           size={17}
-          color={enabled ? ICON_LIME : "rgb(144, 144, 144)"}
+          color={enabled ? ICON_LIME : ICON_DISABLED_GRAY}
           strokeWidth={3}
         />
       }
       onPress={onPress}
       loading={loading}
       disabled={!enabled}
-      textColor={!enabled ? "rgb(144, 144, 144)" : undefined}
+      textColor={!enabled ? ICON_DISABLED_GRAY : undefined}
     >
       {label}
     </AppButton>
-
-    // <IconButton
-    //   variant="liquidGlass"
-    //   icon={<Check size={17} color={ICON_LIME} strokeWidth={3} />}
-    //   onPress={onPress}
-    //   accessibilityLabel="Save"
-    // />
   );
 }

@@ -1,7 +1,20 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import {
+  ICON_MINT,
+  ICON_MINT_LIGHT,
+  ICON_PURE_BLACK,
+} from "@/src/constants/iconColors";
+import {
+  GLASS_BORDER_BOTTOM,
+  GLASS_BORDER_TOP,
+  GLASS_SHEEN_STRONG,
+  SKY_GLOW,
+  WHITE_SHEEN_MED,
+} from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { Plus } from "lucide-react-native";
 import { ReactNode } from "react";
 import { View } from "react-native";
@@ -24,34 +37,26 @@ const CHIP_STYLES: Record<
 > = {
   default: {
     textColor: "$mutedLight",
-    fill: "rgba(220,255,245,0.05)",
-    borderColors: [
-      "rgba(255,255,255,0.5)",
-      "rgba(255,255,255,0.04)",
-      "rgba(150,220,255,0.24)",
-    ],
+    fill: SURFACE_GLASS_BG,
+    borderColors: [GLASS_BORDER_TOP, GLASS_BORDER_BOTTOM, SKY_GLOW],
     borderPositions: [0, 0.44, 1],
     glow: false,
   },
   on: {
     textColor: "$text",
-    fill: "rgba(220,255,245,0.05)",
+    fill: SURFACE_GLASS_BG,
     borderColors: [
-      "rgba(255,255,255,0.6)",
-      "rgba(94,234,212,0.4)",
-      "rgba(94,234,212,0.5)",
+      GLASS_SHEEN_STRONG,
+      withAlpha(ICON_MINT_LIGHT, 0.4),
+      withAlpha(ICON_MINT_LIGHT, 0.5),
     ],
     borderPositions: [0, 0.6, 1],
     glow: true,
   },
   add: {
     textColor: "$mintLight",
-    fill: "rgba(45,212,191,0.12)",
-    borderColors: [
-      "rgba(255,255,255,0.5)",
-      "rgba(255,255,255,0.04)",
-      "rgba(150,220,255,0.24)",
-    ],
+    fill: withAlpha(ICON_MINT, 0.12),
+    borderColors: [GLASS_BORDER_TOP, GLASS_BORDER_BOTTOM, SKY_GLOW],
     borderPositions: [0, 0.44, 1],
     glow: false,
   },
@@ -96,7 +101,7 @@ export function TagChip({
         br={CHIP_RADIUS}
         pos="relative"
         jc="center"
-        shadowColor={s.glow ? "$mintGlassBorder" : "#000"}
+        shadowColor={s.glow ? "$mintGlassBorder" : ICON_PURE_BLACK}
         shadowOffset={{ width: 0, height: s.glow ? 0 : 3 }}
         shadowRadius={4}
         shadowOpacity={0.4}
@@ -125,7 +130,7 @@ export function TagChip({
                 left: 8,
                 right: 8,
                 height: 1,
-                backgroundColor: "rgba(255,255,255,0.4)",
+                backgroundColor: WHITE_SHEEN_MED,
               }}
             />
           )}

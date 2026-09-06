@@ -5,13 +5,14 @@ import {
 } from "@/src/components/ui/MeshGradientBackground";
 import {
   ICON_BASE_DEEP,
-  ICON_HERO_LIME,
   ICON_MUTED,
   ICON_NEAR_BLACK,
-  ICON_TEAL,
   ICON_TEXT,
   ICON_WHITE,
 } from "@/src/constants/iconColors";
+import { GRADIENT_SOFT } from "@/src/constants/gradients";
+import { OVERLAY_BLACK_MED, SURFACE_WHITE_BORDER } from "@/src/constants/surfaceAlpha";
+import { SPLASH_TEXT_SHADOW, SPINNER_ARC } from "@/src/constants/rawColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config, { controlHeight } from "@/tamagui.config";
@@ -124,7 +125,7 @@ export function ErrorBoundary({
       </Text>
       <Pressable onPress={retry}>
         <LinearGradient
-          colors={[ICON_TEAL, ICON_HERO_LIME]}
+          colors={GRADIENT_SOFT}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.errorRetry}
@@ -235,24 +236,23 @@ const styles = StyleSheet.create({
     fontFamily: "Sora_800ExtraBold",
     fontWeight: "800",
     color: ICON_WHITE,
-    // М'яка тінь для чіткості поверх світлих зон мешу[cite: 2]
-    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowColor: SPLASH_TEXT_SHADOW,
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 24,
   },
   ring: {
-    width: 22, // Розміри спінера з HTML[cite: 2]
+    width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 2.5,
-    borderColor: "rgba(255,255,255,0.18)", // Напівпрозоре кільце[cite: 2]
-    borderTopColor: "rgba(255,255,255,0.9)", // Біла дуга[cite: 2]
+    borderColor: SURFACE_WHITE_BORDER,
+    borderTopColor: SPINNER_ARC,
   },
   badge: {
     position: "absolute",
     bottom: 40,
     alignSelf: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: OVERLAY_BLACK_MED,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,

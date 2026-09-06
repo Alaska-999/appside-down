@@ -1,4 +1,9 @@
-import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BORDER_FAINT,
+} from "@/src/constants/surfaceAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, View } from "react-native";
 
@@ -20,7 +25,7 @@ export function ProgressUnderline({
         right: 0,
         bottom: 0,
         height: 2,
-        backgroundColor: "rgba(220,255,245,0.07)",
+        backgroundColor: SURFACE_GLASS_BORDER_FAINT,
       }}
     >
       {dim ? (
@@ -28,7 +33,7 @@ export function ProgressUnderline({
           style={{
             width: `${clamped * 100}%`,
             height: 2,
-            backgroundColor: "rgba(220,255,245,0.22)",
+            backgroundColor: SURFACE_BORDER,
           }}
         />
       ) : (
@@ -36,14 +41,14 @@ export function ProgressUnderline({
           style={{
             width: `${clamped * 100}%`,
             height: 2,
-            shadowColor: "rgba(94,234,212,1)",
+            shadowColor: ICON_MINT_LIGHT,
             shadowOffset: { width: 0, height: 0 },
             shadowRadius: 3.5,
             shadowOpacity: 0.6,
           }}
         >
           <LinearGradient
-            colors={[ICON_MINT, ICON_LIME]}
+            colors={GRADIENT_PRIMARY}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}
