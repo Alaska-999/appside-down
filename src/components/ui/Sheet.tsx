@@ -342,20 +342,26 @@ export function SheetRows({
 
   return (
     <SheetRowsContext.Provider value={{ tone: rowsTone }}>
-      <YStack br="$cardSoft" overflow="hidden">
-        {items.map((child, index) => (
-          <View key={index}>
-            {index > 0 && (
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "rgba(220,255,245,0.12)",
-                }}
-              />
-            )}
-            {child}
-          </View>
-        ))}
+      <YStack br="$cardSoft" pos="relative">
+        <YStack br="$cardSoft" overflow="hidden">
+          {items.map((child, index) => (
+            <View key={index}>
+              {index > 0 && (
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: "rgba(220,255,245,0.12)",
+                  }}
+                />
+              )}
+              {child}
+            </View>
+          ))}
+        </YStack>
+
+        {rowsTone === "surface" && (
+          <GradientBorder radius={20} preset="glowMint" />
+        )}
       </YStack>
     </SheetRowsContext.Provider>
   );

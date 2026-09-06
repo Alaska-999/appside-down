@@ -11,6 +11,8 @@ import {
   KeyboardBar,
 } from "@/src/components/ui/KeyboardBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { PickRow } from "@/src/components/ui/PickRow";
+import { ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
@@ -269,28 +271,25 @@ export default function ModuleCreate() {
                 )}
               </YStack>
 
-              <YStack mb={22}>
-                <SheetRows tone="dark">
-                  <SheetRow
-                    icon={Folder}
-                    label="Folder"
-                    hint={selectedFolder?.name ?? "None"}
-                    chevron
-                    onPress={() => setFolderSheetOpen(true)}
+              <YStack mb={22} gap={12}>
+                <PickRow
+                  icon={Folder}
+                  value={selectedFolder?.name}
+                  placeholder="Folder"
+                  onPress={() => setFolderSheetOpen(true)}
+                />
+                <XStack ai="center" gap={12} px={4}>
+                  <Globe size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />
+                  <Text f={1} fontSize={15} fontWeight="600" color="$color">
+                    Public module
+                  </Text>
+                  <Toggle
+                    value={!!isPublic}
+                    onToggle={() => setValue("isPublic", !isPublic)}
+                    size="md"
+                    accessibilityLabel="Public module"
                   />
-                  <SheetRow
-                    icon={Globe}
-                    label="Public"
-                    right={
-                      <Toggle
-                        value={!!isPublic}
-                        onToggle={() => setValue("isPublic", !isPublic)}
-                        size="md"
-                        accessibilityLabel="Public module"
-                      />
-                    }
-                  />
-                </SheetRows>
+                </XStack>
               </YStack>
 
               <XStack ai="center" jc="space-between" mb={6}>
@@ -375,7 +374,7 @@ export default function ModuleCreate() {
           onOpenChange={setFolderSheetOpen}
           title="Folder"
         >
-          <SheetRows>
+          <SheetRows tone="surface">
             <SheetRow
               icon={Folder}
               label="No folder"

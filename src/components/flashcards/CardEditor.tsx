@@ -1,5 +1,5 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { ICON_ACCENT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
@@ -168,16 +168,22 @@ export function CardEditor<T extends FieldValues>({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.25)",
+            backgroundColor: lit
+              ? "rgba(255, 255, 255, 0.25)"
+              : "rgba(255, 255, 255, 0.08)",
           }}
         />
       </YStack>
-      <GradientBorder
-        radius={CARD_RADIUS}
-        angle={160}
-        colors={CARD_BORDER.colors}
-        positions={CARD_BORDER.positions}
-      />
+      {lit ? (
+        <GradientBorder
+          radius={CARD_RADIUS}
+          angle={160}
+          colors={CARD_BORDER.colors}
+          positions={CARD_BORDER.positions}
+        />
+      ) : (
+        <GradientBorder radius={CARD_RADIUS} preset="surf" />
+      )}
       <FocusRing radius={CARD_RADIUS} progress={focusProgress} />
 
       <YStack px={16} pt={14} pb={12} zIndex={2}>
