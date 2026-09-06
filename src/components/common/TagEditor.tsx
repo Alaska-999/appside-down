@@ -51,7 +51,7 @@ function TagInputRow({
           unstyled
           h={FOLDER_EDIT_ROW_HEIGHT}
           fontSize={15}
-          fontWeight="600"
+          fontWeight="500"
           color={color}
           placeholder={placeholder}
           placeholderTextColor="$placeholderColor"
@@ -219,7 +219,7 @@ export function TagEditor({
             }}
             value={newValue}
             placeholder="New tag"
-            color="$mintLight"
+            color="$color"
             error={error}
             onChange={onChangeValue(setNewValue)}
             onCommit={commitAdd}

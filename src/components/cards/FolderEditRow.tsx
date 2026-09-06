@@ -1,11 +1,14 @@
+import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import {
+  WELL_BORDERS,
+  WELL_FILL_SOFT,
+  WellInsetShadow,
+} from "@/src/components/ui/Well";
 import {
   ICON_ACCENT,
   ICON_DANGER,
-  ICON_MINT_LIGHT,
   ICON_MUTED_LIGHT,
 } from "@/src/constants/iconColors";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { WELL_BORDERS, WellInsetShadow } from "@/src/components/ui/Well";
 import { hapticTap } from "@/src/utils/haptics";
 import { ComponentType, Fragment, ReactNode } from "react";
 import { Pressable, View } from "react-native";
@@ -26,7 +29,7 @@ export function FolderEditRows({ children }: { children: ReactNode[] }) {
         b={0}
         br={ROWS_RADIUS}
         overflow="hidden"
-        bg="rgba(4,8,10,0.5)"
+        bg={WELL_FILL_SOFT}
       >
         <WellInsetShadow radius={ROWS_RADIUS} />
       </YStack>
@@ -214,8 +217,8 @@ export function FolderAddRow({
       }}
     >
       <XStack ai="center" gap={10} px={16} h={ROW_HEIGHT}>
-        <Icon size={19} color={ICON_MINT_LIGHT} strokeWidth={2.2} />
-        <Text fontSize={15} fontWeight="600" color="$mintLight">
+        <Icon size={19} color={ICON_MUTED_LIGHT} strokeWidth={2.2} />
+        <Text fontSize={15} fontWeight="600" color="$mutedLight">
           {label}
         </Text>
       </XStack>

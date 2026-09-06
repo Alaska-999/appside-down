@@ -21,11 +21,7 @@ import { useServerError } from "@/src/hooks/useServerError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  router,
-  useLocalSearchParams,
-  useNavigation,
-} from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Folder, Globe } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -68,9 +64,7 @@ export default function ModuleCreate() {
   const [discardCardCount, setDiscardCardCount] = useState(0);
   const navigation = useNavigation();
   const allowLeaveRef = useRef(false);
-  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(
-    null,
-  );
+  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(null);
   const { returnFolderId } = useLocalSearchParams<{
     returnFolderId?: string;
   }>();
@@ -276,7 +270,7 @@ export default function ModuleCreate() {
               </YStack>
 
               <YStack mb={22}>
-                <SheetRows tone="surface">
+                <SheetRows tone="dark">
                   <SheetRow
                     icon={Folder}
                     label="Folder"
@@ -423,10 +417,7 @@ export default function ModuleCreate() {
             <AppButton variant="danger" onPress={confirmDiscard}>
               Discard
             </AppButton>
-            <AppButton
-              variant="ghost"
-              onPress={() => setDiscardOpen(false)}
-            >
+            <AppButton variant="ghost" onPress={() => setDiscardOpen(false)}>
               Keep editing
             </AppButton>
           </YStack>

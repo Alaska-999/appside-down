@@ -4,6 +4,11 @@ import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
 export type WellState = "default" | "focus" | "error" | "good";
 
+export const WELL_FILL = "rgba(4,8,10,0.5)";
+export const WELL_FILL_FOCUS = "rgba(4,8,10,0.65)";
+export const WELL_FILL_SOFT = "rgba(14,22,26,0.55)";
+export const WELL_FILL_SOFT_FOCUS = "rgba(10,17,20,0.7)";
+
 const WELL_INSET_SHADOW = { dy: 2, blur: 4, color: "rgba(0,0,0,0.55)" };
 
 export function WellInsetShadow({

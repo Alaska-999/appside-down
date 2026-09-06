@@ -7,6 +7,10 @@ import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
   WELL_BORDERS,
+  WELL_FILL,
+  WELL_FILL_FOCUS,
+  WELL_FILL_SOFT,
+  WELL_FILL_SOFT_FOCUS,
   WellInsetShadow,
   WellState,
 } from "@/src/components/ui/Well";
@@ -18,7 +22,12 @@ import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { YStack, YStackProps } from "tamagui";
 
-export type InputShellVariant = "well" | "glass" | "underline" | "plain";
+export type InputShellVariant =
+  | "well"
+  | "wellSoft"
+  | "glass"
+  | "underline"
+  | "plain";
 export type InputShellState = WellState;
 export type InputShellSize = "sm" | "md" | "lg";
 
@@ -177,7 +186,13 @@ export function InputShell({
                 StyleSheet.absoluteFill,
                 {
                   backgroundColor:
-                    state === "focus" ? "rgba(4,8,10,0.65)" : "rgba(4,8,10,.5)",
+                    variant === "wellSoft"
+                      ? state === "focus"
+                        ? WELL_FILL_SOFT_FOCUS
+                        : WELL_FILL_SOFT
+                      : state === "focus"
+                        ? WELL_FILL_FOCUS
+                        : WELL_FILL,
                 },
               ]}
             />
