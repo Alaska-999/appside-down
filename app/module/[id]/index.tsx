@@ -1,5 +1,3 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
-import { StarToggle } from "@/src/components/ui/StarToggle";
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
@@ -16,6 +14,8 @@ import {
   SheetRows,
 } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { StarToggle } from "@/src/components/ui/StarToggle";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatTile } from "@/src/components/ui/StatTile";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -36,7 +36,24 @@ import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { AlertTriangle, ArrowDownUp, BookmarkCheck, BookmarkPlus, Captions, ChevronLeft, Clock, Columns2, FileText, Globe, GraduationCap, Lock, MoreHorizontal, Pencil, Sparkles, Trash2 } from "lucide-react-native";
+import {
+  AlertTriangle,
+  ArrowDownUp,
+  BookmarkCheck,
+  BookmarkPlus,
+  Captions,
+  ChevronLeft,
+  Clock,
+  Columns2,
+  FileText,
+  Globe,
+  GraduationCap,
+  Lock,
+  MoreHorizontal,
+  Pencil,
+  Sparkles,
+  Trash2,
+} from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
 import { InteractionManager, Pressable, ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
@@ -133,8 +150,9 @@ function CardsHeader({
           </Text>
         )}
       </XStack>
-      <XStack ai="center" gap={18}>
+      <XStack ai="center" gap={12}>
         <StarToggle
+          size="sm"
           active={starredOnly}
           onPress={onToggleStarred}
           accessibilityLabel="Filter starred cards"

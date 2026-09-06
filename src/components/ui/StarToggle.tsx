@@ -3,31 +3,43 @@ import { hapticTap } from "@/src/utils/haptics";
 import { Pressable } from "react-native";
 import { YStack } from "tamagui";
 
-const BOX = 40;
+type StarToggleSize = "sm" | "lg";
+
+const SIZE_STYLES: Record<
+  StarToggleSize,
+  { box: number; glyph: "md" | "lg" }
+> = {
+  sm: { box: 32, glyph: "md" },
+  lg: { box: 40, glyph: "lg" },
+};
+const MIN_TAP_TARGET = 44;
 const ACTIVE_BG = "rgba(190,242,100,0.1)";
 const IDLE_BG = "rgba(220,255,245,0.05)";
 
 interface StarToggleProps {
   active: boolean;
+  size?: StarToggleSize;
   onPress?: () => void;
   accessibilityLabel?: string;
 }
 
 export function StarToggle({
   active,
+  size = "lg",
   onPress,
   accessibilityLabel,
 }: StarToggleProps) {
+  const s = SIZE_STYLES[size];
   const box = (
     <YStack
-      w={BOX}
-      h={BOX}
+      w={s.box}
+      h={s.box}
       br="$cardSoft"
       ai="center"
       jc="center"
       bg={active ? ACTIVE_BG : IDLE_BG}
     >
-      <StarGlyph mode="toggle" size="lg" active={active} />
+      <StarGlyph mode="toggle" size={s.glyph} active={active} />
     </YStack>
   );
 
@@ -35,7 +47,7 @@ export function StarToggle({
 
   return (
     <Pressable
-      hitSlop={2}
+      hitSlop={Math.ceil((MIN_TAP_TARGET - s.box) / 2)}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={() => {
