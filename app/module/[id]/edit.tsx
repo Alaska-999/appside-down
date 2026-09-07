@@ -105,7 +105,7 @@ export default function ModuleEditScreen() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="formBright" />
+        <BackgroundMesh preset="auroraDrift" />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}

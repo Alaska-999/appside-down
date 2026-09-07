@@ -1,4 +1,3 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderAddRow } from "@/src/components/cards/FolderEditRow";
 import { SelectableModuleRow } from "@/src/components/cards/SelectableModuleRow";
@@ -9,17 +8,18 @@ import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { Skeleton } from "@/src/components/ui/Skeleton";
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
-import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import {
+  LIQUID_GLASS_DARK_BG,
   SCRIM_BASE_MAX,
   SCRIM_BASE_TRANSPARENT,
-  LIQUID_GLASS_DARK_BG,
 } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
@@ -182,7 +182,8 @@ export default function AddModules() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="folder" />
+      {/* <BackgroundMesh preset="twilightDuo" /> */}
+      <BackgroundMesh preset="homeLampWhite" />
 
       <YStack f={1} pt={screen.top}>
         <XStack px="$screenX" mb={18} ai="center" gap={10}>
@@ -209,9 +210,7 @@ export default function AddModules() {
               key={chip.key}
               label={chip.label}
               count={chip.count}
-              leading={
-                chip.leading ? <StarGlyph /> : undefined
-              }
+              leading={chip.leading ? <StarGlyph /> : undefined}
               variant={filter === chip.key ? "on" : "default"}
               onPress={() => {
                 hapticTap();

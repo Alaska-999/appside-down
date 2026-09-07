@@ -1,8 +1,12 @@
 import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { ICON_MINT, ICON_MUTED, ICON_PURE_BLACK } from "@/src/constants/iconColors";
 import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
+import {
+  ICON_MINT,
+  ICON_MUTED,
+  ICON_PURE_BLACK,
+} from "@/src/constants/iconColors";
 import {
   CARD_EDITOR_DIVIDER_END,
   CARD_EDITOR_EDGE_BLUE,
@@ -22,7 +26,12 @@ import { Input, Text, XStack, YStack } from "tamagui";
 
 const CARD_RADIUS = 20;
 const CARD_BORDER = {
-  colors: [GLASS_BORDER_TOP, SURFACE_BORDER, CARD_EDITOR_EDGE_SOFT, CARD_EDITOR_EDGE_BLUE],
+  colors: [
+    GLASS_BORDER_TOP,
+    SURFACE_BORDER,
+    CARD_EDITOR_EDGE_SOFT,
+    CARD_EDITOR_EDGE_BLUE,
+  ],
   positions: [0, 0.3, 0.8, 1],
 };
 
@@ -151,8 +160,8 @@ export function CardEditor<T extends FieldValues>({
       pos="relative"
       shadowColor={ICON_PURE_BLACK}
       shadowOffset={{ width: 0, height: dragging ? 10 : 4 }}
-      shadowRadius={dragging ? 14 : 7}
-      shadowOpacity={0.8}
+      shadowRadius={dragging ? 14 : 5}
+      shadowOpacity={0.5}
     >
       <YStack
         pos="absolute"

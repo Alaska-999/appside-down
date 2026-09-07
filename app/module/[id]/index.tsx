@@ -425,7 +425,10 @@ export default function ModuleScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="module" />
+      {/* <BackgroundMesh preset="tealBeam" /> */}
+      {/* <BackgroundMesh preset="crossBeams" /> */}
+
+      <BackgroundMesh preset="crossBeamsTeal" />
       <ScrollView showsVerticalScrollIndicator={false}>
         <YStack pb={screen.bottom}>
           <XStack px="$screenX" pt={screen.top} jc="space-between" ai="center">
@@ -667,7 +670,9 @@ export default function ModuleScreen() {
                       <AppButton
                         variant="primary"
                         size="lg"
-                        icon={<BookmarkPlus size={18} color={ICON_MINT_TINT_DARK} />}
+                        icon={
+                          <BookmarkPlus size={18} color={ICON_MINT_TINT_DARK} />
+                        }
                         loading={saving}
                         onPress={handleSaveToLibrary}
                       >

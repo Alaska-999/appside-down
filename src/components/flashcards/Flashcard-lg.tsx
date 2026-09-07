@@ -1,6 +1,7 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { StarToggle } from "@/src/components/ui/StarToggle";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
   ICON_ACCENT,
   ICON_BASE_TOP,
@@ -10,11 +11,10 @@ import {
   ICON_LIME_LIGHT,
   ICON_MINT_LIGHT,
   ICON_MUTED_LIGHT,
+  ICON_ON_GLASS,
   ICON_PURE_BLACK,
   ICON_SLATE_DIM,
-  ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
-import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
   FLASHCARD_EDGE_CYAN,
   FLASHCARD_FACE_BG,
@@ -23,7 +23,6 @@ import {
   TOP_HIGHLIGHT_LINE,
 } from "@/src/constants/rawColors";
 import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
-import { withAlpha } from "@/src/utils/withAlpha";
 import { useFlipCard } from "@/src/hooks/useFlipCard";
 import {
   DEAD_ZONE,
@@ -33,6 +32,7 @@ import {
 import { Flashcard } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
+import { withAlpha } from "@/src/utils/withAlpha";
 import {
   BlurMask,
   Canvas,
@@ -394,7 +394,7 @@ function CardFace({
     >
       <YStack f={1} br={CARD_RADIUS} overflow="hidden">
         <LiquidGlass
-          intensity={22}
+          intensity={1}
           backgroundColor={FLASHCARD_FACE_BG}
           borderRadius={CARD_RADIUS}
         />

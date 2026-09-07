@@ -1,6 +1,6 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { AppCard } from "@/src/components/ui/Card";
 import { Checkbox } from "@/src/components/ui/Checkbox";
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { Lock } from "lucide-react-native";
@@ -49,6 +49,7 @@ export function SelectableModuleRow({
       <AppCard
         variant="glow"
         tone="teal"
+        glow={2}
         size="lg"
         pressed={pressed}
         height={ROW_HEIGHT}
@@ -79,9 +80,7 @@ export function SelectableModuleRow({
               <Text fontSize={12.5} color="$textMuted">
                 {itemsCount} card{itemsCount !== 1 ? "s" : ""}
               </Text>
-              {starred && !locked && (
-                <StarGlyph />
-              )}
+              {starred && !locked && <StarGlyph />}
               {locked && (
                 <Text fontSize={11} color="$mutedDim">
                   · Already here

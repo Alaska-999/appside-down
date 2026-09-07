@@ -1,14 +1,26 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderIcon } from "@/src/components/cards/FolderIcon";
 import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
+import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { ICON_MINT, ICON_ON_GLASS, ICON_TEAL } from "@/src/constants/iconColors";
+import {
+  AppSheet,
+  SheetCrossfade,
+  SheetRow,
+  SheetRows,
+} from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
+import {
+  ICON_DANGER,
+  ICON_MINT,
+  ICON_ON_GLASS,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -18,6 +30,8 @@ import {
   BookOpen,
   ChevronLeft,
   MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
 import Animated, {
@@ -71,6 +85,9 @@ export default function FolderScreen() {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [menuSheetOpen, setMenuSheetOpen] = useState(false);
+  const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
+  const [deleting, setDeleting] = useState(false);
   const hasLoadedRef = useRef(false);
 
   const scrollY = useSharedValue(0);
@@ -124,8 +141,33 @@ export default function FolderScreen() {
 
   const openEditScreen = () => {
     if (!folder) return;
+    setMenuSheetOpen(false);
     router.push({ pathname: "/folder/edit", params: { folderId: folder.id } });
   };
+
+  const closeMenu = (open: boolean) => {
+    setMenuSheetOpen(open);
+    if (!open) setMenuView("menu");
+  };
+
+  const handleDeleteFolder = async () => {
+    setDeleting(true);
+    try {
+      const res = await protectedFetch(`${API_BASE_URL}/folders/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      setMenuSheetOpen(false);
+      router.dismissTo("/library");
+    } catch (err) {
+      console.error("[FolderScreen] delete error:", err);
+      setToast("Couldn't delete the folder. Try again");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const moduleCount = folder?.modules.length ?? 0;
 
   const visibleModules = useMemo(() => {
     const all = folder?.modules ?? [];
@@ -143,12 +185,18 @@ export default function FolderScreen() {
   if (loading && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="folder" />
+        <BackgroundMesh preset="twilightDuo" />
         <YStack px="$screenX" gap="$6" pb={screen.bottom} pt={screen.top}>
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <ChevronLeft
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
+              }
               onPress={() => router.back()}
             />
           </XStack>
@@ -176,12 +224,18 @@ export default function FolderScreen() {
   if (notFound && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="folder" />
+        <BackgroundMesh preset="twilightDuo" />
         <YStack f={1} px="$screenX" gap="$3" pt={screen.top}>
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <ChevronLeft
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
+              }
               onPress={() => router.back()}
             />
           </XStack>
@@ -203,12 +257,18 @@ export default function FolderScreen() {
   if (error && !folder) {
     return (
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="folder" />
+        <BackgroundMesh preset="twilightDuo" />
         <YStack f={1} px="$screenX" gap="$3" pt={screen.top}>
           <XStack jc="space-between" ai="center">
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <ChevronLeft
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
+              }
               onPress={() => router.back()}
             />
           </XStack>
@@ -231,7 +291,12 @@ export default function FolderScreen() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="folder" />
+      {/* <BackgroundMesh preset="twilightDuo" />
+      <BackgroundMesh preset="twilightDuoLime" /> */}
+      <BackgroundMesh preset="twilightDuo" />
+
+      {/* <BackgroundMesh preset="folder" /> */}
+
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
@@ -241,17 +306,27 @@ export default function FolderScreen() {
           <XStack jc="space-between" ai="center" mb={20}>
             <IconButton
               variant="liquidGlass"
-              icon={<ChevronLeft size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <ChevronLeft
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
+              }
               onPress={() => router.back()}
               accessibilityLabel="Back"
             />
             <IconButton
               variant="liquidGlass"
               icon={
-                <MoreHorizontal size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+                <MoreHorizontal
+                  size={22}
+                  color={ICON_ON_GLASS}
+                  strokeWidth={1.9}
+                />
               }
-              onPress={openEditScreen}
-              accessibilityLabel="Edit folder"
+              onPress={() => setMenuSheetOpen(true)}
+              accessibilityLabel="Folder menu"
             />
           </XStack>
           <XStack ai="center" gap={15} mb={20}>
@@ -358,6 +433,58 @@ export default function FolderScreen() {
       </Animated.ScrollView>
 
       <StatusBarScrim />
+
+      <AppSheet
+        open={menuSheetOpen}
+        onOpenChange={closeMenu}
+        title={
+          menuView === "menu"
+            ? (folder?.name ?? "Folder")
+            : "Delete this folder?"
+        }
+        subtitle={
+          menuView === "confirm"
+            ? `${moduleCount} module${moduleCount !== 1 ? "s" : ""} will stay in your library.\nThis can't be undone.`
+            : undefined
+        }
+      >
+        <SheetCrossfade activeKey={menuView}>
+          {menuView === "menu" ? (
+            <SheetRows>
+              <SheetRow
+                icon={Pencil}
+                label="Edit folder"
+                onPress={openEditScreen}
+              />
+              <SheetRow
+                icon={Trash2}
+                label="Delete folder"
+                danger
+                onPress={() => setMenuView("confirm")}
+              />
+            </SheetRows>
+          ) : (
+            <YStack gap={10}>
+              <AppButton
+                variant="danger"
+                icon={
+                  <Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />
+                }
+                loading={deleting}
+                onPress={handleDeleteFolder}
+              >
+                Delete folder
+              </AppButton>
+              <AppButton
+                variant="secondary"
+                onPress={() => setMenuView("menu")}
+              >
+                Cancel
+              </AppButton>
+            </YStack>
+          )}
+        </SheetCrossfade>
+      </AppSheet>
 
       <AppToast
         open={!!toast}

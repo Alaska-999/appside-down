@@ -1,8 +1,11 @@
 import { GradientIcon } from "@/src/components/ui/GradientIcon";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import {
   ICON_BASE,
+  ICON_CYAN_LIGHT,
+  ICON_CYAN_TEAL,
   ICON_LIME,
   ICON_LIME_LIGHT,
   ICON_MINT,
@@ -18,7 +21,6 @@ import {
   BLACK_SCRIM_LIGHT,
   TRANSPARENT_BLACK,
 } from "@/src/constants/rawColors";
-import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import {
@@ -65,14 +67,60 @@ export async function pickCoverImage(): Promise<string | null> {
   return result.assets[0].uri;
 }
 
-function DefaultCover({ box, radius }: { box: number; radius: number }) {
+export type CoverTone = "lime" | "teal";
+
+type CoverPalette = {
+  base: [string, string, string];
+  corner: [string, string];
+  side: [string, string];
+  border: [string, string, string, string];
+  icon: [string, string];
+};
+
+const COVER_PALETTES: Record<CoverTone, CoverPalette> = {
+  lime: {
+    base: [ICON_TEAL, ICON_MINT_TINT_DARK, ICON_BASE],
+    corner: [ICON_LIME_LIGHT, ICON_LIME],
+    side: [ICON_MINT_LIGHT, ICON_MINT],
+    border: [
+      withAlpha(ICON_WHITE, 0.7),
+      withAlpha(ICON_LIME, 0.67),
+      withAlpha(ICON_MINT, 0.38),
+      withAlpha(ICON_TEAL, 0.6),
+    ],
+    icon: [ICON_WHITE, ICON_LIME],
+  },
+  teal: {
+    base: [ICON_CYAN_TEAL, "#061B23", ICON_BASE],
+    corner: [ICON_MINT_LIGHT, ICON_CYAN_LIGHT],
+    side: [ICON_CYAN_LIGHT, ICON_TEAL],
+    border: [
+      withAlpha(ICON_WHITE, 0.7),
+      withAlpha(ICON_CYAN_LIGHT, 0.67),
+      withAlpha(ICON_MINT, 0.38),
+      withAlpha(ICON_TEAL, 0.6),
+    ],
+    icon: [ICON_WHITE, ICON_CYAN_LIGHT],
+  },
+};
+
+function DefaultCover({
+  box,
+  radius,
+  tone,
+}: {
+  box: number;
+  radius: number;
+  tone: CoverTone;
+}) {
+  const lights = COVER_PALETTES[tone];
   return (
     <Canvas style={{ width: box, height: box, borderRadius: radius }}>
       <Rect x={0} y={0} width={box} height={box}>
         <LinearGradient
           start={vec(box, 0)}
           end={vec(0, box)}
-          colors={[ICON_TEAL, ICON_MINT_TINT_DARK, ICON_BASE]}
+          colors={lights.base}
           positions={[0, 0.4, 1]}
         />
       </Rect>
@@ -84,9 +132,9 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
             c={vec(box * 0.95, box * 0.02)}
             r={box * 0.78}
             colors={[
-              withAlpha(ICON_LIME_LIGHT, 0.5),
-              withAlpha(ICON_LIME, 0.14),
-              withAlpha(ICON_LIME, 0),
+              withAlpha(lights.corner[0], 0.5),
+              withAlpha(lights.corner[1], 0.14),
+              withAlpha(lights.corner[1], 0),
             ]}
             positions={[0, 0.3, 1]}
           />
@@ -110,9 +158,9 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
             c={vec(box * 0.12, box * 0.72)}
             r={box * 0.66}
             colors={[
-              withAlpha(ICON_MINT_LIGHT, 0.3),
-              withAlpha(ICON_MINT, 0.07),
-              withAlpha(ICON_MINT, 0),
+              withAlpha(lights.side[0], 0.3),
+              withAlpha(lights.side[1], 0.07),
+              withAlpha(lights.side[1], 0),
             ]}
             positions={[0, 0.35, 1]}
           />
@@ -143,9 +191,11 @@ function DefaultCover({ box, radius }: { box: number; radius: number }) {
 export function FolderCover({
   imageUri,
   onChange,
+  tone = "lime",
 }: {
   imageUri: string | null;
   onChange: (uri: string | null) => void;
+  tone?: CoverTone;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -194,7 +244,11 @@ export function FolderCover({
                   resizeMode="cover"
                 />
               ) : (
-                <DefaultCover box={COVER_BOX} radius={COVER_RADIUS} />
+                <DefaultCover
+                  box={COVER_BOX}
+                  radius={COVER_RADIUS}
+                  tone={tone}
+                />
               )}
               <View
                 pointerEvents="none"
@@ -235,12 +289,7 @@ export function FolderCover({
                   radius={COVER_RADIUS}
                   angle={140}
                   width={1.3}
-                  colors={[
-                    withAlpha(ICON_WHITE, 0.7),
-                    withAlpha(ICON_LIME, 0.67),
-                    withAlpha(ICON_MINT, 0.38),
-                    withAlpha(ICON_TEAL, 0.6),
-                  ]}
+                  colors={COVER_PALETTES[tone].border}
                   positions={[0, 0.32, 0.68, 1]}
                 />
 
@@ -248,7 +297,12 @@ export function FolderCover({
                   variant="liquidGlass"
                   size={EMPTY_LENS_SIZE}
                   icon={
-                    <GradientIcon icon={Camera} size={27} strokeWidth={1.3} />
+                    <GradientIcon
+                      icon={Camera}
+                      size={27}
+                      strokeWidth={1.3}
+                      colors={COVER_PALETTES[tone].icon}
+                    />
                   }
                   accessibilityLabel="Add cover"
                   onPress={onPress}

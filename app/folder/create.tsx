@@ -89,9 +89,12 @@ export default function FolderCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        {/* <BackgroundMesh preset="formBright" /> */}
-        <BackgroundMesh preset="finishWarm2" />
+        {/* <BackgroundMesh preset="folder" /> */}
+        {/* <BackgroundMesh preset="crossBeams" /> */}
+        {/* <BackgroundMesh preset="crossBeamsMint" /> */}
+        {/* <BackgroundMesh preset="twilightDuo" /> */}
 
+        <BackgroundMesh preset="twilightDuo" />
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={70}
@@ -104,6 +107,7 @@ export default function FolderCreate() {
         >
           <YStack px="$screenX">
             <ModalFormHeader
+              saveVariant={"primary"}
               title="New folder"
               onClose={() => router.back()}
               saveEnabled
@@ -123,6 +127,7 @@ export default function FolderCreate() {
               autoFocusName
               tagsHint="optional"
               tagsFootnote="Tags work as subfolders inside this folder"
+              coverTone={"teal"}
               tagEditor={
                 <TagEditor
                   mode="draft"
@@ -136,9 +141,7 @@ export default function FolderCreate() {
             />
           </YStack>
         </KeyboardAwareScrollView>
-
         <StatusBarScrim />
-
         <AppToast
           placement="top"
           open={!!(serverError ?? formError)}
@@ -148,7 +151,6 @@ export default function FolderCreate() {
             setFormError(null);
           }}
         />
-
         <AppSheet
           open={discardOpen}
           onOpenChange={(open) => {

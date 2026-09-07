@@ -26,6 +26,10 @@ import { YStack } from "tamagui";
 
 export type BackgroundPreset =
   | "home"
+  | "home2"
+  | "homeLamp"
+  | "homeLampWhite"
+  | "homeSpark"
   | "module"
   | "form"
   | "formBright"
@@ -33,11 +37,22 @@ export type BackgroundPreset =
   | "flash"
   | "auth"
   | "finish"
+  | "finish2"
   | "finishCold"
+  | "finishCold2"
   | "finishWarm"
-  | "finishWarm2";
+  | "finishWarm2"
+  | "auroraDrift"
+  | "auroraTeal"
+  | "twilightDuo"
+  | "twilightDuoGreen"
+  | "twilightDuoLime"
+  | "tealBeam"
+  | "crossBeams"
+  | "crossBeamsMint"
+  | "crossBeamsTeal";
 
-type Blob = {
+export type Blob = {
   cx: number;
   cy: number;
   rx: number;
@@ -46,11 +61,11 @@ type Blob = {
   edge: number;
 };
 
-type Layer = { blur: number; saturate?: number; blobs: Blob[] };
+export type Layer = { blur: number; saturate?: number; blobs: Blob[] };
 
-type Linear = { angle: number; colors: string[]; positions: number[] };
+export type Linear = { angle: number; colors: string[]; positions: number[] };
 
-type Beam = {
+export type Beam = {
   angle: number;
   colors: string[];
   positions: number[];
@@ -59,7 +74,7 @@ type Beam = {
   duration: number;
 };
 
-type RadialVignette = {
+export type RadialVignette = {
   kind: "radial";
   cx: number;
   cy: number;
@@ -69,12 +84,17 @@ type RadialVignette = {
   positions: number[];
 };
 
-type LinearVignette = { kind: "linear"; colors: string[]; positions: number[] };
+export type LinearVignette = {
+  kind: "linear";
+  colors: string[];
+  positions: number[];
+};
 
-type BgSpec = {
+export type BgSpec = {
   base: Linear;
   layers: Layer[];
   beam?: Beam;
+  beams?: Beam[];
   vignette?: RadialVignette | LinearVignette;
   grain?: number;
 };
@@ -160,6 +180,290 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           colors: [off(DIM), off(DIM), DIM, DIM],
           positions: [0, 0.34, 0.86, 1],
         },
+      };
+    case "home2":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#071E26", "#050F18", "#03070C", "#020304", "#010203"],
+          positions: [0, 0.24, 0.48, 0.78, 1],
+        },
+        layers: [
+          {
+            blur: 45,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(13,148,136,0.32)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 45,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(56, 202, 200, 0.24)",
+                edge: 0.68,
+              },
+            ],
+          },
+          {
+            blur: 45,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(45, 212, 201, 0.16)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [
+            NIGHT,
+            NIGHT,
+            "rgba(58, 196, 215, 0.5)",
+            "rgba(1, 5, 5, 0.86)",
+            "rgba(1,3,5,0.94)",
+          ],
+          positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        grain: 0.07,
+      };
+    case "homeLamp":
+      return {
+        base: {
+          angle: 142,
+          colors: ["#0B2A2C", "#061A1D", "#030A0D", "#020304"],
+          positions: [0, 0.22, 0.56, 1],
+        },
+        layers: [
+          {
+            blur: 90,
+            blobs: [
+              {
+                cx: -0.12 * w,
+                cy: -0.08 * h,
+                rx: 0.95 * w,
+                ry: 0.6 * h,
+                color: "rgba(13,148,136,0.4)",
+                edge: 0.82,
+              },
+            ],
+          },
+          {
+            blur: 60,
+            blobs: [
+              {
+                cx: -0.06 * w,
+                cy: -0.04 * h,
+                rx: 0.5 * w,
+                ry: 0.3 * h,
+                color: "rgba(45,212,191,0.4)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 30,
+            blobs: [
+              {
+                cx: -0.02 * w,
+                cy: -0.01 * h,
+                rx: 90,
+                ry: 90,
+                color: "rgba(94,234,212,0.6)",
+                edge: 0.6,
+              },
+            ],
+          },
+          {
+            blur: 96,
+            blobs: [
+              {
+                cx: 1.08 * w,
+                cy: 1.02 * h,
+                rx: 240,
+                ry: 220,
+                color: "rgba(31,156,175,0.12)",
+                edge: 0.82,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "radial",
+          cx: 0.0 * w,
+          cy: 0.0 * h,
+          rx: 1.6 * w,
+          ry: 1.25 * h,
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.)", "rgba(1,3,5,0.8)"],
+          positions: [0, 0.34, 0.74, 1],
+        },
+        grain: 0.06,
+      };
+    case "homeLampWhite":
+      return {
+        base: {
+          angle: 142,
+          colors: ["#0A2630", "#06181F", "#03090D", "#020304"],
+          positions: [0, 0.22, 0.56, 1],
+        },
+        layers: [
+          {
+            blur: 90,
+            blobs: [
+              {
+                cx: -0.12 * w,
+                cy: -0.08 * h,
+                rx: 0.95 * w,
+                ry: 0.6 * h,
+                color: "rgba(31,156,175,0.38)",
+                edge: 0.82,
+              },
+            ],
+          },
+          {
+            blur: 60,
+            blobs: [
+              {
+                cx: -0.06 * w,
+                cy: -0.04 * h,
+                rx: 0.5 * w,
+                ry: 0.3 * h,
+                color: "rgba(45,190,212,0.36)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 30,
+            blobs: [
+              {
+                cx: -0.02 * w,
+                cy: -0.01 * h,
+                rx: 90,
+                ry: 90,
+                color: "rgba(234,247,255,0.55)",
+                edge: 0.6,
+              },
+            ],
+          },
+          {
+            blur: 96,
+            blobs: [
+              {
+                cx: 1.08 * w,
+                cy: 1.02 * h,
+                rx: 240,
+                ry: 220,
+                color: "rgba(45,190,212,0.1)",
+                edge: 0.82,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "radial",
+          cx: 0.0 * w,
+          cy: 0.0 * h,
+          rx: 1.6 * w,
+          ry: 1.25 * h,
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.)", "rgba(1,3,5,0.8)"],
+          positions: [0, 0.34, 0.74, 1],
+        },
+        grain: 0.06,
+      };
+    case "homeSpark":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#082226", "#051519", "#03090C", "#020304"],
+          positions: [0, 0.38, 0.72, 1],
+        },
+        layers: [
+          {
+            blur: 42,
+            blobs: [
+              {
+                cx: -0.08 * w,
+                cy: 0.3 * h,
+                rx: 110,
+                ry: 180,
+                color: "rgba(13,148,136,0.15)",
+                edge: 0.5,
+              },
+              {
+                cx: 1.08 * w,
+                cy: 0.68 * h,
+                rx: 110,
+                ry: 200,
+                color: "rgba(43, 185, 207, 0.15)",
+                edge: 0.5,
+              },
+            ],
+          },
+          {
+            blur: 76,
+            blobs: [
+              {
+                cx: -0.01 * w,
+                cy: 0.24 * h,
+                rx: 50,
+                ry: 50,
+                color: "rgba(94,234,212,0.6)",
+                edge: 0.6,
+              },
+              {
+                cx: 0.02 * w,
+                cy: 0.58 * h,
+                rx: 30,
+                ry: 30,
+                color: "rgba(94,234,212,0.42)",
+                edge: 0.6,
+              },
+            ],
+          },
+          {
+            blur: 60,
+            blobs: [
+              {
+                cx: 1.0 * w,
+                cy: 0.44 * h,
+                rx: 34,
+                ry: 34,
+                color: "rgba(94,234,212,0.5)",
+                edge: 0.6,
+              },
+              {
+                cx: 0.99 * w,
+                cy: 0.8 * h,
+                rx: 46,
+                ry: 46,
+                color: "rgba(45,212,191,0.5)",
+                edge: 0.6,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
+          positions: [0, 0.4, 0.66, 1],
+        },
+        grain: 0.07,
       };
     case "module":
       return {
@@ -411,6 +715,82 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         grain: 0.07,
       };
+
+    case "finish2":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#071E26", "#050F18", "#03070C", "#020304", "#010203"],
+          positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(13,148,136,0.34)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 52,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(67,56,202,0.26)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.1 * w,
+                cy: 0.9 * h,
+                rx: 190,
+                ry: 190,
+                color: "rgba(94,234,212,0.2)",
+                edge: 0.72,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(45,212,191,0.18)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [
+            NIGHT,
+            NIGHT,
+            "rgba(1,3,5,0.5)",
+            "rgba(1,3,5,0.86)",
+            "rgba(1,3,5,0.94)",
+          ],
+          positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        grain: 0.07,
+      };
+
     case "finishCold":
       return {
         base: {
@@ -466,6 +846,76 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         grain: 0.07,
       };
+
+    case "finishCold2":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#090F2C", "#06091B", "#03050E", "#020304"],
+          positions: [0, 0.38, 0.72, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 40,
+                cy: 30,
+                rx: 200,
+                ry: 200,
+                color: "rgba(67,56,202,0.32)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 52,
+            blobs: [
+              {
+                cx: w - 10,
+                cy: 50,
+                rx: 150,
+                ry: 150,
+                color: "rgba(13,148,136,0.28)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.85 * w,
+                cy: 0.9 * h,
+                rx: 190,
+                ry: 190,
+                color: "rgba(94,234,212,0.2)",
+                edge: 0.72,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.06 * w + 180,
+                cy: h + 15,
+                rx: 180,
+                ry: 125,
+                color: "rgba(45,212,191,0.16)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
+          positions: [0, 0.4, 0.66, 1],
+        },
+        grain: 0.07,
+      };
+
     case "finishWarm":
       return {
         base: {
@@ -531,42 +981,41 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         layers: [
           {
-            blur: 40,
+            blur: 54,
             blobs: [
               {
                 cx: 40,
                 cy: 30,
                 rx: 200,
                 ry: 200,
-                color: "rgba(163,230,53,0.15)",
-                edge: 0.64,
+                color: "rgba(163,230,53,0.18)",
+                edge: 0.7,
               },
             ],
           },
-
           {
-            blur: 60,
+            blur: 58,
             blobs: [
               {
                 cx: w - 30,
                 cy: -10,
                 rx: 220,
                 ry: 220,
-                color: "rgba(163, 251, 30, 0.35)",
-                edge: 0.8,
+                color: "rgba(163,230,53,0.3)",
+                edge: 0.76,
               },
             ],
           },
           {
-            blur: 45,
+            blur: 50,
             blobs: [
               {
-                cx: w - 10,
-                cy: 40,
+                cx: w - 20,
+                cy: 50,
                 rx: 70,
                 ry: 70,
-                color: "rgba(248, 254, 182, 0.7)",
-                edge: 0.7,
+                color: "rgba(190,242,100,0.35)",
+                edge: 0.76,
               },
             ],
           },
@@ -588,6 +1037,691 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           kind: "linear",
           colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
           positions: [0, 0.4, 0.66, 1],
+        },
+        grain: 0.07,
+      };
+
+    case "auroraDrift":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#071E26", "#050F18", "#03070C", "#020304", "#010203"],
+          positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 0.14 * w,
+                cy: 0.06 * h,
+                rx: 190,
+                ry: 190,
+                color: "rgba(45,212,191,0.3)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.88 * w,
+                cy: 0.55 * h,
+                rx: 200,
+                ry: 220,
+                color: "rgba(13,148,136,0.26)",
+                edge: 0.72,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.2 * w,
+                cy: 0.8 * h,
+                rx: 180,
+                ry: 180,
+                color: "rgba(94,234,212,0.2)",
+                edge: 0.72,
+              },
+            ],
+          },
+        ],
+        beam: {
+          angle: 118,
+          colors: [
+            "rgba(94,234,212,0)",
+            "rgba(94,234,212,0.34)",
+            "rgba(13,148,136,0.22)",
+            "rgba(190,242,100,0.14)",
+            "rgba(190,242,100,0)",
+          ],
+          positions: [0.2, 0.42, 0.58, 0.68, 0.76],
+          blur: 46,
+          opacity: 0.65,
+          duration: 18000,
+        },
+        vignette: {
+          kind: "linear",
+          colors: [
+            NIGHT,
+            NIGHT,
+            "rgba(1,3,5,0.5)",
+            "rgba(1,3,5,0.82)",
+            "rgba(1,3,5,0.92)",
+          ],
+          positions: [0, 0.3, 0.56, 0.78, 1],
+        },
+        grain: 0.05,
+      };
+
+    case "auroraTeal":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#051822", "#040F16", "#02070B", "#020304", "#010203"],
+          positions: [0, 0.34, 0.58, 0.78, 1],
+        },
+        layers: [
+          {
+            blur: 54,
+            blobs: [
+              {
+                cx: 0.14 * w,
+                cy: 0.06 * h,
+                rx: 190,
+                ry: 190,
+                color: "rgba(45,212,191,0.3)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.88 * w,
+                cy: 0.55 * h,
+                rx: 200,
+                ry: 220,
+                color: "rgba(31,156,175,0.25)",
+                edge: 0.6,
+              },
+            ],
+          },
+          {
+            blur: 56,
+            blobs: [
+              {
+                cx: 0.2 * w,
+                cy: 0.8 * h,
+                rx: 180,
+                ry: 180,
+                color: "rgba(94,234,212,0.38)",
+                edge: 0.72,
+              },
+            ],
+          },
+        ],
+        beam: {
+          angle: 118,
+          colors: [
+            "rgba(99,236,198,0)",
+            "rgba(68, 224, 162, 0.33)",
+            "rgba(45,190,212,0.2)",
+            "rgba(31,156,175,0.14)",
+            "rgba(31,156,175,0)",
+          ],
+          positions: [0.2, 0.42, 0.58, 0.68, 0.76],
+          blur: 46,
+          opacity: 0.65,
+          duration: 18000,
+        },
+        vignette: {
+          kind: "linear",
+          colors: [
+            NIGHT,
+            NIGHT,
+            "rgba(1,3,5,0.5)",
+            "rgba(1,3,5,0.65)",
+            "rgba(1,3,5,0.8)",
+          ],
+          positions: [0, 0.3, 0.56, 0.78, 1],
+        },
+        grain: 0.05,
+      };
+
+    // layers: [
+    //   {
+    //     blur: 90,
+    //     blobs: [
+    //       {
+    //         cx: -0.12 * w,
+    //         cy: -0.08 * h,
+    //         rx: 0.95 * w,
+    //         ry: 0.6 * h,
+    //         color: "rgba(31,156,175,0.38)",
+    //         edge: 0.82,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     blur: 60,
+    //     blobs: [
+    //       {
+    //         cx: -0.06 * w,
+    //         cy: -0.04 * h,
+    //         rx: 0.5 * w,
+    //         ry: 0.3 * h,
+    //         color: "rgba(45,190,212,0.36)",
+    //         edge: 0.7,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     blur: 30,
+    //     blobs: [
+    //       {
+    //         cx: -0.02 * w,
+    //         cy: -0.01 * h,
+    //         rx: 90,
+    //         ry: 90,
+    //         color: "rgba(234,247,255,0.55)",
+    //         edge: 0.6,
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     blur: 96,
+    //     blobs: [
+    //       {
+    //         cx: 1.08 * w,
+    //         cy: 1.02 * h,
+    //         rx: 240,
+    //         ry: 220,
+    //         color: "rgba(45,190,212,0.1)",
+    //         edge: 0.82,
+    //       },
+    //     ],
+    //   },
+    // ],
+
+    case "twilightDuo":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#051822", "#040F16", "#02070B", "#030B10", "#041219"],
+          positions: [0, 0.3, 0.52, 0.8, 1],
+        },
+        layers: [
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.2 * w,
+                cy: 0.1 * h,
+                rx: 220,
+                ry: 220,
+                color: "rgba(31,156,175,0.38)",
+                edge: 0.7,
+              },
+            ],
+          },
+
+          {
+            blur: 35,
+            blobs: [
+              {
+                cx: 0.02 * w,
+                cy: 0.05 * h,
+                rx: 110,
+                ry: 110,
+                color: "rgba(137, 239, 210, 0.6)",
+                edge: 0.55,
+              },
+            ],
+          },
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.9 * w,
+                cy: 1.0 * h,
+                rx: 310,
+                ry: 260,
+                color: "rgba(31,156,175,0.38)",
+                edge: 0.8,
+              },
+            ],
+          },
+
+          {
+            blur: 30,
+            blobs: [
+              {
+                cx: w + 3,
+                cy: h + 5,
+                rx: 62,
+                ry: 62,
+                color: "rgba(120, 248, 212, 0.6)",
+                edge: 0.7,
+              },
+            ],
+          },
+          // {
+          //   blur: 50,
+          //   blobs: [
+          //     {
+          //       cx: 0.7 * w,
+          //       cy: 0.3 * h,
+          //       rx: 180,
+          //       ry: 180,
+          //       color: "rgba(45, 123, 182, 0.15)",
+          //       edge: 0.72,
+          //     },
+          //   ],
+          // },
+        ],
+
+        grain: 0.06,
+      };
+
+    case "twilightDuoGreen":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#04201A", "#03140F", "#02090A", "#020403"],
+          positions: [0, 0.38, 0.72, 1],
+        },
+        layers: [
+          {
+            blur: 84,
+            blobs: [
+              {
+                cx: 0.2 * w,
+                cy: 0.1 * h,
+                rx: 220,
+                ry: 220,
+                color: "rgba(52,211,153,0.28)",
+                edge: 0.7,
+              },
+            ],
+          },
+
+          {
+            blur: 72,
+            blobs: [
+              {
+                cx: 0.04 * w,
+                cy: 0.05 * h,
+                rx: 110,
+                ry: 110,
+                color: "rgba(110, 231, 120, 0.62)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 120,
+            blobs: [
+              {
+                cx: 0.9 * w,
+                cy: 1.0 * h,
+                rx: 310,
+                ry: 260,
+                color: "rgba(34, 160, 140, 0.24)",
+                edge: 0.8,
+              },
+            ],
+          },
+          {
+            blur: 96,
+            blobs: [
+              {
+                cx: 0.85 * w,
+                cy: 0.95 * h,
+                rx: 220,
+                ry: 220,
+                color: "rgba(64, 205, 170, 0.36)",
+                edge: 0.63,
+              },
+            ],
+          },
+
+          {
+            blur: 48,
+            blobs: [
+              {
+                cx: w + 5,
+                cy: h + 5,
+                rx: 62,
+                ry: 62,
+                color: "rgba(134, 239, 172, 0.55)",
+                edge: 0.72,
+              },
+            ],
+          },
+          {
+            blur: 40,
+            blobs: [
+              {
+                cx: 0.7 * w,
+                cy: 0.35 * h,
+                rx: 180,
+                ry: 180,
+                color: "rgba(60, 170, 150, 0.14)",
+                edge: 0.72,
+              },
+            ],
+          },
+        ],
+
+        grain: 0.06,
+      };
+
+    case "twilightDuoLime":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#041F20", "#031415", "#02090B", "#020304"],
+          positions: [0, 0.38, 0.72, 1],
+        },
+        layers: [
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.2 * w,
+                cy: 0.1 * h,
+                rx: 220,
+                ry: 220,
+                color: "rgba(45,212,191,0.32)",
+                edge: 0.7,
+              },
+            ],
+          },
+
+          {
+            blur: 50,
+            blobs: [
+              {
+                cx: 0.04 * w,
+                cy: 0.05 * h,
+                rx: 110,
+                ry: 110,
+                color: "rgba(163, 230, 53, 0.36)",
+                edge: 0.7,
+              },
+            ],
+          },
+          {
+            blur: 96,
+            blobs: [
+              {
+                cx: 0.9 * w,
+                cy: 1.0 * h,
+                rx: 310,
+                ry: 260,
+                color: "rgba(13, 148, 136, 0.28)",
+                edge: 0.8,
+              },
+            ],
+          },
+          {
+            blur: 75,
+            blobs: [
+              {
+                cx: 0.85 * w,
+                cy: 0.95 * h,
+                rx: 220,
+                ry: 220,
+                color: "rgba(45, 212, 191, 0.38)",
+                edge: 0.63,
+              },
+            ],
+          },
+
+          {
+            blur: 30,
+            blobs: [
+              {
+                cx: w + 5,
+                cy: h + 5,
+                rx: 62,
+                ry: 62,
+                color: "rgba(190, 242, 100, 0.44)",
+                edge: 0.72,
+              },
+            ],
+          },
+          {
+            blur: 50,
+            blobs: [
+              {
+                cx: 0.7 * w,
+                cy: 0.3 * h,
+                rx: 180,
+                ry: 180,
+                color: "rgba(94, 234, 227, 0.16)",
+                edge: 0.7,
+              },
+            ],
+          },
+        ],
+
+        grain: 0.06,
+      };
+
+    case "tealBeam":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#061A20", "#031016", "#020A0E", "#020304"],
+          positions: [0, 0.36, 0.7, 1],
+        },
+        layers: [
+          {
+            blur: 52,
+            blobs: [
+              {
+                cx: 0.15 * w,
+                cy: 0.85 * h,
+                rx: 210,
+                ry: 210,
+                color: "rgba(140,224,90,0.3)",
+                edge: 0.72,
+              },
+            ],
+          },
+        ],
+        beam: {
+          angle: 100,
+
+          colors: [
+            "rgba(9, 28, 31, 0.05)",
+            "rgba(12, 150, 175, 0.55)",
+            "rgba(94, 226, 120, 0.26)",
+            "rgba(53, 230, 192, 0.05)",
+          ],
+          positions: [0.16, 0.53, 0.62, 0.78],
+          blur: 43,
+          opacity: 0.8,
+          duration: 13000,
+        },
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.55)", "rgba(1,3,5,0.9)"],
+          positions: [0, 0.3, 0.6, 1],
+        },
+        grain: 0.05,
+      };
+
+    case "crossBeams":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#071921", "#050F16", "#03070B", "#020304"],
+          positions: [0, 0.36, 0.68, 1],
+        },
+        layers: [
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.5 * w,
+                cy: 0.5 * h,
+                rx: 230,
+                ry: 230,
+                color: "rgba(45,212,191,0.16)",
+                edge: 0.75,
+              },
+            ],
+          },
+        ],
+        beams: [
+          {
+            angle: 100,
+            colors: [
+              "rgba(94,234,212,0)",
+              "rgba(78, 230, 207, 0.4)",
+              "rgba(94,234,212,0)",
+            ],
+            positions: [0.28, 0.46, 0.64],
+            blur: 44,
+            opacity: 0.7,
+            duration: 16000,
+          },
+          {
+            angle: 150,
+            colors: [
+              "rgba(190,242,100,0)",
+              "rgba(156, 243, 80, 0.32)",
+              "rgba(190,242,100,0)",
+            ],
+            positions: [0.32, 0.5, 0.68],
+            blur: 44,
+            opacity: 0.6,
+            duration: 19000,
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.52)", "rgba(1,3,5,0.88)"],
+          positions: [0, 0.3, 0.6, 1],
+        },
+        grain: 0.07,
+      };
+
+    case "crossBeamsMint":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#071921", "#050F16", "#03070B", "#020304"],
+          positions: [0, 0.36, 0.68, 1],
+        },
+        layers: [
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.5 * w,
+                cy: 0.5 * h,
+                rx: 230,
+                ry: 230,
+                color: "rgba(45,212,191,0.22)",
+                edge: 0.75,
+              },
+            ],
+          },
+        ],
+        beams: [
+          {
+            angle: 100,
+            colors: [
+              "rgba(94,234,212,0)",
+              "rgba(94, 234, 212, 0.42)",
+              "rgba(94,234,212,0)",
+            ],
+            positions: [0.28, 0.46, 0.64],
+            blur: 44,
+            opacity: 0.7,
+            duration: 16000,
+          },
+          {
+            angle: 150,
+            colors: [
+              "rgba(45,212,191,0)",
+              "rgba(45, 212, 191, 0.36)",
+              "rgba(45,212,191,0)",
+            ],
+            positions: [0.32, 0.5, 0.68],
+            blur: 44,
+            opacity: 0.6,
+            duration: 19000,
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.52)", "rgba(1,3,5,0.88)"],
+          positions: [0, 0.3, 0.6, 1],
+        },
+        grain: 0.07,
+      };
+
+    case "crossBeamsTeal":
+      return {
+        base: {
+          angle: 180,
+          colors: ["#051822", "#040F16", "#02070B", "#020304"],
+          positions: [0, 0.36, 0.68, 1],
+        },
+        layers: [
+          {
+            blur: 58,
+            blobs: [
+              {
+                cx: 0.5 * w,
+                cy: 0.5 * h,
+                rx: 230,
+                ry: 230,
+                color: "rgba(31, 156, 175, 0.26)",
+                edge: 0.75,
+              },
+            ],
+          },
+        ],
+        beams: [
+          {
+            angle: 100,
+            colors: [
+              "rgba(45,190,212,0)",
+              "rgba(45, 190, 212, 0.42)",
+              "rgba(45,190,212,0)",
+            ],
+            positions: [0.28, 0.46, 0.64],
+            blur: 44,
+            opacity: 0.7,
+            duration: 16000,
+          },
+          {
+            angle: 150,
+            colors: [
+              "rgba(99,236,198,0)",
+              "rgba(99, 236, 198, 0.3)",
+              "rgba(99,236,198,0)",
+            ],
+            positions: [0.32, 0.5, 0.68],
+            blur: 44,
+            opacity: 0.6,
+            duration: 19000,
+          },
+        ],
+        vignette: {
+          kind: "linear",
+          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.4)", "rgba(1,3,5,0.65)"],
+          positions: [0, 0.3, 0.6, 1],
         },
         grain: 0.07,
       };
@@ -800,6 +1934,7 @@ export function BackgroundMesh({
   const { width: w, height: h } = useWindowDimensions();
   const spec = useMemo(() => buildSpec(preset, w, h), [preset, w, h]);
   const baseLine = gradientLine(spec.base.angle, w, h);
+  const beams = spec.beams ?? (spec.beam ? [spec.beam] : []);
 
   return (
     <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -814,9 +1949,9 @@ export function BackgroundMesh({
       {spec.layers.map((layer, i) => (
         <BlobLayer key={i} layer={layer} mode={debugMode} />
       ))}
-      {spec.beam && (
-        <BeamLayer beam={spec.beam} w={w} h={h} animated={animated} />
-      )}
+      {beams.map((beam, i) => (
+        <BeamLayer key={i} beam={beam} w={w} h={h} animated={animated} />
+      ))}
       {spec.vignette && <Vignette vignette={spec.vignette} w={w} h={h} />}
       {spec.grain !== undefined && <Grain w={w} h={h} amount={spec.grain} />}
     </Canvas>

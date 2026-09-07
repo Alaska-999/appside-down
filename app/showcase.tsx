@@ -72,12 +72,31 @@ import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
   { preset: "home" },
+  { preset: "home2" },
+  { preset: "homeLamp" },
+  { preset: "homeLampWhite" },
+  { preset: "homeSpark" },
   { preset: "module" },
   { preset: "form" },
+  { preset: "formBright" },
   { preset: "folder" },
   { preset: "flash" },
   { preset: "auth" },
   { preset: "finish" },
+  { preset: "finish2" },
+  { preset: "finishCold" },
+  { preset: "finishCold2" },
+  { preset: "finishWarm" },
+  { preset: "finishWarm2" },
+  { preset: "auroraDrift" },
+  { preset: "auroraTeal" },
+  { preset: "twilightDuo" },
+  { preset: "twilightDuoGreen" },
+  { preset: "twilightDuoLime" },
+  { preset: "tealBeam" },
+  { preset: "crossBeams" },
+  { preset: "crossBeamsMint" },
+  { preset: "crossBeamsTeal" },
 ];
 
 function ControlsDemo() {
@@ -566,7 +585,7 @@ export default function Showcase() {
             >
               <GradientBorder radius={16} preset="surf" />
               <Text {...TYPE.card} color="$color">
-                7 пресетів фону
+                {BG_PRESETS.length} пресетів фону
               </Text>
             </YStack>
           </Pressable>

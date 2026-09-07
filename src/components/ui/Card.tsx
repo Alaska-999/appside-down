@@ -8,6 +8,8 @@ import {
 } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { EDGE_MINT_FAINT, RING_GLOW_BORDER } from "@/src/constants/focus";
+import { GRADIENT_ACCENT_LIME } from "@/src/constants/gradients";
 import {
   ICON_LIME,
   ICON_MINT,
@@ -15,7 +17,22 @@ import {
   ICON_MINT_TINT_DARK,
   ICON_PURE_BLACK,
 } from "@/src/constants/iconColors";
-import { GRADIENT_ACCENT_LIME } from "@/src/constants/gradients";
+import {
+  BLACK_SCRIM_SOFT,
+  BLACK_SCRIM_WELL,
+  GLASS_BORDER_ACCENT,
+  GLASS_BORDER_BOTTOM,
+  GLASS_BORDER_MID,
+  GLASS_SHEEN_SOFT,
+  GLASS_SHEEN_STRONG,
+  MINT_FADE_MID,
+  MINT_FADE_TRANSPARENT,
+  SCRIM_BASE_30,
+  SCRIM_BASE_MAX,
+  SCRIM_BASE_STRONG,
+  SCRIM_BASE_TRANSPARENT,
+  TRANSPARENT_BLACK,
+} from "@/src/constants/rawColors";
 import {
   SURFACE_BORDER,
   SURFACE_CARD,
@@ -32,23 +49,6 @@ import {
   SURFACE_WHITE_BORDER,
   SURFACE_WHITE_STRONG,
 } from "@/src/constants/surfaceAlpha";
-import {
-  BLACK_SCRIM_SOFT,
-  BLACK_SCRIM_WELL,
-  GLASS_BORDER_ACCENT,
-  GLASS_BORDER_BOTTOM,
-  GLASS_BORDER_MID,
-  GLASS_SHEEN_SOFT,
-  GLASS_SHEEN_STRONG,
-  MINT_FADE_MID,
-  MINT_FADE_TRANSPARENT,
-  SCRIM_BASE_30,
-  SCRIM_BASE_STRONG,
-  SCRIM_BASE_TRANSPARENT,
-  SCRIM_BASE_MAX,
-  TRANSPARENT_BLACK,
-} from "@/src/constants/rawColors";
-import { EDGE_MINT_FAINT, RING_GLOW_BORDER } from "@/src/constants/focus";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check } from "lucide-react-native";
@@ -137,7 +137,6 @@ const SIZE_STYLES: Record<CardSize, { px: number; py: number; br: number }> = {
   lg: { px: 19, py: 19, br: 23 },
 };
 
-
 const ROW_BORDER = {
   borderAngle: 140,
   borderColors: [SURFACE_BORDER, SURFACE_GLASS_BG, SURFACE_GLASS_BG_FAINT],
@@ -176,11 +175,7 @@ const SURFACE_VARIANTS: Record<
     fill: SURFACE_GLASS_BG,
     blurIntensity: 65,
     borderAngle: 140,
-    borderColors: [
-      GLASS_BORDER_ACCENT,
-      GLASS_BORDER_MID,
-      GLASS_BORDER_BOTTOM,
-    ],
+    borderColors: [GLASS_BORDER_ACCENT, GLASS_BORDER_MID, GLASS_BORDER_BOTTOM],
     borderPositions: [0, 0.42, 1],
   },
   liquid: {
@@ -188,11 +183,7 @@ const SURFACE_VARIANTS: Record<
     blurIntensity: 12,
     liquidGlass: true,
     borderAngle: 155,
-    borderColors: [
-      SURFACE_WHITE_STRONG,
-      GLASS_BORDER_MID,
-      GLASS_SHEEN_SOFT,
-    ],
+    borderColors: [SURFACE_WHITE_STRONG, GLASS_BORDER_MID, GLASS_SHEEN_SOFT],
     borderPositions: [0, 0.46, 1],
   },
   well: {
@@ -483,12 +474,12 @@ export function AppCard(props: CardProps) {
           <LinearGradient
             colors={[
               withAlpha(ICON_MINT, 0),
-              withAlpha(ICON_MINT, 0.09),
-              withAlpha(ICON_MINT, 0.34),
+              withAlpha(ICON_MINT, 0.03),
+              withAlpha(ICON_MINT, 0.23),
             ]}
-            locations={[0, 0.44, 1]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
+            locations={[0, 0.5, 1]}
+            start={{ x: 0.9, y: 0 }}
+            end={{ x: 0.9, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
         </View>

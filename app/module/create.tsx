@@ -16,7 +16,7 @@ import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
-import { ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
+import { ICON_ACCENT, ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useServerError } from "@/src/hooks/useServerError";
@@ -218,7 +218,12 @@ export default function ModuleCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="formBright" />
+        {/* <BackgroundMesh preset="auroraDrift" /> */}
+        {/* <BackgroundMesh preset="crossBeams" /> */}
+        {/* <BackgroundMesh preset="crossBeamsMint" /> */}
+        {/* <BackgroundMesh preset="crossBeamsTeal" /> */}
+
+        <BackgroundMesh preset="auroraTeal" />
 
         <View
           style={{ flex: 1 }}
@@ -301,7 +306,7 @@ export default function ModuleCreate() {
                     f={1}
                     fontSize={14.5}
                     fontWeight="500"
-                    color={ICON_MUTED_LIGHT}
+                    color={ICON_ACCENT}
                   >
                     Public module
                   </Text>

@@ -1,4 +1,4 @@
-import { FolderCover } from "@/src/components/common/FolderCover";
+import { CoverTone, FolderCover } from "@/src/components/common/FolderCover";
 import { FormInput } from "@/src/components/common/FormInput";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
 import { ReactNode } from "react";
@@ -10,6 +10,7 @@ export function FolderFormFields<T extends FieldValues>({
   nameField,
   coverUri,
   onCoverChange,
+  coverTone,
   autoFocusName,
   tagsHint,
   tagsFootnote,
@@ -20,6 +21,7 @@ export function FolderFormFields<T extends FieldValues>({
   nameField: Path<T>;
   coverUri: string | null;
   onCoverChange: (uri: string | null) => void;
+  coverTone?: CoverTone;
   autoFocusName?: boolean;
   tagsHint?: string;
   tagsFootnote?: string;
@@ -29,7 +31,11 @@ export function FolderFormFields<T extends FieldValues>({
   return (
     <YStack gap={18}>
       <YStack ai="center" pt={10} pb={0} mb={-6}>
-        <FolderCover imageUri={coverUri} onChange={onCoverChange} />
+        <FolderCover
+          imageUri={coverUri}
+          onChange={onCoverChange}
+          tone={coverTone}
+        />
       </YStack>
 
       <YStack>

@@ -1,11 +1,10 @@
 import { Lamp } from "@/src/components/ui/GlowSurface";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import { ICON_MINT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
 import { EASE_STANDARD } from "@/src/constants/motion";
 import { MODULE_DECK_EDGE_LIME } from "@/src/constants/rawColors";
-import { SURFACE_ROW_BG_PRESSED } from "@/src/constants/surfaceAlpha";
+import { SURFACE_CARD_HARD } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
@@ -52,20 +51,21 @@ function CardSurface({ children }: { children: ReactNode }) {
       pos="relative"
       overflow="hidden"
     >
-      <LiquidGlass
-        intensity={45}
-        tint="default"
-        borderRadius={CARD_RADIUS}
-        backgroundColor={SURFACE_ROW_BG_PRESSED}
+      <View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: SURFACE_CARD_HARD },
+        ]}
       />
-      <Lamp color={withAlpha(ICON_MINT, 0.25)} />
+      <Lamp color={withAlpha(ICON_MINT, 0.18)} />
       <GradientBorder
         radius={CARD_RADIUS}
         angle={160}
         colors={[
           MODULE_DECK_EDGE_LIME,
-          withAlpha(ICON_MINT_LIGHT, 0.35),
-          withAlpha(ICON_MINT_LIGHT, 0.05),
+          withAlpha(ICON_MINT_LIGHT, 0.4),
+          withAlpha(ICON_MINT_LIGHT, 0.08),
         ]}
         positions={[0, 0.2, 0.9]}
       />
@@ -136,7 +136,10 @@ function DeckCardView({
 
   return (
     <GestureDetector gesture={tap}>
-      <View style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}>
+      <View
+        collapsable={false}
+        style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+      >
         <Animated.View style={[FACE, frontStyle]}>
           <CardSurface>
             <FaceText text={card.term} />
@@ -272,7 +275,7 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
   return (
     <YStack>
       <GestureDetector gesture={gesture}>
-        <YStack h={DECK_HEIGHT} overflow="hidden">
+        <YStack h={DECK_HEIGHT} overflow="hidden" collapsable={false}>
           {window.map((i) => (
             <DeckSlot key={cards[i].id} cardIndex={i} progress={progress}>
               <DeckCardView card={cards[i]} interactive={i === index} />

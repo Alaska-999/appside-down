@@ -295,7 +295,11 @@ export default function FolderEditScreen() {
   return (
     <YStack f={1} bg="$background">
       {/* <BackgroundMesh preset="folder" /> */}
-      <BackgroundMesh preset="finishWarm2" />
+      {/* <BackgroundMesh preset="crossBeams" /> */}
+      {/* <BackgroundMesh preset="twilightDuoGreen" /> */}
+      {/* <BackgroundMesh preset="auroraDrift" /> */}
+      {/* <BackgroundMesh preset="crossBeamsTeal" /> */}
+      <BackgroundMesh preset="crossBeamsTeal" />
 
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
@@ -331,6 +335,7 @@ export default function FolderEditScreen() {
               nameField="name"
               coverUri={coverUri}
               onCoverChange={setCoverUri}
+              coverTone="teal"
               tagEditor={
                 <TagEditor
                   mode="manage"

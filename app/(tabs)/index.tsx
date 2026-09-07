@@ -25,11 +25,11 @@ import {
   ICON_TEAL,
   ICON_TEAL_BRIGHT,
 } from "@/src/constants/iconColors";
+import { GLASS_BORDER_TOP, SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import {
   SURFACE_WHITE_BORDER,
   TEXT_MINT_STRONG,
 } from "@/src/constants/surfaceAlpha";
-import { GLASS_BORDER_TOP, SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -282,7 +282,10 @@ export default function Home() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="home" />
+      {/* <BackgroundMesh preset="home2" /> */}
+      {/* <BackgroundMesh preset="homeLamp" /> */}
+      {/* <BackgroundMesh preset="homeLampWhite" /> */}
+      <BackgroundMesh preset="homeLampWhite" />
       <YStack f={1} pt={screen.top} gap="$section">
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
@@ -383,12 +386,7 @@ export default function Home() {
                     onButtonPress={() => fetchData()}
                   />
                 ) : featuredModule && featuredStats ? (
-                  <AppCard
-                    variant="progressLit"
-                    size="lg"
-                    lit={featuredStats.progress}
-                    minHeight={186}
-                  >
+                  <AppCard variant="glow" size="lg" minHeight={186} tone="teal">
                     <Text
                       fontSize={11}
                       fontWeight="700"
@@ -667,7 +665,6 @@ export default function Home() {
           </ScrollView>
         )}
       </YStack>
-
       <StatusBarScrim />
     </YStack>
   );

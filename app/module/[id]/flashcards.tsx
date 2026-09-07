@@ -1,4 +1,3 @@
-import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { API_BASE_URL } from "@/src/api/config";
 import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlashcards";
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
@@ -8,6 +7,7 @@ import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SyncingPill } from "@/src/components/ui/SyncingPill";
 import { AppToast } from "@/src/components/ui/Toast";
+import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import { useGameStore } from "@/src/store/useGameStore";
@@ -135,7 +135,13 @@ export default function FlashcardsGame() {
   return (
     <PortalProvider>
       <YStack f={1} bg="$background">
-        {!isComplete && <BackgroundMesh preset="flash" animated />}
+        {/* {!isComplete && <BackgroundMesh preset="flash" animated />} */}
+        {/* {!isComplete && <BackgroundMesh preset="auroraDrift" animated />} */}
+        {/* {!isComplete && <BackgroundMesh preset="tealBeam" animated />} */}
+        {/* {!isComplete && <BackgroundMesh preset="auth" animated />} */}
+        {/* {!isComplete && <BackgroundMesh preset="flash" animated />} */}
+
+        {!isComplete && <BackgroundMesh preset="crossBeamsMint" animated />}
 
         {!isComplete && (
           <ScreenHeaderFlashcards

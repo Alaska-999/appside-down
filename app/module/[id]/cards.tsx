@@ -83,15 +83,10 @@ export default function ModuleCardsEditScreen() {
     keyName: "fieldKey",
   });
 
-  const {
-    scrollRef,
-    scrollInnerRef,
-    onViewportLayout,
-    spacerStyle,
-    liftCard,
-  } = useKeyboardCardLift({
-    bottomInset: STICKY_ADD_HEIGHT + STICKY_ADD_KEYBOARD_GAP,
-  });
+  const { scrollRef, scrollInnerRef, onViewportLayout, spacerStyle, liftCard } =
+    useKeyboardCardLift({
+      bottomInset: STICKY_ADD_HEIGHT + STICKY_ADD_KEYBOARD_GAP,
+    });
   const termRefs = useRef<(TextInput | null)[]>([]);
   const definitionRefs = useRef<(TextInput | null)[]>([]);
   const focusAppendedRef = useRef(false);
@@ -200,7 +195,7 @@ export default function ModuleCardsEditScreen() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <BackgroundMesh preset="formBright" />
+        <BackgroundMesh preset="auroraDrift" />
 
         <View
           style={{ flex: 1 }}

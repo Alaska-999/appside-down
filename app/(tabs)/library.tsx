@@ -436,7 +436,7 @@ export default function Library() {
   };
 
   return (
-    <ScreenBackground preset="home">
+    <ScreenBackground preset="homeLampWhite">
       <YStack f={1} pt={screen.top}>
         <YStack px="$screenX">
           <XStack ai="center" jc="space-between" gap={12}>
@@ -451,14 +451,20 @@ export default function Library() {
             <XStack gap={8}>
               <IconButton
                 variant="liquidGlass"
-                icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+                icon={
+                  <Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+                }
                 onPress={toggleSearch}
                 accessibilityLabel="Search library"
               />
               <IconButton
                 variant="liquidGlass"
                 icon={
-                  <ArrowDownUp size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+                  <ArrowDownUp
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
                 }
                 onPress={() => setSortSheetOpen(true)}
                 accessibilityLabel="Sort library"

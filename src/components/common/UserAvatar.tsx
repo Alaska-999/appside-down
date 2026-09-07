@@ -26,8 +26,8 @@ export function UserAvatar({
           label={label}
           size={size}
           fontSize={fontSize}
-          variant="frostLight"
-          // variant="frostMuted"
+          // variant="frostLight"
+          variant="frostMuted"
 
           // variant="frostVeilMint"
           // variant="frostVeilSoft"

@@ -1,6 +1,7 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { AppCard } from "@/src/components/ui/Card";
+import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
   ICON_LIME,
   ICON_LIME_LIGHT,
@@ -8,9 +9,11 @@ import {
   ICON_MUTED,
   ICON_SUBTLE,
 } from "@/src/constants/iconColors";
-import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import { TEXT_LIME_PALEST } from "@/src/constants/rawColors";
-import { SURFACE_BORDER, SURFACE_GLASS_BORDER_FAINT } from "@/src/constants/surfaceAlpha";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BORDER_FAINT,
+} from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
@@ -127,62 +130,61 @@ export function ModuleCard({
       style={{ transform: [{ scale: pressed ? 0.978 : 1 }] }}
     >
       <YStack pos="relative" br={ROW_RADIUS} overflow="hidden">
-      <AppCard
-        variant={mastered ? "rowGold" : "row"}
-        tone={mastered ? "lime" : "mint"}
-        size="lg"
-        pressed={pressed}
-        height={ROW_HEIGHT}
-        px={18}
-        py={0}
-        jc="center"
-        opacity={dimmed ? 0.45 : 1}
-      >
-        <XStack ai="center" gap={12}>
-          <YStack f={1} minWidth={0}>
-            <XStack ai="center" gap={8}>
-              <Text
-                fontSize={16}
-                fontWeight="700"
-                letterSpacing={-0.16}
-                color={mastered ? TEXT_LIME_PALEST : "$color"}
-                numberOfLines={1}
-                flexShrink={1}
-              >
-                {module.name}
+        <AppCard
+          variant={mastered ? "rowGold" : "row"}
+          tone={mastered ? "lime" : "mint"}
+          // glow={2}
+          size="lg"
+          pressed={pressed}
+          height={ROW_HEIGHT}
+          px={18}
+          py={0}
+          jc="center"
+          opacity={dimmed ? 0.45 : 1}
+        >
+          <XStack ai="center" gap={12}>
+            <YStack f={1} minWidth={0}>
+              <XStack ai="center" gap={8}>
+                <Text
+                  fontSize={16}
+                  fontWeight="700"
+                  letterSpacing={-0.16}
+                  color={mastered ? TEXT_LIME_PALEST : "$color"}
+                  numberOfLines={1}
+                  flexShrink={1}
+                >
+                  {module.name}
+                </Text>
+                {mastered && <MasteredTick />}
+              </XStack>
+              <Text fontSize={12.5} color="$textMuted" mt={3}>
+                {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
               </Text>
-              {mastered && <MasteredTick />}
-            </XStack>
-            <Text fontSize={12.5} color="$textMuted" mt={3}>
-              {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
-            </Text>
-          </YStack>
+            </YStack>
 
-          {module.isFavorite && !mastered && (
-            <StarGlyph />
-          )}
+            {module.isFavorite && !mastered && <StarGlyph />}
 
-          {trailing}
+            {trailing}
 
-          {!trailing && removeButton && onRemoveButtonPress && (
-            <IconButton
-              size={36}
-              icon={<X size={18} color={ICON_MUTED} />}
-              onPress={onRemoveButtonPress}
-            />
-          )}
+            {!trailing && removeButton && onRemoveButtonPress && (
+              <IconButton
+                size={36}
+                icon={<X size={18} color={ICON_MUTED} />}
+                onPress={onRemoveButtonPress}
+              />
+            )}
 
-          {!trailing && !removeButton && (
-            <ChevronRight size={15} color={ICON_SUBTLE} strokeWidth={2} />
-          )}
-        </XStack>
-      </AppCard>
-      {hasProgress && (
-        <ProgressUnderline
-          ratio={total ? known / total : 0}
-          dim={known / total < 0.25}
-        />
-      )}
+            {!trailing && !removeButton && (
+              <ChevronRight size={15} color={ICON_SUBTLE} strokeWidth={2} />
+            )}
+          </XStack>
+        </AppCard>
+        {hasProgress && (
+          <ProgressUnderline
+            ratio={total ? known / total : 0}
+            dim={known / total < 0.25}
+          />
+        )}
       </YStack>
     </Pressable>
   );
