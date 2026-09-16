@@ -12,7 +12,7 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
-import { ICON_LIME_LIGHT, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { ICON_MINT_LIGHT, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import {
   LIQUID_GLASS_DARK_BG,
   SCRIM_BASE_MAX,
@@ -301,11 +301,11 @@ export default function AddModules() {
               debouncedSearch && visible.length === 0 ? null : (
                 <YStack mt={4}>
                   <AppButton
-                    variant="outline"
+                    variant="glass"
                     icon={
                       <Plus
                         size={18}
-                        color={ICON_LIME_LIGHT}
+                        color={ICON_MINT_LIGHT}
                         strokeWidth={2.2}
                       />
                     }

@@ -143,7 +143,6 @@ export function ErrorBoundary({
 const SCREEN_BASE = "#08090C";
 
 const SHEET_SCREEN = {
-  presentation: "fullScreenModal",
   animation: "slide_from_bottom",
 } as const;
 

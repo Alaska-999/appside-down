@@ -5,7 +5,7 @@ import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
-import { GlowTone } from "@/src/components/ui/GlowSurface";
+import { LightLevel } from "@/src/components/ui/GlowSurface";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
@@ -15,15 +15,9 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import {
   ICON_ACCENT,
-  ICON_BASE,
-  ICON_CYAN_TEAL,
-  ICON_HERO_LIME,
-  ICON_LIME,
-  ICON_LIME_LIGHT,
   ICON_MINT,
   ICON_MINT_TINT_DARK,
   ICON_TEAL,
-  ICON_TEAL_BRIGHT,
 } from "@/src/constants/iconColors";
 import { GLASS_BORDER_TOP, SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import {
@@ -82,19 +76,24 @@ type Stats = {
   continueLearning: ContinueLearningEntry[];
 };
 
-const RECENT_TONES: GlowTone[] = ["mint", "teal", "lime"];
-const RECENT_MONOGRAM_GRADIENTS: [string, string][] = [
-  [ICON_ACCENT, ICON_MINT],
-  [ICON_MINT, ICON_TEAL],
-  [ICON_LIME_LIGHT, ICON_LIME],
-  [ICON_ACCENT, ICON_TEAL],
-];
-const DISCOVER_COVERS: [string, string][] = [
-  [ICON_TEAL_BRIGHT, ICON_BASE],
-  [ICON_HERO_LIME, ICON_BASE],
-  [ICON_TEAL, ICON_BASE],
-  [ICON_CYAN_TEAL, ICON_BASE],
-];
+const MODULE_MONOGRAM_GRADIENT: [string, string] = [ICON_MINT, ICON_TEAL];
+const DISCOVER_COVER_DIM = "rgba(27,168,143,0.34)";
+const DISCOVER_COVER_SAVED = "rgba(27,168,143,0.82)";
+const DISCOVER_COVER_BASE: [string, string] = ["#0E1A1E", "#08090C"];
+
+function progressGlow(progress: number): LightLevel {
+  if (progress >= 0.8) return 4;
+  if (progress >= 0.4) return 3;
+  if (progress > 0) return 2;
+  return 1;
+}
+
+function moduleProgress(module: HomeModule): number {
+  const cards = module.flashcards ?? [];
+  if (cards.length === 0) return 0;
+  const known = cards.filter((c) => c.status === "KNOWN").length;
+  return known / cards.length;
+}
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   const count = module._count?.flashcards ?? 0;
@@ -314,7 +313,7 @@ export default function Home() {
               username={user?.username}
               onPress={navigateToProfile}
               size={55}
-              variant="limeGlassLit"
+              variant="frostGlass"
             />
           </XStack>
           <SearchField
@@ -389,13 +388,19 @@ export default function Home() {
                     onButtonPress={() => fetchData()}
                   />
                 ) : featuredModule && featuredStats ? (
-                  <AppCard variant="glow" size="lg" minHeight={186} tone="teal">
+                  <AppCard
+                    variant="glow"
+                    size="lg"
+                    minHeight={186}
+                    tone="teal"
+                    glow={2}
+                  >
                     <Text
                       fontSize={11}
                       fontWeight="700"
                       letterSpacing={1.1}
                       textTransform="uppercase"
-                      color="$limeLight"
+                      color="$colorMuted"
                       mb={7}
                     >
                       Continue
@@ -440,8 +445,7 @@ export default function Home() {
 
                 <XStack gap={10}>
                   <AppCard
-                    variant="glow"
-                    tone="teal"
+                    variant="surface"
                     f={1}
                     minHeight={104}
                     px={16}
@@ -474,8 +478,7 @@ export default function Home() {
                     </Text>
                   </AppCard>
                   <AppCard
-                    variant="glow"
-                    tone="lime"
+                    variant="surface"
                     f={1}
                     minHeight={104}
                     px={16}
@@ -525,13 +528,14 @@ export default function Home() {
                       gap: 11,
                     }}
                   >
-                    {recentModules.map((m, i) => {
+                    {recentModules.map((m) => {
                       const count = m._count?.flashcards ?? 0;
                       return (
                         <AppCard
                           key={m.id}
                           variant="glow"
-                          tone={RECENT_TONES[i % RECENT_TONES.length]}
+                          tone="teal"
+                          glow={progressGlow(moduleProgress(m))}
                           width={142}
                           height={132}
                           px={15}
@@ -543,11 +547,7 @@ export default function Home() {
                           }}
                         >
                           <LinearGradient
-                            colors={
-                              RECENT_MONOGRAM_GRADIENTS[
-                                i % RECENT_MONOGRAM_GRADIENTS.length
-                              ]
-                            }
+                            colors={MODULE_MONOGRAM_GRADIENT}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                             style={{
@@ -594,9 +594,12 @@ export default function Home() {
                     onSeeAll={() => router.push("/library")}
                   />
                   <YStack gap={11}>
-                    {discoverModules.map((m, i) => {
+                    {discoverModules.map((m) => {
                       const count = m._count?.flashcards ?? 0;
                       const author = m.author?.username ?? m.authorUsername;
+                      const coverLight = m.savedCopyId
+                        ? DISCOVER_COVER_SAVED
+                        : DISCOVER_COVER_DIM;
                       return (
                         <YStack
                           key={m.id}
@@ -612,14 +615,20 @@ export default function Home() {
                             variant="media"
                             minHeight={122}
                             cover={
-                              <LinearGradient
-                                colors={
-                                  DISCOVER_COVERS[i % DISCOVER_COVERS.length]
-                                }
-                                start={{ x: 0.2, y: 0 }}
-                                end={{ x: 0.8, y: 1 }}
-                                style={StyleSheet.absoluteFill}
-                              />
+                              <YStack style={StyleSheet.absoluteFill}>
+                                <LinearGradient
+                                  colors={DISCOVER_COVER_BASE}
+                                  start={{ x: 0.2, y: 0 }}
+                                  end={{ x: 0.8, y: 1 }}
+                                  style={StyleSheet.absoluteFill}
+                                />
+                                <LinearGradient
+                                  colors={[coverLight, "transparent"]}
+                                  start={{ x: 0.26, y: 0.14 }}
+                                  end={{ x: 1, y: 1 }}
+                                  style={StyleSheet.absoluteFill}
+                                />
+                              </YStack>
                             }
                           >
                             <Text

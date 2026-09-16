@@ -295,8 +295,6 @@ export default function FolderScreen() {
       <BackgroundMesh preset="twilightDuoLime" /> */}
       <BackgroundMesh preset="twilightDuo" />
 
-      {/* <BackgroundMesh preset="folder" /> */}
-
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
