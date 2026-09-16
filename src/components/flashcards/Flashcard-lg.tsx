@@ -62,7 +62,7 @@ const CARD_ACTION_INSET = 14;
 const DRAG_SHADOW_DISTANCE = 60;
 const LEARNING_SHADE = { distance: 140, maxOpacity: 0.3 };
 const KNOW_GLOW = {
-  distance: 140,
+  distance: 110,
   margin: 64,
   spread: -14,
   blur: 30,

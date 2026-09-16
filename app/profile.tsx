@@ -14,24 +14,7 @@ export default function ProfileScreen() {
   const todayIndex = (new Date().getDay() + 6) % 7;
 
   return (
-    // | "home"
-
-    // | "homeLampWhite"
-
-    // | "auth"
-    // | "auth"
-    // | "finish2"
-    // | "finishCold"
-    // | "finishCold2"
-
-    // | "auroraTeal"
-    // | "twilightDuo"
-
-    // | "tealBeam"
-    // | "crossBeams"
-    // | "crossBeamsTeal"
-
-    <ScreenBackground preset="crossBeamsTeal">
+    <ScreenBackground preset="twilightDuo">
       <ScreenHeader title="Profile" />
 
       <YStack f={1} px="$screenX" gap={20} pt="$2">

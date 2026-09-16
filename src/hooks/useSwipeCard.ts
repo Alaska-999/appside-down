@@ -14,7 +14,7 @@ import {
 
 export type SwipeDecision = "idle" | "dragRight" | "dragLeft" | "know" | "learning";
 
-export const DEAD_ZONE = 10;
+export const DEAD_ZONE = 30;
 const COMMIT_THRESHOLD = 75;
 const DECISION_OFFSET = 52;
 const DECISION_ROTATE = 6;

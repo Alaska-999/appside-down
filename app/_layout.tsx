@@ -11,7 +11,10 @@ import {
   ICON_WHITE,
 } from "@/src/constants/iconColors";
 import { GRADIENT_SOFT } from "@/src/constants/gradients";
-import { OVERLAY_BLACK_MED, SURFACE_WHITE_BORDER } from "@/src/constants/surfaceAlpha";
+import {
+  OVERLAY_BLACK_MED,
+  SURFACE_WHITE_BORDER,
+} from "@/src/constants/surfaceAlpha";
 import { SPLASH_TEXT_SHADOW, SPINNER_ARC } from "@/src/constants/rawColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
@@ -137,6 +140,15 @@ export function ErrorBoundary({
   );
 }
 
+const SCREEN_BASE = "#08090C";
+
+const SHEET_SCREEN = {
+  presentation: "fullScreenModal",
+  animation: "slide_from_bottom",
+} as const;
+
+const SHEET_LOCKED = { ...SHEET_SCREEN, gestureEnabled: false } as const;
+
 const SPLASH_FLASH_THRESHOLD = 300;
 const SPLASH_HOLD_DURATION = 3000;
 // Прев'ю мешу: залишаємо true, поки триває підбір варіантів на девайсі.
@@ -206,9 +218,22 @@ export default function RootLayout() {
           <PortalProvider>
             <Theme name="dark">
               <QueryClientProvider client={queryClient}>
-                <Stack screenOptions={{ headerShown: false }}>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "slide_from_right",
+                    contentStyle: { backgroundColor: SCREEN_BASE },
+                  }}
+                >
                   <Stack.Screen name="(tabs)" />
                   <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="module/create" options={SHEET_LOCKED} />
+                  <Stack.Screen name="folder/create" options={SHEET_LOCKED} />
+                  <Stack.Screen name="folder/edit" options={SHEET_SCREEN} />
+                  <Stack.Screen
+                    name="folder/add-modules"
+                    options={SHEET_SCREEN}
+                  />
                 </Stack>
               </QueryClientProvider>
             </Theme>

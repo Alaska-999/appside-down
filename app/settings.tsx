@@ -3,10 +3,10 @@ import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { AppButton } from "@/src/components/ui/Button";
 import { Row, Rows } from "@/src/components/ui/Rows";
-import { Surface } from "@/src/components/ui/Surfaces";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { AppSheet } from "@/src/components/ui/Sheet";
+import { Surface } from "@/src/components/ui/Surfaces";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_ROSE_SOFT } from "@/src/constants/iconColors";
@@ -90,9 +90,13 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScreenBackground preset="home">
-      <ScreenHeader title="Settings" />
+    // <ScreenBackground preset="twilightDuo">
+    // <ScreenBackground preset="finish">
 
+    // <ScreenBackground preset="twilightDuoLime">
+    // <ScreenBackground preset="homeLampWhite">
+    <ScreenBackground preset="finish2">
+      <ScreenHeader title="Settings" />
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$screenX" gap={18} pt="$2" pb={screen.bottom}>
           <Surface variant="glass" p={16}>
@@ -187,7 +191,6 @@ export default function SettingsScreen() {
           </YStack>
         </YStack>
       </ScrollView>
-
       <AppSheet
         open={deleteSheetOpen}
         onOpenChange={(open: boolean) => {
@@ -254,7 +257,6 @@ export default function SettingsScreen() {
           </YStack>
         </KeyboardAwareScrollView>
       </AppSheet>
-
       <AppToast
         open={!!toast}
         message={toast ?? ""}

@@ -1,5 +1,4 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { FolderAddRow } from "@/src/components/cards/FolderEditRow";
 import { SelectableModuleRow } from "@/src/components/cards/SelectableModuleRow";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { AppButton } from "@/src/components/ui/Button";
@@ -13,7 +12,7 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
-import { ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { ICON_LIME_LIGHT, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import {
   LIQUID_GLASS_DARK_BG,
   SCRIM_BASE_MAX,
@@ -301,11 +300,19 @@ export default function AddModules() {
             ListFooterComponent={
               debouncedSearch && visible.length === 0 ? null : (
                 <YStack mt={4}>
-                  <FolderAddRow
-                    icon={Plus}
-                    label="Create a new module"
+                  <AppButton
+                    variant="outline"
+                    icon={
+                      <Plus
+                        size={18}
+                        color={ICON_LIME_LIGHT}
+                        strokeWidth={2.2}
+                      />
+                    }
                     onPress={goCreate}
-                  />
+                  >
+                    Create a new module
+                  </AppButton>
                 </YStack>
               )
             }

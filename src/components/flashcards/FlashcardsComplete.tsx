@@ -3,6 +3,7 @@ import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
 import { AppButton } from "@/src/components/ui/Button";
+import { StaggerIn } from "@/src/components/ui/StaggerIn";
 import { IconButton } from "@/src/components/ui/IconButton";
 import {
   BackgroundMesh,
@@ -13,7 +14,11 @@ import {
   ICON_LIME_LIGHT,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
-import { EASE_STANDARD } from "@/src/constants/motion";
+import {
+  EASE_STANDARD,
+  FINISH_PROGRESS_DELAY_MS,
+  FINISH_STAGGER_MS,
+} from "@/src/constants/motion";
 import { TEXT_MINT_MED } from "@/src/constants/surfaceAlpha";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useGameStore } from "@/src/store/useGameStore";
@@ -74,7 +79,7 @@ export function FlashcardsComplete({
     }
     progress.value = 0;
     progress.value = withDelay(
-      350,
+      FINISH_PROGRESS_DELAY_MS,
       withTiming(1, { duration, easing: EASE_STANDARD }),
     );
   }, [reducedMotion, duration, progress]);
@@ -88,103 +93,121 @@ export function FlashcardsComplete({
       </View>
 
       <YStack f={1} pt={screen.top} pb={screen.bottom}>
-        <XStack px={16}>
-          <IconButton
-            variant="liquidGlass"
-            icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
-            onPress={onClose ?? (() => router.back())}
-            accessibilityLabel="Close"
-          />
-        </XStack>
-        <YStack f={1} ai="center" jc="center">
-          <OrbitProgress
-            progress={progress}
-            fraction={fraction}
-            hot={isFull}
-            tone={tone}
-          />
-        </YStack>
-
-        <YStack ai="center">
-          <AnimatedNumber
-            progress={progress}
-            from={0}
-            to={targetPct}
-            suffix="%"
-            gradientColors={[ICON_ACCENT, ICON_LIME_LIGHT]}
-            width={210}
-            height={76}
-            style={{
-              fontSize: 76,
-              fontWeight: "800",
-              letterSpacing: -3.04,
-              textAlign: "center",
-            }}
-          />
-          <Text
-            fontSize={12}
-            fontWeight="700"
-            letterSpacing={2.4}
-            textTransform="uppercase"
-            color={TEXT_MINT_MED}
-            mt={8}
-          >
-            {isFull ? "orbit closed" : "of the orbit"}
-          </Text>
-        </YStack>
-
-        <XStack jc="center" gap={10} mt={15}>
-          <StatusPill kind="moon" tone="known" count={known} label="known" />
-          {!isFull && (
-            <StatusPill
-              kind="moon"
-              tone="learning"
-              count={stillLearning}
-              label="learning"
+        <StaggerIn delay={FINISH_STAGGER_MS * 4}>
+          <XStack px={16}>
+            <IconButton
+              variant="liquidGlass"
+              icon={<X size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              onPress={onClose ?? (() => router.back())}
+              accessibilityLabel="Close"
             />
-          )}
-        </XStack>
+          </XStack>
+        </StaggerIn>
+        <StaggerIn
+          variant="bloom"
+          delay={FINISH_STAGGER_MS}
+          style={{ flex: 1 }}
+        >
+          <YStack f={1} ai="center" jc="center">
+            <OrbitProgress
+              progress={progress}
+              fraction={fraction}
+              hot={isFull}
+              tone={tone}
+            />
+          </YStack>
+        </StaggerIn>
 
-        <YStack px={22} gap={10} pt={20}>
-          {isFull ? (
-            <>
-              <AppButton variant="primary" size="lg" onPress={() => restart()}>
-                Practise all again
-              </AppButton>
-              <AppButton
-                variant="ghost"
-                size="sm"
-                onPress={() => router.back()}
-              >
-                Back to module
-              </AppButton>
-            </>
-          ) : (
-            <>
-              <AppButton
-                variant="primary"
-                size="md"
-                onPress={() => restart(true)}
-              >
-                Practise {stillLearning} cards
-              </AppButton>
-              <AppButton
-                variant="secondary"
-                size="md"
-                onPress={() => restart()}
-              >
-                Restart game
-              </AppButton>
-              <AppButton
-                variant="ghost"
-                size="md"
-                onPress={() => router.back()}
-              >
-                Back to module
-              </AppButton>
-            </>
-          )}
-        </YStack>
+        <StaggerIn delay={FINISH_STAGGER_MS * 2}>
+          <YStack ai="center">
+            <AnimatedNumber
+              progress={progress}
+              from={0}
+              to={targetPct}
+              suffix="%"
+              gradientColors={[ICON_ACCENT, ICON_LIME_LIGHT]}
+              width={210}
+              height={76}
+              style={{
+                fontSize: 76,
+                fontWeight: "800",
+                letterSpacing: -3.04,
+                textAlign: "center",
+              }}
+            />
+            <Text
+              fontSize={12}
+              fontWeight="700"
+              letterSpacing={2.4}
+              textTransform="uppercase"
+              color={TEXT_MINT_MED}
+              mt={8}
+            >
+              {isFull ? "orbit closed" : "of the orbit"}
+            </Text>
+          </YStack>
+        </StaggerIn>
+
+        <StaggerIn delay={FINISH_STAGGER_MS * 3}>
+          <XStack jc="center" gap={10} mt={15}>
+            <StatusPill kind="moon" tone="known" count={known} label="known" />
+            {!isFull && (
+              <StatusPill
+                kind="moon"
+                tone="learning"
+                count={stillLearning}
+                label="learning"
+              />
+            )}
+          </XStack>
+        </StaggerIn>
+
+        <StaggerIn delay={FINISH_STAGGER_MS * 4}>
+          <YStack px={22} gap={10} pt={20}>
+            {isFull ? (
+              <>
+                <AppButton
+                  variant="primary"
+                  size="lg"
+                  onPress={() => restart()}
+                >
+                  Practise all again
+                </AppButton>
+                <AppButton
+                  variant="ghost"
+                  size="sm"
+                  onPress={() => router.back()}
+                >
+                  Back to module
+                </AppButton>
+              </>
+            ) : (
+              <>
+                <AppButton
+                  variant="primary"
+                  size="md"
+                  onPress={() => restart(true)}
+                >
+                  Practise {stillLearning} cards
+                </AppButton>
+                <AppButton
+                  variant="secondary"
+                  size="md"
+                  onPress={() => restart()}
+                >
+                  Restart game
+                </AppButton>
+                <AppButton
+                  variant="ghost"
+                  size="md"
+                  onPress={() => router.back()}
+                >
+                  Back to module
+                </AppButton>
+              </>
+            )}
+          </YStack>
+        </StaggerIn>
       </YStack>
     </YStack>
   );
