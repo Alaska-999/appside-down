@@ -99,6 +99,8 @@ const CALM_EDGE = {
 
 const LIVE_EDGE = {
   width: 2.2,
+  sweep: true,
+  sweepStartDeg: 210,
   colors: [
     ICON_LIME_LIGHT,
     ICON_ACCENT,
@@ -110,6 +112,8 @@ const LIVE_EDGE = {
 
 const LEARNING_EDGE = {
   width: 2.2,
+  sweep: true,
+  sweepStartDeg: 210,
   colors: [
     ICON_INDIGO_LIGHT,
     ICON_INDIGO,
@@ -157,39 +161,13 @@ function Ghosts() {
 }
 
 function Edge({ decision }: { decision: SwipeDecision }) {
-  if (decision === "learning" || decision === "dragLeft") {
-    return (
-      <GradientBorder
-        radius={CARD_RADIUS}
-        width={LEARNING_EDGE.width}
-        sweep
-        sweepStartDeg={210}
-        colors={LEARNING_EDGE.colors}
-        positions={LEARNING_EDGE.positions}
-      />
-    );
-  }
-  if (decision === "dragRight" || decision === "know") {
-    return (
-      <GradientBorder
-        radius={CARD_RADIUS}
-        width={LIVE_EDGE.width}
-        sweep
-        sweepStartDeg={210}
-        colors={LIVE_EDGE.colors}
-        positions={LIVE_EDGE.positions}
-      />
-    );
-  }
-  return (
-    <GradientBorder
-      radius={CARD_RADIUS}
-      width={CALM_EDGE.width}
-      angle={CALM_EDGE.angle}
-      colors={CALM_EDGE.colors}
-      positions={CALM_EDGE.positions}
-    />
-  );
+  const edge =
+    decision === "learning" || decision === "dragLeft"
+      ? LEARNING_EDGE
+      : decision === "dragRight" || decision === "know"
+        ? LIVE_EDGE
+        : CALM_EDGE;
+  return <GradientBorder {...edge} radius={CARD_RADIUS} />;
 }
 
 function StampFace({

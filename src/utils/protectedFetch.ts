@@ -38,7 +38,12 @@ const refreshAccessToken = (): Promise<string> => {
       throw new Error("Failed to refresh token");
     }
 
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
+    if (!data?.access_token) {
+      useAuthStore.getState().logout({ expired: true });
+      throw new Error("Refresh response did not contain an access token");
+    }
+
     useAuthStore.getState().setToken(data.access_token);
     if (data.refresh_token) {
       await SecureStore.setItemAsync("refreshToken", data.refresh_token);

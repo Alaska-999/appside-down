@@ -24,15 +24,25 @@ import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
 export default function SettingsScreen() {
   const screen = useScreenInsets();
-  const { user } = useAuthStore();
-  const {
-    soundEffectsEnabled,
-    hapticFeedbackEnabled,
-    pushNotificationsEnabled,
-    toggleSoundEffects,
-    toggleHapticFeedback,
-    togglePushNotifications,
-  } = usePreferencesStore();
+  const user = useAuthStore((state) => state.user);
+  const soundEffectsEnabled = usePreferencesStore(
+    (state) => state.soundEffectsEnabled,
+  );
+  const hapticFeedbackEnabled = usePreferencesStore(
+    (state) => state.hapticFeedbackEnabled,
+  );
+  const pushNotificationsEnabled = usePreferencesStore(
+    (state) => state.pushNotificationsEnabled,
+  );
+  const toggleSoundEffects = usePreferencesStore(
+    (state) => state.toggleSoundEffects,
+  );
+  const toggleHapticFeedback = usePreferencesStore(
+    (state) => state.toggleHapticFeedback,
+  );
+  const togglePushNotifications = usePreferencesStore(
+    (state) => state.togglePushNotifications,
+  );
 
   const [deleteSheetOpen, setDeleteSheetOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");

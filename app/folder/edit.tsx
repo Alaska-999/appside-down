@@ -18,7 +18,9 @@ import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { computeTagCounts } from "@/src/utils/tagCounts";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ArrowUpFromLine, Plus, Tags, Trash2 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -102,12 +104,10 @@ export default function FolderEditScreen() {
     }, [folderId, form]),
   );
 
-  const tagCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const m of folder?.modules ?? [])
-      for (const t of m.tags) counts.set(t.id, (counts.get(t.id) ?? 0) + 1);
-    return counts;
-  }, [folder?.modules]);
+  const tagCounts = useMemo(
+    () => computeTagCounts(folder?.modules ?? []),
+    [folder?.modules],
+  );
 
   const tagsModule = folder?.modules.find((m) => m.id === tagsModuleId) ?? null;
 
@@ -445,7 +445,7 @@ export default function FolderEditScreen() {
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title="Delete this folder?"
-        subtitle={`${moduleCount} module${moduleCount !== 1 ? "s" : ""} will stay in your library.\nThis can't be undone.`}
+        subtitle={`${pluralize(moduleCount, "module")} will stay in your library.\nThis can't be undone.`}
         blur="strong"
       >
         <YStack gap={10}>
@@ -474,7 +474,7 @@ export default function FolderEditScreen() {
         title={`Delete tag “${confirmTag?.name ?? ""}”?`}
         subtitle={
           confirmTag
-            ? `${tagCounts.get(confirmTag.id) ?? 0} module${(tagCounts.get(confirmTag.id) ?? 0) !== 1 ? "s" : ""} will lose this tag.\nThe modules themselves stay.`
+            ? `${pluralize(tagCounts.get(confirmTag.id) ?? 0, "module")} will lose this tag.\nThe modules themselves stay.`
             : undefined
         }
         blur="strong"

@@ -39,6 +39,7 @@ import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
@@ -207,7 +208,7 @@ export default function ModuleScreen() {
 
   const initGame = useGameStore((state) => state.initGame);
 
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const isOwner = moduleData?.user?.id === user?.id;
   const authorName =
     moduleData?.author?.username ?? moduleData?.authorUsername ?? undefined;
@@ -607,8 +608,7 @@ export default function ModuleScreen() {
                     )}
                     <YStack w={3} h={3} br={2} bg="$mutedDim" />
                     <Text fontSize={12.5} color="$textMuted">
-                      {moduleData.itemsCount} card
-                      {moduleData.itemsCount !== 1 ? "s" : ""}
+                      {pluralize(moduleData.itemsCount, "card")}
                     </Text>
                     {moduleData.isPublic && (
                       <XStack

@@ -8,8 +8,7 @@ import { AppButton } from "@/src/components/ui/Button";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { CardOrientation, ThemeMode } from "@/src/types";
-import { getErrorMessage } from "@/src/utils/apiError";
+import { AUTH_ERROR_MESSAGES, getErrorMessage, readJsonBody } from "@/src/utils/apiError";
 import { SignupForm, signupSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -19,6 +18,7 @@ import { useRef } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import type { TextInput } from "react-native";
 import { Text, YStack } from "tamagui";
+import { mapAuthUser } from "@/src/api/mappers";
 
 export default function Signup() {
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -50,40 +50,35 @@ export default function Signup() {
         body: JSON.stringify({ email, password, username }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        setServerError(getErrorMessage(data, "Signup failed"));
+        const errorBody = await readJsonBody(response);
+        setServerError(
+          getErrorMessage(
+            errorBody,
+            response.status >= 500
+              ? "Server problem. Try again later"
+              : "Signup failed",
+          ),
+        );
         return;
       }
 
-      const user = {
-        id: data.user.id,
-        username: data.user.username,
-        email: data.user.email,
-        createdAt: new Date().toISOString(),
-        settings: {
-          userId: data.user.id,
-          theme: "light" as ThemeMode,
-          defaultCardOrientation: "term_first" as CardOrientation,
-          isTtsEnabled: false,
-          dailyStreakGoal: 10,
-        },
-        streak: {
-          userId: data.user.id,
-          currentStreak: 0,
-          lastActiveDate: new Date().toISOString(),
-        },
-      };
+      const data = await readJsonBody(response);
 
-      const refreshToken = data.refresh_token;
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
+      if (!data?.user || !data?.access_token || !data?.refresh_token) {
+        setServerError(AUTH_ERROR_MESSAGES.incompleteSession);
+        return;
+      }
+
+      const user = mapAuthUser(data.user);
+
+      await SecureStore.setItemAsync("refreshToken", data.refresh_token);
       setAuth(user, data.access_token);
 
       router.replace("/");
     } catch (error) {
       console.error("Network error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 

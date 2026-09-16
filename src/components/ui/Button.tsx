@@ -379,13 +379,11 @@ export function AppButton({
         const floodActive = Boolean(flood) && pressed && !isBlocked;
         const textColor =
           textColorOverride ??
-          (variant === "danger"
-            ? "$roseSoft"
-            : floodActive
-              ? "$nearBlack"
-              : pressed && spec.pressedTextColor
-                ? spec.pressedTextColor
-                : spec.textColor);
+          (floodActive
+            ? "$nearBlack"
+            : pressed && spec.pressedTextColor
+              ? spec.pressedTextColor
+              : spec.textColor);
         const shadowProps =
           spec.shadow && !disabled
             ? {

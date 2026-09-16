@@ -10,6 +10,8 @@ import {
   SURFACE_ROW_BG,
 } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
+import { ratio } from "@/src/utils/progress";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { ChevronRight } from "lucide-react-native";
 import { useState } from "react";
@@ -67,7 +69,7 @@ export function FolderModuleRow({
   const styleBottomRight = useAnimatedStyle(() => ({ opacity: t.value }));
 
   const hasProgress = MODULE_PROGRESS_UNDERLINE && !!progress && progress.total > 0;
-  const ratio = hasProgress ? progress!.known / progress!.total : 0;
+  const progressRatio = hasProgress ? ratio(progress!.known, progress!.total) : 0;
 
   return (
     <Pressable
@@ -152,7 +154,7 @@ export function FolderModuleRow({
             </Text>
             <XStack ai="center" gap={5} mt={3} flexWrap="wrap">
               <Text fontSize={12.5} color="$textMuted">
-                {itemsCount} card{itemsCount !== 1 ? "s" : ""}
+                {pluralize(itemsCount, "card")}
               </Text>
               {tags.map((tag) => (
                 <XStack
@@ -175,7 +177,7 @@ export function FolderModuleRow({
         </XStack>
 
         {hasProgress && (
-          <ProgressUnderline progress={ratio} dim={ratio < 0.25} />
+          <ProgressUnderline progress={progressRatio} dim={progressRatio < 0.25} />
         )}
       </YStack>
     </Pressable>

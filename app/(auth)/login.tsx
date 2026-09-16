@@ -8,8 +8,7 @@ import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { CardOrientation, ThemeMode } from "@/src/types";
-import { getErrorMessage } from "@/src/utils/apiError";
+import { AUTH_ERROR_MESSAGES, getErrorMessage, readJsonBody } from "@/src/utils/apiError";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -22,6 +21,7 @@ import { Pressable } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, YStack } from "tamagui";
+import { mapAuthUser } from "@/src/api/mappers";
 
 export default function Login() {
   const insets = useSafeAreaInsets();
@@ -56,42 +56,38 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const errorBody = await readJsonBody(response);
+        if (response.status >= 500) {
+          setToastMessage(
+            getErrorMessage(errorBody, "Server problem. Try again later"),
+          );
+          return;
+        }
         setError("password", {
-          message: getErrorMessage(data, "Wrong email or password"),
+          message: getErrorMessage(errorBody, "Wrong email or password"),
         });
         return;
       }
 
-      const user = {
-        id: data.user.id,
-        username: data.user.username,
-        email: data.user.email,
-        createdAt: data.user.createdAt || new Date().toISOString(),
-        settings: {
-          userId: data.user.id,
-          theme: "light" as ThemeMode,
-          defaultCardOrientation: "term_first" as CardOrientation,
-          isTtsEnabled: false,
-          dailyStreakGoal: 10,
-        },
-        streak: {
-          userId: data.user.id,
-          currentStreak: 0,
-          lastActiveDate: new Date().toISOString(),
-        },
-      };
+      const data = await readJsonBody(response);
 
-      const refreshToken = data.refresh_token;
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
+      if (!data?.user || !data?.access_token || !data?.refresh_token) {
+        setError("password", {
+          message: AUTH_ERROR_MESSAGES.incompleteSession,
+        });
+        return;
+      }
+
+      const user = mapAuthUser(data.user);
+
+      await SecureStore.setItemAsync("refreshToken", data.refresh_token);
 
       setAuth(user, data.access_token);
       router.replace("/");
     } catch (error) {
       console.error("Network error:", error);
-      setToastMessage("Connection problem. Try again");
+      setToastMessage(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 

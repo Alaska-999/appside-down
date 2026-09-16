@@ -11,7 +11,7 @@ export const soundComplete = () => {
   if (!soundsEnabled()) return;
   if (!completePlayer) {
     completePlayer = createAudioPlayer(
-      require("../../assets/sounds/complete.wav"),
+      require("../../assets/sounds/complete2.mp3"),
     );
   }
   completePlayer.seekTo(0);

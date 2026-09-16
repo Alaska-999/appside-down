@@ -5,15 +5,18 @@ import {
   Canvas,
   Circle,
   Group,
+  LinearGradient,
   RadialGradient,
+  Rect,
   RoundedRect,
   vec,
 } from "@shopify/react-native-skia";
 import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
 import { fadeOut } from "@/src/utils/withAlpha";
-import { ReactNode, useState } from "react";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import { ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
 import { YStack, YStackProps, useTheme } from "tamagui";
+import { useMeasure } from "@/src/hooks/useMeasure";
 
 export type GlowTone = "mint" | "teal" | "lime" | "indigo" | "neutral";
 export type LightLevel = 0 | 1 | 2 | 3 | 4;
@@ -56,15 +59,6 @@ function saturateRgb([r, g, b]: Rgb, s: number): Rgb {
 export function toneRgba(rgb: Rgb, alpha: number, sat = 1): string {
   const [r, g, b] = sat === 1 ? rgb : saturateRgb(rgb, sat);
   return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function useMeasure() {
-  const [size, setSize] = useState({ w: 0, h: 0 });
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    setSize((prev) => (prev.w === width && prev.h === height ? prev : { w: width, h: height }));
-  };
-  return { size, onLayout };
 }
 
 export type LampGeometry = { rx: number; ry: number; cx: number; cy: number };
@@ -124,7 +118,15 @@ export function CoverGlow({
   blikBlur = 18,
   shadowSpread = 22,
   shadowBlur = 17,
+  coverColors,
+  tintColor,
+  scrimColors,
+  scrimPositions,
 }: {
+  coverColors?: string[];
+  tintColor?: string;
+  scrimColors?: string[];
+  scrimPositions?: number[];
   lampColor?: string;
   blikColor?: string;
   shadowColor?: string;
@@ -145,6 +147,24 @@ export function CoverGlow({
     <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
       {size.w > 0 && (
         <Canvas style={StyleSheet.absoluteFill}>
+          {coverColors ? (
+            <Rect x={0} y={0} width={size.w} height={size.h} dither>
+              <LinearGradient
+                start={vec(size.w / 2, 0)}
+                end={vec(size.w / 2, size.h)}
+                colors={coverColors}
+              />
+            </Rect>
+          ) : null}
+          {tintColor ? (
+            <Rect
+              x={0}
+              y={0}
+              width={size.w}
+              height={size.h}
+              color={tintColor}
+            />
+          ) : null}
           {lampColor ? (
             <Group
               transform={[
@@ -172,6 +192,16 @@ export function CoverGlow({
             >
               <BlurMask blur={blikBlur} style="normal" />
             </Circle>
+          ) : null}
+          {scrimColors ? (
+            <Rect x={0} y={0} width={size.w} height={size.h} dither>
+              <LinearGradient
+                start={vec(size.w / 2, 0)}
+                end={vec(size.w / 2, size.h)}
+                colors={scrimColors}
+                positions={scrimPositions}
+              />
+            </Rect>
           ) : null}
           {shadowColor ? (
             <RoundedRect

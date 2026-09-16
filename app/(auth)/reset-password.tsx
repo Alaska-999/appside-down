@@ -6,7 +6,11 @@ import { AppButton } from "@/src/components/ui/Button";
 import { CodeInput } from "@/src/components/ui/CodeInput";
 import { ICON_SUBTLE, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
-import { getErrorMessage } from "@/src/utils/apiError";
+import {
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
 import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
@@ -64,7 +68,7 @@ export default function ResetPassword() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await readJsonBody(response);
         setServerError(getErrorMessage(data, "Failed to send code"));
         return;
       }
@@ -72,7 +76,7 @@ export default function ResetPassword() {
       setResendCooldown(60);
     } catch (error) {
       console.error("[ResetPassword] resend error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     } finally {
       setIsResending(false);
     }
@@ -89,7 +93,7 @@ export default function ResetPassword() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await readJsonBody(response);
         setServerError(getErrorMessage(data, "Failed to reset password"));
         return;
       }
@@ -97,7 +101,7 @@ export default function ResetPassword() {
       router.replace("/login");
     } catch (error) {
       console.error("[ResetPassword] request error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 

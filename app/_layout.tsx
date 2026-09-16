@@ -218,7 +218,8 @@ const SHEET_SCREEN = {
 const SHEET_LOCKED = { ...SHEET_SCREEN, gestureEnabled: false } as const;
 
 export default function RootLayout() {
-  const { token, isHydrated } = useAuthStore();
+  const token = useAuthStore((state) => state.token);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
     Sora_500Medium,

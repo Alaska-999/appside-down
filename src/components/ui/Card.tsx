@@ -28,9 +28,6 @@ import {
   MINT_FADE_MID,
   MINT_FADE_TRANSPARENT,
   SCRIM_BASE_30,
-  SCRIM_BASE_MAX,
-  SCRIM_BASE_STRONG,
-  SCRIM_BASE_TRANSPARENT,
   TRANSPARENT_BLACK,
 } from "@/src/constants/rawColors";
 import {
@@ -199,6 +196,93 @@ const SURFACE_VARIANTS: Record<
     fill: SURFACE_CARD_SWEEP,
   },
   media: {},
+};
+
+type UnderlayArgs = { lit: number; cover?: ReactNode; animateSweep: boolean };
+
+const UNDERLAY_RENDERERS: Partial<
+  Record<CardVariant, (args: UnderlayArgs) => ReactNode>
+> = {
+  liquid: () => (
+    <>
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 10,
+          right: 10,
+          height: 1.2,
+          backgroundColor: GLASS_SHEEN_STRONG,
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 10,
+          right: 10,
+          height: 1.2,
+          backgroundColor: SURFACE_WHITE_BORDER,
+        }}
+      />
+    </>
+  ),
+  progressLit: ({ lit }) => (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: `${Math.round(lit * 100)}%`,
+      }}
+    >
+      <LinearGradient
+        colors={[
+          withAlpha(ICON_MINT, 0),
+          withAlpha(ICON_MINT, 0.03),
+          withAlpha(ICON_MINT, 0.23),
+        ]}
+        locations={[0, 0.5, 1]}
+        start={{ x: 0.9, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
+  ),
+  well: () => (
+    <>
+      <LinearGradient
+        colors={[BLACK_SCRIM_WELL, TRANSPARENT_BLACK]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 12,
+        }}
+        pointerEvents="none"
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 1,
+          backgroundColor: SURFACE_GLASS_BORDER_FAINT,
+        }}
+      />
+    </>
+  ),
+  sweep: ({ animateSweep }) => <SweepBand animate={animateSweep} />,
+  media: ({ cover }) => cover,
 };
 
 function SweepBand({ animate }: { animate: boolean }) {
@@ -422,97 +506,7 @@ export function AppCard(props: CardProps) {
         : null),
     };
 
-    const underlay =
-      variant === "liquid" ? (
-        <>
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 10,
-              right: 10,
-              height: 1.2,
-              backgroundColor: GLASS_SHEEN_STRONG,
-            }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 10,
-              right: 10,
-              height: 1.2,
-              backgroundColor: SURFACE_WHITE_BORDER,
-            }}
-          />
-        </>
-      ) : variant === "progressLit" ? (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: `${Math.round(lit * 100)}%`,
-          }}
-        >
-          <LinearGradient
-            colors={[
-              withAlpha(ICON_MINT, 0),
-              withAlpha(ICON_MINT, 0.03),
-              withAlpha(ICON_MINT, 0.23),
-            ]}
-            locations={[0, 0.5, 1]}
-            start={{ x: 0.9, y: 0 }}
-            end={{ x: 0.9, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        </View>
-      ) : variant === "well" ? (
-        <>
-          <LinearGradient
-            colors={[BLACK_SCRIM_WELL, TRANSPARENT_BLACK]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 12,
-            }}
-            pointerEvents="none"
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 1,
-              backgroundColor: SURFACE_GLASS_BORDER_FAINT,
-            }}
-          />
-        </>
-      ) : variant === "sweep" ? (
-        <SweepBand animate={animateSweep} />
-      ) : variant === "media" ? (
-        <>
-          {cover}
-          <LinearGradient
-            colors={[SCRIM_BASE_TRANSPARENT, SCRIM_BASE_STRONG, SCRIM_BASE_MAX]}
-            locations={[0.24, 0.62, 1]}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={StyleSheet.absoluteFill}
-            pointerEvents="none"
-          />
-        </>
-      ) : undefined;
+    const underlay = UNDERLAY_RENDERERS[variant]?.({ lit, cover, animateSweep });
 
     const liquidShadow =
       variant === "liquid"
@@ -536,13 +530,10 @@ export function AppCard(props: CardProps) {
         jc={variant === "media" ? "flex-end" : undefined}
         underlay={underlay}
         overlay={selected ? <SelectedRing radius={sizeStyle.br} /> : undefined}
-        {...(locked ? { opacity: 0.42 } : null)}
+        {...stateProps}
         {...surfaceProps}
         {...liquidShadow}
         {...accentBorderProps}
-        {...(onPress
-          ? { onPress, pressStyle: { scale: 0.982 }, transition: "press" }
-          : null)}
         {...rest}
       >
         {variant === "media" ? <YStack p={18}>{children}</YStack> : children}

@@ -23,7 +23,9 @@ import {
 } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { computeTagCounts } from "@/src/utils/tagCounts";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
@@ -174,12 +176,10 @@ export default function FolderScreen() {
     if (selectedTag === "all") return all;
     return all.filter((m) => m.tags.some((t) => t.id === selectedTag));
   }, [folder?.modules, selectedTag]);
-  const tagCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const m of folder?.modules ?? [])
-      for (const t of m.tags) counts.set(t.id, (counts.get(t.id) ?? 0) + 1);
-    return counts;
-  }, [folder?.modules]);
+  const tagCounts = useMemo(
+    () => computeTagCounts(folder?.modules ?? []),
+    [folder?.modules],
+  );
   const heroIcon = useMemo(() => folder?.icon ?? "", [folder?.icon]);
 
   if (loading && !folder) {
@@ -347,8 +347,7 @@ export default function FolderScreen() {
                 {folder.name}
               </Text>
               <Text fontSize={13} color="$textMuted" mt={5}>
-                {folder.modules.length} module
-                {folder.modules.length !== 1 ? "s" : ""}
+                {pluralize(folder.modules.length, "module")}
               </Text>
             </YStack>
           </XStack>
@@ -442,7 +441,7 @@ export default function FolderScreen() {
         }
         subtitle={
           menuView === "confirm"
-            ? `${moduleCount} module${moduleCount !== 1 ? "s" : ""} will stay in your library.\nThis can't be undone.`
+            ? `${pluralize(moduleCount, "module")} will stay in your library.\nThis can't be undone.`
             : undefined
         }
       >

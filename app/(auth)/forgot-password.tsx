@@ -5,7 +5,11 @@ import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
-import { getErrorMessage } from "@/src/utils/apiError";
+import {
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
@@ -42,7 +46,7 @@ export default function ForgotPassword() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await readJsonBody(response);
         setServerError(getErrorMessage(data, "Failed to send code"));
         return;
       }
@@ -50,7 +54,7 @@ export default function ForgotPassword() {
       router.push({ pathname: "/reset-password", params: { email } });
     } catch (error) {
       console.error("[ForgotPassword] request error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 

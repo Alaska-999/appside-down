@@ -10,7 +10,7 @@ import { BellRing, Settings } from "lucide-react-native";
 import { Text, YStack } from "tamagui";
 
 export default function ProfileScreen() {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const todayIndex = (new Date().getDay() + 6) % 7;
 
   return (

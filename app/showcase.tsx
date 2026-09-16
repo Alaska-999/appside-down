@@ -13,8 +13,8 @@ import { CodeInput } from "@/src/components/ui/CodeInput";
 import { FilterChip } from "@/src/components/ui/FilterChip";
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { AppFab, IconButton } from "@/src/components/ui/IconButton";
-import { ProgressBar } from "@/src/components/ui/ProgressBar";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
+import { ProgressSplitBar } from "@/src/components/ui/ProgressSplitBar";
 import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
 import {
   BackgroundMesh,
@@ -918,7 +918,7 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>Прогреси · bar 8 · ring 62 · underline 2 · число</Label>
           <AppCard size="lg" variant="surface" gap={14}>
-            <ProgressBar known={58} learning={84} total={200} />
+            <ProgressSplitBar known={58} learning={84} total={200} />
             <XStack ai="center" gap={16}>
               <ProgressRing progress={0.64} label="64%" animated />
               <YStack f={1} gap={4}>

@@ -61,6 +61,7 @@ function TagInputRow({
           value={value}
           onChangeText={onChange}
           onSubmitEditing={onCommit}
+          submitBehavior="submit"
           onFocus={() => onFocusChange(true)}
           onBlur={() => onFocusChange(false)}
         />
@@ -145,7 +146,9 @@ export function TagEditor({
     if (isTaken(trimmed)) return setError(takenMessage(trimmed));
     const result = await onAdd(trimmed);
     if (result) return setError(result);
-    closeAdd();
+    setNewValue("");
+    setError(null);
+    newInputRef.current?.focus();
   };
 
   const commitRename = async () => {

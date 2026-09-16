@@ -3,6 +3,7 @@ import { Checkbox } from "@/src/components/ui/Checkbox";
 import { StarGlyph } from "@/src/components/ui/StarGlyph";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { Lock } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable } from "react-native";
@@ -78,7 +79,7 @@ export function SelectableModuleRow({
             </Text>
             <XStack ai="center" gap={6} mt={3}>
               <Text fontSize={12.5} color="$textMuted">
-                {itemsCount} card{itemsCount !== 1 ? "s" : ""}
+                {pluralize(itemsCount, "card")}
               </Text>
               {starred && !locked && <StarGlyph />}
               {locked && (

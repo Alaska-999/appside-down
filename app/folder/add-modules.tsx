@@ -20,6 +20,7 @@ import {
 } from "@/src/constants/rawColors";
 import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
+import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
@@ -27,9 +28,9 @@ import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { AlertTriangle, Captions, Plus, X } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, View } from "react-native";
-import { Text, XStack, YStack } from "tamagui";
+import { Spinner, Text, XStack, YStack } from "tamagui";
 
 type ModuleItem = {
   id: string;
@@ -57,77 +58,91 @@ function mapModule(raw: any, folderId: string | undefined): ModuleItem {
   };
 }
 
+function LoadMoreFooter({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <YStack py="$3" ai="center">
+      <Spinner size="small" color="$mint" />
+    </YStack>
+  );
+}
+
 export default function AddModules() {
   const screen = useScreenInsets();
   const { folderId, folderName } = useLocalSearchParams<{
     folderId: string;
     folderName?: string;
   }>();
-  const [modules, setModules] = useState<ModuleItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<Filter | null>(null);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search.trim());
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const hasLoadedRef = useRef(false);
+  const hasFocusedRef = useRef(false);
+  const filterInitRef = useRef(false);
 
-  const fetchModules = async () => {
-    const isFirstLoad = !hasLoadedRef.current;
-    if (isFirstLoad) {
-      setLoading(true);
-      setError(null);
-    }
-    try {
-      const res = await protectedFetch(`${API_BASE_URL}/modules?limit=50`);
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-      const page: { data: any[] } = await res.json();
-      const items = (page.data ?? []).map((m) => mapModule(m, folderId));
-      setModules(items);
-      setFilter(
-        (prev) =>
-          prev ??
-          (items.some((m) => m.folderCount === 0 && !m.inThisFolder)
-            ? "noFolder"
-            : "all"),
+  const fetchModulesPage = useCallback(
+    async (cursor: string | null) => {
+      const params = new URLSearchParams({ limit: "30" });
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (cursor) params.set("cursor", cursor);
+      const res = await protectedFetch(
+        `${API_BASE_URL}/modules?${params.toString()}`,
       );
-      hasLoadedRef.current = true;
-    } catch (err) {
-      console.error("[AddModules] fetch error:", err);
-      if (isFirstLoad) setError("Failed to load modules");
-    } finally {
-      if (isFirstLoad) setLoading(false);
-    }
-  };
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      const page: { data: any[]; nextCursor: string | null } =
+        await res.json();
+      return {
+        data: (page.data ?? []).map((m) => mapModule(m, folderId)),
+        nextCursor: page.nextCursor,
+      };
+    },
+    [debouncedSearch, folderId],
+  );
+
+  const modulesList = usePaginatedCursorList<ModuleItem>(
+    fetchModulesPage,
+    `${folderId}|${debouncedSearch}`,
+  );
 
   useFocusEffect(
     useCallback(() => {
-      fetchModules();
-    }, [folderId]),
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        return;
+      }
+      modulesList.reload();
+    }, [modulesList.reload]),
   );
+
+  useEffect(() => {
+    if (filterInitRef.current) return;
+    if (modulesList.initialLoading || modulesList.error) return;
+    filterInitRef.current = true;
+    setFilter(
+      modulesList.items.some((m) => m.folderCount === 0 && !m.inThisFolder)
+        ? "noFolder"
+        : "all",
+    );
+  }, [modulesList.initialLoading, modulesList.error, modulesList.items]);
 
   const counts = useMemo(
     () => ({
-      all: modules.length,
-      noFolder: modules.filter((m) => m.folderCount === 0).length,
-      starred: modules.filter((m) => m.starred).length,
+      all: modulesList.items.length,
+      noFolder: modulesList.items.filter((m) => m.folderCount === 0).length,
+      starred: modulesList.items.filter((m) => m.starred).length,
     }),
-    [modules],
+    [modulesList.items],
   );
 
   const visible = useMemo(() => {
-    const byFilter = modules.filter((m) => {
+    return modulesList.items.filter((m) => {
       if (filter === "noFolder") return m.folderCount === 0;
       if (filter === "starred") return m.starred;
       return true;
     });
-    const q = debouncedSearch.toLowerCase();
-    return q
-      ? byFilter.filter((m) => m.name.toLowerCase().includes(q))
-      : byFilter;
-  }, [modules, filter, debouncedSearch]);
+  }, [modulesList.items, filter]);
 
   const toggleModule = (id: string) => {
     setSelectedIds((prev) => {
@@ -232,13 +247,13 @@ export default function AddModules() {
           />
         </XStack>
 
-        {loading ? (
+        {modulesList.initialLoading ? (
           <YStack px="$screenX" gap={11}>
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} height={74} borderRadius="$card" />
             ))}
           </YStack>
-        ) : error ? (
+        ) : modulesList.error ? (
           <YStack px="$screenX">
             <StateCard
               tone="error"
@@ -246,7 +261,7 @@ export default function AddModules() {
               title="Couldn't load modules"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
               buttonLabel="Try again"
-              onButtonPress={fetchModules}
+              onButtonPress={modulesList.retry}
             />
           </YStack>
         ) : (
@@ -256,6 +271,8 @@ export default function AddModules() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
+            onEndReached={modulesList.loadMore}
+            onEndReachedThreshold={0.4}
             contentContainerStyle={{
               paddingHorizontal: screenGutter,
               paddingBottom: ADD_BAR_HEIGHT + screen.insets.bottom + 24,
@@ -299,7 +316,12 @@ export default function AddModules() {
             )}
             ListFooterComponent={
               debouncedSearch && visible.length === 0 ? null : (
-                <YStack mt={4}>
+                <YStack mt={4} gap={4}>
+                  <LoadMoreFooter
+                    visible={
+                      modulesList.loading && !modulesList.initialLoading
+                    }
+                  />
                   <AppButton
                     variant="glass"
                     icon={

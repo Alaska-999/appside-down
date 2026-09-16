@@ -21,6 +21,7 @@ import {
 } from "@/src/constants/motion";
 import { TEXT_MINT_MED } from "@/src/constants/surfaceAlpha";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { ratio } from "@/src/utils/progress";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
@@ -61,7 +62,7 @@ export function FlashcardsComplete({
   const screen = useScreenInsets();
   const reducedMotion = useReducedMotion();
 
-  const fraction = total > 0 ? known / total : 0;
+  const fraction = ratio(known, total);
   const isFull = fraction >= 1;
   const targetPct = Math.round(fraction * 100);
   const duration = isFull ? 2400 : 1700;

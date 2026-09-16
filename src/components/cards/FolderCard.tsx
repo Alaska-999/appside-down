@@ -18,6 +18,7 @@ import {
   SURFACE_GLASS_BG_STRONG,
 } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { ChevronRight, Plus, Settings } from "lucide-react-native";
 import { useState } from "react";
@@ -211,7 +212,7 @@ export function FolderCard({
                     {folder.name}
                   </Text>
                   <Text fontSize={12.5} color="$textMuted" mt={3}>
-                    {moduleCount} module{moduleCount !== 1 ? "s" : ""}
+                    {pluralize(moduleCount, "module")}
                   </Text>
                 </YStack>
                 <Pressable

@@ -7,8 +7,8 @@ import {
   SweepGradient,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useEffect, useMemo, useState } from "react";
-import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 import {
   Easing,
   useDerivedValue,
@@ -22,6 +22,7 @@ import {
   GRADIENT_BORDER_PRESETS,
   GradientBorderPreset,
 } from "@/src/components/ui/gradientBorderPresets";
+import { useMeasure } from "@/src/hooks/useMeasure";
 
 export type { GradientBorderPreset };
 
@@ -75,7 +76,7 @@ export function GradientBorder({
   spinDuration,
   sweepStartDeg = 0,
 }: GradientBorderProps) {
-  const [size, setSize] = useState({ w: 0, h: 0 });
+  const { size, onLayout } = useMeasure();
   const reducedMotion = useReducedMotion();
   const spin = useSharedValue(0);
   const spinning = sweep && !!spinDuration && !reducedMotion;
@@ -131,10 +132,6 @@ export function GradientBorder({
     [resolvedAngle, size.w, size.h],
   );
 
-  const onLayout = (e: LayoutChangeEvent) => {
-    const { width: w, height: h } = e.nativeEvent.layout;
-    setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
-  };
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>

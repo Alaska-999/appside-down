@@ -15,6 +15,8 @@ import {
   SURFACE_GLASS_BORDER_FAINT,
 } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
+import { ratio } from "@/src/utils/progress";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
 import { Check, ChevronRight, X } from "lucide-react-native";
@@ -158,7 +160,7 @@ export function ModuleCard({
                 {mastered && <MasteredTick />}
               </XStack>
               <Text fontSize={12.5} color="$textMuted" mt={3}>
-                {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
+                {pluralize(module.itemsCount, "card")}
               </Text>
             </YStack>
 
@@ -181,8 +183,8 @@ export function ModuleCard({
         </AppCard>
         {hasProgress && (
           <ProgressUnderline
-            ratio={total ? known / total : 0}
-            dim={known / total < 0.25}
+            ratio={ratio(known, total)}
+            dim={ratio(known, total) < 0.25}
           />
         )}
       </YStack>

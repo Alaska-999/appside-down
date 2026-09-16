@@ -6,6 +6,7 @@ import {
 } from "@/src/constants/iconColors";
 import { SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import { withAlpha } from "@/src/utils/withAlpha";
+import { ratio } from "@/src/utils/progress";
 import { StyleSheet, View } from "react-native";
 import { XStack } from "tamagui";
 
@@ -52,7 +53,7 @@ export function ProgressSplitBar({
   total: number;
 }) {
   const safeTotal = total > 0 ? total : 1;
-  const knownRatio = Math.max(0, Math.min(1, known / safeTotal));
+  const knownRatio = ratio(known, total);
   const learningRatio = Math.max(0, Math.min(1 - knownRatio, learning / safeTotal));
 
   return (

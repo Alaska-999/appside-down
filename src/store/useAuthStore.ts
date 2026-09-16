@@ -38,9 +38,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async (opts) => {
-        set({ user: null, token: null, sessionExpired: opts?.expired ?? false });
         const { useStudyQueueStore } = await import("./useStudyQueueStore");
-        useStudyQueueStore.getState().clear();
+        await useStudyQueueStore.getState().flushBeforeLogout(opts);
+        set({ user: null, token: null, sessionExpired: opts?.expired ?? false });
         await Promise.all([
           SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
           SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
@@ -58,11 +58,24 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-storage",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ user: state.user }),
-      onRehydrateStorage: () => (state) => {
-        SecureStore.getItemAsync(ACCESS_TOKEN_KEY).then((token) => {
-          if (token) state?.setToken(token);
-          state?._setHydrated(true);
-        });
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error("Failed to rehydrate auth storage:", error);
+        }
+
+        const finishHydration = () => {
+          const store = state ?? useAuthStore.getState();
+          store._setHydrated(true);
+        };
+
+        SecureStore.getItemAsync(ACCESS_TOKEN_KEY)
+          .then((token) => {
+            if (token) state?.setToken(token);
+          })
+          .catch((secureStoreError) => {
+            console.error("Failed to read access token:", secureStoreError);
+          })
+          .finally(finishHydration);
       },
     },
   ),

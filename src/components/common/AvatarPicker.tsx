@@ -31,7 +31,7 @@ const uriToBlob = (uri: string): Promise<Blob> =>
   });
 
 export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const [uploading, setUploading] = useState(false);
 
   const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {

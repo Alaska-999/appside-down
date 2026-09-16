@@ -31,7 +31,10 @@ import {
   BLACK_SCRIM_SOFT,
   GLASS_BORDER_TOP,
   SCRIM_BASE_30,
+  SCRIM_BASE_MAX,
   SCRIM_BASE_SOFT,
+  SCRIM_BASE_STRONG,
+  SCRIM_BASE_TRANSPARENT,
 } from "@/src/constants/rawColors";
 import {
   SURFACE_GLOW_COLOR,
@@ -45,7 +48,9 @@ import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
 import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { ratio } from "@/src/utils/progress";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
@@ -56,7 +61,7 @@ import {
   Sparkles,
 } from "lucide-react-native";
 import { useCallback, useState } from "react";
-import { FlatList, Pressable, RefreshControl, StyleSheet } from "react-native";
+import { FlatList, Pressable, RefreshControl } from "react-native";
 import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 type PublicModuleResult = {
@@ -157,8 +162,8 @@ function PublicModuleRow({ module }: { module: PublicModuleResult }) {
         <XStack ai="center" gap={6} flexWrap="wrap">
           <Text fontSize={14} color="$colorMuted">
             {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
-            {count} term{count !== 1 ? "s" : ""}
-            {saves > 0 ? ` · ${saves} save${saves !== 1 ? "s" : ""}` : ""}
+            {pluralize(count, "term")}
+            {saves > 0 ? ` · ${pluralize(saves, "save")}` : ""}
           </Text>
           {module.savedCopyId && (
             <XStack
@@ -225,7 +230,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
-  const { user, isHydrated } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
   const isLoggedIn = !!user;
 
   const searching = search.trim().length >= 2;
@@ -310,9 +316,7 @@ export default function Home() {
     ? {
         known: featuredModule.known,
         total: featuredModule.total,
-        progress: featuredModule.total
-          ? featuredModule.known / featuredModule.total
-          : 0,
+        progress: ratio(featuredModule.known, featuredModule.total),
       }
     : null;
 
@@ -633,7 +637,7 @@ export default function Home() {
                               {m.name}
                             </Text>
                             <Text fontSize={11} color="$colorMuted" mt={4}>
-                              {count} card{count !== 1 ? "s" : ""}
+                              {pluralize(count, "card")}
                             </Text>
                           </YStack>
                         </AppCard>
@@ -668,26 +672,22 @@ export default function Home() {
                             variant="media"
                             minHeight={122}
                             cover={
-                              <YStack style={StyleSheet.absoluteFill}>
-                                <LinearGradient
-                                  colors={
-                                    DISCOVER_COVERS[i % DISCOVER_COVERS.length]
-                                  }
-                                  start={{ x: 0.5, y: 0 }}
-                                  end={{ x: 0.5, y: 1 }}
-                                  style={StyleSheet.absoluteFill}
-                                />
-                                <YStack
-                                  style={StyleSheet.absoluteFill}
-                                  bg={SCRIM_BASE_30}
-                                />
-                                <CoverGlow
-                                  lampColor={SURFACE_GLOW_COLOR}
-                                  blikColor={SURFACE_WHITE_STRONG}
-                                  shadowColor={BLACK_SCRIM_SOFT}
-                                  radius={20}
-                                />
-                              </YStack>
+                              <CoverGlow
+                                coverColors={
+                                  DISCOVER_COVERS[i % DISCOVER_COVERS.length]
+                                }
+                                tintColor={SCRIM_BASE_30}
+                                scrimColors={[
+                                  SCRIM_BASE_TRANSPARENT,
+                                  SCRIM_BASE_STRONG,
+                                  SCRIM_BASE_MAX,
+                                ]}
+                                scrimPositions={[0.24, 0.62, 1]}
+                                lampColor={SURFACE_GLOW_COLOR}
+                                blikColor={SURFACE_WHITE_STRONG}
+                                shadowColor={BLACK_SCRIM_SOFT}
+                                radius={20}
+                              />
                             }
                           >
                             <Text

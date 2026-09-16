@@ -4,6 +4,7 @@ import * as Crypto from "expo-crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { protectedFetch } from "../utils/protectedFetch";
+import { useAuthStore } from "./useAuthStore";
 
 export interface StudyEventInput {
   id: string;
@@ -18,6 +19,7 @@ interface StudyQueueState {
   flushing: boolean;
   addEvent: (event: Omit<StudyEventInput, "id">) => void;
   flush: () => Promise<void>;
+  flushBeforeLogout: (opts?: { expired?: boolean }) => Promise<void>;
   clear: () => void;
 }
 
@@ -44,6 +46,7 @@ export const useStudyQueueStore = create<StudyQueueState>()(
       flush: async () => {
         if (inFlight) return inFlight;
         if (get().events.length === 0) return;
+        if (!useAuthStore.getState().user) return;
         const run = async () => {
           set({ flushing: true });
           try {
@@ -66,6 +69,11 @@ export const useStudyQueueStore = create<StudyQueueState>()(
           inFlight = null;
         });
         return inFlight;
+      },
+
+      flushBeforeLogout: async (opts) => {
+        if (opts?.expired) return;
+        await get().flush();
       },
 
       clear: () => set({ events: [] }),

@@ -12,7 +12,7 @@ import {
   TileMode,
   vec,
 } from "@shopify/react-native-skia";
-import { ReactNode, useEffect, useMemo } from "react";
+import { memo, ReactNode, useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import {
   Easing,
@@ -83,7 +83,13 @@ function useLayerPaint(
   }, [blur, saturate, mode]);
 }
 
-function BlobLayer({ layer, mode }: { layer: Layer; mode?: BgDebugMode }) {
+const BlobLayer = memo(function BlobLayer({
+  layer,
+  mode,
+}: {
+  layer: Layer;
+  mode?: BgDebugMode;
+}) {
   const paint = useLayerPaint(layer.blur, layer.saturate, mode);
   return (
     <Group layer={paint}>
@@ -108,9 +114,9 @@ function BlobLayer({ layer, mode }: { layer: Layer; mode?: BgDebugMode }) {
       ))}
     </Group>
   );
-}
+});
 
-function BeamLayer({
+const BeamLayer = memo(function BeamLayer({
   beam,
   w,
   h,
@@ -157,9 +163,9 @@ function BeamLayer({
       </Rect>
     </Group>
   );
-}
+});
 
-function Vignette({
+const Vignette = memo(function Vignette({
   vignette,
   w,
   h,
@@ -204,9 +210,9 @@ function Vignette({
       </Rect>
     </Group>
   );
-}
+});
 
-export function Grain({
+export const Grain = memo(function Grain({
   w,
   h,
   amount,
@@ -227,9 +233,9 @@ export function Grain({
       </Rect>
     </Group>
   );
-}
+});
 
-export function BackgroundMesh({
+export const BackgroundMesh = memo(function BackgroundMesh({
   preset,
   animated = false,
   debugMode,
@@ -263,7 +269,7 @@ export function BackgroundMesh({
       {spec.grain !== undefined && <Grain w={w} h={h} amount={spec.grain} />}
     </Canvas>
   );
-}
+});
 
 export function ScreenBackground({
   preset,

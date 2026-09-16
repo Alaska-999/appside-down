@@ -18,14 +18,15 @@ import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_ACCENT, ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
+import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useServerError } from "@/src/hooks/useServerError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { Folder, Globe } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Folder, Globe } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FormProvider,
   useFieldArray,
@@ -60,7 +61,6 @@ export default function ModuleCreate() {
       },
     ],
   }));
-  const [folders, setFolders] = useState<FolderOption[]>([]);
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [discardCardCount, setDiscardCardCount] = useState(0);
@@ -130,24 +130,27 @@ export default function ModuleCreate() {
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
 
-  useEffect(() => {
-    const loadFolders = async () => {
-      try {
-        const res = await protectedFetch(`${API_BASE_URL}/folders?limit=50`);
-        if (!res.ok) return;
-        const page = await res.json();
-        setFolders(
-          (page.data ?? []).map((f: FolderOption) => ({
-            id: f.id,
-            name: f.name,
-          })),
-        );
-      } catch (err) {
-        console.error("[ModuleCreate] folders error:", err);
-      }
+  const fetchFoldersPage = useCallback(async (cursor: string | null) => {
+    const params = new URLSearchParams({ limit: "30" });
+    if (cursor) params.set("cursor", cursor);
+    const res = await protectedFetch(
+      `${API_BASE_URL}/folders?${params.toString()}`,
+    );
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+    const page = await res.json();
+    return {
+      data: (page.data ?? []).map((f: FolderOption) => ({
+        id: f.id,
+        name: f.name,
+      })),
+      nextCursor: page.nextCursor,
     };
-    loadFolders();
   }, []);
+
+  const foldersList = usePaginatedCursorList<FolderOption>(
+    fetchFoldersPage,
+    "folders",
+  );
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -182,7 +185,7 @@ export default function ModuleCreate() {
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
 
-  const selectedFolder = folders.find((f) => f.id === folderId);
+  const selectedFolder = foldersList.items.find((f) => f.id === folderId);
 
   const onSubmit = async (data: ModuleForm) => {
     setServerError(null);
@@ -420,7 +423,7 @@ export default function ModuleCreate() {
                 setFolderSheetOpen(false);
               }}
             />
-            {folders.map((folder) => (
+            {foldersList.items.map((folder) => (
               <SheetRow
                 key={folder.id}
                 icon={Folder}
@@ -432,6 +435,14 @@ export default function ModuleCreate() {
                 }}
               />
             ))}
+            {foldersList.hasMore && (
+              <SheetRow
+                icon={ChevronDown}
+                label={foldersList.loading ? "Loading…" : "Load more folders"}
+                disabled={foldersList.loading}
+                onPress={foldersList.loadMore}
+              />
+            )}
           </SheetRows>
         </AppSheet>
 
