@@ -5,7 +5,13 @@ import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
-import { LightLevel } from "@/src/components/ui/GlowSurface";
+import {
+  Blik,
+  GlowTone,
+  InnerBloom,
+  Lamp,
+  LightLevel,
+} from "@/src/components/ui/GlowSurface";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { ProgressRing } from "@/src/components/ui/ProgressRing";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
@@ -15,13 +21,24 @@ import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import {
   ICON_ACCENT,
+  ICON_CYAN_LIGHT,
+  ICON_CYAN_TEAL,
+  ICON_HERO_LIME,
   ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_MINT_TINT_DARK,
   ICON_TEAL,
 } from "@/src/constants/iconColors";
-import { GLASS_BORDER_TOP, SCRIM_BASE_SOFT } from "@/src/constants/rawColors";
 import {
+  BLACK_SCRIM_SOFT,
+  GLASS_BORDER_TOP,
+  SCRIM_BASE_30,
+  SCRIM_BASE_SOFT,
+} from "@/src/constants/rawColors";
+import {
+  SURFACE_GLOW_COLOR,
   SURFACE_WHITE_BORDER,
+  SURFACE_WHITE_STRONG,
   TEXT_MINT_STRONG,
 } from "@/src/constants/surfaceAlpha";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
@@ -76,24 +93,27 @@ type Stats = {
   continueLearning: ContinueLearningEntry[];
 };
 
-const MODULE_MONOGRAM_GRADIENT: [string, string] = [ICON_MINT, ICON_TEAL];
-const DISCOVER_COVER_DIM = "rgba(27,168,143,0.34)";
-const DISCOVER_COVER_SAVED = "rgba(27,168,143,0.82)";
-const DISCOVER_COVER_BASE: [string, string] = ["#0E1A1E", "#08090C"];
+const RECENT_LIGHT: { tone: GlowTone; glow: LightLevel }[] = [
+  { tone: "neutral", glow: 2 },
+  { tone: "teal", glow: 4 },
+  { tone: "neutral", glow: 1 },
+  { tone: "teal", glow: 3 },
+  { tone: "neutral", glow: 4 },
+  { tone: "teal", glow: 1 },
+  { tone: "neutral", glow: 3 },
+];
+const MODULE_MONOGRAM_GRADIENTS: [string, string][] = [
+  [ICON_ACCENT, ICON_MINT],
+  [ICON_MINT, ICON_TEAL],
+  [ICON_ACCENT, ICON_TEAL],
+];
+const DISCOVER_COVERS: [string, string][] = [
+  [ICON_MINT_LIGHT, ICON_HERO_LIME],
 
-function progressGlow(progress: number): LightLevel {
-  if (progress >= 0.8) return 4;
-  if (progress >= 0.4) return 3;
-  if (progress > 0) return 2;
-  return 1;
-}
-
-function moduleProgress(module: HomeModule): number {
-  const cards = module.flashcards ?? [];
-  if (cards.length === 0) return 0;
-  const known = cards.filter((c) => c.status === "KNOWN").length;
-  return known / cards.length;
-}
+  [ICON_CYAN_LIGHT, ICON_MINT_TINT_DARK],
+  [ICON_ACCENT, ICON_CYAN_TEAL],
+  [ICON_MINT, ICON_CYAN_TEAL],
+];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
   const count = module._count?.flashcards ?? 0;
@@ -281,8 +301,6 @@ export default function Home() {
 
   return (
     <YStack f={1} bg="$background">
-      {/* <BackgroundMesh preset="home2" /> */}
-      {/* <BackgroundMesh preset="homeLamp" /> */}
       {/* <BackgroundMesh preset="homeLampWhite" /> */}
       {/* <BackgroundMesh preset="finish" /> */}
       <BackgroundMesh preset="homeLampWhite" />
@@ -308,12 +326,18 @@ export default function Home() {
               </XStack>
             </YStack>
 
+            {/* | "tealDeep"
+  | "limeGlassLit"
+  | "frostGlass"
+  | "frostVeil"
+  */}
+
             <UserAvatar
               avatarUrl={user?.avatarUrl}
               username={user?.username}
               onPress={navigateToProfile}
               size={55}
-              variant="frostGlass"
+              variant="limeGlassLit"
             />
           </XStack>
           <SearchField
@@ -388,19 +412,13 @@ export default function Home() {
                     onButtonPress={() => fetchData()}
                   />
                 ) : featuredModule && featuredStats ? (
-                  <AppCard
-                    variant="glow"
-                    size="lg"
-                    minHeight={186}
-                    tone="teal"
-                    glow={2}
-                  >
+                  <AppCard variant="glow" size="lg" minHeight={186} tone="teal">
                     <Text
                       fontSize={11}
                       fontWeight="700"
                       letterSpacing={1.1}
                       textTransform="uppercase"
-                      color="$colorMuted"
+                      color="$limeLight"
                       mb={7}
                     >
                       Continue
@@ -433,6 +451,7 @@ export default function Home() {
                       <ProgressRing
                         progress={featuredStats.progress}
                         label={`${Math.round(featuredStats.progress * 100)}%`}
+                        animated
                       />
                     </XStack>
                   </AppCard>
@@ -445,7 +464,8 @@ export default function Home() {
 
                 <XStack gap={10}>
                   <AppCard
-                    variant="surface"
+                    variant="glow"
+                    tone="teal"
                     f={1}
                     minHeight={104}
                     px={16}
@@ -478,7 +498,9 @@ export default function Home() {
                     </Text>
                   </AppCard>
                   <AppCard
-                    variant="surface"
+                    variant="glow"
+                    tone="neutral"
+                    glow={1}
                     f={1}
                     minHeight={104}
                     px={16}
@@ -528,14 +550,14 @@ export default function Home() {
                       gap: 11,
                     }}
                   >
-                    {recentModules.map((m) => {
+                    {recentModules.map((m, i) => {
                       const count = m._count?.flashcards ?? 0;
                       return (
                         <AppCard
                           key={m.id}
                           variant="glow"
-                          tone="teal"
-                          glow={progressGlow(moduleProgress(m))}
+                          tone={RECENT_LIGHT[i % RECENT_LIGHT.length].tone}
+                          glow={RECENT_LIGHT[i % RECENT_LIGHT.length].glow}
                           width={142}
                           height={132}
                           px={15}
@@ -547,7 +569,11 @@ export default function Home() {
                           }}
                         >
                           <LinearGradient
-                            colors={MODULE_MONOGRAM_GRADIENT}
+                            colors={
+                              MODULE_MONOGRAM_GRADIENTS[
+                                i % MODULE_MONOGRAM_GRADIENTS.length
+                              ]
+                            }
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                             style={{
@@ -594,12 +620,9 @@ export default function Home() {
                     onSeeAll={() => router.push("/library")}
                   />
                   <YStack gap={11}>
-                    {discoverModules.map((m) => {
+                    {discoverModules.map((m, i) => {
                       const count = m._count?.flashcards ?? 0;
                       const author = m.author?.username ?? m.authorUsername;
-                      const coverLight = m.savedCopyId
-                        ? DISCOVER_COVER_SAVED
-                        : DISCOVER_COVER_DIM;
                       return (
                         <YStack
                           key={m.id}
@@ -617,16 +640,30 @@ export default function Home() {
                             cover={
                               <YStack style={StyleSheet.absoluteFill}>
                                 <LinearGradient
-                                  colors={DISCOVER_COVER_BASE}
-                                  start={{ x: 0.2, y: 0 }}
-                                  end={{ x: 0.8, y: 1 }}
+                                  colors={
+                                    DISCOVER_COVERS[i % DISCOVER_COVERS.length]
+                                  }
+                                  start={{ x: 0.5, y: 0 }}
+                                  end={{ x: 0.5, y: 1 }}
                                   style={StyleSheet.absoluteFill}
                                 />
-                                <LinearGradient
-                                  colors={[coverLight, "transparent"]}
-                                  start={{ x: 0.26, y: 0.14 }}
-                                  end={{ x: 1, y: 1 }}
+                                <YStack
                                   style={StyleSheet.absoluteFill}
+                                  bg={SCRIM_BASE_30}
+                                />
+                                <Lamp color={SURFACE_GLOW_COLOR} />
+                                <Blik
+                                  color={SURFACE_WHITE_STRONG}
+                                  size={48}
+                                  x={-24}
+                                  y={-24}
+                                  blur={18}
+                                />
+                                <InnerBloom
+                                  color={BLACK_SCRIM_SOFT}
+                                  radius={20}
+                                  spread={22}
+                                  blur={17}
                                 />
                               </YStack>
                             }

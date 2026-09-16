@@ -2,8 +2,8 @@ import { FormInput } from "@/src/components/common/FormInput";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
 import {
-  AvatarPlaceholder,
   AVATAR_PLACEHOLDER_VARIANTS,
+  AvatarPlaceholder,
 } from "@/src/components/ui/AvatarPlaceholder";
 import { AvatarRing } from "@/src/components/ui/AvatarRing";
 import { AppButton } from "@/src/components/ui/Button";
@@ -41,11 +41,11 @@ import {
   ICON_TEAL,
   ICON_TEAL_BRIGHT,
 } from "@/src/constants/iconColors";
+import { TEXT_DARK_ON_ACCENT } from "@/src/constants/rawColors";
 import {
   SURFACE_WHITE_STRONG,
   TEXT_MINT_META,
 } from "@/src/constants/surfaceAlpha";
-import { TEXT_DARK_ON_ACCENT } from "@/src/constants/rawColors";
 import { TYPE } from "@/src/constants/type";
 import { useDelayedLoading } from "@/src/hooks/useDelayedLoading";
 import { LinearGradient } from "expo-linear-gradient";
@@ -71,16 +71,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScrollView, Text, XStack, YStack } from "tamagui";
 
 const BG_PRESETS: { preset: BackgroundPreset; debug?: BgDebugMode }[] = [
-  { preset: "home" },
-  { preset: "home2" },
   { preset: "homeLamp" },
   { preset: "homeLampWhite" },
-  { preset: "homeSpark" },
-  { preset: "module" },
-  { preset: "form" },
-  { preset: "formBright" },
   { preset: "folder" },
-  { preset: "flash" },
   { preset: "auth" },
   { preset: "finish" },
   { preset: "finish2" },
@@ -285,10 +278,16 @@ function SheetsDemo() {
         <AppButton variant="secondary" onPress={() => setToastOpen(true)}>
           Показати тост · error
         </AppButton>
-        <AppButton variant="secondary" onPress={() => setSuccessToastOpen(true)}>
+        <AppButton
+          variant="secondary"
+          onPress={() => setSuccessToastOpen(true)}
+        >
           Показати тост · success + Undo
         </AppButton>
-        <AppButton variant="secondary" onPress={() => setNeutralToastOpen(true)}>
+        <AppButton
+          variant="secondary"
+          onPress={() => setNeutralToastOpen(true)}
+        >
           Показати тост · neutral
         </AppButton>
         <AppButton variant="secondary" onPress={() => setSmToastOpen(true)}>
@@ -514,7 +513,7 @@ export default function Showcase() {
         <YStack f={1} bg="$background">
           <BackgroundMesh
             preset={entry.preset}
-            animated={entry.preset === "auth" || entry.preset === "flash"}
+            animated={entry.preset === "auth"}
             debugMode={entry.debug}
           />
           <Text
@@ -536,7 +535,7 @@ export default function Showcase() {
 
   return (
     <YStack f={1} bg="$background">
-      <BackgroundMesh preset="home" />
+      <BackgroundMesh preset="homeLampWhite" />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + 12,
@@ -898,7 +897,9 @@ export default function Showcase() {
           <XStack gap={16} ai="center">
             <IconButton
               variant="glass"
-              icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+              icon={
+                <Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+              }
             />
             <IconButton
               variant="acc"
@@ -1068,15 +1069,23 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>liquid лінза 44 · тільки над градієнтом</Label>
           <YStack h={140} br="$card" overflow="hidden">
-            <BackgroundMesh preset="module" />
+            <BackgroundMesh preset="crossBeamsTeal" />
             <XStack f={1} ai="center" jc="center" gap={16}>
               <IconButton
                 variant="liquidGlass"
-                icon={<Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+                icon={
+                  <Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+                }
               />
               <IconButton
                 variant="liquidGlass"
-                icon={<Settings2 size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />}
+                icon={
+                  <Settings2
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
+                }
               />
               <IconButton
                 variant="liquidGlass"

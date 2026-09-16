@@ -13,11 +13,14 @@ import {
 } from "@shopify/react-native-skia";
 import {
   ICON_ACCENT,
+  ICON_BASE,
   ICON_INDIGO,
   ICON_LIME,
   ICON_MINT,
+  ICON_MINT_LIGHT,
   ICON_TEAL,
 } from "@/src/constants/iconColors";
+import { SPLASH_BASE_TOP } from "@/src/constants/rawColors";
 import React, { useEffect, useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import {
@@ -33,16 +36,15 @@ import {
 } from "react-native-reanimated";
 
 export type MeshVariant =
-  | "mesh-full"
-  | "mesh-dark"
-  | "fall-morph"
-  | "breathe-core";
+  "mesh-full" | "mesh-dark" | "fall-morph" | "breathe-core" | "calm-mist";
 
 interface Props {
   variant?: MeshVariant;
 }
 
 const MOCKUP_WIDTH = 250;
+const ELEMENTS_WIDTH = 393;
+const CALM_INTENSITY = 0.6;
 const THIRDS = [0, 1 / 3, 2 / 3, 1];
 const HALVES = [0, 1];
 
@@ -144,6 +146,19 @@ function useMorphColor(
   return useDerivedValue(() => {
     const color = interpolateColor(phase.value, input, output);
     return [withAlpha(color, 1), withAlpha(color, 0)];
+  });
+}
+
+function useMorphColorAlpha(
+  phase: SharedValue<number>,
+  input: number[],
+  output: string[],
+  alphas: number[],
+) {
+  return useDerivedValue(() => {
+    const color = interpolateColor(phase.value, input, output);
+    const alpha = interpolate(phase.value, input, alphas) * CALM_INTENSITY;
+    return [withAlpha(color, alpha), withAlpha(color, 0)];
   });
 }
 
@@ -509,6 +524,59 @@ function BreatheCore({ width, height, still }: VariantProps) {
   );
 }
 
+function CalmMist({ width, height, still }: VariantProps) {
+  const { boxW, boxH, offset } = useMeshBox(width, height, 0.18);
+  const move = useLoop(11000, true, !still);
+  const hue = useLoop(13000, true, !still);
+  const paint = useMeshPaint((width / ELEMENTS_WIDTH) * 46, 0.92);
+  const base = gradientEnds(178, boxW, boxH);
+
+  const coreX = useDerivedValue(() => boxW * 0.5);
+  const coreY = useTrack(move, HALVES, [0.38, 0.46], boxH);
+  const counterX = useTrack(move, HALVES, [0.76, 0.62], boxW);
+  const counterY = useDerivedValue(() => boxH * 0.84);
+
+  const core = useMorphColorAlpha(
+    hue,
+    HALVES,
+    [ICON_MINT, ICON_MINT_LIGHT],
+    [0.27, 0.24],
+  );
+  const counter = useMorphColorAlpha(
+    hue,
+    HALVES,
+    [ICON_INDIGO, ICON_MINT],
+    [0.17, 0.15],
+  );
+
+  return (
+    <Group transform={offset} layer={paint}>
+      <Rect x={0} y={0} width={boxW} height={boxH}>
+        <LinearGradient
+          start={vec(base.start.x, base.start.y)}
+          end={vec(base.end.x, base.end.y)}
+          colors={[SPLASH_BASE_TOP, ICON_BASE]}
+          positions={[0, 0.52]}
+        />
+      </Rect>
+      <MeshNode
+        cx={counterX}
+        cy={counterY}
+        rx={boxW * 0.6 * 0.7}
+        ry={boxH * 0.46 * 0.7}
+        colors={counter}
+      />
+      <MeshNode
+        cx={coreX}
+        cy={coreY}
+        rx={boxW * 0.74 * 0.72}
+        ry={boxH * 0.52 * 0.72}
+        colors={core}
+      />
+    </Group>
+  );
+}
+
 export function MeshGradientBackground({ variant = "mesh-dark" }: Props) {
   const { width, height } = useWindowDimensions();
   const still = useReducedMotion();
@@ -527,6 +595,9 @@ export function MeshGradientBackground({ variant = "mesh-dark" }: Props) {
         )}
         {variant === "breathe-core" && (
           <BreatheCore width={width} height={height} still={still} />
+        )}
+        {variant === "calm-mist" && (
+          <CalmMist width={width} height={height} still={still} />
         )}
         <Grain width={width} height={height} />
       </Canvas>

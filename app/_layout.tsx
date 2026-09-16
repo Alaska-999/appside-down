@@ -1,21 +1,13 @@
-import { AuroraBeams } from "@/src/components/ui/AuroraBeams";
+import { SvitlyMark, MARK_TIMING } from "@/src/components/brand/SvitlyMark";
+import { GradientText } from "@/src/components/ui/GradientText";
+import { MeshGradientBackground } from "@/src/components/ui/MeshGradientBackground";
 import {
-  MeshGradientBackground,
-  MeshVariant,
-} from "@/src/components/ui/MeshGradientBackground";
-import {
-  ICON_BASE_DEEP,
+  ICON_BASE,
   ICON_MUTED,
   ICON_NEAR_BLACK,
   ICON_TEXT,
-  ICON_WHITE,
 } from "@/src/constants/iconColors";
 import { GRADIENT_SOFT } from "@/src/constants/gradients";
-import {
-  OVERLAY_BLACK_MED,
-  SURFACE_WHITE_BORDER,
-} from "@/src/constants/surfaceAlpha";
-import { SPLASH_TEXT_SHADOW, SPINNER_ARC } from "@/src/constants/rawColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config, { controlHeight } from "@/tamagui.config";
@@ -31,82 +23,116 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
-  withRepeat,
+  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { PortalProvider, TamaguiProvider, Theme } from "tamagui";
 
 const queryClient = new QueryClient();
 
-type SplashVariant = "aurora" | MeshVariant;
-
-// Доступні 5 затверджених варіантів
-const SPLASH_VARIANTS: SplashVariant[] = [
-  "mesh-full",
-  "mesh-dark",
-  "fall-morph",
-  "breathe-core",
-  "aurora",
-];
-
-function AppSplashSpinner() {
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 900, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, [rotation]);
-
-  const spinStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  return <Animated.View style={[styles.ring, spinStyle]} />;
-}
+const MARK_SIZE = 120;
+const WORDMARK_SIZE = 44;
+const WORDMARK_DELAY = 1500;
+const WORDMARK_MS = 600;
+const TAGLINE_DELAY = 1900;
+const TAGLINE_MS = 500;
+const TAGLINE_TRACKING_FROM = 4.59;
+const TAGLINE_TRACKING_TO = 2.7;
+const EXIT_DELAY = 2550;
+const EXIT_MS = 340;
+const SOFT_OUT = Easing.bezier(0.2, 0.8, 0.3, 1);
 
 export function AppSplash() {
-  // Індекс активного варіанта для перемикання тапом
-  const [variantIndex, setVariantIndex] = useState(1); // За замовчуванням "mesh-dark" (№2)
+  const still = useReducedMotion();
+  const [wordmarkWidth, setWordmarkWidth] = useState(0);
 
-  const currentVariant = SPLASH_VARIANTS[variantIndex];
+  const reveal = useSharedValue(still ? 1 : 0);
+  const tagline = useSharedValue(still ? 1 : 0);
+  const exit = useSharedValue(0);
 
-  const handleNextVariant = () => {
-    setVariantIndex((prev) => (prev + 1) % SPLASH_VARIANTS.length);
+  useEffect(() => {
+    if (still) return;
+
+    reveal.value = withDelay(
+      WORDMARK_DELAY,
+      withTiming(1, { duration: WORDMARK_MS, easing: SOFT_OUT }),
+    );
+    tagline.value = withDelay(
+      TAGLINE_DELAY,
+      withTiming(1, { duration: TAGLINE_MS, easing: Easing.out(Easing.quad) }),
+    );
+    exit.value = withDelay(
+      EXIT_DELAY,
+      withTiming(1, { duration: EXIT_MS, easing: Easing.in(Easing.quad) }),
+    );
+  }, [still, reveal, tagline, exit]);
+
+  const rootStyle = useAnimatedStyle(() => ({
+    opacity: 1 - exit.value,
+    transform: [{ scale: 1 + exit.value * 0.04 }],
+  }));
+
+  const wordmarkStyle = useAnimatedStyle(() => ({
+    opacity: reveal.value,
+    transform: [{ translateY: (1 - reveal.value) * 14 }],
+  }));
+
+  const wordmarkClipStyle = useAnimatedStyle(() => ({
+    width: wordmarkWidth === 0 ? undefined : wordmarkWidth * reveal.value,
+  }));
+
+  const taglineStyle = useAnimatedStyle(() => ({
+    opacity: tagline.value,
+    letterSpacing:
+      TAGLINE_TRACKING_FROM +
+      (TAGLINE_TRACKING_TO - TAGLINE_TRACKING_FROM) * tagline.value,
+  }));
+
+  const measureWordmark = (event: LayoutChangeEvent) => {
+    setWordmarkWidth(event.nativeEvent.layout.width);
   };
 
   return (
-    <Pressable style={styles.splashRoot} onPress={handleNextVariant}>
-      {/* Динамічний анімований фон */}
-      {currentVariant === "aurora" ? (
-        <AuroraBeams intensity={1.5} coverage="full" motion="lively" />
-      ) : (
-        <MeshGradientBackground variant={currentVariant} />
-      )}
+    <Animated.View style={[styles.splashRoot, rootStyle]}>
+      <MeshGradientBackground variant="calm-mist" />
 
-      {/* Центровий блок логотипа та спінера */}
-      <View style={styles.splashCenter}>
-        <Text style={styles.wm}>Appside</Text>
-        <AppSplashSpinner />
+      <View style={styles.splashMark} pointerEvents="none">
+        <SvitlyMark mode={still ? "static" : "draw"} size={MARK_SIZE} />
       </View>
 
-      {/* Підказка перемикання (для тестування) */}
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>
-          {variantIndex + 1}/{SPLASH_VARIANTS.length}: {currentVariant} (Тап для
-          зміни)
-        </Text>
+      <View style={styles.splashWords} pointerEvents="none">
+        <Animated.View
+          style={[
+            styles.wordmarkOuter,
+            wordmarkStyle,
+            wordmarkWidth > 0 && { width: wordmarkWidth },
+          ]}
+        >
+          <Animated.View style={[styles.wordmarkClip, wordmarkClipStyle]}>
+            <View onLayout={measureWordmark} style={styles.wordmarkInner}>
+              <GradientText fontSize={WORDMARK_SIZE}>Svitly</GradientText>
+            </View>
+          </Animated.View>
+        </Animated.View>
+        <Animated.Text style={[styles.tagline, taglineStyle]}>
+          Illuminate your learning
+        </Animated.Text>
       </View>
-    </Pressable>
+    </Animated.View>
   );
 }
 
@@ -149,10 +175,8 @@ const SHEET_SCREEN = {
 const SHEET_LOCKED = { ...SHEET_SCREEN, gestureEnabled: false } as const;
 
 const SPLASH_FLASH_THRESHOLD = 300;
-const SPLASH_HOLD_DURATION = 3000;
-// Прев'ю мешу: залишаємо true, поки триває підбір варіантів на девайсі.
-// Поверни false, щоб знову увімкнути реальний стек (TamaguiProvider/Stack нижче).
-const SPLASH_PREVIEW = false;
+const SPLASH_HOLD_DURATION =
+  MARK_TIMING.drawDelayMs + MARK_TIMING.drawMs + 1000;
 
 export default function RootLayout() {
   const { token, isHydrated } = useAuthStore();
@@ -206,7 +230,7 @@ export default function RootLayout() {
     }
   }, [isHydrated, token]);
 
-  if (SPLASH_PREVIEW || !isReady || splashHeld) {
+  if (!isReady || splashHeld) {
     return <AppSplash />;
   }
 
@@ -246,46 +270,36 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   splashRoot: {
     flex: 1,
-    backgroundColor: ICON_BASE_DEEP, // Темний фон підкладки з HTML[cite: 2]
+    backgroundColor: ICON_BASE,
   },
-  splashCenter: {
-    flex: 1,
+  splashMark: {
+    ...StyleSheet.absoluteFill,
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
-    zIndex: 7,
   },
-  wm: {
-    fontSize: 23, // Розмір тексту з HTML[cite: 2]
-    fontFamily: "Sora_800ExtraBold",
-    fontWeight: "800",
-    color: ICON_WHITE,
-    textShadowColor: SPLASH_TEXT_SHADOW,
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 24,
-  },
-  ring: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2.5,
-    borderColor: SURFACE_WHITE_BORDER,
-    borderTopColor: SPINNER_ARC,
-  },
-  badge: {
+  splashWords: {
     position: "absolute",
-    bottom: 40,
-    alignSelf: "center",
-    backgroundColor: OVERLAY_BLACK_MED,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    zIndex: 10,
+    left: 0,
+    right: 0,
+    top: "50%",
+    marginTop: 78,
+    alignItems: "center",
   },
-  badgeText: {
+  wordmarkOuter: {
+    alignItems: "flex-start",
+  },
+  wordmarkClip: {
+    overflow: "hidden",
+    alignItems: "flex-start",
+  },
+  wordmarkInner: {
+    flexShrink: 0,
+  },
+  tagline: {
+    marginTop: 10,
+    fontSize: 13.5,
+    fontFamily: "Sora_500Medium",
     color: ICON_MUTED,
-    fontSize: 11,
-    fontWeight: "600",
   },
   errorRoot: {
     flex: 1,

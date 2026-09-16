@@ -16,7 +16,6 @@ export type AvatarPlaceholderVariant =
   | "nightMint"
   | "frostMuted"
   | "frostLight"
-  // | "frostDark"
   | "frostAccent"
   | "mintGlassSoft"
   | "mintGlassLit"

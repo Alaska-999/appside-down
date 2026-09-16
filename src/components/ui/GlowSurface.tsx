@@ -110,6 +110,30 @@ export function Lamp({
   );
 }
 
+export function Blik({
+  color,
+  size = 20,
+  x = 16,
+  y = 14,
+  blur = 7,
+}: {
+  color: string;
+  size?: number;
+  x?: number;
+  y?: number;
+  blur?: number;
+}) {
+  return (
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <Canvas style={StyleSheet.absoluteFill}>
+        <Circle cx={x + size / 2} cy={y + size / 2} r={size / 2} color={color}>
+          <BlurMask blur={blur} style="normal" />
+        </Circle>
+      </Canvas>
+    </View>
+  );
+}
+
 export function InnerBloom({
   color,
   radius,

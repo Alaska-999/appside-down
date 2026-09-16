@@ -25,16 +25,9 @@ import {
 import { YStack } from "tamagui";
 
 export type BackgroundPreset =
-  | "home"
-  | "home2"
   | "homeLamp"
   | "homeLampWhite"
-  | "homeSpark"
-  | "module"
-  | "form"
-  | "formBright"
   | "folder"
-  | "flash"
   | "auth"
   | "finish"
   | "finish2"
@@ -101,8 +94,6 @@ export type BgSpec = {
 
 const off = (c: string) => c.replace(/,[\d.\s]+\)$/, ",0)");
 
-const DIM = "rgba(5,6,9,0.7)";
-const DIM_MOD = "rgba(5,6,9,0.6)";
 const NIGHT = "rgba(1,3,5,0)";
 
 function ribBlobs(
@@ -124,124 +115,6 @@ function ribBlobs(
 
 function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
   switch (preset) {
-    case "home":
-      return {
-        base: {
-          angle: 178,
-          colors: ["#0E1A1E", "#08090C"],
-          positions: [0, 0.42],
-        },
-        layers: [
-          {
-            blur: 40,
-            saturate: 1.1,
-            blobs: [
-              {
-                cx: 0.26 * w,
-                cy: 0.02 * h,
-                rx: 0.42 * w,
-                ry: 0.2 * h,
-                color: "rgba(45,212,191,0.42)",
-                edge: 0.72,
-              },
-              {
-                cx: 0.82 * w,
-                cy: 0.1 * h,
-                rx: 0.38 * w,
-                ry: 0.17 * h,
-                color: "rgba(13,148,136,0.34)",
-                edge: 0.72,
-              },
-              {
-                cx: -0.04 * w,
-                cy: 0.4 * h,
-                rx: 0.22 * w,
-                ry: 0.3 * h,
-                color: "rgba(94,234,212,0.28)",
-                edge: 0.74,
-              },
-              {
-                cx: -0.04 * w,
-                cy: 0.74 * h,
-                rx: 0.2 * w,
-                ry: 0.26 * h,
-                color: "rgba(13,148,136,0.26)",
-                edge: 0.74,
-              },
-            ],
-          },
-        ],
-        vignette: {
-          kind: "radial",
-          cx: 0.5 * w,
-          cy: 0.26 * h,
-          rx: 1.2 * w,
-          ry: 0.78 * h,
-          colors: [off(DIM), off(DIM), DIM, DIM],
-          positions: [0, 0.34, 0.86, 1],
-        },
-      };
-    case "home2":
-      return {
-        base: {
-          angle: 180,
-          colors: ["#071E26", "#050F18", "#03070C", "#020304", "#010203"],
-          positions: [0, 0.24, 0.48, 0.78, 1],
-        },
-        layers: [
-          {
-            blur: 45,
-            blobs: [
-              {
-                cx: 40,
-                cy: 30,
-                rx: 200,
-                ry: 200,
-                color: "rgba(13,148,136,0.32)",
-                edge: 0.68,
-              },
-            ],
-          },
-          {
-            blur: 45,
-            blobs: [
-              {
-                cx: w - 10,
-                cy: 50,
-                rx: 150,
-                ry: 150,
-                color: "rgba(56, 202, 200, 0.24)",
-                edge: 0.68,
-              },
-            ],
-          },
-          {
-            blur: 45,
-            blobs: [
-              {
-                cx: 0.06 * w + 180,
-                cy: h + 15,
-                rx: 180,
-                ry: 125,
-                color: "rgba(45, 212, 201, 0.16)",
-                edge: 0.7,
-              },
-            ],
-          },
-        ],
-        vignette: {
-          kind: "linear",
-          colors: [
-            NIGHT,
-            NIGHT,
-            "rgba(58, 196, 215, 0.5)",
-            "rgba(1, 5, 5, 0.86)",
-            "rgba(1,3,5,0.94)",
-          ],
-          positions: [0, 0.34, 0.58, 0.78, 1],
-        },
-        grain: 0.07,
-      };
     case "homeLamp":
       return {
         base: {
@@ -386,172 +259,6 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         grain: 0.06,
       };
-    case "homeSpark":
-      return {
-        base: {
-          angle: 180,
-          colors: ["#082226", "#051519", "#03090C", "#020304"],
-          positions: [0, 0.38, 0.72, 1],
-        },
-        layers: [
-          {
-            blur: 42,
-            blobs: [
-              {
-                cx: -0.08 * w,
-                cy: 0.3 * h,
-                rx: 110,
-                ry: 180,
-                color: "rgba(13,148,136,0.15)",
-                edge: 0.5,
-              },
-              {
-                cx: 1.08 * w,
-                cy: 0.68 * h,
-                rx: 110,
-                ry: 200,
-                color: "rgba(43, 185, 207, 0.15)",
-                edge: 0.5,
-              },
-            ],
-          },
-          {
-            blur: 76,
-            blobs: [
-              {
-                cx: -0.01 * w,
-                cy: 0.24 * h,
-                rx: 50,
-                ry: 50,
-                color: "rgba(94,234,212,0.6)",
-                edge: 0.6,
-              },
-              {
-                cx: 0.02 * w,
-                cy: 0.58 * h,
-                rx: 30,
-                ry: 30,
-                color: "rgba(94,234,212,0.42)",
-                edge: 0.6,
-              },
-            ],
-          },
-          {
-            blur: 60,
-            blobs: [
-              {
-                cx: 1.0 * w,
-                cy: 0.44 * h,
-                rx: 34,
-                ry: 34,
-                color: "rgba(94,234,212,0.5)",
-                edge: 0.6,
-              },
-              {
-                cx: 0.99 * w,
-                cy: 0.8 * h,
-                rx: 46,
-                ry: 46,
-                color: "rgba(45,212,191,0.5)",
-                edge: 0.6,
-              },
-            ],
-          },
-        ],
-        vignette: {
-          kind: "linear",
-          colors: [NIGHT, NIGHT, "rgba(1,3,5,0.26)", "rgba(1,3,5,0.46)"],
-          positions: [0, 0.4, 0.66, 1],
-        },
-        grain: 0.07,
-      };
-
-    case "module":
-      return {
-        base: {
-          angle: 96,
-          colors: ["#0C1518", "#08090C"],
-          positions: [0, 0.56],
-        },
-        layers: [
-          {
-            blur: 40,
-            blobs: [
-              ...ribBlobs(-0.03 * w, -0.11 * h, 0.58 * w, 1.22 * h, [
-                [0.6, 0.12, 0.38, 0.4, "rgba(94,234,212,0.54)", 0.7],
-                [0.4, 0.48, 0.4, 0.3, "rgba(45,212,191,0.46)", 0.72],
-                [0.62, 0.84, 0.36, 0.26, "rgba(13,148,136,0.44)", 0.72],
-              ]),
-              ...ribBlobs(0, 0, 0.54 * w, 0.27 * h, [
-                [0.5, 0.5, 0.5, 0.5, "rgba(163,230,53,0.29)", 0.72],
-              ]),
-            ],
-          },
-        ],
-        vignette: {
-          kind: "radial",
-          cx: 0.5 * w,
-          cy: 0.24 * h,
-          rx: 1.2 * w,
-          ry: 0.7 * h,
-          colors: [off(DIM_MOD), off(DIM_MOD), DIM_MOD, DIM_MOD],
-          positions: [0, 0.38, 0.92, 1],
-        },
-        grain: 0.05,
-      };
-    case "form":
-      return {
-        base: {
-          angle: 96,
-          colors: ["#0C1518", "#08090C"],
-          positions: [0, 0.56],
-        },
-        layers: [
-          {
-            blur: 32,
-            blobs: ribBlobs(-0.27 * w, -0.11 * h, 0.58 * w, 1.22 * h, [
-              [0.6, 0.12, 0.38, 0.4, "rgba(94,234,212,0.44)", 0.7],
-              [0.4, 0.48, 0.4, 0.3, "rgba(45,212,191,0.37)", 0.72],
-              [0.62, 0.84, 0.36, 0.26, "rgba(13,148,136,0.35)", 0.72],
-            ]),
-          },
-          {
-            blur: 40,
-            blobs: ribBlobs(0.62 * w, -0.1 * h, 0.58 * w, 0.26 * h, [
-              [0.5, 0.5, 0.5, 0.5, "rgba(163,230,53,0.30)", 0.72],
-              [0.42, 0.58, 0.62, 0.62, "rgba(45,212,191,0.20)", 0.74],
-            ]),
-          },
-        ],
-        grain: 0.055,
-      };
-    case "formBright":
-      return {
-        base: {
-          angle: 96,
-          colors: ["#0C1518", "#08090C"],
-          positions: [0, 0.56],
-        },
-        layers: [
-          {
-            blur: 32,
-            blobs: ribBlobs(-0.27 * w, -0.11 * h, 0.58 * w, 1.22 * h, [
-              [0.6, 0.12, 0.38, 0.4, "rgba(94,234,212,0.44)", 0.7],
-              [0.4, 0.48, 0.4, 0.3, "rgba(45,212,191,0.37)", 0.72],
-              [0.62, 0.84, 0.36, 0.3, "rgba(13, 148, 123, 0.35)", 0.7],
-            ]),
-          },
-
-          {
-            blur: 38,
-            blobs: ribBlobs(0.62 * w, -0.1 * h, 0.63 * w, 0.29 * h, [
-              [0.52, 0.5, 0.5, 0.65, "rgba(177, 253, 55, 0.45)", 0.8],
-              [0.2, 0.6, 0.56, 0.9, "rgba(45,212,191,0.25)", 0.69],
-            ]),
-          },
-        ],
-        grain: 0.05,
-      };
     case "folder":
       return {
         base: {
@@ -575,43 +282,6 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           },
         ],
         grain: 0.04,
-      };
-    case "flash":
-      return {
-        base: {
-          angle: 180,
-          colors: ["#0B2A34", "#0A1620", "#07080B"],
-          positions: [0, 0.44, 1],
-        },
-        beam: {
-          angle: 106,
-          colors: [
-            "rgba(94,234,212,0)",
-            "rgba(94,234,212,0.62)",
-            "rgba(190,242,100,0.55)",
-            "rgba(190,242,100,0)",
-          ],
-          positions: [0.2, 0.38, 0.52, 0.72],
-          blur: 40,
-          opacity: 1,
-          duration: 14000,
-        },
-        layers: [
-          {
-            blur: 42,
-            blobs: [
-              {
-                cx: 0.5 * w,
-                cy: 1.06 * h,
-                rx: 0.7 * w,
-                ry: 0.3 * h,
-                color: "rgba(13,148,136,0.5)",
-                edge: 0.74,
-              },
-            ],
-          },
-        ],
-        grain: 0.05,
       };
     case "auth":
       return {
