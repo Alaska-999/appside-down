@@ -2,7 +2,8 @@ import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { AppButton } from "@/src/components/ui/Button";
-import { GlassCard, GlassRow, GlassRows } from "@/src/components/ui/GlassRows";
+import { Row, Rows } from "@/src/components/ui/Rows";
+import { Surface } from "@/src/components/ui/Surfaces";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { AppSheet } from "@/src/components/ui/Sheet";
@@ -94,7 +95,7 @@ export default function SettingsScreen() {
 
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$screenX" gap={18} pt="$2" pb={screen.bottom}>
-          <GlassCard p={16}>
+          <Surface variant="glass" p={16}>
             <XStack ai="center" gap={14}>
               <AvatarPicker size={66} onError={setToast} />
               <YStack f={1}>
@@ -106,21 +107,21 @@ export default function SettingsScreen() {
                 </Text>
               </YStack>
             </XStack>
-          </GlassCard>
+          </Surface>
 
-          <GlassRows>
-            <GlassRow
+          <Rows variant="glass" divider="inset">
+            <Row
               label="Create password"
               onPress={() => router.push("/change-password")}
             />
-          </GlassRows>
+          </Rows>
 
           <YStack gap="$2">
             <SectionTitle tone="eyebrow" px={4}>
               Preferences
             </SectionTitle>
-            <GlassRows>
-              <GlassRow
+            <Rows variant="glass" divider="inset">
+              <Row
                 label="Push notifications"
                 right={
                   <Toggle
@@ -130,7 +131,7 @@ export default function SettingsScreen() {
                   />
                 }
               />
-              <GlassRow
+              <Row
                 label="Sound effects"
                 right={
                   <Toggle
@@ -140,7 +141,7 @@ export default function SettingsScreen() {
                   />
                 }
               />
-              <GlassRow
+              <Row
                 label="Haptic feedback"
                 right={
                   <Toggle
@@ -150,21 +151,21 @@ export default function SettingsScreen() {
                   />
                 }
               />
-            </GlassRows>
+            </Rows>
           </YStack>
 
           <YStack gap="$2">
             <SectionTitle tone="eyebrow" px={4}>
               About
             </SectionTitle>
-            <GlassRows>
-              <GlassRow label="Privacy policy" disabled />
-              <GlassRow label="Terms of service" disabled />
-              <GlassRow
+            <Rows variant="glass" divider="inset">
+              <Row label="Privacy policy" disabled />
+              <Row label="Terms of service" disabled />
+              <Row
                 label="Version"
                 value={Constants.expoConfig?.version ?? "unknown"}
               />
-            </GlassRows>
+            </Rows>
           </YStack>
 
           <YStack gap={9}>

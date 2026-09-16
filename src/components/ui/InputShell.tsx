@@ -1,22 +1,15 @@
-import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { useFocusProgress } from "@/src/components/ui/FocusRing";
 import {
-  WELL_BORDERS,
-  WELL_FILL,
-  WELL_FILL_FOCUS,
-  WELL_FILL_SOFT,
-  WELL_FILL_SOFT_FOCUS,
-  WellInsetShadow,
-  WellState,
-} from "@/src/components/ui/Well";
-import { ICON_MINT_LIGHT, ICON_STATUS_DANGER } from "@/src/constants/iconColors";
+  SurfaceLayers,
+  SurfaceVariant,
+} from "@/src/components/ui/Surfaces";
+import { WellState } from "@/src/components/ui/Well";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
-import { INPUT_GLASS_TINT } from "@/src/constants/rawColors";
 import {
-  SURFACE_BORDER,
-  SURFACE_GLASS_BORDER_FAINT,
-} from "@/src/constants/surfaceAlpha";
+  ICON_MINT_LIGHT,
+  ICON_STATUS_DANGER,
+} from "@/src/constants/iconColors";
+import { SURFACE_BORDER } from "@/src/constants/surfaceAlpha";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { controlHeight } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
@@ -25,12 +18,7 @@ import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { YStack, YStackProps } from "tamagui";
 
-export type InputShellVariant =
-  | "well"
-  | "wellSoft"
-  | "glass"
-  | "underline"
-  | "plain";
+export type InputShellVariant = SurfaceVariant | "underline";
 export type InputShellState = WellState;
 export type InputShellSize = "sm" | "md" | "lg";
 
@@ -166,59 +154,12 @@ export function InputShell({
       opacity={disabled ? 0.42 : 1}
       {...rest}
     >
-      <YStack
-        pos="absolute"
-        t={0}
-        l={0}
-        r={0}
-        b={0}
-        br={s.radius}
-        overflow="hidden"
-      >
-        {variant === "glass" ? (
-          <LiquidGlass
-            intensity={45}
-            tint="default"
-            borderRadius={s.radius}
-            backgroundColor={INPUT_GLASS_TINT}
-          />
-        ) : (
-          <>
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                {
-                  backgroundColor:
-                    variant === "wellSoft"
-                      ? state === "focus"
-                        ? WELL_FILL_SOFT_FOCUS
-                        : WELL_FILL_SOFT
-                      : state === "focus"
-                        ? WELL_FILL_FOCUS
-                        : WELL_FILL,
-                },
-              ]}
-            />
-            <WellInsetShadow radius={s.radius} />
-          </>
-        )}
-      </YStack>
-      {variant === "glass" ? (
-        <GradientBorder
-          radius={s.radius}
-          angle={150}
-          colors={[SURFACE_BORDER, SURFACE_GLASS_BORDER_FAINT]}
-          positions={[0, 1]}
-        />
-      ) : (
-        <GradientBorder
-          radius={s.radius}
-          angle={180}
-          colors={WELL_BORDERS[state].colors}
-          positions={WELL_BORDERS[state].positions}
-        />
-      )}
-      {!disabled && <FocusRing radius={s.radius} progress={focusProgress} />}
+      <SurfaceLayers
+        variant={variant}
+        state={state}
+        radius={s.radius}
+        focusProgress={disabled ? undefined : focusProgress}
+      />
       <YStack
         f={1}
         zIndex={2}

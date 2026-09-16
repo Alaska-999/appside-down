@@ -141,7 +141,7 @@ export default function FlashcardsGame() {
         {/* {!isComplete && <BackgroundMesh preset="auth" animated />} */}
         {/* {!isComplete && <BackgroundMesh preset="flash" animated />} */}
 
-        {!isComplete && <BackgroundMesh preset="crossBeamsMint" animated />}
+        {!isComplete && <BackgroundMesh preset="auth" animated />}
 
         {!isComplete && (
           <ScreenHeaderFlashcards

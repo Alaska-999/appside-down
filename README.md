@@ -1,8 +1,35 @@
-# Welcome to your Expo app 👋
+# appside-down
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile flashcards learning app built with Expo / React Native.
 
-## Get started
+## Stack
+
+- [Expo](https://expo.dev) + [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing)
+- [Tamagui](https://tamagui.dev) — design system and UI components
+- [Zustand](https://github.com/pmndrs/zustand) — state (auth, game, preferences, study queue)
+- [TanStack Query](https://tanstack.com/query) — API layer
+- [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) — forms and validation
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/) + [Skia](https://shopify.github.io/react-native-skia/) — animations and visual effects
+
+## Project structure
+
+```
+app/            screens (file-based routing)
+  (auth)/       login, signup, password recovery
+  (tabs)/       main tabs: home, library, create
+  module/       flashcard module screen
+src/
+  api/          API client config
+  components/   UI components (cards, flashcards, common, ui)
+  constants/    colors, tokens
+  store/        Zustand stores
+  hooks/        custom hooks
+  utils/        helper functions
+  validation/   Zod schemas
+tamagui.config.ts   design system config (tokens, themes)
+```
+
+## Getting started
 
 1. Install dependencies
 
@@ -16,35 +43,20 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Useful flags:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   npx expo start --ios       # iOS simulator
+   npx expo start --android   # Android emulator
+   npx expo start -c          # clear Metro cache (after bulk changes)
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+3. Lint
 
-## Get a fresh project
+   ```bash
+   npm run lint
+   ```
 
-When you're ready, run:
+## Backend
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The app pairs with a separate backend repo (`appside-down-be`). The API URL is configured in `src/api/config.ts` / environment variables.

@@ -2,7 +2,7 @@ import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { API_BASE_URL } from "@/src/api/config";
 import { StreakCard } from "@/src/components/cards/StreakCard";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
-import { AvatarRing } from "@/src/components/ui/AvatarRing";
+import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
 import { GlowTone } from "@/src/components/ui/GlowSurface";
@@ -16,8 +16,8 @@ import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import {
   ICON_ACCENT,
   ICON_BASE,
+  ICON_CYAN_TEAL,
   ICON_HERO_LIME,
-  ICON_INDIGO,
   ICON_LIME,
   ICON_LIME_LIGHT,
   ICON_MINT,
@@ -93,7 +93,7 @@ const DISCOVER_COVERS: [string, string][] = [
   [ICON_TEAL_BRIGHT, ICON_BASE],
   [ICON_HERO_LIME, ICON_BASE],
   [ICON_TEAL, ICON_BASE],
-  [ICON_INDIGO, ICON_BASE],
+  [ICON_CYAN_TEAL, ICON_BASE],
 ];
 
 function PublicModuleRow({ module }: { module: PublicModuleResult }) {
@@ -285,6 +285,7 @@ export default function Home() {
       {/* <BackgroundMesh preset="home2" /> */}
       {/* <BackgroundMesh preset="homeLamp" /> */}
       {/* <BackgroundMesh preset="homeLampWhite" /> */}
+      {/* <BackgroundMesh preset="finish" /> */}
       <BackgroundMesh preset="homeLampWhite" />
       <YStack f={1} pt={screen.top} gap="$section">
         <YStack px="$screenX" gap="$section">
@@ -307,10 +308,13 @@ export default function Home() {
                 </Text>
               </XStack>
             </YStack>
-            <AvatarRing
+
+            <UserAvatar
               avatarUrl={user?.avatarUrl}
               username={user?.username}
               onPress={navigateToProfile}
+              size={55}
+              variant="limeGlassLit"
             />
           </XStack>
           <SearchField
@@ -319,7 +323,6 @@ export default function Home() {
             placeholder="Search public modules"
           />
         </YStack>
-
         {searching ? (
           <FlatList
             data={debouncedSearch.length >= 2 ? searchList.items : []}

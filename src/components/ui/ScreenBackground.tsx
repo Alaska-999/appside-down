@@ -465,6 +465,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         },
         grain: 0.07,
       };
+
     case "module":
       return {
         base: {
@@ -1094,9 +1095,9 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           colors: [
             "rgba(94,234,212,0)",
             "rgba(94,234,212,0.34)",
-            "rgba(13,148,136,0.22)",
-            "rgba(190,242,100,0.14)",
-            "rgba(190,242,100,0)",
+            "rgba(13, 137, 148, 0.22)",
+            "rgba(100, 242, 145, 0.14)",
+            "rgba(100, 242, 145, 0)",
           ],
           positions: [0.2, 0.42, 0.58, 0.68, 0.76],
           blur: 46,
@@ -1168,15 +1169,15 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
         beam: {
           angle: 118,
           colors: [
-            "rgba(99,236,198,0)",
-            "rgba(68, 224, 162, 0.33)",
-            "rgba(45,190,212,0.2)",
-            "rgba(31,156,175,0.14)",
-            "rgba(31,156,175,0)",
+            "rgba(50, 227, 153, 0)",
+            "rgba(49, 210, 129, 0.33)",
+            "rgba(29, 176, 199, 0.2)",
+            "rgba(25, 164, 185, 0.14)",
+            "rgba(19, 155, 176, 0)",
           ],
           positions: [0.2, 0.42, 0.58, 0.68, 0.76],
-          blur: 46,
-          opacity: 0.65,
+          blur: 40,
+          opacity: 0.7,
           duration: 18000,
         },
         vignette: {
@@ -1184,8 +1185,8 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
           colors: [
             NIGHT,
             NIGHT,
-            "rgba(1,3,5,0.5)",
-            "rgba(1,3,5,0.65)",
+            "rgba(1,3,5,0.4)",
+            "rgba(1,3,5,0.55)",
             "rgba(1,3,5,0.8)",
           ],
           positions: [0, 0.3, 0.56, 0.78, 1],
@@ -1344,7 +1345,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
                 cy: 0.1 * h,
                 rx: 220,
                 ry: 220,
-                color: "rgba(52,211,153,0.28)",
+                color: "rgba(71, 200, 153, 0.28)",
                 edge: 0.7,
               },
             ],
@@ -1358,7 +1359,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
                 cy: 0.05 * h,
                 rx: 110,
                 ry: 110,
-                color: "rgba(110, 231, 120, 0.62)",
+                color: "rgba(110, 231, 187, 0.62)",
                 edge: 0.7,
               },
             ],
@@ -1371,7 +1372,7 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
                 cy: 1.0 * h,
                 rx: 310,
                 ry: 260,
-                color: "rgba(34, 160, 140, 0.24)",
+                color: "rgba(34, 156, 160, 0.24)",
                 edge: 0.8,
               },
             ],
@@ -1390,19 +1391,6 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
             ],
           },
 
-          {
-            blur: 48,
-            blobs: [
-              {
-                cx: w + 5,
-                cy: h + 5,
-                rx: 62,
-                ry: 62,
-                color: "rgba(134, 239, 172, 0.55)",
-                edge: 0.72,
-              },
-            ],
-          },
           {
             blur: 40,
             blobs: [
@@ -1479,33 +1467,6 @@ function buildSpec(preset: BackgroundPreset, w: number, h: number): BgSpec {
                 ry: 220,
                 color: "rgba(45, 212, 191, 0.38)",
                 edge: 0.63,
-              },
-            ],
-          },
-
-          {
-            blur: 30,
-            blobs: [
-              {
-                cx: w + 5,
-                cy: h + 5,
-                rx: 62,
-                ry: 62,
-                color: "rgba(190, 242, 100, 0.44)",
-                edge: 0.72,
-              },
-            ],
-          },
-          {
-            blur: 50,
-            blobs: [
-              {
-                cx: 0.7 * w,
-                cy: 0.3 * h,
-                rx: 180,
-                ry: 180,
-                color: "rgba(94, 234, 227, 0.16)",
-                edge: 0.7,
               },
             ],
           },

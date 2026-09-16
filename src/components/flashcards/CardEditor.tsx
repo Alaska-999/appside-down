@@ -201,7 +201,13 @@ export function CardEditor<T extends FieldValues>({
             fontWeight="500"
             letterSpacing={0.63}
             textTransform="uppercase"
-            color={lit ? "$mintLight" : "$textMuted"}
+            color={
+              lit
+                ? "$mintLight"
+                : termName || definitionName
+                  ? "$textMuted"
+                  : "$mutedLight"
+            }
           >
             Card {String(index + 1).padStart(2, "0")}
           </Text>

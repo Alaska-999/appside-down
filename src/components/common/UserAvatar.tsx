@@ -1,4 +1,7 @@
-import { AvatarPlaceholder } from "@/src/components/ui/AvatarPlaceholder";
+import {
+  AvatarPlaceholder,
+  AvatarPlaceholderVariant,
+} from "@/src/components/ui/AvatarPlaceholder";
 import { getInitials } from "@/src/utils/getInitials";
 import { Pressable } from "react-native";
 import { Avatar } from "tamagui";
@@ -7,6 +10,7 @@ interface UserAvatarProps {
   avatarUrl?: string | null;
   username?: string | null;
   size: number;
+  variant?: AvatarPlaceholderVariant;
   onPress?: () => void;
 }
 
@@ -15,6 +19,7 @@ export function UserAvatar({
   username,
   size,
   onPress,
+  variant,
 }: UserAvatarProps) {
   const fontSize = Math.round(size * 0.43);
   const label = getInitials(username);
@@ -26,13 +31,12 @@ export function UserAvatar({
           label={label}
           size={size}
           fontSize={fontSize}
-          // variant="frostLight"
-          variant="frostMuted"
+          variant={variant ? variant : "frostMuted"}
 
+          // variant="frostLight"
           // variant="frostVeilMint"
           // variant="frostVeilSoft"
           // variant="limeGlassLit"
-          // variant="mintGlass"
           // variant="mintGlassLit"
           // variant="tealDeep"
         />

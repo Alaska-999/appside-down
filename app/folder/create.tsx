@@ -89,12 +89,13 @@ export default function FolderCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        {/* <BackgroundMesh preset="folder" /> */}
-        {/* <BackgroundMesh preset="crossBeams" /> */}
         {/* <BackgroundMesh preset="crossBeamsMint" /> */}
         {/* <BackgroundMesh preset="twilightDuo" /> */}
+        {/* <BackgroundMesh preset="twilightDuo" /> */}
 
-        <BackgroundMesh preset="twilightDuo" />
+        {/* <BackgroundMesh preset="crossBeams" /> */}
+        <BackgroundMesh preset="auroraTeal" />
+
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           bottomOffset={70}
@@ -127,7 +128,7 @@ export default function FolderCreate() {
               autoFocusName
               tagsHint="optional"
               tagsFootnote="Tags work as subfolders inside this folder"
-              coverTone={"teal"}
+              coverTone={"lime"}
               tagEditor={
                 <TagEditor
                   mode="draft"

@@ -63,26 +63,12 @@ const VARIANTS: Record<AvatarPlaceholderVariant, VariantStyle> = {
     textColor: "$mintTintDark",
   },
 
-  // frostLight2: {
-  //   colors: [ICON_MINT_TINT_DARK, "rgba(127, 231, 225, 0.34)", ICON_WHITE],
-  //   locations: [0, 0.2, 0.9],
-  //   textColor: "$mintTintDark",
-  // },
-  // frostLight3: {
-  //   colors: ["rgba(12, 69, 62, 0.7)", "rgba(255, 255, 255, 0.7)"],
-  //   locations: [0, 0.75],
-  //   textColor: "$mintTintDark",
-  // },
   frostLight: {
     colors: [ICON_MINT_TINT_DARK, ICON_WHITE],
     locations: [0, 0.75],
     textColor: "$mintTintDark",
   },
-  // frostDark: {
-  //   colors: [ICON_WHITE, ICON_MINT_TINT_DARK],
-  //   locations: [0, 0.6],
-  //   textColor: "$mintLight",
-  // },
+
   frostAccent: {
     colors: [ICON_MINT_TINT_DARK, ICON_TEAL, ICON_ACCENT],
     locations: [0, 0.5, 1],
@@ -135,11 +121,11 @@ const VARIANTS: Record<AvatarPlaceholderVariant, VariantStyle> = {
   },
   frostVeilMint: {
     colors: [
-      "rgba(12,69,62,0.7)",
+      "rgba(12,69,62,0.6)",
       "rgba(94,234,212,0.5)",
       "rgba(255,255,255,0.78)",
     ],
-    locations: [0, 0.4, 0.9],
+    locations: [0, 0.35, 0.9],
     textColor: "$mintTintDark",
   },
 };

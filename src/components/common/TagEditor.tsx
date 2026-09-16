@@ -2,9 +2,9 @@ import {
   FOLDER_EDIT_ROW_HEIGHT,
   FolderAddRow,
   FolderEditIconAction,
-  FolderEditRows,
   FolderTagEditRow,
 } from "@/src/components/cards/FolderEditRow";
+import { Rows, RowsVariant } from "@/src/components/ui/Rows";
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";
@@ -85,12 +85,14 @@ function TagInputRow({
 export function TagEditor({
   tags,
   mode,
+  variant = "well",
   onAdd,
   onRename,
   onRemove,
 }: {
   tags: TagEditorTag[];
   mode: TagEditorMode;
+  variant?: RowsVariant;
   onAdd: (name: string) => Promise<string | null> | string | null | void;
   onRename?: (
     tag: TagEditorTag,
@@ -164,7 +166,7 @@ export function TagEditor({
   };
 
   return (
-    <FolderEditRows focused={inputFocused}>
+    <Rows variant={variant} focused={inputFocused}>
       {[
         ...tags.map((tag) =>
           renamingId === tag.id ? (
@@ -243,6 +245,6 @@ export function TagEditor({
           />
         ),
       ]}
-    </FolderEditRows>
+    </Rows>
   );
 }

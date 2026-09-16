@@ -436,7 +436,7 @@ export default function Library() {
   };
 
   return (
-    <ScreenBackground preset="homeLampWhite">
+    <ScreenBackground preset="finish">
       <YStack f={1} pt={screen.top}>
         <YStack px="$screenX">
           <XStack ai="center" jc="space-between" gap={12}>

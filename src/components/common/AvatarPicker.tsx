@@ -4,8 +4,8 @@ import { IconButton } from "@/src/components/ui/IconButton";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Ban, Camera } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
+import { Ban, Camera } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Linking } from "react-native";
 import { Spinner, YStack } from "tamagui";
@@ -33,10 +33,10 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
         type: asset.mimeType ?? "image/jpeg",
       } as unknown as Blob);
 
-      const res = await protectedFetch(
-        `${API_BASE_URL}/users/me/avatar`,
-        { method: "PATCH", body: formData },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/users/me/avatar`, {
+        method: "PATCH",
+        body: formData,
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
 
       const data = await res.json();
@@ -78,10 +78,9 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
   const removeAvatar = async () => {
     setUploading(true);
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/users/me/avatar`,
-        { method: "DELETE" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/users/me/avatar`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       useAuthStore.getState().updateAvatar(null);
     } catch (err) {

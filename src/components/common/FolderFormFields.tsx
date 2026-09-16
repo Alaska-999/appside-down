@@ -43,7 +43,7 @@ export function FolderFormFields<T extends FieldValues>({
         <FormInput
           control={control}
           name={nameField}
-          variant="wellSoft"
+          variant="well"
           placeholder="Untitled folder"
           maxLength={40}
           showCounter

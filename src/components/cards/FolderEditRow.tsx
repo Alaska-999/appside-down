@@ -1,11 +1,3 @@
-import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import {
-  WELL_BORDERS,
-  WELL_FILL_SOFT,
-  WELL_FILL_SOFT_FOCUS,
-  WellInsetShadow,
-} from "@/src/components/ui/Well";
 import {
   ICON_ACCENT,
   ICON_DANGER,
@@ -13,64 +5,13 @@ import {
   ICON_MUTED_LIGHT,
   ICON_STATUS_DANGER,
 } from "@/src/constants/iconColors";
-import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
-import { ComponentType, Fragment, ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { ComponentType, ReactNode } from "react";
+import { Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 export { ROW_HEIGHT as FOLDER_EDIT_ROW_HEIGHT };
-
-const ROWS_RADIUS = 20;
-
-export function FolderEditRows({
-  children,
-  focused = false,
-}: {
-  children: ReactNode[];
-  focused?: boolean;
-}) {
-  const focusProgress = useFocusProgress(focused);
-  return (
-    <YStack br={ROWS_RADIUS} pos="relative">
-      <YStack
-        pos="absolute"
-        t={0}
-        l={0}
-        r={0}
-        b={0}
-        br={ROWS_RADIUS}
-        overflow="hidden"
-        bg={focused ? WELL_FILL_SOFT_FOCUS : WELL_FILL_SOFT}
-      >
-        <WellInsetShadow radius={ROWS_RADIUS} />
-      </YStack>
-      <GradientBorder
-        radius={ROWS_RADIUS}
-        angle={180}
-        colors={WELL_BORDERS.default.colors}
-        positions={WELL_BORDERS.default.positions}
-      />
-      <FocusRing radius={ROWS_RADIUS} progress={focusProgress} />
-      <YStack br={ROWS_RADIUS} overflow="hidden" zIndex={2}>
-        {children.map((child, index) => (
-          <Fragment key={index}>
-            {index > 0 && (
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: SURFACE_GLASS_BG_STRONG,
-                }}
-              />
-            )}
-            {child}
-          </Fragment>
-        ))}
-      </YStack>
-    </YStack>
-  );
-}
 
 const ACTION_SIZE = 36;
 const ROW_HEIGHT = 56;

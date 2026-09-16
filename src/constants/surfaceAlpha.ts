@@ -6,7 +6,7 @@ export const SURFACE_GLASS_BG_STRONG = "rgba(220,255,245,0.08)";
 export const SURFACE_CARD = "rgba(20,28,34,0.55)";
 export const SURFACE_CARD_HARD = "rgba(9,15,18,0.5)";
 
-export const SURFACE_WELL = "rgba(4,7,10,0.6)";
+export const SURFACE_WELL = "rgba(4,7,10,0.52)";
 export const SURFACE_MINT_GLASS_BG = "rgba(45,212,191,0.14)";
 export const SURFACE_ACCENT_BORDER_SOFT = "rgba(163,230,53,0.4)";
 export const SURFACE_GLOW_COLOR = "rgba(45,212,191,0.5)";

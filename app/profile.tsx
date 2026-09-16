@@ -1,7 +1,7 @@
 import { StreakCard } from "@/src/components/cards/StreakCard";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
-import { GlassRow, GlassRows } from "@/src/components/ui/GlassRows";
+import { Row, Rows } from "@/src/components/ui/Rows";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
 import { SectionTitle } from "@/src/components/ui/SectionTitle";
 import { useAuthStore } from "@/src/store/useAuthStore";
@@ -15,14 +15,23 @@ export default function ProfileScreen() {
 
   return (
     // | "home"
-    // | "module"
-    // | "form"
-    // | "formBright"
-    // | "folder"
+
+    // | "homeLampWhite"
+
     // | "auth"
-    // | "finish"
-    // | "finishWarm";
-    <ScreenBackground preset="finish">
+    // | "auth"
+    // | "finish2"
+    // | "finishCold"
+    // | "finishCold2"
+
+    // | "auroraTeal"
+    // | "twilightDuo"
+
+    // | "tealBeam"
+    // | "crossBeams"
+    // | "crossBeamsTeal"
+
+    <ScreenBackground preset="crossBeamsTeal">
       <ScreenHeader title="Profile" />
 
       <YStack f={1} px="$screenX" gap={20} pt="$2">
@@ -49,13 +58,13 @@ export default function ProfileScreen() {
           <SectionTitle tone="eyebrow" px={4}>
             Account
           </SectionTitle>
-          <GlassRows>
-            <GlassRow
+          <Rows variant="glass" divider="inset">
+            <Row
               icon={Settings}
               label="Settings"
               onPress={() => router.push("/settings")}
             />
-            <GlassRow
+            <Row
               icon={BellRing}
               label="Activity"
               disabled
@@ -65,7 +74,7 @@ export default function ProfileScreen() {
                 </Text>
               }
             />
-          </GlassRows>
+          </Rows>
         </YStack>
       </YStack>
     </ScreenBackground>

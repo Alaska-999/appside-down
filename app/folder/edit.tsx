@@ -2,7 +2,6 @@ import { API_BASE_URL } from "@/src/api/config";
 import {
   FolderAddRow,
   FolderEditIconAction,
-  FolderEditRows,
   FolderModuleEditRow,
 } from "@/src/components/cards/FolderEditRow";
 import { FolderFormFields } from "@/src/components/common/FolderFormFields";
@@ -10,6 +9,7 @@ import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -298,8 +298,9 @@ export default function FolderEditScreen() {
       {/* <BackgroundMesh preset="crossBeams" /> */}
       {/* <BackgroundMesh preset="twilightDuoGreen" /> */}
       {/* <BackgroundMesh preset="auroraDrift" /> */}
+
       {/* <BackgroundMesh preset="crossBeamsTeal" /> */}
-      <BackgroundMesh preset="crossBeamsTeal" />
+      <BackgroundMesh preset="auroraTeal" />
 
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
@@ -335,9 +336,11 @@ export default function FolderEditScreen() {
               nameField="name"
               coverUri={coverUri}
               onCoverChange={setCoverUri}
-              coverTone="teal"
+              // coverTone="teal"
+              coverTone={"lime"}
               tagEditor={
                 <TagEditor
+                  variant="well"
                   mode="manage"
                   tags={folder.tags.map((tag) => ({
                     ...tag,
@@ -351,7 +354,7 @@ export default function FolderEditScreen() {
             >
               <YStack>
                 <FieldLabel label="Modules" hint={String(moduleCount)} />
-                <FolderEditRows>
+                <Rows variant="well">
                   {[
                     ...folder.modules.map((mod) => (
                       <FolderModuleEditRow
@@ -391,7 +394,7 @@ export default function FolderEditScreen() {
                       }
                     />,
                   ]}
-                </FolderEditRows>
+                </Rows>
               </YStack>
 
               <SheetRows>

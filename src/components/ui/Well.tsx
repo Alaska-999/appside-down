@@ -1,6 +1,9 @@
 import { WELL_EDGE_TAIL } from "@/src/constants/focus";
 import { ICON_LIME, ICON_STATUS_DANGER } from "@/src/constants/iconColors";
-import { WELL_BORDER_TOP, WELL_INSET_SHADOW_COLOR } from "@/src/constants/rawColors";
+import {
+  WELL_BORDER_TOP,
+  WELL_INSET_SHADOW_COLOR,
+} from "@/src/constants/rawColors";
 import {
   SURFACE_ACCENT_BORDER_SOFT,
   SURFACE_WELL,
@@ -78,7 +81,10 @@ export const WELL_BORDERS: Record<
   default: WELL_DEFAULT_BORDER,
   focus: WELL_DEFAULT_BORDER,
   error: {
-    colors: [withAlpha(ICON_STATUS_DANGER, 0.5), withAlpha(ICON_STATUS_DANGER, 0.2)],
+    colors: [
+      withAlpha(ICON_STATUS_DANGER, 0.5),
+      withAlpha(ICON_STATUS_DANGER, 0.2),
+    ],
     positions: [0, 1],
   },
   good: {

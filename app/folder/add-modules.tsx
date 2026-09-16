@@ -183,7 +183,11 @@ export default function AddModules() {
   return (
     <YStack f={1} bg="$background">
       {/* <BackgroundMesh preset="twilightDuo" /> */}
-      <BackgroundMesh preset="homeLampWhite" />
+      {/* <BackgroundMesh preset="finishWarm" /> */}
+      {/* <BackgroundMesh preset="crossBeams" /> */}
+      {/* <BackgroundMesh preset="tealBeam" /> */}
+      <BackgroundMesh preset="twilightDuoLime" />
+      {/* <BackgroundMesh preset="auroraTeal" /> */}
 
       <YStack f={1} pt={screen.top}>
         <XStack px="$screenX" mb={18} ai="center" gap={10}>

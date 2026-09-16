@@ -5,7 +5,7 @@ import {
 } from "@/src/components/ui/InputShell";
 import { ICON_DANGER, ICON_SUBTLE, ICON_WARNING } from "@/src/constants/iconColors";
 import { AlertCircle, Eye, EyeOff } from "lucide-react-native";
-import { FieldGroupContext } from "@/src/components/ui/FieldGroup";
+import { RowsFocusContext } from "@/src/components/ui/Rows";
 import { ReactNode, Ref, forwardRef, useContext, useState } from "react";
 import {
   Control,
@@ -79,7 +79,7 @@ function FormInputInner<T extends FieldValues>(
   const formContext = useFormContext();
   const [focused, setFocused] = useState(false);
   const [secureVisible, setSecureVisible] = useState(false);
-  const groupFocus = useContext(FieldGroupContext);
+  const groupFocus = useContext(RowsFocusContext);
   const { errors: formErrors } = useFormState({ control });
   const error = get(formErrors, name) as { message?: string } | undefined;
   const hasError = !!error;

@@ -1,8 +1,8 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
-import { FieldGroup } from "@/src/components/ui/FieldGroup";
 import { PickRow } from "@/src/components/ui/PickRow";
+import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -106,6 +106,7 @@ export default function ModuleEditScreen() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <BackgroundMesh preset="auroraDrift" />
+        {/* <BackgroundMesh preset="auroraTeal" /> */}
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
@@ -138,7 +139,7 @@ export default function ModuleEditScreen() {
             ) : (
               <>
                 <YStack mb={14}>
-                  <FieldGroup>
+                  <Rows variant="well">
                     <FormInput
                       control={control}
                       name="name"
@@ -157,7 +158,7 @@ export default function ModuleEditScreen() {
                       multiline
                       hideError
                     />
-                  </FieldGroup>
+                  </Rows>
                 </YStack>
 
                 <PickRow

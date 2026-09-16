@@ -5,12 +5,12 @@ import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
 import { AddPill } from "@/src/components/ui/AddPill";
 import { AppButton } from "@/src/components/ui/Button";
-import { FieldGroup } from "@/src/components/ui/FieldGroup";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
 } from "@/src/components/ui/KeyboardBar";
 import { PickRow } from "@/src/components/ui/PickRow";
+import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -219,10 +219,10 @@ export default function ModuleCreate() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         {/* <BackgroundMesh preset="auroraDrift" /> */}
-        {/* <BackgroundMesh preset="crossBeams" /> */}
         {/* <BackgroundMesh preset="crossBeamsMint" /> */}
         {/* <BackgroundMesh preset="crossBeamsTeal" /> */}
 
+        {/* <BackgroundMesh preset="crossBeams" /> */}
         <BackgroundMesh preset="auroraTeal" />
 
         <View
@@ -269,7 +269,7 @@ export default function ModuleCreate() {
               />
 
               <YStack mb={14}>
-                <FieldGroup>
+                <Rows variant="well">
                   <FormInput
                     control={control}
                     name="name"
@@ -290,7 +290,7 @@ export default function ModuleCreate() {
                     multiline
                     hideError
                   />
-                </FieldGroup>
+                </Rows>
               </YStack>
 
               <YStack mb={50} gap={16}>

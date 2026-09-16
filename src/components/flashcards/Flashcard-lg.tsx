@@ -394,7 +394,7 @@ function CardFace({
     >
       <YStack f={1} br={CARD_RADIUS} overflow="hidden">
         <LiquidGlass
-          intensity={1}
+          intensity={12}
           backgroundColor={FLASHCARD_FACE_BG}
           borderRadius={CARD_RADIUS}
         />
@@ -484,10 +484,13 @@ export function FlashcardLg({
       p={1}
     >
       <GestureDetector gesture={taps.star}>
-        <StarToggle active={!!card?.isStarred} />
+        <View collapsable={false}>
+          <StarToggle active={!!card?.isStarred} />
+        </View>
       </GestureDetector>
       <GestureDetector gesture={taps.tts}>
         <YStack
+          collapsable={false}
           w={40}
           h={40}
           br="$cardSoft"

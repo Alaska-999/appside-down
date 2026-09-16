@@ -196,6 +196,7 @@ export default function ModuleCardsEditScreen() {
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
         <BackgroundMesh preset="auroraDrift" />
+        {/* <BackgroundMesh preset="auroraTeal" /> */}
 
         <View
           style={{ flex: 1 }}
@@ -239,13 +240,10 @@ export default function ModuleCardsEditScreen() {
                 }
               />
 
-              <XStack ai="center" jc="space-between" mb={10} pr={10} pl={6}>
-                <Text fontSize={16} fontWeight="600" color="$color">
-                  Cards
-                </Text>
+              <XStack ai="center" jc="flex-end" mb={10} pr={10} pl={6}>
                 {!loading && (
                   <Text fontSize={14.5} color="$textMuted">
-                    {fields.length}
+                    {fields.length} cards
                   </Text>
                 )}
               </XStack>

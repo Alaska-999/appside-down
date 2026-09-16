@@ -221,6 +221,7 @@ export function AppToast({
     >
       <GestureDetector gesture={swipeGesture}>
         <XStack
+          collapsable={false}
           ai="center"
           gap={s.gap}
           br={s.radius}
