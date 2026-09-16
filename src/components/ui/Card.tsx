@@ -75,13 +75,10 @@ type CardVariant =
   | "sweep"
   | "media"
   | "liquid"
-  | "solid"
-  | "soft"
-  | "flat"
   | "row"
   | "rowGold";
 
-type CardSize = "sm" | "md" | "lg";
+type CardSize = "md" | "lg";
 
 type CardLayoutProps = Pick<
   YStackProps,
@@ -132,7 +129,6 @@ interface CardProps extends CardLayoutProps {
 }
 
 const SIZE_STYLES: Record<CardSize, { px: number; py: number; br: number }> = {
-  sm: { px: 14, py: 14, br: 18 },
   md: { px: 19, py: 17, br: 20 },
   lg: { px: 19, py: 19, br: 23 },
 };
@@ -405,15 +401,7 @@ export function AppCard(props: CardProps) {
       </YStack>
     );
   } else {
-    const surfaceKey =
-      variant === "glow" ||
-      variant === "solid" ||
-      variant === "soft" ||
-      variant === "flat"
-        ? variant === "glow"
-          ? "glow"
-          : "surface"
-        : variant;
+    const surfaceKey = variant;
     const isRow = variant === "row" || variant === "rowGold";
     const surfaceProps = {
       ...(surfaceKey === "glow"

@@ -1,11 +1,8 @@
 import { GradientBorder } from "@/src/components/ui/GradientBorder";
 import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
 import {
-  ICON_ACCENT,
   ICON_MINT,
   ICON_MINT_LIGHT,
-  ICON_PURE_BLACK,
-  ICON_SUBTLE,
 } from "@/src/constants/iconColors";
 import { GLASS_PILL_MINT_EDGE, GLASS_SHEEN_MED } from "@/src/constants/rawColors";
 import { SURFACE_GLASS_BG } from "@/src/constants/surfaceAlpha";
@@ -15,8 +12,8 @@ import { ComponentType } from "react";
 import { View } from "react-native";
 import { Spinner, Text, XStack, YStack } from "tamagui";
 
-export type GlassPillTone = "accent" | "save";
-export type GlassPillSize = "lg" | "md";
+export type GlassPillTone = "accent";
+export type GlassPillSize = "lg";
 
 interface ToneStyle {
   glassBg: string;
@@ -54,24 +51,6 @@ const TONE_STYLES: Record<GlassPillTone, ToneStyle> = {
     textColorInactive: "$mintLight",
     centerSelf: true,
   },
-  save: {
-    glassBg: SURFACE_GLASS_BG,
-    glassIntensity: 25,
-    borderPreset: "lens",
-    shadow: {
-      color: ICON_PURE_BLACK,
-      offset: { width: 0, height: 3 },
-      radius: 5,
-      opacity: 0.7,
-    },
-    topHighlight: true,
-    spinnerColor: "$mintLight",
-    iconColorActive: ICON_ACCENT,
-    iconColorInactive: ICON_SUBTLE,
-    textColorActive: "$iconOnGlass",
-    textColorInactive: "$textMuted",
-    centerSelf: false,
-  },
 };
 
 interface SizeStyle {
@@ -93,15 +72,6 @@ const SIZE_STYLES: Record<GlassPillSize, SizeStyle> = {
     fontWeight: "600",
     iconSize: 17,
     iconStroke: 2.6,
-  },
-  md: {
-    height: 40,
-    px: 17,
-    gap: 8,
-    fontSize: 14,
-    fontWeight: "700",
-    iconSize: 17,
-    iconStroke: 2.3,
   },
 };
 

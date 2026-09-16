@@ -6,10 +6,8 @@ import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { AppButton } from "@/src/components/ui/Button";
 import { AppCard } from "@/src/components/ui/Card";
 import {
-  Blik,
+  CoverGlow,
   GlowTone,
-  InnerBloom,
-  Lamp,
   LightLevel,
 } from "@/src/components/ui/GlowSurface";
 import { GradientText } from "@/src/components/ui/GradientText";
@@ -107,6 +105,34 @@ const MODULE_MONOGRAM_GRADIENTS: [string, string][] = [
   [ICON_MINT, ICON_TEAL],
   [ICON_ACCENT, ICON_TEAL],
 ];
+const DISCOVER_POOL_LIMIT = 20;
+const DISCOVER_COUNT = 5;
+
+let discoverSeed = (Math.random() * 0xffffffff) >>> 0;
+
+function reseedDiscover() {
+  discoverSeed = (Math.random() * 0xffffffff) >>> 0;
+}
+
+function seededRank(id: string) {
+  let hash = 2166136261 ^ discoverSeed;
+  for (let i = 0; i < id.length; i += 1) {
+    hash ^= id.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 2246822507);
+  hash ^= hash >>> 13;
+  return hash >>> 0;
+}
+
+function pickDiscover(modules: PublicModuleResult[]) {
+  return modules
+    .filter((m) => !m.savedCopyId)
+    .sort((a, b) => seededRank(a.id) - seededRank(b.id))
+    .slice(0, DISCOVER_COUNT);
+}
+
 const DISCOVER_COVERS: [string, string][] = [
   [ICON_MINT_LIGHT, ICON_HERO_LIME],
 
@@ -213,15 +239,17 @@ export default function Home() {
   );
 
   const fetchData = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+    if (isRefresh) {
+      reseedDiscover();
+      setRefreshing(true);
+    } else setLoading(true);
     setError(false);
     try {
       const [statsRes, recentRes, discoverRes] = await Promise.all([
         protectedFetch(`${API_BASE_URL}/modules/stats`),
         protectedFetch(`${API_BASE_URL}/modules?limit=6`),
         protectedFetch(
-          `${API_BASE_URL}/modules/public?limit=5&excludeOwn=true`,
+          `${API_BASE_URL}/modules/public?limit=${DISCOVER_POOL_LIMIT}&excludeOwn=true`,
         ),
       ]);
       if (!statsRes.ok) throw new Error(`Stats error: ${statsRes.status}`);
@@ -242,7 +270,7 @@ export default function Home() {
       ]);
       setStats(statsData);
       setRecentModules(recentData.data);
-      setDiscoverModules(discoverData.data);
+      setDiscoverModules(pickDiscover(discoverData.data));
     } catch (err) {
       console.error("[Home] fetch error:", err);
       setError(true);
@@ -253,9 +281,11 @@ export default function Home() {
   };
 
   const debouncedSearch = useDebouncedValue(search.trim());
+  const searchPending = search.trim() !== debouncedSearch;
 
   const fetchSearchPage = useCallback(
     async (cursor: string | null) => {
+      if (debouncedSearch.length < 2) return { data: [], nextCursor: null };
       const params = new URLSearchParams({
         search: debouncedSearch,
         limit: "20",
@@ -368,7 +398,7 @@ export default function Home() {
               />
             }
             ListEmptyComponent={
-              searchList.initialLoading ? null : searchList.error ? (
+              searchPending || searchList.initialLoading ? null : searchList.error ? (
                 <StateCard
                   tone="error"
                   icon={AlertTriangle}
@@ -651,19 +681,11 @@ export default function Home() {
                                   style={StyleSheet.absoluteFill}
                                   bg={SCRIM_BASE_30}
                                 />
-                                <Lamp color={SURFACE_GLOW_COLOR} />
-                                <Blik
-                                  color={SURFACE_WHITE_STRONG}
-                                  size={48}
-                                  x={-24}
-                                  y={-24}
-                                  blur={18}
-                                />
-                                <InnerBloom
-                                  color={BLACK_SCRIM_SOFT}
+                                <CoverGlow
+                                  lampColor={SURFACE_GLOW_COLOR}
+                                  blikColor={SURFACE_WHITE_STRONG}
+                                  shadowColor={BLACK_SCRIM_SOFT}
                                   radius={20}
-                                  spread={22}
-                                  blur={17}
                                 />
                               </YStack>
                             }

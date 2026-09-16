@@ -100,13 +100,13 @@ export default function SettingsScreen() {
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <YStack px="$screenX" gap={18} pt="$2" pb={screen.bottom}>
           <Surface variant="glass" p={16}>
-            <XStack ai="center" gap={14}>
-              <AvatarPicker size={66} onError={setToast} />
+            <XStack ai="center" gap={20}>
+              <AvatarPicker size={72} onError={setToast} />
               <YStack f={1}>
-                <Text fontSize={17} fontWeight="800" color="$color">
+                <Text fontSize={18} fontWeight="800" color="$color">
                   {user?.username ?? "Unknown"}
                 </Text>
-                <Text fontSize={13} color="$colorMuted" mt={2}>
+                <Text fontSize={14} color="$colorMuted" mt={2}>
                   {user?.email ?? ""}
                 </Text>
               </YStack>

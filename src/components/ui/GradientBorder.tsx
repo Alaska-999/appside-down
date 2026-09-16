@@ -18,101 +18,18 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-export type GradientBorderPreset =
-  | "surf"
-  | "glowMint"
-  | "glowTeal"
-  | "glowLime"
-  | "glowIndigo"
-  | "liquid"
-  | "lens"
-  | "well"
-  | "sheet";
+import {
+  GRADIENT_BORDER_PRESETS,
+  GradientBorderPreset,
+} from "@/src/components/ui/gradientBorderPresets";
+
+export type { GradientBorderPreset };
 
 export type CornerRadii = {
   topLeft: number;
   topRight: number;
   bottomRight: number;
   bottomLeft: number;
-};
-
-const PRESETS: Record<
-  GradientBorderPreset,
-  { angle: number; colors: string[]; positions: number[] }
-> = {
-  surf: {
-    angle: 140,
-    colors: [
-      "rgba(220,255,245,0.13)",
-      "rgba(220,255,245,0.06)",
-      "rgba(220,255,245,0.03)",
-    ],
-    positions: [0, 0.48, 1],
-  },
-  glowMint: {
-    angle: 138,
-    colors: [
-      "rgba(94,234,212,0.48)",
-      "rgba(94,234,212,0.07)",
-      "rgba(220,255,245,0.03)",
-    ],
-    positions: [0, 0.46, 1],
-  },
-  glowTeal: {
-    angle: 138,
-    colors: [
-      "rgba(45,212,191,0.4)",
-      "rgba(45,212,191,0.06)",
-      "rgba(220,255,245,0.03)",
-    ],
-    positions: [0, 0.46, 1],
-  },
-  glowLime: {
-    angle: 138,
-    colors: [
-      "rgba(190,242,100,0.48)",
-      "rgba(190,242,100,0.06)",
-      "rgba(220,255,245,0.03)",
-    ],
-    positions: [0, 0.46, 1],
-  },
-  glowIndigo: {
-    angle: 138,
-    colors: [
-      "rgba(99,102,241,0.42)",
-      "rgba(99,102,241,0.05)",
-      "rgba(220,255,245,0.03)",
-    ],
-    positions: [0, 0.46, 1],
-  },
-  liquid: {
-    angle: 155,
-    colors: [
-      "rgba(255,255,255,0.8)",
-      "rgba(255,255,255,0.06)",
-      "rgba(255,255,255,0.32)",
-    ],
-    positions: [0, 0.46, 1],
-  },
-  lens: {
-    angle: 160,
-    colors: [
-      "rgba(255,255,255,0.5)",
-      "rgba(255,255,255,0.04)",
-      "rgba(150,220,255,0.24)",
-    ],
-    positions: [0, 0.44, 1],
-  },
-  well: {
-    angle: 180,
-    colors: ["rgba(0,0,0,0.5)", "rgba(220,255,245,0.13)"],
-    positions: [0, 1],
-  },
-  sheet: {
-    angle: 180,
-    colors: ["rgba(255,255,255,0.4)", "rgba(255,255,255,0.03)", "rgba(255,255,255,0)"],
-    positions: [0, 0.4, 1],
-  },
 };
 
 type GradientBorderProps = {
@@ -176,7 +93,7 @@ export function GradientBorder({
   const spinTransform = useDerivedValue(() => [
     { rotate: ((spin.value + sweepStartDeg) * Math.PI) / 180 },
   ]);
-  const presetDef = PRESETS[preset];
+  const presetDef = GRADIENT_BORDER_PRESETS[preset];
   const resolvedAngle = angle ?? presetDef.angle;
   const resolvedColors = colors ?? presetDef.colors;
   const resolvedPositions = positions ?? presetDef.positions;

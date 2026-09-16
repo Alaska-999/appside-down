@@ -17,7 +17,18 @@ interface AvatarPickerProps {
 
 const CAMERA_BADGE = 30;
 const REMOVE_BADGE = 26;
-const BADGE_OFFSET = -4;
+const BADGE_OFFSET_X = -12;
+const BADGE_OFFSET_Y = -4;
+
+const uriToBlob = (uri: string): Promise<Blob> =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => resolve(xhr.response as Blob);
+    xhr.onerror = () => reject(new Error("Couldn't read the selected file"));
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
 
 export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
   const { user } = useAuthStore();
@@ -26,12 +37,13 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
   const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
     setUploading(true);
     try {
+      const blob = await uriToBlob(asset.uri);
       const formData = new FormData();
-      formData.append("avatar", {
-        uri: asset.uri,
-        name: asset.fileName ?? `avatar-${Date.now()}.jpg`,
-        type: asset.mimeType ?? "image/jpeg",
-      } as unknown as Blob);
+      formData.append(
+        "avatar",
+        blob,
+        asset.fileName ?? `avatar-${Date.now()}.jpg`,
+      );
 
       const res = await protectedFetch(`${API_BASE_URL}/users/me/avatar`, {
         method: "PATCH",
@@ -64,7 +76,7 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -121,8 +133,8 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
           variant="badge"
           size={CAMERA_BADGE}
           pos="absolute"
-          right={BADGE_OFFSET}
-          bottom={BADGE_OFFSET}
+          right={BADGE_OFFSET_X}
+          bottom={BADGE_OFFSET_Y}
           icon={<Camera size={15} color={ICON_ON_GLASS} strokeWidth={2} />}
           onPress={pickImage}
           disabled={uploading}
@@ -134,8 +146,8 @@ export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
             variant="danger"
             size={REMOVE_BADGE}
             pos="absolute"
-            right={BADGE_OFFSET}
-            top={BADGE_OFFSET}
+            right={BADGE_OFFSET_X}
+            top={BADGE_OFFSET_Y}
             icon={<Ban size={13} color={ICON_ON_GLASS} strokeWidth={2.2} />}
             onPress={removeAvatar}
             disabled={uploading}

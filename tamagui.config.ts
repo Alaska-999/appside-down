@@ -63,18 +63,6 @@ export const screenGutter = 16
 
 export const topPaddingBoost = 18
 
-export const elevation = {
-    sm: { shadowRadius: 12, shadowOpacity: 0.06 },
-    md: { shadowRadius: 20, shadowOpacity: 0.1 },
-    lg: { shadowRadius: 32, shadowOpacity: 0.16 },
-}
-
-export const stateOpacity = {
-    disabled: 0.5,
-    pressed: 0.7,
-    hover: 0.85,
-}
-
 const soraFace = {
     normal: { normal: 'Sora_400Regular' },
     bold: { normal: 'Sora_700Bold' },
@@ -173,7 +161,7 @@ const appConfig = createTamagui({
 
 
             surfaceCard: 'rgba(20,28,34,0.55)',
-            surfaceWell: 'rgba(4,7,10,0.5)',
+            surfaceWell: 'rgba(4,7,10,0.52)',
 
             surfaceGlassFaint: 'rgba(220,255,245,0.03)',
             tabBarBg: 'rgba(14,26,28,0.62)',

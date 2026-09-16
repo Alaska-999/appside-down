@@ -74,12 +74,6 @@ export default function AddModules() {
   const [toast, setToast] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchModules();
-    }, [folderId]),
-  );
-
   const fetchModules = async () => {
     const isFirstLoad = !hasLoadedRef.current;
     if (isFirstLoad) {
@@ -92,13 +86,13 @@ export default function AddModules() {
       const page: { data: any[] } = await res.json();
       const items = (page.data ?? []).map((m) => mapModule(m, folderId));
       setModules(items);
-      if (filter === null) {
-        setFilter(
-          items.some((m) => m.folderCount === 0 && !m.inThisFolder)
+      setFilter(
+        (prev) =>
+          prev ??
+          (items.some((m) => m.folderCount === 0 && !m.inThisFolder)
             ? "noFolder"
-            : "all",
-        );
-      }
+            : "all"),
+      );
       hasLoadedRef.current = true;
     } catch (err) {
       console.error("[AddModules] fetch error:", err);
@@ -107,6 +101,12 @@ export default function AddModules() {
       if (isFirstLoad) setLoading(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchModules();
+    }, [folderId]),
+  );
 
   const counts = useMemo(
     () => ({

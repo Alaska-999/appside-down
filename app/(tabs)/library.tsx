@@ -33,8 +33,21 @@ import {
   Search,
   Star,
 } from "lucide-react-native";
-import { ComponentType, memo, useCallback, useMemo, useState } from "react";
-import { FlatList, RefreshControl } from "react-native";
+import {
+  ComponentType,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  RefreshControl,
+} from "react-native";
 import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
@@ -91,6 +104,19 @@ const LIST_STYLE = { flex: 1 } as const;
 
 const keyById = (item: { id: string }) => item.id;
 
+type ScrollOffsetRef = { current: number };
+
+function useScrollOffsetKeeper(scrollOffsetRef: ScrollOffsetRef) {
+  const [initialOffset] = useState(() => scrollOffsetRef.current);
+  const onScrollSettled = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+    },
+    [scrollOffsetRef],
+  );
+  return { initialOffset, onScrollSettled };
+}
+
 const FoldersPane = memo(function FoldersPane({
   items,
   loading,
@@ -105,6 +131,7 @@ const FoldersPane = memo(function FoldersPane({
   expandedId,
   folderModules,
   onToggle,
+  scrollOffsetRef,
 }: {
   items: Folder[];
   loading: boolean;
@@ -119,8 +146,11 @@ const FoldersPane = memo(function FoldersPane({
   expandedId: string | null;
   folderModules: Record<string, FolderModulesState>;
   onToggle: (folder: Folder) => void;
+  scrollOffsetRef: ScrollOffsetRef;
 }) {
   const theme = useTheme();
+  const { initialOffset, onScrollSettled } =
+    useScrollOffsetKeeper(scrollOffsetRef);
   const contentContainerStyle = useMemo(
     () => ({
       paddingHorizontal: screenGutter,
@@ -168,6 +198,9 @@ const FoldersPane = memo(function FoldersPane({
       style={LIST_STYLE}
       keyExtractor={keyById}
       showsVerticalScrollIndicator={false}
+      contentOffset={{ x: 0, y: initialOffset }}
+      onMomentumScrollEnd={onScrollSettled}
+      onScrollEndDrag={onScrollSettled}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
       initialNumToRender={5}
@@ -228,6 +261,7 @@ const ModulesPane = memo(function ModulesPane({
   search,
   sortOrder,
   bottomPadding,
+  scrollOffsetRef,
 }: {
   items: Module[];
   loading: boolean;
@@ -240,8 +274,11 @@ const ModulesPane = memo(function ModulesPane({
   search: string;
   sortOrder: SortOption;
   bottomPadding: number;
+  scrollOffsetRef: ScrollOffsetRef;
 }) {
   const theme = useTheme();
+  const { initialOffset, onScrollSettled } =
+    useScrollOffsetKeeper(scrollOffsetRef);
   const contentContainerStyle = useMemo(
     () => ({
       paddingHorizontal: screenGutter,
@@ -268,6 +305,9 @@ const ModulesPane = memo(function ModulesPane({
       style={LIST_STYLE}
       keyExtractor={keyById}
       showsVerticalScrollIndicator={false}
+      contentOffset={{ x: 0, y: initialOffset }}
+      onMomentumScrollEnd={onScrollSettled}
+      onScrollEndDrag={onScrollSettled}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
       initialNumToRender={6}
@@ -336,6 +376,10 @@ export default function Library() {
     Record<string, FolderModulesState>
   >({});
   const [toast, setToast] = useState<string | null>(null);
+  const foldersScrollOffsetRef = useRef(0);
+  const modulesScrollOffsetRef = useRef(0);
+  const expandedIdRef = useRef<string | null>(null);
+  const hasFocusedRef = useRef(false);
   const tabBarClearance =
     TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
@@ -381,14 +425,6 @@ export default function Library() {
     debouncedSearch,
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      modulesList.reload();
-      foldersList.reload();
-      setFolderModules({});
-    }, [modulesList.reload, foldersList.reload]),
-  );
-
   const loadFolderModules = useCallback(async (folderId: string) => {
     setFolderModules((prev) => ({
       ...prev,
@@ -417,6 +453,25 @@ export default function Library() {
       setToast("Couldn't load modules. Try again");
     }
   }, []);
+
+  useEffect(() => {
+    expandedIdRef.current = expandedId;
+  }, [expandedId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        return;
+      }
+      modulesList.reload();
+      foldersList.reload();
+      setFolderModules({});
+      if (expandedIdRef.current) {
+        loadFolderModules(expandedIdRef.current);
+      }
+    }, [modulesList.reload, foldersList.reload, loadFolderModules]),
+  );
 
   const toggleFolder = useCallback(
     (folder: Folder) => {
@@ -508,6 +563,7 @@ export default function Library() {
             expandedId={expandedId}
             folderModules={folderModules}
             onToggle={toggleFolder}
+            scrollOffsetRef={foldersScrollOffsetRef}
           />
           <ModulesPane
             items={modulesList.items}
@@ -521,6 +577,7 @@ export default function Library() {
             search={debouncedSearch}
             sortOrder={sortOrder}
             bottomPadding={tabBarClearance}
+            scrollOffsetRef={modulesScrollOffsetRef}
           />
         </FadeTabPanes>
       </YStack>

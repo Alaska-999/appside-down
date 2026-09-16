@@ -64,7 +64,6 @@ export const GLASS_BORDER_BOTTOM = "rgba(255,255,255,0.03)";
 export const GLASS_BORDER_ACCENT = "rgba(255,255,255,0.55)";
 export const BLACK_SCRIM_WELL = "rgba(0,0,0,0.62)";
 export const BLACK_SCRIM_35 = "rgba(0,0,0,0.35)";
-export const BLACK_SCRIM_60 = "rgba(0,0,0,0.6)";
 export const GLASS_PILL_MINT_EDGE = "rgba(70,210,191,0.35)";
 export const LIQUID_LENS_TINT = "rgba(150,220,255,0.05)";
 export const LIQUID_LENS_LINE_BOTTOM = "rgba(150,220,255,0.03)";

@@ -5,8 +5,6 @@ import {
   WELL_BORDERS,
   WELL_FILL,
   WELL_FILL_FOCUS,
-  WELL_FILL_SOFT,
-  WELL_FILL_SOFT_FOCUS,
   WellInsetShadow,
   WellState,
 } from "@/src/components/ui/Well";
@@ -21,7 +19,7 @@ import { StyleSheet, View } from "react-native";
 import { SharedValue } from "react-native-reanimated";
 import { YStack, YStackProps } from "tamagui";
 
-export type SurfaceVariant = "well" | "wellSoft" | "glass" | "plain";
+export type SurfaceVariant = "well" | "glass" | "plain";
 export type SurfaceState = WellState;
 
 type SurfaceSpec = {
@@ -35,11 +33,6 @@ export const SURFACE_VARIANTS: Record<SurfaceVariant, SurfaceSpec> = {
     fill: { default: WELL_FILL, focus: WELL_FILL_FOCUS },
     glass: false,
     divider: SURFACE_BORDER,
-  },
-  wellSoft: {
-    fill: { default: WELL_FILL_SOFT, focus: WELL_FILL_SOFT_FOCUS },
-    glass: false,
-    divider: SURFACE_GLASS_BG_STRONG,
   },
   glass: {
     fill: null,

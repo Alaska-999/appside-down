@@ -27,7 +27,7 @@ import {
   YStack,
 } from "tamagui";
 
-type FormInputVariant = InputShellVariant | "bordered";
+type FormInputVariant = InputShellVariant;
 type FormInputSize = InputShellSize;
 
 type FormInputProps<T extends FieldValues> = {
@@ -83,8 +83,7 @@ function FormInputInner<T extends FieldValues>(
   const { errors: formErrors } = useFormState({ control });
   const error = get(formErrors, name) as { message?: string } | undefined;
   const hasError = !!error;
-  const shellVariant: InputShellVariant =
-    variant === "bordered" ? "well" : variant;
+  const shellVariant: InputShellVariant = variant;
   const text = TEXT_ROLE_STYLES[textRole];
 
   return (

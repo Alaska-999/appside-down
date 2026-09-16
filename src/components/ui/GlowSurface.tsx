@@ -10,6 +10,7 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import { SURFACE_GLASS_BG_FAINT } from "@/src/constants/surfaceAlpha";
+import { fadeOut } from "@/src/utils/withAlpha";
 import { ReactNode, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 import { YStack, YStackProps, useTheme } from "tamagui";
@@ -99,7 +100,7 @@ export function Lamp({
               <RadialGradient
                 c={vec(0, 0)}
                 r={rx}
-                colors={[color, color.replace(/,[\d.\s]+\)$/, ",0)")]}
+                colors={[color, fadeOut(color)]}
                 positions={[0, edge]}
               />
             </Circle>
@@ -110,26 +111,84 @@ export function Lamp({
   );
 }
 
-export function Blik({
-  color,
-  size = 20,
-  x = 16,
-  y = 14,
-  blur = 7,
+export function CoverGlow({
+  lampColor,
+  blikColor,
+  shadowColor,
+  radius,
+  lampEdge = 0.56,
+  lampGeometry = LAMP_CARD,
+  blikSize = 48,
+  blikX = -24,
+  blikY = -24,
+  blikBlur = 18,
+  shadowSpread = 22,
+  shadowBlur = 17,
 }: {
-  color: string;
-  size?: number;
-  x?: number;
-  y?: number;
-  blur?: number;
+  lampColor?: string;
+  blikColor?: string;
+  shadowColor?: string;
+  radius: number;
+  lampEdge?: number;
+  lampGeometry?: LampGeometry;
+  blikSize?: number;
+  blikX?: number;
+  blikY?: number;
+  blikBlur?: number;
+  shadowSpread?: number;
+  shadowBlur?: number;
 }) {
+  const { size, onLayout } = useMeasure();
+  const rx = lampGeometry.rx * size.w;
+  const ry = lampGeometry.ry * size.h;
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Circle cx={x + size / 2} cy={y + size / 2} r={size / 2} color={color}>
-          <BlurMask blur={blur} style="normal" />
-        </Circle>
-      </Canvas>
+    <View pointerEvents="none" style={StyleSheet.absoluteFill} onLayout={onLayout}>
+      {size.w > 0 && (
+        <Canvas style={StyleSheet.absoluteFill}>
+          {lampColor ? (
+            <Group
+              transform={[
+                { translateX: lampGeometry.cx * size.w },
+                { translateY: lampGeometry.cy * size.h },
+                { scaleY: ry / rx },
+              ]}
+            >
+              <Circle cx={0} cy={0} r={rx}>
+                <RadialGradient
+                  c={vec(0, 0)}
+                  r={rx}
+                  colors={[lampColor, fadeOut(lampColor)]}
+                  positions={[0, lampEdge]}
+                />
+              </Circle>
+            </Group>
+          ) : null}
+          {blikColor ? (
+            <Circle
+              cx={blikX + blikSize / 2}
+              cy={blikY + blikSize / 2}
+              r={blikSize / 2}
+              color={blikColor}
+            >
+              <BlurMask blur={blikBlur} style="normal" />
+            </Circle>
+          ) : null}
+          {shadowColor ? (
+            <RoundedRect
+              x={-shadowSpread / 2}
+              y={-shadowSpread / 2}
+              width={size.w + shadowSpread}
+              height={size.h + shadowSpread}
+              r={radius}
+              style="stroke"
+              strokeWidth={shadowSpread}
+              color={shadowColor}
+            >
+              <BlurMask blur={shadowBlur} style="normal" />
+            </RoundedRect>
+          ) : null}
+        </Canvas>
+      )}
     </View>
   );
 }

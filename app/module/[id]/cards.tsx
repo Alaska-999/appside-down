@@ -31,6 +31,11 @@ const STICKY_ADD_HEIGHT = 46;
 const STICKY_ADD_KEYBOARD_GAP = 10;
 const STICKY_ADD_CLEARANCE = STICKY_ADD_HEIGHT + 20;
 
+type SaveResult =
+  | { kind: "delete"; cardId: string }
+  | { kind: "patch" }
+  | { kind: "create"; index: number; id?: string };
+
 const newCard = () => ({
   id: `new-${Date.now()}`,
   term: "",
@@ -74,6 +79,7 @@ export default function ModuleCardsEditScreen() {
     handleSubmit,
     reset,
     getValues,
+    setValue,
     formState: { isSubmitting },
   } = form;
 
@@ -90,6 +96,7 @@ export default function ModuleCardsEditScreen() {
   const termRefs = useRef<(TextInput | null)[]>([]);
   const definitionRefs = useRef<(TextInput | null)[]>([]);
   const focusAppendedRef = useRef(false);
+  const createdKeysRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!focusAppendedRef.current) return;
@@ -143,53 +150,95 @@ export default function ModuleCardsEditScreen() {
   const onSubmit = async (data: EditCardsForm) => {
     const isEmpty = (card: { term: string; definition: string }) =>
       !card.term && !card.definition;
-    const keptCards = data.flashcards.filter((c) => !isEmpty(c));
-    const emptiedExistingIds = data.flashcards
-      .filter((c) => !c.isNew && isEmpty(c))
-      .map((c) => c.id);
-    const idsToDelete = [...removedIds, ...emptiedExistingIds];
+    const rows = data.flashcards.map((card, index) => ({
+      card,
+      index,
+      key: fields[index]?.fieldKey ?? `${card.id}-${index}`,
+    }));
+    const keptRows = rows.filter((r) => !isEmpty(r.card));
+    const emptiedExistingIds = rows
+      .filter((r) => !r.card.isNew && isEmpty(r.card))
+      .map((r) => r.card.id);
+    const idsToDelete = Array.from(
+      new Set([...removedIds, ...emptiedExistingIds]),
+    );
 
-    const ensureOk = (res: Response) => {
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-      return res;
-    };
-
-    try {
-      await Promise.all([
-        ...idsToDelete.map((cardId) =>
-          protectedFetch(`${API_BASE_URL}/flashcards/${cardId}`, {
-            method: "DELETE",
-          }).then(ensureOk),
-        ),
-        ...keptCards
-          .filter((c) => !c.isNew)
-          .map((c) =>
-            protectedFetch(`${API_BASE_URL}/flashcards/${c.id}`, {
+    const tasks: (() => Promise<SaveResult>)[] = [
+      ...idsToDelete.map((cardId) => async (): Promise<SaveResult> => {
+        const res = await protectedFetch(
+          `${API_BASE_URL}/flashcards/${cardId}`,
+          { method: "DELETE" },
+        );
+        if (!res.ok && res.status !== 404)
+          throw new Error(`Error: ${res.status}`);
+        return { kind: "delete", cardId };
+      }),
+      ...keptRows
+        .filter((r) => !r.card.isNew)
+        .map((r) => async (): Promise<SaveResult> => {
+          const res = await protectedFetch(
+            `${API_BASE_URL}/flashcards/${r.card.id}`,
+            {
               method: "PATCH",
               body: JSON.stringify({
-                term: c.term,
-                definition: c.definition,
+                term: r.card.term,
+                definition: r.card.definition,
               }),
-            }).then(ensureOk),
-          ),
-        ...keptCards
-          .filter((c) => c.isNew)
-          .map((c) =>
-            protectedFetch(`${API_BASE_URL}/flashcards`, {
-              method: "POST",
-              body: JSON.stringify({
-                term: c.term,
-                definition: c.definition,
-                moduleId: id,
-              }),
-            }).then(ensureOk),
-          ),
-      ]);
-      router.back();
-    } catch (err) {
-      console.error("[ModuleCardsEdit] save error:", err);
-      setToast("Couldn't save the cards. Try again");
+            },
+          );
+          if (!res.ok) throw new Error(`Error: ${res.status}`);
+          return { kind: "patch" };
+        }),
+      ...keptRows
+        .filter((r) => r.card.isNew && !createdKeysRef.current.has(r.key))
+        .map((r) => async (): Promise<SaveResult> => {
+          const res = await protectedFetch(`${API_BASE_URL}/flashcards`, {
+            method: "POST",
+            body: JSON.stringify({
+              term: r.card.term,
+              definition: r.card.definition,
+              moduleId: id,
+            }),
+          });
+          if (!res.ok) throw new Error(`Error: ${res.status}`);
+          createdKeysRef.current.add(r.key);
+          const created = (await res
+            .json()
+            .catch(() => null)) as { id?: string } | null;
+          return { kind: "create", index: r.index, id: created?.id };
+        }),
+    ];
+
+    const results = await Promise.allSettled(tasks.map((task) => task()));
+
+    const deletedIds = new Set<string>();
+    const failures: unknown[] = [];
+    for (const result of results) {
+      if (result.status === "rejected") {
+        failures.push(result.reason);
+        continue;
+      }
+      const value = result.value;
+      if (value.kind === "delete") deletedIds.add(value.cardId);
+      if (value.kind === "create" && value.id) {
+        setValue(`flashcards.${value.index}.id`, value.id);
+        setValue(`flashcards.${value.index}.isNew`, false);
+      }
     }
+    if (deletedIds.size > 0) {
+      setRemovedIds((prev) => prev.filter((cardId) => !deletedIds.has(cardId)));
+    }
+
+    if (failures.length === 0) {
+      createdKeysRef.current.clear();
+      router.back();
+      return;
+    }
+
+    console.error("[ModuleCardsEdit] save error:", failures);
+    setToast(
+      `Couldn't save ${failures.length} of ${results.length} changes. Try again`,
+    );
   };
 
   return (

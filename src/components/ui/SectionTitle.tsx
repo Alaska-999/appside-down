@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Text, TextProps } from "tamagui";
 
-type SectionTitleTone = "muted" | "onGlass" | "eyebrow";
+type SectionTitleTone = "muted" | "eyebrow";
 
 type SectionTitleLayoutProps = Pick<
   TextProps,
@@ -20,13 +20,6 @@ const TONE_STYLES: Record<SectionTitleTone, Partial<TextProps>> = {
     color: "$colorMuted",
     letterSpacing: 1.04,
     mt: 0,
-  },
-  onGlass: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "$colorSecondary",
-    letterSpacing: 0.77,
-    mt: 3,
   },
   eyebrow: {
     fontSize: 11,

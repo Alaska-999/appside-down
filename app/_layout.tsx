@@ -1,13 +1,17 @@
-import { SvitlyMark, MARK_TIMING } from "@/src/components/brand/SvitlyMark";
+import {
+  MARK_INK,
+  MARK_VIEWBOX,
+  SvitlyMark,
+} from "@/src/components/brand/SvitlyMark";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { MeshGradientBackground } from "@/src/components/ui/MeshGradientBackground";
+import { GRADIENT_SOFT } from "@/src/constants/gradients";
 import {
   ICON_BASE,
   ICON_MUTED,
   ICON_NEAR_BLACK,
   ICON_TEXT,
 } from "@/src/constants/iconColors";
-import { GRADIENT_SOFT } from "@/src/constants/gradients";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import config, { controlHeight } from "@/tamagui.config";
@@ -22,7 +26,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   LayoutChangeEvent,
   Pressable,
@@ -34,6 +38,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import Animated, {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -52,17 +57,33 @@ const TAGLINE_DELAY = 1900;
 const TAGLINE_MS = 500;
 const TAGLINE_TRACKING_FROM = 4.59;
 const TAGLINE_TRACKING_TO = 2.7;
+const GRADIENT_TEXT_RIGHT_PAD = 6;
+const MARK_SCALE = MARK_SIZE / MARK_VIEWBOX;
+const MARK_INK_WIDTH = MARK_INK.width * MARK_SCALE;
+const MARK_INK_HEIGHT = MARK_INK.height * MARK_SCALE;
+const MARK_TO_WORDMARK = 37.3;
+const STACK_TOP_FROM_CENTER = -140.375;
 const EXIT_DELAY = 2550;
 const EXIT_MS = 340;
 const SOFT_OUT = Easing.bezier(0.2, 0.8, 0.3, 1);
 
-export function AppSplash() {
+interface AppSplashProps {
+  ready: boolean;
+  onExited: () => void;
+}
+
+export function AppSplash({ ready, onExited }: AppSplashProps) {
   const still = useReducedMotion();
   const [wordmarkWidth, setWordmarkWidth] = useState(0);
+  const mountedAt = useRef(0);
 
   const reveal = useSharedValue(still ? 1 : 0);
   const tagline = useSharedValue(still ? 1 : 0);
   const exit = useSharedValue(0);
+
+  useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (still) return;
@@ -75,11 +96,27 @@ export function AppSplash() {
       TAGLINE_DELAY,
       withTiming(1, { duration: TAGLINE_MS, easing: Easing.out(Easing.quad) }),
     );
+  }, [still, reveal, tagline]);
+
+  useEffect(() => {
+    if (!ready) return;
+
+    const elapsed = Date.now() - mountedAt.current;
+    const delay = still ? 0 : Math.max(0, EXIT_DELAY - elapsed);
+
     exit.value = withDelay(
-      EXIT_DELAY,
-      withTiming(1, { duration: EXIT_MS, easing: Easing.in(Easing.quad) }),
+      delay,
+      withTiming(
+        1,
+        { duration: EXIT_MS, easing: Easing.in(Easing.quad) },
+        (finished) => {
+          if (finished) {
+            runOnJS(onExited)();
+          }
+        },
+      ),
     );
-  }, [still, reveal, tagline, exit]);
+  }, [ready, still, exit, onExited]);
 
   const rootStyle = useAnimatedStyle(() => ({
     opacity: 1 - exit.value,
@@ -95,12 +132,16 @@ export function AppSplash() {
     width: wordmarkWidth === 0 ? undefined : wordmarkWidth * reveal.value,
   }));
 
-  const taglineStyle = useAnimatedStyle(() => ({
-    opacity: tagline.value,
-    letterSpacing:
+  const taglineStyle = useAnimatedStyle(() => {
+    const tracking =
       TAGLINE_TRACKING_FROM +
-      (TAGLINE_TRACKING_TO - TAGLINE_TRACKING_FROM) * tagline.value,
-  }));
+      (TAGLINE_TRACKING_TO - TAGLINE_TRACKING_FROM) * tagline.value;
+    return {
+      opacity: tagline.value,
+      letterSpacing: tracking,
+      transform: [{ translateX: tracking / 2 }],
+    };
+  });
 
   const measureWordmark = (event: LayoutChangeEvent) => {
     setWordmarkWidth(event.nativeEvent.layout.width);
@@ -110,27 +151,29 @@ export function AppSplash() {
     <Animated.View style={[styles.splashRoot, rootStyle]}>
       <MeshGradientBackground variant="calm-mist" />
 
-      <View style={styles.splashMark} pointerEvents="none">
-        <SvitlyMark mode={still ? "static" : "draw"} size={MARK_SIZE} />
-      </View>
+      <View style={styles.splashStack} pointerEvents="none">
+        <View style={styles.markSlot}>
+          <SvitlyMark mode={still ? "static" : "draw"} size={MARK_SIZE} />
+        </View>
 
-      <View style={styles.splashWords} pointerEvents="none">
-        <Animated.View
-          style={[
-            styles.wordmarkOuter,
-            wordmarkStyle,
-            wordmarkWidth > 0 && { width: wordmarkWidth },
-          ]}
-        >
-          <Animated.View style={[styles.wordmarkClip, wordmarkClipStyle]}>
-            <View onLayout={measureWordmark} style={styles.wordmarkInner}>
-              <GradientText fontSize={WORDMARK_SIZE}>Svitly</GradientText>
-            </View>
+        <View style={styles.splashWords}>
+          <Animated.View
+            style={[
+              styles.wordmarkOuter,
+              wordmarkStyle,
+              wordmarkWidth > 0 && { width: wordmarkWidth },
+            ]}
+          >
+            <Animated.View style={[styles.wordmarkClip, wordmarkClipStyle]}>
+              <View onLayout={measureWordmark} style={styles.wordmarkInner}>
+                <GradientText fontSize={WORDMARK_SIZE}>Svitly</GradientText>
+              </View>
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
-        <Animated.Text style={[styles.tagline, taglineStyle]}>
-          Illuminate your learning
-        </Animated.Text>
+          <Animated.Text style={[styles.tagline, taglineStyle]}>
+            Illuminate your learning
+          </Animated.Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -174,10 +217,6 @@ const SHEET_SCREEN = {
 
 const SHEET_LOCKED = { ...SHEET_SCREEN, gestureEnabled: false } as const;
 
-const SPLASH_FLASH_THRESHOLD = 300;
-const SPLASH_HOLD_DURATION =
-  MARK_TIMING.drawDelayMs + MARK_TIMING.drawMs + 1000;
-
 export default function RootLayout() {
   const { token, isHydrated } = useAuthStore();
   const [fontsLoaded] = useFonts({
@@ -190,23 +229,10 @@ export default function RootLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  const splashStartRef = useRef(Date.now());
-  const [splashHeld, setSplashHeld] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
   const isReady = isHydrated && fontsLoaded;
 
-  useEffect(() => {
-    if (!isReady) return;
-
-    const elapsed = Date.now() - splashStartRef.current;
-    if (elapsed < SPLASH_FLASH_THRESHOLD) {
-      return;
-    }
-
-    setSplashHeld(true);
-    const remaining = SPLASH_HOLD_DURATION - elapsed;
-    const timeout = setTimeout(() => setSplashHeld(false), remaining);
-    return () => clearTimeout(timeout);
-  }, [isReady]);
+  const hideSplash = useCallback(() => setSplashVisible(false), []);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -230,10 +256,6 @@ export default function RootLayout() {
     }
   }, [isHydrated, token]);
 
-  if (!isReady || splashHeld) {
-    return <AppSplash />;
-  }
-
   return (
     <KeyboardProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -241,27 +263,31 @@ export default function RootLayout() {
           <PortalProvider>
             <Theme name="dark">
               <QueryClientProvider client={queryClient}>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    animation: "slide_from_right",
-                    contentStyle: { backgroundColor: SCREEN_BASE },
-                  }}
-                >
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="(auth)" />
-                  <Stack.Screen name="module/create" options={SHEET_LOCKED} />
-                  <Stack.Screen name="folder/create" options={SHEET_LOCKED} />
-                  <Stack.Screen name="folder/edit" options={SHEET_SCREEN} />
-                  <Stack.Screen
-                    name="folder/add-modules"
-                    options={SHEET_SCREEN}
-                  />
-                </Stack>
+                {isReady ? (
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                      contentStyle: { backgroundColor: SCREEN_BASE },
+                    }}
+                  >
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="(auth)" />
+                    <Stack.Screen name="module/create" options={SHEET_LOCKED} />
+                    <Stack.Screen name="folder/create" options={SHEET_LOCKED} />
+                    <Stack.Screen name="folder/edit" options={SHEET_SCREEN} />
+                    <Stack.Screen
+                      name="folder/add-modules"
+                      options={SHEET_SCREEN}
+                    />
+                  </Stack>
+                ) : null}
               </QueryClientProvider>
             </Theme>
           </PortalProvider>
         </TamaguiProvider>
+
+        {splashVisible && <AppSplash ready={isReady} onExited={hideSplash} />}
       </GestureHandlerRootView>
     </KeyboardProvider>
   );
@@ -269,20 +295,25 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   splashRoot: {
-    flex: 1,
+    ...StyleSheet.absoluteFill,
     backgroundColor: ICON_BASE,
   },
-  splashMark: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  splashWords: {
+  splashStack: {
     position: "absolute",
     left: 0,
     right: 0,
     top: "50%",
-    marginTop: 78,
+    marginTop: STACK_TOP_FROM_CENTER,
+    alignItems: "center",
+  },
+  markSlot: {
+    width: MARK_INK_WIDTH,
+    height: MARK_INK_HEIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  splashWords: {
+    marginTop: MARK_TO_WORDMARK,
     alignItems: "center",
   },
   wordmarkOuter: {
@@ -294,6 +325,7 @@ const styles = StyleSheet.create({
   },
   wordmarkInner: {
     flexShrink: 0,
+    transform: [{ translateX: GRADIENT_TEXT_RIGHT_PAD / 2 }],
   },
   tagline: {
     marginTop: 10,

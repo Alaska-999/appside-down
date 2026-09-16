@@ -60,7 +60,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
-import { InteractionManager, Pressable, ScrollView } from "react-native";
+import { FlatList, InteractionManager, Pressable } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type SortOrder = "original" | "alphabetical";
@@ -104,6 +104,10 @@ const MODE_TILES = [
     live: false,
   },
 ];
+
+function CardSeparator() {
+  return <YStack h={9} />;
+}
 
 function ModuleSkeleton() {
   return (
@@ -202,7 +206,6 @@ export default function ModuleScreen() {
   const [saving, setSaving] = useState(false);
 
   const initGame = useGameStore((state) => state.initGame);
-  const currentModule = useGameStore((state) => state.currentModule);
 
   const { user } = useAuthStore();
   const isOwner = moduleData?.user?.id === user?.id;
@@ -289,6 +292,11 @@ export default function ModuleScreen() {
     }
     return base;
   }, [flashcards, sortOrder, starredOnly]);
+
+  const cardsReady =
+    !!moduleData && !loading && !notFound && flashcards.length > 0;
+  const listData = cardsReady ? visibleCards : [];
+  const showStarredEmpty = cardsReady && starredOnly;
 
   const deckCards = useMemo(
     () =>
@@ -416,10 +424,14 @@ export default function ModuleScreen() {
 
   const startFlashcards = () => {
     if (!moduleData || !flashcards.length) return;
+    const game = useGameStore.getState();
     const isStale =
-      currentModule?.id !== moduleData.id ||
-      currentModule?.updatedAt !== moduleData.updatedAt;
-    if (isStale) initGame(moduleData, flashcards);
+      game.currentModule?.id !== moduleData.id ||
+      game.currentModule?.updatedAt !== moduleData.updatedAt;
+    const isFinished =
+      game.activeCards.length === 0 ||
+      game.currentIndex >= game.activeCards.length;
+    if (isStale || isFinished) initGame(moduleData, flashcards);
     router.push({ pathname: "/module/[id]/flashcards", params: { id } });
   };
 
@@ -429,271 +441,321 @@ export default function ModuleScreen() {
       {/* <BackgroundMesh preset="crossBeams" /> */}
 
       <BackgroundMesh preset="crossBeamsTeal" />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <YStack pb={screen.bottom}>
-          <XStack px="$screenX" pt={screen.top} jc="space-between" ai="center">
-            <IconButton
-              variant="liquidGlass"
-              icon={
-                <ChevronLeft
-                  size={22}
-                  color={ICON_ON_GLASS}
-                  strokeWidth={1.9}
-                />
-              }
-              onPress={() => router.back()}
-              accessibilityLabel="Back"
+      <FlatList
+        data={listData}
+        keyExtractor={(card) => card.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: screen.bottom,
+          minHeight: starredOnly ? fullListHeight : undefined,
+        }}
+        onContentSizeChange={(_, height) => {
+          if (!starredOnly) setFullListHeight(height);
+        }}
+        ItemSeparatorComponent={CardSeparator}
+        renderItem={({ item }) => (
+          <YStack px="$screenX">
+            <CardRow
+              term={cardSideText(item.term)}
+              definition={cardSideText(item.definition)}
+              starred={item.isStarred}
+              onToggleStar={isOwner ? () => handleToggleStar(item) : undefined}
             />
-            {moduleData && isOwner && (
-              <XStack gap={9}>
-                <IconButton
-                  variant="liquidGlass"
-                  icon={
-                    <StarGlyph
-                      mode="toggle"
-                      size="lg"
-                      active={moduleData.isFavorite}
-                      onGlass
-                    />
-                  }
-                  onPress={handleToggleFavorite}
-                  accessibilityLabel={
-                    moduleData.isFavorite ? "Remove favorite" : "Add favorite"
-                  }
-                />
-                <IconButton
-                  variant="liquidGlass"
-                  icon={
-                    <MoreHorizontal
-                      size={22}
-                      color={ICON_ON_GLASS}
-                      strokeWidth={1.9}
-                    />
-                  }
-                  onPress={() => setMenuSheetOpen(true)}
-                  accessibilityLabel="Module menu"
-                />
-              </XStack>
-            )}
-          </XStack>
-
-          {loading && (
-            <YStack pt={22}>
-              <ModuleSkeleton />
+          </YStack>
+        )}
+        ListEmptyComponent={
+          showStarredEmpty ? (
+            <YStack px="$screenX" ai="center" gap={8} pt={28}>
+              <Text
+                fontSize={15}
+                fontWeight="600"
+                color="$color"
+                textAlign="center"
+              >
+                No starred cards yet
+              </Text>
+              <Text fontSize={12.5} color="$textMuted" textAlign="center">
+                Star a card and it will show up here
+              </Text>
             </YStack>
-          )}
-
-          {notFound && !loading && (
-            <YStack px="$screenX" pt={22}>
-              <StateCard
-                tone="empty"
-                icon={Sparkles}
-                title="Module not found"
-                subtitle="It may have been removed or made private."
-                buttonLabel="Try again"
-                onButtonPress={() => fetchData()}
-              />
-            </YStack>
-          )}
-
-          {error && !loading && !notFound && (
-            <YStack px="$screenX" pt={22}>
-              <StateCard
-                tone="error"
-                icon={AlertTriangle}
-                title="Couldn't load module"
-                subtitle="Looks like a connection hiccup. Your data is safe — try again."
-                buttonLabel="Try again"
-                onButtonPress={() => fetchData()}
-              />
-            </YStack>
-          )}
-
-          {moduleData && !loading && !notFound && (
-            <>
-              {deckCards.length > 0 && <ModuleDeck cards={deckCards} />}
-
-              <YStack px="$screenX" pt={26}>
-                <Text
-                  fontSize={27}
-                  fontWeight="800"
-                  letterSpacing={-0.54}
-                  lineHeight={31}
-                  color="$color"
-                >
-                  {moduleData.name}
-                </Text>
-
-                {!!moduleData.description && (
-                  <Text
-                    fontSize={13.5}
-                    lineHeight={20}
-                    color="$textMuted"
-                    mt={7}
-                  >
-                    {moduleData.description}
-                  </Text>
-                )}
-
-                <XStack ai="center" gap={9} mt={13}>
-                  <UserAvatar
-                    avatarUrl={moduleData.author?.avatarUrl}
-                    username={authorName}
-                    size={26}
+          ) : null
+        }
+        ListHeaderComponent={
+          <YStack>
+            <XStack
+              px="$screenX"
+              pt={screen.top}
+              jc="space-between"
+              ai="center"
+            >
+              <IconButton
+                variant="liquidGlass"
+                icon={
+                  <ChevronLeft
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
                   />
-                  <Text fontSize={12.5} fontWeight="700" color="$color">
-                    @{authorName ?? "unknown"}
+                }
+                onPress={() => router.back()}
+                accessibilityLabel="Back"
+              />
+              {moduleData && isOwner && (
+                <XStack gap={9}>
+                  <IconButton
+                    variant="liquidGlass"
+                    icon={
+                      <StarGlyph
+                        mode="toggle"
+                        size="lg"
+                        active={moduleData.isFavorite}
+                        onGlass
+                      />
+                    }
+                    onPress={handleToggleFavorite}
+                    accessibilityLabel={
+                      moduleData.isFavorite ? "Remove favorite" : "Add favorite"
+                    }
+                  />
+                  <IconButton
+                    variant="liquidGlass"
+                    icon={
+                      <MoreHorizontal
+                        size={22}
+                        color={ICON_ON_GLASS}
+                        strokeWidth={1.9}
+                      />
+                    }
+                    onPress={() => setMenuSheetOpen(true)}
+                    accessibilityLabel="Module menu"
+                  />
+                </XStack>
+              )}
+            </XStack>
+
+            {loading && (
+              <YStack pt={22}>
+                <ModuleSkeleton />
+              </YStack>
+            )}
+
+            {notFound && !loading && (
+              <YStack px="$screenX" pt={22}>
+                <StateCard
+                  tone="empty"
+                  icon={Sparkles}
+                  title="Module not found"
+                  subtitle="It may have been removed or made private."
+                  buttonLabel="Try again"
+                  onButtonPress={() => fetchData()}
+                />
+              </YStack>
+            )}
+
+            {error && !loading && !notFound && (
+              <YStack px="$screenX" pt={22}>
+                <StateCard
+                  tone="error"
+                  icon={AlertTriangle}
+                  title="Couldn't load module"
+                  subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                  buttonLabel="Try again"
+                  onButtonPress={() => fetchData()}
+                />
+              </YStack>
+            )}
+
+            {moduleData && !loading && !notFound && (
+              <>
+                {deckCards.length > 0 && <ModuleDeck cards={deckCards} />}
+
+                <YStack px="$screenX" pt={26}>
+                  <Text
+                    fontSize={27}
+                    fontWeight="800"
+                    letterSpacing={-0.54}
+                    lineHeight={31}
+                    color="$color"
+                  >
+                    {moduleData.name}
                   </Text>
-                  {isDeletedAuthor && (
-                    <Text fontSize={12.5} color="$textMuted">
-                      (deleted)
+
+                  {!!moduleData.description && (
+                    <Text
+                      fontSize={13.5}
+                      lineHeight={20}
+                      color="$textMuted"
+                      mt={7}
+                    >
+                      {moduleData.description}
                     </Text>
                   )}
-                  <YStack w={3} h={3} br={2} bg="$mutedDim" />
-                  <Text fontSize={12.5} color="$textMuted">
-                    {moduleData.itemsCount} card
-                    {moduleData.itemsCount !== 1 ? "s" : ""}
-                  </Text>
-                  {moduleData.isPublic && (
+
+                  <XStack ai="center" gap={9} mt={13}>
+                    <UserAvatar
+                      avatarUrl={moduleData.author?.avatarUrl}
+                      username={authorName}
+                      size={26}
+                    />
+                    <Text fontSize={12.5} fontWeight="700" color="$color">
+                      @{authorName ?? "unknown"}
+                    </Text>
+                    {isDeletedAuthor && (
+                      <Text fontSize={12.5} color="$textMuted">
+                        (deleted)
+                      </Text>
+                    )}
+                    <YStack w={3} h={3} br={2} bg="$mutedDim" />
+                    <Text fontSize={12.5} color="$textMuted">
+                      {moduleData.itemsCount} card
+                      {moduleData.itemsCount !== 1 ? "s" : ""}
+                    </Text>
+                    {moduleData.isPublic && (
+                      <XStack
+                        ml="auto"
+                        px={10}
+                        py={4}
+                        br={999}
+                        bg={SURFACE_MINT_GLASS_BG}
+                        borderWidth={1}
+                        borderColor={SURFACE_MINT_GLASS_BORDER}
+                      >
+                        <Text
+                          fontSize={10.5}
+                          fontWeight="600"
+                          color="$mintLight"
+                        >
+                          Public
+                        </Text>
+                      </XStack>
+                    )}
+                  </XStack>
+
+                  <YStack mt={22}>
+                    <ProgressSplitBar
+                      known={progress.known}
+                      learning={progress.learning}
+                      total={progress.total}
+                    />
+                    <XStack gap={9} mt={12}>
+                      <StatTile
+                        tone="known"
+                        value={progress.known}
+                        label="Known"
+                      />
+                      <StatTile
+                        tone="learning"
+                        value={progress.learning}
+                        label="Learning"
+                      />
+                      <StatTile
+                        tone="new"
+                        value={progress.unstudied}
+                        label="New"
+                      />
+                    </XStack>
+                  </YStack>
+
+                  <YStack mt={22} gap={10}>
+                    <XStack gap={10}>
+                      {MODE_TILES.slice(0, 2).map((tile) => (
+                        <ModeTile
+                          key={tile.key}
+                          icon={tile.icon}
+                          label={tile.label}
+                          hint={tile.hint}
+                          live={tile.live && deckCards.length > 0}
+                          onPress={tile.live ? startFlashcards : undefined}
+                        />
+                      ))}
+                    </XStack>
+                    <XStack gap={10}>
+                      {MODE_TILES.slice(2).map((tile) => (
+                        <ModeTile
+                          key={tile.key}
+                          icon={tile.icon}
+                          label={tile.label}
+                          hint={tile.hint}
+                        />
+                      ))}
+                    </XStack>
                     <XStack
-                      ml="auto"
-                      px={10}
-                      py={4}
-                      br={999}
-                      bg={SURFACE_MINT_GLASS_BG}
+                      ai="center"
+                      gap={10}
+                      px={16}
+                      py={13}
+                      br={18}
+                      bg="$glassBgSubtle"
                       borderWidth={1}
-                      borderColor={SURFACE_MINT_GLASS_BORDER}
+                      borderStyle="dashed"
+                      borderColor="$borderColor"
                     >
-                      <Text fontSize={10.5} fontWeight="600" color="$mintLight">
-                        Public
+                      <Lock size={16} color={ICON_MUTED} strokeWidth={1.8} />
+                      <Text fontSize={12.5} color="$textMuted">
+                        <Text
+                          fontSize={12.5}
+                          fontWeight="600"
+                          color="$mutedLight"
+                        >
+                          Test, Match, Learn
+                        </Text>{" "}
+                        — coming soon
                       </Text>
                     </XStack>
-                  )}
-                </XStack>
-
-                <YStack mt={22}>
-                  <ProgressSplitBar
-                    known={progress.known}
-                    learning={progress.learning}
-                    total={progress.total}
-                  />
-                  <XStack gap={9} mt={12}>
-                    <StatTile
-                      tone="known"
-                      value={progress.known}
-                      label="Known"
-                    />
-                    <StatTile
-                      tone="learning"
-                      value={progress.learning}
-                      label="Learning"
-                    />
-                    <StatTile
-                      tone="new"
-                      value={progress.unstudied}
-                      label="New"
-                    />
-                  </XStack>
-                </YStack>
-
-                <YStack mt={22} gap={10}>
-                  <XStack gap={10}>
-                    {MODE_TILES.slice(0, 2).map((tile) => (
-                      <ModeTile
-                        key={tile.key}
-                        icon={tile.icon}
-                        label={tile.label}
-                        hint={tile.hint}
-                        live={tile.live && deckCards.length > 0}
-                        onPress={tile.live ? startFlashcards : undefined}
-                      />
-                    ))}
-                  </XStack>
-                  <XStack gap={10}>
-                    {MODE_TILES.slice(2).map((tile) => (
-                      <ModeTile
-                        key={tile.key}
-                        icon={tile.icon}
-                        label={tile.label}
-                        hint={tile.hint}
-                      />
-                    ))}
-                  </XStack>
-                  <XStack
-                    ai="center"
-                    gap={10}
-                    px={16}
-                    py={13}
-                    br={18}
-                    bg="$glassBgSubtle"
-                    borderWidth={1}
-                    borderStyle="dashed"
-                    borderColor="$borderColor"
-                  >
-                    <Lock size={16} color={ICON_MUTED} strokeWidth={1.8} />
-                    <Text fontSize={12.5} color="$textMuted">
-                      <Text
-                        fontSize={12.5}
-                        fontWeight="600"
-                        color="$mutedLight"
-                      >
-                        Test, Match, Learn
-                      </Text>{" "}
-                      — coming soon
-                    </Text>
-                  </XStack>
-                </YStack>
-
-                {!isOwner && (
-                  <YStack mt={22}>
-                    {moduleData.savedCopyId ? (
-                      <AppButton
-                        variant="secondary"
-                        size="lg"
-                        icon={
-                          <BookmarkCheck
-                            size={18}
-                            color={ICON_ON_GLASS}
-                            strokeWidth={1.9}
-                          />
-                        }
-                        onPress={() =>
-                          router.push({
-                            pathname: "/module/[id]",
-                            params: { id: moduleData.savedCopyId as string },
-                          })
-                        }
-                      >
-                        In your library · open
-                      </AppButton>
-                    ) : (
-                      <AppButton
-                        variant="primary"
-                        size="lg"
-                        icon={
-                          <BookmarkPlus size={18} color={ICON_MINT_TINT_DARK} />
-                        }
-                        loading={saving}
-                        onPress={handleSaveToLibrary}
-                      >
-                        Save to library
-                      </AppButton>
-                    )}
                   </YStack>
-                )}
 
-                <YStack mt={26}>
-                  {flashcards.length === 0 ? (
-                    <StateCard
-                      tone="empty"
-                      icon={Sparkles}
-                      title="No cards yet"
-                      subtitle="This module doesn't have any flashcards yet"
-                      buttonLabel={isOwner ? "Add cards" : undefined}
-                      onButtonPress={isOwner ? openEditSheet : undefined}
-                    />
-                  ) : (
-                    <>
+                  {!isOwner && (
+                    <YStack mt={22}>
+                      {moduleData.savedCopyId ? (
+                        <AppButton
+                          variant="secondary"
+                          size="lg"
+                          icon={
+                            <BookmarkCheck
+                              size={18}
+                              color={ICON_ON_GLASS}
+                              strokeWidth={1.9}
+                            />
+                          }
+                          onPress={() =>
+                            router.push({
+                              pathname: "/module/[id]",
+                              params: { id: moduleData.savedCopyId as string },
+                            })
+                          }
+                        >
+                          In your library · open
+                        </AppButton>
+                      ) : (
+                        <AppButton
+                          variant="primary"
+                          size="lg"
+                          icon={
+                            <BookmarkPlus
+                              size={18}
+                              color={ICON_MINT_TINT_DARK}
+                            />
+                          }
+                          loading={saving}
+                          onPress={handleSaveToLibrary}
+                        >
+                          Save to library
+                        </AppButton>
+                      )}
+                    </YStack>
+                  )}
+
+                  <YStack mt={26}>
+                    {flashcards.length === 0 ? (
+                      <StateCard
+                        tone="empty"
+                        icon={Sparkles}
+                        title="No cards yet"
+                        subtitle="This module doesn't have any flashcards yet"
+                        buttonLabel={isOwner ? "Add cards" : undefined}
+                        onButtonPress={isOwner ? openEditSheet : undefined}
+                      />
+                    ) : (
                       <CardsHeader
                         count={flashcards.length}
                         starredCount={starredCount}
@@ -701,56 +763,14 @@ export default function ModuleScreen() {
                         onToggleStarred={() => setStarredOnly((v) => !v)}
                         onSort={() => setSortSheetOpen(true)}
                       />
-                      <YStack
-                        gap={9}
-                        minHeight={starredOnly ? fullListHeight : undefined}
-                        onLayout={(e) => {
-                          if (!starredOnly)
-                            setFullListHeight(e.nativeEvent.layout.height);
-                        }}
-                      >
-                        {starredOnly && visibleCards.length === 0 ? (
-                          <YStack ai="center" gap={8} pt={28}>
-                            <Text
-                              fontSize={15}
-                              fontWeight="600"
-                              color="$color"
-                              textAlign="center"
-                            >
-                              No starred cards yet
-                            </Text>
-                            <Text
-                              fontSize={12.5}
-                              color="$textMuted"
-                              textAlign="center"
-                            >
-                              Star a card and it will show up here
-                            </Text>
-                          </YStack>
-                        ) : (
-                          visibleCards.map((card) => (
-                            <CardRow
-                              key={card.id}
-                              term={cardSideText(card.term)}
-                              definition={cardSideText(card.definition)}
-                              starred={card.isStarred}
-                              onToggleStar={
-                                isOwner
-                                  ? () => handleToggleStar(card)
-                                  : undefined
-                              }
-                            />
-                          ))
-                        )}
-                      </YStack>
-                    </>
-                  )}
+                    )}
+                  </YStack>
                 </YStack>
-              </YStack>
-            </>
-          )}
-        </YStack>
-      </ScrollView>
+              </>
+            )}
+          </YStack>
+        }
+      />
 
       <StatusBarScrim />
 

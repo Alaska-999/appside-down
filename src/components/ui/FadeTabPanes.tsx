@@ -2,6 +2,8 @@ import {
   Children,
   ReactNode,
   useCallback,
+  useEffect,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -13,6 +15,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { YStack } from "tamagui";
+
+const FADE_DURATION = 150;
+const UNMOUNT_DELAY = FADE_DURATION + 60;
 
 export type FadeTabsController = {
   activeSv: SharedValue<number>;
@@ -37,21 +42,27 @@ export function useFadeTabs(initialIndex = 0): FadeTabsController {
 }
 
 function Pane({
-  index,
-  activeSv,
+  active,
+  appear,
   children,
 }: {
-  index: number;
-  activeSv: SharedValue<number>;
+  active: boolean;
+  appear: boolean;
   children: ReactNode;
 }) {
-  const style = useAnimatedStyle(() => ({
-    opacity: withTiming(activeSv.value === index ? 1 : 0, { duration: 150 }),
-    pointerEvents: activeSv.value === index ? ("auto" as const) : ("none" as const),
-  }));
+  const opacity = useSharedValue(appear ? 0 : active ? 1 : 0);
+
+  useEffect(() => {
+    opacity.value = withTiming(active ? 1 : 0, { duration: FADE_DURATION });
+  }, [active, opacity]);
+
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, style]}>
+    <Animated.View
+      style={[StyleSheet.absoluteFill, style]}
+      pointerEvents={active ? "auto" : "none"}
+    >
       {children}
     </Animated.View>
   );
@@ -64,13 +75,36 @@ export function FadeTabPanes({
   controller: FadeTabsController;
   children: ReactNode;
 }) {
+  const activeIndex = controller.index;
+  const [mounted, setMounted] = useState<number[]>([activeIndex]);
+  const firstRenderRef = useRef(true);
+
+  useEffect(() => {
+    firstRenderRef.current = false;
+    setMounted((prev) =>
+      prev.includes(activeIndex) ? prev : [...prev, activeIndex],
+    );
+    const timer = setTimeout(() => {
+      setMounted((prev) =>
+        prev.length === 1 && prev[0] === activeIndex ? prev : [activeIndex],
+      );
+    }, UNMOUNT_DELAY);
+    return () => clearTimeout(timer);
+  }, [activeIndex]);
+
   return (
     <YStack f={1} position="relative">
-      {Children.toArray(children).map((child, i) => (
-        <Pane key={i} index={i} activeSv={controller.activeSv}>
-          {child}
-        </Pane>
-      ))}
+      {Children.toArray(children).map((child, i) =>
+        mounted.includes(i) ? (
+          <Pane
+            key={i}
+            active={i === activeIndex}
+            appear={!firstRenderRef.current}
+          >
+            {child}
+          </Pane>
+        ) : null,
+      )}
     </YStack>
   );
 }

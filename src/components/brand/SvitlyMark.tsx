@@ -1,3 +1,5 @@
+import { ICON_LIME_LIGHT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
+import { SPARK_CORE } from "@/src/constants/rawColors";
 import type { SkPath } from "@shopify/react-native-skia";
 import {
   BlurMask,
@@ -9,8 +11,6 @@ import {
   Skia,
   vec,
 } from "@shopify/react-native-skia";
-import { ICON_LIME_LIGHT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
-import { SPARK_CORE } from "@/src/constants/rawColors";
 import React, { useEffect } from "react";
 import {
   Easing,
@@ -22,6 +22,11 @@ import {
 } from "react-native-reanimated";
 
 export const MARK_VIEWBOX = 120;
+
+export const MARK_INK = {
+  width: 67.63,
+  height: 87.75,
+};
 
 export const MARK_TIMING = {
   sparkMs: 500,
@@ -42,6 +47,9 @@ const HEAD_CORE_R = 7;
 const HEAD_GLOW_R = 13;
 const HEAD_GLOW_OPACITY = 0.28;
 const SAMPLES = 240;
+const GLOW_BLEED = 24;
+const OPTICAL_DX = -1.54;
+const OPTICAL_DY = 3.35;
 
 type MarkMode = "draw" | "static";
 
@@ -163,14 +171,22 @@ export function SvitlyMark({ mode = "static", size = MARK_VIEWBOX }: Props) {
   }
 
   const scale = size / MARK_VIEWBOX;
+  const bleed = GLOW_BLEED * scale;
+  const canvasSize = size + bleed * 2;
   const gradientStart = box ? vec(box.x, box.y) : vec(0, 0);
   const gradientEnd = box
     ? vec(box.x + box.width, box.y + box.height)
     : vec(MARK_VIEWBOX, MARK_VIEWBOX);
 
   return (
-    <Canvas style={{ width: size, height: size }}>
-      <Group transform={[{ scale }]}>
+    <Canvas style={{ width: canvasSize, height: canvasSize }}>
+      <Group
+        transform={[
+          { translateX: bleed + OPTICAL_DX * scale },
+          { translateY: bleed + OPTICAL_DY * scale },
+          { scale },
+        ]}
+      >
         <Path
           path={path}
           style="stroke"
