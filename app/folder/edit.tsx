@@ -20,14 +20,15 @@ import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_DANGER } from "@/src/constants/iconColors";
+import { useResourceOnFocus } from "@/src/hooks/useResourceOnFocus";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { computeTagCounts } from "@/src/utils/tagCounts";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ArrowUpFromLine, Plus, Tags, Trash2 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Text, YStack } from "tamagui";
@@ -67,45 +68,40 @@ export default function FolderEditScreen() {
   const [confirmTag, setConfirmTag] = useState<FolderTag | null>(null);
   const [deletingTag, setDeletingTag] = useState(false);
 
-  const loadedRef = useRef(false);
-
-  useFocusEffect(
-    useCallback(() => {
+  const { markLoaded } = useResourceOnFocus(
+    [folderId, form],
+    async (isFirstLoad) => {
       if (!folderId) return;
-      const isFirstLoad = !loadedRef.current;
-      const load = async () => {
-        try {
-          const res = await protectedFetch(
-            `${API_BASE_URL}/folders/${folderId}`,
-          );
-          if (!res.ok) throw new Error(`Error: ${res.status}`);
-          const raw = await res.json();
-          const detail: FolderDetail = {
-            id: raw.id,
-            name: raw.name,
-            icon: raw.icon ?? "",
-            tags: (raw.tags ?? []).map(mapTag),
-            modules: (raw.modules ?? []).map((m: FolderModule) => ({
-              id: m.id,
-              name: m.name,
-              tags: (m.tags ?? []).map(mapTag),
-            })),
-          };
-          setFolder(detail);
-          if (isFirstLoad) {
-            form.reset({ name: detail.name });
-            setCoverUri(detail.icon || null);
-          }
-          loadedRef.current = true;
-        } catch (err) {
-          console.error("[FolderEdit] fetch error:", err);
-          if (isFirstLoad) setToast("Couldn't load the folder. Try again");
-        } finally {
-          if (isFirstLoad) setLoading(false);
+      try {
+        const res = await protectedFetch(
+          `${API_BASE_URL}/folders/${folderId}`,
+        );
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const raw = await res.json();
+        const detail: FolderDetail = {
+          id: raw.id,
+          name: raw.name,
+          icon: raw.icon ?? "",
+          tags: (raw.tags ?? []).map(mapTag),
+          modules: (raw.modules ?? []).map((m: FolderModule) => ({
+            id: m.id,
+            name: m.name,
+            tags: (m.tags ?? []).map(mapTag),
+          })),
+        };
+        setFolder(detail);
+        if (isFirstLoad) {
+          form.reset({ name: detail.name });
+          setCoverUri(detail.icon || null);
         }
-      };
-      load();
-    }, [folderId, form]),
+        markLoaded();
+      } catch (err) {
+        console.error("[FolderEdit] fetch error:", err);
+        if (isFirstLoad) setToast("Couldn't load the folder. Try again");
+      } finally {
+        if (isFirstLoad) setLoading(false);
+      }
+    },
   );
 
   const tagCounts = useMemo(

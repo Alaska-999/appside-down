@@ -1,15 +1,10 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderIcon } from "@/src/components/cards/FolderIcon";
 import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
-import { AppButton } from "@/src/components/ui/Button";
+import { ConfirmMenuSheet } from "@/src/components/ui/ConfirmMenuSheet";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import {
-  AppSheet,
-  SheetCrossfade,
-  SheetRow,
-  SheetRows,
-} from "@/src/components/ui/Sheet";
+import { SheetRow } from "@/src/components/ui/Sheet";
 import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
@@ -17,27 +12,26 @@ import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { TagChip } from "@/src/components/ui/TagChip";
 import { AppToast } from "@/src/components/ui/Toast";
 import {
-  ICON_DANGER,
   ICON_MINT,
   ICON_ON_GLASS,
   ICON_TEAL,
 } from "@/src/constants/iconColors";
+import { useResourceOnFocus } from "@/src/hooks/useResourceOnFocus";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { computeTagCounts } from "@/src/utils/tagCounts";
 import { screenGutter } from "@/tamagui.config";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
   BookOpen,
   ChevronLeft,
   MoreHorizontal,
   Pencil,
-  Trash2,
 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { FlatList } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
@@ -93,9 +87,6 @@ export default function FolderScreen() {
   const [notFound, setNotFound] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
-  const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
-  const [deleting, setDeleting] = useState(false);
-  const hasLoadedRef = useRef(false);
   const listRef = useRef<FlatList<FolderModule>>(null);
 
   const scrollY = useSharedValue(0);
@@ -104,15 +95,8 @@ export default function FolderScreen() {
     scrollY.value = e.contentOffset.y;
   });
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!id) return;
-      fetchFolder();
-    }, [id]),
-  );
-
-  const fetchFolder = async () => {
-    const isFirstLoad = !hasLoadedRef.current;
+  const fetchFolder = async (isFirstLoad: boolean) => {
+    if (!id) return;
     if (isFirstLoad) {
       setLoading(true);
       setError(null);
@@ -140,7 +124,7 @@ export default function FolderScreen() {
         totalModules: raw._count?.modules ?? (raw.modules ?? []).length,
         modulesTruncated: !!raw.modulesTruncated,
       });
-      hasLoadedRef.current = true;
+      markLoaded();
     } catch (err) {
       console.error("[FolderScreen] fetch error:", err);
       if (isFirstLoad) setError("Failed to load folder");
@@ -149,19 +133,15 @@ export default function FolderScreen() {
     }
   };
 
+  const { markLoaded } = useResourceOnFocus([id], fetchFolder);
+
   const openEditScreen = () => {
     if (!folder) return;
     setMenuSheetOpen(false);
     router.push({ pathname: "/folder/edit", params: { folderId: folder.id } });
   };
 
-  const closeMenu = (open: boolean) => {
-    setMenuSheetOpen(open);
-    if (!open) setMenuView("menu");
-  };
-
   const handleDeleteFolder = async () => {
-    setDeleting(true);
     try {
       const res = await protectedFetch(`${API_BASE_URL}/folders/${id}`, {
         method: "DELETE",
@@ -172,8 +152,6 @@ export default function FolderScreen() {
     } catch (err) {
       console.error("[FolderScreen] delete error:", err);
       setToast("Couldn't delete the folder. Try again");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -255,7 +233,7 @@ export default function FolderScreen() {
               title="Folder not found"
               subtitle="It may have been removed or made private."
               buttonLabel="Try again"
-              onButtonPress={fetchFolder}
+              onButtonPress={() => fetchFolder(true)}
             />
           </YStack>
         </YStack>
@@ -288,7 +266,7 @@ export default function FolderScreen() {
               title="Couldn't load folder"
               subtitle="Looks like a connection hiccup. Your data is safe — try again."
               buttonLabel="Try again"
-              onButtonPress={fetchFolder}
+              onButtonPress={() => fetchFolder(true)}
             />
           </YStack>
         </YStack>
@@ -462,57 +440,17 @@ export default function FolderScreen() {
 
       <StatusBarScrim />
 
-      <AppSheet
+      <ConfirmMenuSheet
         open={menuSheetOpen}
-        onOpenChange={closeMenu}
-        title={
-          menuView === "menu"
-            ? (folder?.name ?? "Folder")
-            : "Delete this folder?"
-        }
-        subtitle={
-          menuView === "confirm"
-            ? `${pluralize(moduleCount, "module")} will stay in your library.\nThis can't be undone.`
-            : undefined
-        }
+        onOpenChange={setMenuSheetOpen}
+        menuTitle={folder?.name ?? "Folder"}
+        deleteLabel="Delete folder"
+        confirmTitle="Delete this folder?"
+        confirmSubtitle={`${pluralize(moduleCount, "module")} will stay in your library.\nThis can't be undone.`}
+        onConfirmDelete={handleDeleteFolder}
       >
-        <SheetCrossfade activeKey={menuView}>
-          {menuView === "menu" ? (
-            <SheetRows>
-              <SheetRow
-                icon={Pencil}
-                label="Edit folder"
-                onPress={openEditScreen}
-              />
-              <SheetRow
-                icon={Trash2}
-                label="Delete folder"
-                danger
-                onPress={() => setMenuView("confirm")}
-              />
-            </SheetRows>
-          ) : (
-            <YStack gap={10}>
-              <AppButton
-                variant="danger"
-                icon={
-                  <Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />
-                }
-                loading={deleting}
-                onPress={handleDeleteFolder}
-              >
-                Delete folder
-              </AppButton>
-              <AppButton
-                variant="secondary"
-                onPress={() => setMenuView("menu")}
-              >
-                Cancel
-              </AppButton>
-            </YStack>
-          )}
-        </SheetCrossfade>
-      </AppSheet>
+        <SheetRow icon={Pencil} label="Edit folder" onPress={openEditScreen} />
+      </ConfirmMenuSheet>
 
       <AppToast
         open={!!toast}

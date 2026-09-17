@@ -21,12 +21,13 @@ import {
 import { SURFACE_GLASS_BG_STRONG } from "@/src/constants/surfaceAlpha";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { useResourceOnFocus } from "@/src/hooks/useResourceOnFocus";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { hapticTap } from "@/src/utils/haptics";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AlertTriangle, Captions, Plus, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, View } from "react-native";
@@ -79,7 +80,6 @@ export default function AddModules() {
   const debouncedSearch = useDebouncedValue(search.trim());
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const hasFocusedRef = useRef(false);
   const filterInitRef = useRef(false);
 
   const fetchModulesPage = useCallback(
@@ -106,15 +106,9 @@ export default function AddModules() {
     `${folderId}|${debouncedSearch}`,
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocusedRef.current) {
-        hasFocusedRef.current = true;
-        return;
-      }
-      modulesList.reload();
-    }, [modulesList.reload]),
-  );
+  useResourceOnFocus([modulesList.reload], () => modulesList.reload(), {
+    skipFirstFocus: true,
+  });
 
   useEffect(() => {
     if (filterInitRef.current) return;
