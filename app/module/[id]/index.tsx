@@ -1,7 +1,8 @@
-import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
 import { CardRow } from "@/src/components/flashcards/CardRow";
+import { CardsHeader } from "@/src/components/flashcards/CardsHeader";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
+import { ModuleSkeleton } from "@/src/components/flashcards/ModuleSkeleton";
 import { AppButton } from "@/src/components/ui/Button";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { ModeTile } from "@/src/components/ui/ModeTile";
@@ -9,21 +10,16 @@ import { ProgressSplitBar } from "@/src/components/ui/ProgressSplitBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import {
   AppSheet,
-  SheetCrossfade,
   SheetRow,
   SheetRows,
 } from "@/src/components/ui/Sheet";
-import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StarGlyph } from "@/src/components/ui/StarGlyph";
-import { StarToggle } from "@/src/components/ui/StarToggle";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatTile } from "@/src/components/ui/StatTile";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import {
-  ICON_DANGER,
-  ICON_MINT_LIGHT,
   ICON_MINT_TINT_DARK,
   ICON_MUTED,
   ICON_ON_GLASS,
@@ -32,15 +28,12 @@ import {
   SURFACE_MINT_GLASS_BG,
   SURFACE_MINT_GLASS_BORDER,
 } from "@/src/constants/surfaceAlpha";
+import { useModule } from "@/src/hooks/useModule";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
-import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
-import { Flashcard, Module } from "@/src/types";
 import { cardSideText } from "@/src/utils/cardText";
-import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";
-import { protectedFetch } from "@/src/utils/protectedFetch";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
@@ -58,11 +51,11 @@ import {
   MoreHorizontal,
   Pencil,
   Sparkles,
-  Trash2,
 } from "lucide-react-native";
-import { ComponentType, useCallback, useMemo, useRef, useState } from "react";
-import { FlatList, InteractionManager, Pressable } from "react-native";
+import { ComponentType, useCallback, useMemo, useState } from "react";
+import { FlatList, InteractionManager } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { ConfirmMenuSheet } from "@/src/components/ui/ConfirmMenuSheet";
 
 type SortOrder = "original" | "alphabetical";
 
@@ -110,101 +103,31 @@ function CardSeparator() {
   return <YStack h={9} />;
 }
 
-function ModuleSkeleton() {
-  return (
-    <YStack gap={22}>
-      <YStack ai="center">
-        <Skeleton width={294} height={182} borderRadius={24} />
-      </YStack>
-      <YStack px="$screenX" gap={12}>
-        <Skeleton height={31} width="72%" borderRadius={8} />
-        <Skeleton height={17} width="90%" borderRadius={6} />
-        <Skeleton height={8} borderRadius={999} />
-        <XStack gap={9}>
-          <Skeleton height={62} f={1} borderRadius="$control" />
-          <Skeleton height={62} f={1} borderRadius="$control" />
-          <Skeleton height={62} f={1} borderRadius="$control" />
-        </XStack>
-      </YStack>
-    </YStack>
-  );
-}
-
-function CardsHeader({
-  count,
-  starredCount,
-  starredOnly,
-  onToggleStarred,
-  onSort,
-}: {
-  count: number;
-  starredCount: number;
-  starredOnly: boolean;
-  onToggleStarred: () => void;
-  onSort: () => void;
-}) {
-  return (
-    <XStack ai="center" jc="space-between" mb={11}>
-      <XStack ai="baseline" gap={9}>
-        <Text fontSize={16} fontWeight="700" color="$color">
-          Cards
-        </Text>
-        {starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
-            {starredCount} starred
-          </Text>
-        )}
-        {!starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
-            {count}
-          </Text>
-        )}
-      </XStack>
-      <XStack ai="center" gap={12}>
-        <StarToggle
-          size="sm"
-          active={starredOnly}
-          onPress={onToggleStarred}
-          accessibilityLabel="Filter starred cards"
-        />
-        <Pressable
-          hitSlop={{ top: 14, bottom: 14, left: 10, right: 10 }}
-          accessibilityRole="button"
-          accessibilityLabel="Sort cards"
-          onPress={() => {
-            hapticTap();
-            onSort();
-          }}
-        >
-          <XStack ai="center" gap={6}>
-            <ArrowDownUp size={16} color={ICON_MINT_LIGHT} strokeWidth={2} />
-            <Text fontSize={14.5} fontWeight="600" color="$mintLight">
-              Sort
-            </Text>
-          </XStack>
-        </Pressable>
-      </XStack>
-    </XStack>
-  );
-}
-
 export default function ModuleScreen() {
   const screen = useScreenInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [moduleData, setModuleData] = useState<Module | null>(null);
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const {
+    moduleData,
+    flashcards,
+    loading,
+    error,
+    notFound,
+    toast,
+    setToast,
+    saving,
+    loadedRef,
+    fetchData,
+    toggleCardStar,
+    toggleFavorite,
+    togglePublic,
+    saveToLibrary,
+    deleteModule,
+  } = useModule(id);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
   const [starredOnly, setStarredOnly] = useState(false);
   const [fullListHeight, setFullListHeight] = useState(0);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
-  const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
-  const [deleting, setDeleting] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const initGame = useGameStore((state) => state.initGame);
 
@@ -214,59 +137,14 @@ export default function ModuleScreen() {
     moduleData?.author?.username ?? moduleData?.authorUsername ?? undefined;
   const isDeletedAuthor = !moduleData?.author && !!moduleData?.authorUsername;
 
-  const loadedRef = useRef(false);
-
   useFocusEffect(
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() =>
         fetchData(loadedRef.current),
       );
       return () => task.cancel();
-    }, [id]),
+    }, [id, fetchData, loadedRef]),
   );
-
-  const fetchData = async (silent = false) => {
-    if (!silent) setLoading(true);
-    setError(null);
-    setNotFound(false);
-    try {
-      await useStudyQueueStore.getState().flush();
-      const [moduleRes, flashcardsRes] = await Promise.all([
-        protectedFetch(`${API_BASE_URL}/modules/${id}`, { method: "GET" }),
-        protectedFetch(`${API_BASE_URL}/flashcards/module/${id}`, {
-          method: "GET",
-        }),
-      ]);
-      if (moduleRes.status === 403 || moduleRes.status === 404) {
-        if (!silent) setNotFound(true);
-        return;
-      }
-      if (!moduleRes.ok) throw new Error(`Module error: ${moduleRes.status}`);
-      if (!flashcardsRes.ok)
-        throw new Error(`Flashcards error: ${flashcardsRes.status}`);
-
-      const [rawModule, flashcardsData] = await Promise.all([
-        moduleRes.json() as Promise<any>,
-        flashcardsRes.json() as Promise<Flashcard[]>,
-      ]);
-
-      setModuleData({
-        ...rawModule,
-        itemsCount: rawModule._count?.flashcards ?? 0,
-        folderIds: (rawModule.folders ?? []).map((f: { id: string }) => f.id),
-        savedCopyId: rawModule.savedCopyId ?? null,
-        user: rawModule.user ?? null,
-        author: rawModule.author ?? null,
-      });
-      setFlashcards(flashcardsData);
-      loadedRef.current = true;
-    } catch (err) {
-      console.error("[ModuleScreen] fetch error:", err);
-      if (!silent) setError("Failed to load module");
-    } finally {
-      if (!silent) setLoading(false);
-    }
-  };
 
   const progress = useMemo(() => {
     if (moduleData?.progress) return moduleData.progress;
@@ -309,71 +187,6 @@ export default function ModuleScreen() {
     [flashcards],
   );
 
-  const handleToggleStar = async (card: Flashcard) => {
-    const newValue = !card.isStarred;
-    setFlashcards((prev) =>
-      prev.map((c) => (c.id === card.id ? { ...c, isStarred: newValue } : c)),
-    );
-    try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/flashcards/${card.id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ isStarred: newValue }),
-        },
-      );
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-    } catch (err) {
-      console.error("[ModuleScreen] star error:", err);
-      setFlashcards((prev) =>
-        prev.map((c) =>
-          c.id === card.id ? { ...c, isStarred: card.isStarred } : c,
-        ),
-      );
-      setToast("Couldn't update star. Try again");
-    }
-  };
-
-  const handleToggleFavorite = async () => {
-    if (!moduleData) return;
-    const newValue = !moduleData.isFavorite;
-    setModuleData((prev) => (prev ? { ...prev, isFavorite: newValue } : prev));
-    try {
-      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isFavorite: newValue }),
-      });
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-    } catch (err) {
-      console.error("[ModuleScreen] favorite error:", err);
-      setModuleData((prev) =>
-        prev ? { ...prev, isFavorite: !newValue } : prev,
-      );
-      setToast("Couldn't update favorite. Try again");
-    }
-  };
-
-  const handleSaveToLibrary = async () => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}/save`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-      const newModule = await res.json();
-      router.replace({
-        pathname: "/module/[id]",
-        params: { id: newModule.id },
-      });
-    } catch (err) {
-      console.error("[ModuleScreen] save error:", err);
-      setToast("Couldn't save to library. Try again");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const openEditSheet = () => {
     setMenuSheetOpen(false);
     router.push({ pathname: "/module/[id]/cards", params: { id } });
@@ -386,40 +199,13 @@ export default function ModuleScreen() {
 
   const closeMenu = (open: boolean) => {
     setMenuSheetOpen(open);
-    if (!open) setMenuView("menu");
-  };
-
-  const handleTogglePublic = async () => {
-    if (!moduleData) return;
-    const next = !moduleData.isPublic;
-    setModuleData({ ...moduleData, isPublic: next });
-    try {
-      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isPublic: next }),
-      });
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-    } catch (err) {
-      console.error("[ModuleScreen] visibility error:", err);
-      setModuleData((prev) => (prev ? { ...prev, isPublic: !next } : prev));
-      setToast("Couldn't change visibility. Try again");
-    }
   };
 
   const handleDeleteModule = async () => {
-    setDeleting(true);
-    try {
-      const res = await protectedFetch(`${API_BASE_URL}/modules/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
+    const ok = await deleteModule();
+    if (ok) {
       setMenuSheetOpen(false);
       router.back();
-    } catch (err) {
-      console.error("[ModuleScreen] delete error:", err);
-      setToast("Couldn't delete the module. Try again");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -460,7 +246,7 @@ export default function ModuleScreen() {
               term={cardSideText(item.term)}
               definition={cardSideText(item.definition)}
               starred={item.isStarred}
-              onToggleStar={isOwner ? () => handleToggleStar(item) : undefined}
+              onToggleStar={isOwner ? () => toggleCardStar(item) : undefined}
             />
           </YStack>
         )}
@@ -513,7 +299,7 @@ export default function ModuleScreen() {
                         onGlass
                       />
                     }
-                    onPress={handleToggleFavorite}
+                    onPress={toggleFavorite}
                     accessibilityLabel={
                       moduleData.isFavorite ? "Remove favorite" : "Add favorite"
                     }
@@ -737,7 +523,7 @@ export default function ModuleScreen() {
                             />
                           }
                           loading={saving}
-                          onPress={handleSaveToLibrary}
+                          onPress={saveToLibrary}
                         >
                           Save to library
                         </AppButton>
@@ -774,75 +560,35 @@ export default function ModuleScreen() {
 
       <StatusBarScrim />
 
-      <AppSheet
+      <ConfirmMenuSheet
         open={menuSheetOpen}
         onOpenChange={closeMenu}
-        title={
-          menuView === "menu"
-            ? (moduleData?.name ?? "Module")
-            : "Delete this module?"
-        }
-        subtitle={
-          menuView === "confirm"
-            ? `${flashcards.length} cards will be deleted too.\nThis can't be undone.`
-            : undefined
-        }
+        menuTitle={moduleData?.name ?? "Module"}
+        deleteLabel="Delete module"
+        confirmTitle="Delete this module?"
+        confirmSubtitle={`${flashcards.length} cards will be deleted too.\nThis can't be undone.`}
+        onConfirmDelete={handleDeleteModule}
       >
-        <SheetCrossfade activeKey={menuView}>
-          {menuView === "menu" ? (
-            <SheetRows>
-              <SheetRow
-                icon={Pencil}
-                label="Edit module"
-                onPress={openEditModule}
-              />
-              <SheetRow
-                icon={Captions}
-                label="Edit cards"
-                hint={String(flashcards.length)}
-                onPress={openEditSheet}
-              />
-              <SheetRow
-                icon={Globe}
-                label="Public"
-                right={
-                  <Toggle
-                    size="md"
-                    value={moduleData?.isPublic ?? false}
-                    onToggle={handleTogglePublic}
-                  />
-                }
-                onPress={handleTogglePublic}
-              />
-              <SheetRow
-                icon={Trash2}
-                label="Delete module"
-                danger
-                onPress={() => setMenuView("confirm")}
-              />
-            </SheetRows>
-          ) : (
-            <YStack gap={10}>
-              <AppButton
-                variant="danger"
-                icon={
-                  <Trash2 size={19} color={ICON_DANGER} strokeWidth={1.9} />
-                }
-                loading={deleting}
-                onPress={handleDeleteModule}
-              >
-                Delete module
-              </AppButton>
-              <AppButton
-                variant="secondary"
-                onPress={() => setMenuView("menu")}
-              >
-                Cancel
-              </AppButton>
-            </YStack>
-          )}
-        </SheetCrossfade>
-      </AppSheet>
+        <SheetRow icon={Pencil} label="Edit module" onPress={openEditModule} />
+        <SheetRow
+          icon={Captions}
+          label="Edit cards"
+          hint={String(flashcards.length)}
+          onPress={openEditSheet}
+        />
+        <SheetRow
+          icon={Globe}
+          label="Public"
+          right={
+            <Toggle
+              size="md"
+              value={moduleData?.isPublic ?? false}
+              onToggle={togglePublic}
+            />
+          }
+          onPress={togglePublic}
+        />
+      </ConfirmMenuSheet>
 
       <AppToast
         open={!!toast}

@@ -8,6 +8,7 @@ import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { SyncingPill } from "@/src/components/ui/SyncingPill";
 import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { useOptimisticPatch } from "@/src/hooks/useOptimisticPatch";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import {
@@ -59,6 +60,8 @@ export default function FlashcardsGame() {
   const [decision, setDecision] = useState<SwipeDecision>("idle");
   const [toast, setToast] = useState<string | null>(null);
   const [outroDone, setOutroDone] = useState(false);
+
+  const patch = useOptimisticPatch(setToast);
 
   const reducedMotion = useReducedMotion();
   const gameFade = useSharedValue(1);
@@ -124,19 +127,18 @@ export default function FlashcardsGame() {
     const card = activeCards[currentIndex];
     if (!card) return;
     const newValue = !card.isStarred;
-    toggleStar(card.id);
-    try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/flashcards/${card.id}`,
-        { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
-      );
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-    } catch (err) {
-      console.error("[FlashcardsGame] star error:", err);
-      toggleStar(card.id);
-      setToast("Couldn't update star. Try again");
-    }
-  }, [activeCards, currentIndex, toggleStar]);
+    await patch({
+      onLog: "FlashcardsGame",
+      errorMessage: "Couldn't update star. Try again",
+      apply: () => toggleStar(card.id),
+      revert: () => toggleStar(card.id),
+      request: () =>
+        protectedFetch(`${API_BASE_URL}/flashcards/${card.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ isStarred: newValue }),
+        }),
+    });
+  }, [activeCards, currentIndex, toggleStar, patch]);
 
   const isComplete = currentIndex >= activeCards.length;
 
