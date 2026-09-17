@@ -7,6 +7,15 @@ import { UserProfile } from "../types";
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
+function isCompleteProfile(patch: Partial<UserProfile>): patch is UserProfile {
+  return (
+    typeof patch.id === "string" &&
+    typeof patch.username === "string" &&
+    typeof patch.email === "string" &&
+    typeof patch.createdAt === "string"
+  );
+}
+
 interface AuthState {
   user: UserProfile | null;
   token: string | null;
@@ -59,7 +68,11 @@ export const useAuthStore = create<AuthState>()(
 
       updateProfile: (patch) =>
         set((state) => ({
-          user: state.user ? { ...state.user, ...patch } : state.user,
+          user: state.user
+            ? { ...state.user, ...patch }
+            : isCompleteProfile(patch)
+              ? patch
+              : null,
         })),
 
       _setHydrated: (val) => set({ isHydrated: val }),

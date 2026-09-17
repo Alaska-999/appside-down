@@ -219,6 +219,7 @@ const SHEET_LOCKED = { ...SHEET_SCREEN, gestureEnabled: false } as const;
 
 export default function RootLayout() {
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
   const isHydrated = useAuthStore((state) => state.isHydrated);
   const [fontsLoaded] = useFonts({
     Sora_400Regular,
@@ -231,33 +232,48 @@ export default function RootLayout() {
   const router = useRouter();
 
   const [splashVisible, setSplashVisible] = useState(true);
+  const [sessionResolved, setSessionResolved] = useState(false);
   const isReady = isHydrated && fontsLoaded;
 
   const hideSplash = useCallback(() => setSplashVisible(false), []);
 
+  const sessionPending = Boolean(token) && !user && !sessionResolved;
+
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || sessionPending) return;
 
     const inAuthGroup = segments[0] === "(auth)";
+    const isSignedIn = Boolean(token && user);
 
     const performRedirect = () => {
-      if (!token && !inAuthGroup) {
+      if (!isSignedIn && !inAuthGroup) {
         router.replace("/login");
-      } else if (token && inAuthGroup) {
+      } else if (isSignedIn && inAuthGroup) {
         router.replace("/");
       }
     };
     const timeout = setTimeout(performRedirect, 1);
     return () => clearTimeout(timeout);
-  }, [token, isHydrated, segments]);
+  }, [token, user, isHydrated, sessionPending, segments]);
 
   useEffect(() => {
-    if (isHydrated && token) {
-      useStudyQueueStore.getState().flush();
-      fetchCurrentUserProfile().then((profile) => {
-        if (profile) useAuthStore.getState().updateProfile(profile);
-      });
-    }
+    if (!isHydrated || !token) return;
+
+    let cancelled = false;
+    useStudyQueueStore.getState().flush();
+    fetchCurrentUserProfile().then((profile) => {
+      if (cancelled) return;
+      if (profile) {
+        useAuthStore.getState().updateProfile(profile);
+      } else if (!useAuthStore.getState().user) {
+        useAuthStore.getState().logout();
+      }
+      setSessionResolved(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isHydrated, token]);
 
   return (
