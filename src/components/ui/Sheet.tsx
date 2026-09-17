@@ -30,7 +30,11 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { Keyboard, View } from "react-native";
+import {
+  GestureResponderEvent,
+  Keyboard,
+  View,
+} from "react-native";
 import { useKeyboardState } from "react-native-keyboard-controller";
 import Animated, {
   useAnimatedStyle,
@@ -58,8 +62,6 @@ const SHEET_BLUR: Record<SheetBlur, number> = {
   strong: 56,
 };
 
-const SCROLLABLE_SHEET_SNAP_POINTS = [92];
-
 interface AppSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -67,7 +69,6 @@ interface AppSheetProps {
   subtitle?: string;
   blur?: SheetBlur;
   snapPoints?: number[];
-  scrollable?: boolean;
   keepKeyboard?: boolean;
   growWithKeyboard?: boolean;
   leftAction?: ReactNode;
@@ -82,7 +83,6 @@ export function AppSheet({
   subtitle,
   blur = "default",
   snapPoints,
-  scrollable = false,
   keepKeyboard = false,
   growWithKeyboard = false,
   leftAction,
@@ -95,10 +95,8 @@ export function AppSheet({
   const hasHeaderActions = Boolean(leftAction || rightAction);
   const keyboardVisible = useKeyboardState((state) => state.isVisible);
   const grown = growWithKeyboard && keyboardVisible;
-  const boundedSnapPoints =
-    snapPoints ?? (scrollable ? SCROLLABLE_SHEET_SNAP_POINTS : undefined);
-  const fitContent = !boundedSnapPoints;
-  const activeSnapPoints = grown ? [100] : boundedSnapPoints;
+  const fitContent = !snapPoints;
+  const activeSnapPoints = grown ? [100] : snapPoints;
 
   return (
     <Sheet
@@ -121,10 +119,10 @@ export function AppSheet({
         pb={30 + insets.bottom}
         overflow="visible"
         pos="relative"
-        onTouchStart={(e) => {
+        onTouchStart={(e: GestureResponderEvent) => {
           touchStartY.current = e.nativeEvent.pageY;
         }}
-        onTouchMove={(e) => {
+        onTouchMove={(e: GestureResponderEvent) => {
           if (keepKeyboard) return;
           if (e.nativeEvent.pageY - touchStartY.current > 12)
             Keyboard.dismiss();
@@ -239,25 +237,14 @@ export function AppSheet({
           </Text>
         )}
 
-        {scrollable ? (
-          <Sheet.ScrollView
-            f={1}
-            pos="relative"
-            zIndex={1}
-            showsVerticalScrollIndicator={false}
-          >
-            {children}
-          </Sheet.ScrollView>
-        ) : (
-          <YStack
-            f={1}
-            pos="relative"
-            zIndex={1}
-            onPress={keepKeyboard ? undefined : Keyboard.dismiss}
-          >
-            {children}
-          </YStack>
-        )}
+        <YStack
+          f={1}
+          pos="relative"
+          zIndex={1}
+          onPress={keepKeyboard ? undefined : Keyboard.dismiss}
+        >
+          {children}
+        </YStack>
       </Sheet.Frame>
     </Sheet>
   );

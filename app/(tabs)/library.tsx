@@ -16,7 +16,7 @@ import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { AppToast } from "@/src/components/ui/Toast";
-import { ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { ICON_ON_GLASS, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
@@ -412,6 +412,7 @@ export default function Library() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const foldersTabActive = tabs.index === 0;
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [folderModules, setFolderModules] = useState<
     Record<string, FolderModulesState>
@@ -555,10 +556,11 @@ export default function Library() {
               />
               <IconButton
                 variant="liquidGlass"
+                disabled={foldersTabActive}
                 icon={
                   <ArrowDownUp
                     size={22}
-                    color={ICON_ON_GLASS}
+                    color={foldersTabActive ? ICON_SUBTLE : ICON_ON_GLASS}
                     strokeWidth={1.9}
                   />
                 }

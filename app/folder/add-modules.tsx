@@ -152,7 +152,7 @@ export default function AddModules() {
   const goCreate = () =>
     router.push({
       pathname: "/module/create",
-      params: { returnFolderId: folderId },
+      params: { returnFolderId: folderId, returnFolderName: folderName },
     });
 
   const handleAdd = async () => {

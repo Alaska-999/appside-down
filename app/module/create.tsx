@@ -12,20 +12,25 @@ import {
 import { PickRow } from "@/src/components/ui/PickRow";
 import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { AppSheet } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { Toggle } from "@/src/components/ui/Toggle";
 import { ICON_ACCENT, ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
-import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useServerError } from "@/src/hooks/useServerError";
+import { useFolderSelectionStore } from "@/src/store/useFolderSelectionStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { ChevronDown, Folder, Globe } from "lucide-react-native";
+import {
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
+import { Folder, Globe } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FormProvider,
@@ -40,8 +45,6 @@ import {
 } from "react-native-keyboard-controller";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
-
-type FolderOption = { id: string; name: string };
 
 const STICKY_ADD_HEIGHT = 46;
 const STICKY_ADD_KEYBOARD_GAP = 10;
@@ -61,7 +64,6 @@ export default function ModuleCreate() {
       },
     ],
   }));
-  const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const [discardCardCount, setDiscardCardCount] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -71,9 +73,13 @@ export default function ModuleCreate() {
   const navigation = useNavigation();
   const allowLeaveRef = useRef(false);
   const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(null);
-  const { returnFolderId } = useLocalSearchParams<{
+  const { returnFolderId, returnFolderName } = useLocalSearchParams<{
     returnFolderId?: string;
+    returnFolderName?: string;
   }>();
+  const [folderName, setFolderName] = useState<string | undefined>(
+    returnFolderName,
+  );
 
   const form = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
@@ -130,26 +136,13 @@ export default function ModuleCreate() {
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
 
-  const fetchFoldersPage = useCallback(async (cursor: string | null) => {
-    const params = new URLSearchParams({ limit: "30" });
-    if (cursor) params.set("cursor", cursor);
-    const res = await protectedFetch(
-      `${API_BASE_URL}/folders?${params.toString()}`,
-    );
-    if (!res.ok) throw new Error(`Error: ${res.status}`);
-    const page = await res.json();
-    return {
-      data: (page.data ?? []).map((f: FolderOption) => ({
-        id: f.id,
-        name: f.name,
-      })),
-      nextCursor: page.nextCursor,
-    };
-  }, []);
-
-  const foldersList = usePaginatedCursorList<FolderOption>(
-    fetchFoldersPage,
-    "folders",
+  useFocusEffect(
+    useCallback(() => {
+      const result = useFolderSelectionStore.getState().consumeResult();
+      if (!result) return;
+      setValue("folderId", result.folderId);
+      setFolderName(result.folderName);
+    }, [setValue]),
   );
 
   useEffect(() => {
@@ -184,8 +177,6 @@ export default function ModuleCreate() {
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
-
-  const selectedFolder = foldersList.items.find((f) => f.id === folderId);
 
   const onSubmit = async (data: ModuleForm) => {
     setServerError(null);
@@ -299,9 +290,14 @@ export default function ModuleCreate() {
               <YStack mb={50} gap={16}>
                 <PickRow
                   icon={Folder}
-                  value={selectedFolder?.name}
+                  value={folderName}
                   placeholder="Folder"
-                  onPress={() => setFolderSheetOpen(true)}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/folder/pick",
+                      params: folderId ? { currentFolderId: folderId } : {},
+                    })
+                  }
                 />
                 <XStack ai="center" gap={12} px={4}>
                   <Globe size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />
@@ -413,45 +409,6 @@ export default function ModuleCreate() {
           }}
           size="lg"
         />
-
-        <AppSheet
-          open={folderSheetOpen}
-          onOpenChange={setFolderSheetOpen}
-          title="Folder"
-          scrollable
-        >
-          <SheetRows tone="surface">
-            <SheetRow
-              icon={Folder}
-              label="No folder"
-              selected={!folderId}
-              onPress={() => {
-                setValue("folderId", undefined);
-                setFolderSheetOpen(false);
-              }}
-            />
-            {foldersList.items.map((folder) => (
-              <SheetRow
-                key={folder.id}
-                icon={Folder}
-                label={folder.name}
-                selected={folderId === folder.id}
-                onPress={() => {
-                  setValue("folderId", folder.id);
-                  setFolderSheetOpen(false);
-                }}
-              />
-            ))}
-            {foldersList.hasMore && (
-              <SheetRow
-                icon={ChevronDown}
-                label={foldersList.loading ? "Loading…" : "Load more folders"}
-                disabled={foldersList.loading}
-                onPress={foldersList.loadMore}
-              />
-            )}
-          </SheetRows>
-        </AppSheet>
 
         <AppSheet
           open={discardOpen}

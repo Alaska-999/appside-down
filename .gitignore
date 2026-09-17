@@ -49,3 +49,5 @@ app-example
 # AI agent scratch/working files
 .superpowers/
 .docs/superpowers/
+# Особисті нотатки по техборгу
+TECH_DEBT.md

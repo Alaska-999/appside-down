@@ -13,7 +13,6 @@ export default function ModuleLayout() {
       <Stack.Screen
         name="edit"
         options={{
-          presentation: "fullScreenModal",
           animation: "slide_from_bottom",
         }}
       />
