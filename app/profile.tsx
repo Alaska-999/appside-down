@@ -1,9 +1,9 @@
 import { StreakCard } from "@/src/components/cards/StreakCard";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
-import { Row, Rows } from "@/src/components/ui/Rows";
-import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
-import { SectionTitle } from "@/src/components/ui/SectionTitle";
+import { Row, Rows } from "@/src/components/ui/display/Rows";
+import { ScreenBackground } from "@/src/components/ui/background/ScreenBackground";
+import { SectionTitle } from "@/src/components/ui/display/SectionTitle";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { router } from "expo-router";
 import { BellRing, Settings } from "lucide-react-native";

@@ -1,15 +1,15 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuthHeading } from "@/src/components/ui/AuthHeading";
-import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
-import { AppButton } from "@/src/components/ui/Button";
+import { AuthHeading } from "@/src/components/common/AuthHeading";
+import { AuthSwitchLink } from "@/src/components/common/AuthSwitchLink";
+import { AppButton } from "@/src/components/ui/controls/Button";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
 import { useAuthStore } from "@/src/store/useAuthStore";

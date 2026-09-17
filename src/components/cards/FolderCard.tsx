@@ -1,7 +1,7 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
 import { FOLDER_ICON_GRADIENTS, FolderIcon } from "@/src/components/cards/FolderIcon";
-import { AppCard } from "@/src/components/ui/Card";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
 import {
   ICON_ACCENT,
   ICON_LIME_LIGHT,

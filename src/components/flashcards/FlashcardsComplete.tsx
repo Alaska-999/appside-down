@@ -1,14 +1,14 @@
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
-import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
-import { AppButton } from "@/src/components/ui/Button";
-import { StaggerIn } from "@/src/components/ui/StaggerIn";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { AnimatedNumber } from "@/src/components/ui/display/AnimatedNumber";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { StaggerIn } from "@/src/components/ui/motion/StaggerIn";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import {
   BackgroundMesh,
   BackgroundPreset,
-} from "@/src/components/ui/ScreenBackground";
+} from "@/src/components/ui/background/ScreenBackground";
 import {
   ICON_ACCENT,
   ICON_LIME_LIGHT,

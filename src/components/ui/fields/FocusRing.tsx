@@ -1,4 +1,4 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
 import {
   FOCUS_BORDER,
   FOCUS_GLOW,

@@ -1,5 +1,5 @@
-import { gradientLine } from "@/src/components/ui/GradientBorder";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+import { gradientLine } from "@/src/components/ui/surface/GradientBorder";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
 import {
   Canvas,
   Circle,
@@ -31,9 +31,9 @@ import {
   type Layer,
   type LinearVignette,
   type RadialVignette,
-} from "@/src/components/ui/backgroundPresets";
+} from "@/src/components/ui/background/backgroundPresets";
 
-export type { BackgroundPreset } from "@/src/components/ui/backgroundPresets";
+export type { BackgroundPreset } from "@/src/components/ui/background/backgroundPresets";
 
 function saturationMatrix(s: number) {
   const lr = 0.213;

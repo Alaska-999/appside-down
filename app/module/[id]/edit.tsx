@@ -4,13 +4,13 @@ import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { PickRow } from "@/src/components/ui/PickRow";
-import { Rows } from "@/src/components/ui/Rows";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { PickRow } from "@/src/components/ui/display/PickRow";
+import { Rows } from "@/src/components/ui/display/Rows";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useFolderSelectionStore } from "@/src/store/useFolderSelectionStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";

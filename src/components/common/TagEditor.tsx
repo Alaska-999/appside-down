@@ -4,7 +4,7 @@ import {
   FolderEditIconAction,
   FolderTagEditRow,
 } from "@/src/components/cards/FolderEditRow";
-import { Rows, RowsVariant } from "@/src/components/ui/Rows";
+import { Rows, RowsVariant } from "@/src/components/ui/display/Rows";
 import { Check, Pencil, Plus, Trash2, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import type { TextInput } from "react-native";

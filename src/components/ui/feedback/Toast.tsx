@@ -1,6 +1,6 @@
-import { VARIANT_STYLES } from "@/src/components/ui/Button";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { VARIANT_STYLES } from "@/src/components/ui/controls/Button";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   ICON_DANGER,
   ICON_LIME_LIGHT,

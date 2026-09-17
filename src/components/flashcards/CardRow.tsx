@@ -1,6 +1,6 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   SURFACE_BORDER,
   SURFACE_GLASS_BG_FAINT,

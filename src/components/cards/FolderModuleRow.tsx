@@ -1,6 +1,6 @@
-import { Lamp } from "@/src/components/ui/GlowSurface";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
+import { Lamp } from "@/src/components/ui/surface/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { ProgressUnderline } from "@/src/components/ui/feedback/ProgressUnderline";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
 import { ICON_MINT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { EDGE_MINT_FAINT } from "@/src/constants/focus";

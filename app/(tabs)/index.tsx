@@ -1,22 +1,27 @@
 import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { API_BASE_URL } from "@/src/api/config";
+import {
+  PublicModuleResult,
+  PublicModuleRow,
+} from "@/src/components/cards/PublicModuleRow";
 import { StreakCard } from "@/src/components/cards/StreakCard";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
-import { AppButton } from "@/src/components/ui/Button";
-import { AppCard } from "@/src/components/ui/Card";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { AppCard } from "@/src/components/ui/surface/Card";
 import {
   CoverGlow,
   GlowTone,
   LightLevel,
-} from "@/src/components/ui/GlowSurface";
-import { GradientText } from "@/src/components/ui/GradientText";
-import { ProgressRing } from "@/src/components/ui/ProgressRing";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+} from "@/src/components/ui/surface/GlowSurface";
+import { GradientText } from "@/src/components/ui/display/GradientText";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
+import { ProgressRing } from "@/src/components/ui/feedback/ProgressRing";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
 import {
   ICON_ACCENT,
   ICON_CYAN_LIGHT,
@@ -54,25 +59,10 @@ import { ratio } from "@/src/utils/progress";
 import { screenGutter } from "@/tamagui.config";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import {
-  AlertTriangle,
-  BookmarkCheck,
-  Layers,
-  Sparkles,
-} from "lucide-react-native";
+import { AlertTriangle, Layers, Sparkles } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { FlatList, Pressable, RefreshControl } from "react-native";
 import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
-
-type PublicModuleResult = {
-  id: string;
-  name: string;
-  user?: { id: string; username: string; avatarUrl?: string | null };
-  author?: { id: string; username: string; avatarUrl?: string | null } | null;
-  authorUsername?: string | null;
-  _count?: { flashcards: number; copies?: number };
-  savedCopyId?: string | null;
-};
 
 type HomeModule = {
   id: string;
@@ -145,46 +135,6 @@ const DISCOVER_COVERS: [string, string][] = [
   [ICON_ACCENT, ICON_CYAN_TEAL],
   [ICON_MINT, ICON_CYAN_TEAL],
 ];
-
-function PublicModuleRow({ module }: { module: PublicModuleResult }) {
-  const count = module._count?.flashcards ?? 0;
-  const saves = module._count?.copies ?? 0;
-  return (
-    <Pressable
-      onPress={() =>
-        router.push({ pathname: "/module/[id]", params: { id: module.id } })
-      }
-    >
-      <AppCard variant="surface" size="md" gap="$0.5">
-        <Text fontSize={17} fontWeight="700" color="$color">
-          {module.name}
-        </Text>
-        <XStack ai="center" gap={6} flexWrap="wrap">
-          <Text fontSize={14} color="$colorMuted">
-            {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
-            {pluralize(count, "term")}
-            {saves > 0 ? ` · ${pluralize(saves, "save")}` : ""}
-          </Text>
-          {module.savedCopyId && (
-            <XStack
-              ai="center"
-              gap={4}
-              px={8}
-              py={2}
-              br={999}
-              bg="$mintGlassBg"
-            >
-              <BookmarkCheck size={12} color={ICON_ACCENT} strokeWidth={2} />
-              <Text fontSize={11} fontWeight="700" color="$mintLight">
-                Saved
-              </Text>
-            </XStack>
-          )}
-        </XStack>
-      </AppCard>
-    </Pressable>
-  );
-}
 
 function SectionHeader({
   title,
@@ -393,7 +343,9 @@ export default function Home() {
             }}
             onEndReached={searchList.loadMore}
             onEndReachedThreshold={0.4}
-            renderItem={({ item }) => <PublicModuleRow module={item} />}
+            renderItem={({ item }) => (
+              <PublicModuleRow module={item} onPress={() => openModule(item.id)} />
+            )}
             refreshControl={
               <RefreshControl
                 refreshing={searchList.refreshing}
@@ -651,7 +603,7 @@ export default function Home() {
                 <YStack gap={14}>
                   <SectionHeader
                     title="Discover"
-                    onSeeAll={() => router.push("/library")}
+                    onSeeAll={() => router.push("/discover")}
                   />
                   <YStack gap={11}>
                     {discoverModules.map((m, i) => {
@@ -737,6 +689,7 @@ export default function Home() {
         )}
       </YStack>
       <StatusBarScrim />
+      <KeyboardBar />
     </YStack>
   );
 }

@@ -1,16 +1,16 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FolderIcon } from "@/src/components/cards/FolderIcon";
 import { FolderModuleRow } from "@/src/components/cards/FolderModuleRow";
-import { ConfirmMenuSheet } from "@/src/components/ui/ConfirmMenuSheet";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { SheetRow } from "@/src/components/ui/Sheet";
-import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { TagChip } from "@/src/components/ui/TagChip";
-import { AppToast } from "@/src/components/ui/Toast";
+import { ConfirmMenuSheet } from "@/src/components/ui/overlays/ConfirmMenuSheet";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SheetRow } from "@/src/components/ui/overlays/Sheet";
+import { ScrollToTopButton } from "@/src/components/ui/controls/ScrollToTopButton";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { TagChip } from "@/src/components/ui/display/TagChip";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import {
   ICON_MINT,
   ICON_ON_GLASS,

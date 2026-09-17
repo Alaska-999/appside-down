@@ -1,4 +1,4 @@
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { ChevronLeft } from "@tamagui/lucide-icons";
@@ -68,7 +68,7 @@ export function ScreenHeader({
       />
 
       {title && (
-        <Text color="$color" fontSize={19} fontWeight="800" ml={4}>
+        <Text color="$color" fontSize={19} fontWeight="800" ml={5}>
           {title}
         </Text>
       )}

@@ -1,6 +1,6 @@
 import { CoverTone, FolderCover } from "@/src/components/common/FolderCover";
 import { FormInput } from "@/src/components/common/FormInput";
-import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { FieldLabel } from "@/src/components/ui/fields/FieldLabel";
 import { ReactNode } from "react";
 import { Control, FieldValues, Path } from "react-hook-form";
 import { Text, YStack } from "tamagui";

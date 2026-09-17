@@ -1,6 +1,6 @@
-import { InnerBloom } from "@/src/components/ui/GlowSurface";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { InnerBloom } from "@/src/components/ui/surface/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   ICON_LIME,
   ICON_LIME_LIGHT,

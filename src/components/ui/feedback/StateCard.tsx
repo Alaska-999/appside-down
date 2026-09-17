@@ -1,5 +1,5 @@
-import { AppButton } from "@/src/components/ui/Button";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import {
   ICON_ACCENT,

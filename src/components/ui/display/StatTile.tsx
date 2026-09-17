@@ -1,4 +1,4 @@
-import { GlowSurface, LAMP_TILE } from "@/src/components/ui/GlowSurface";
+import { GlowSurface, LAMP_TILE } from "@/src/components/ui/surface/GlowSurface";
 import { ICON_ON_GLASS, ICON_PURE_BLACK } from "@/src/constants/iconColors";
 import {
   GLASS_BORDER_BOTTOM,

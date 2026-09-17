@@ -14,7 +14,7 @@ import {
   tabLightSlot,
   tabLightSlotCount,
   tabLightTop,
-} from "@/src/components/ui/tabLight";
+} from "@/src/components/ui/navigation/tabLight";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRef } from "react";
 import { StyleSheet, View } from "react-native";

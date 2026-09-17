@@ -1,7 +1,7 @@
 import {
   AvatarPlaceholder,
   AvatarPlaceholderVariant,
-} from "@/src/components/ui/AvatarPlaceholder";
+} from "@/src/components/ui/avatar/AvatarPlaceholder";
 import { getInitials } from "@/src/utils/getInitials";
 import { Pressable } from "react-native";
 import { Avatar } from "tamagui";

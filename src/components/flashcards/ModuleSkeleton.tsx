@@ -1,4 +1,4 @@
-import { Skeleton } from "@/src/components/ui/Skeleton";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
 import { XStack, YStack } from "tamagui";
 
 export function ModuleSkeleton() {

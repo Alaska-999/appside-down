@@ -1,9 +1,9 @@
-import { useFocusProgress } from "@/src/components/ui/FocusRing";
+import { useFocusProgress } from "@/src/components/ui/fields/FocusRing";
 import {
   SurfaceLayers,
   SurfaceVariant,
-} from "@/src/components/ui/Surfaces";
-import { WellState } from "@/src/components/ui/Well";
+} from "@/src/components/ui/surface/Surfaces";
+import { WellState } from "@/src/components/ui/surface/Well";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
   ICON_MINT_LIGHT,

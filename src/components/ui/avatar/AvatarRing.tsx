@@ -8,7 +8,7 @@ import {
 import {
   AvatarPlaceholder,
   AvatarPlaceholderVariant,
-} from "@/src/components/ui/AvatarPlaceholder";
+} from "@/src/components/ui/avatar/AvatarPlaceholder";
 import { ICON_LIME, ICON_MINT } from "@/src/constants/iconColors";
 import { Image, Pressable } from "react-native";
 import { YStack } from "tamagui";

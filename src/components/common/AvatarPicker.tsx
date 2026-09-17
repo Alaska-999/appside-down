@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";

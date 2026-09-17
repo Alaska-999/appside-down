@@ -1,17 +1,17 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { SelectableModuleRow } from "@/src/components/cards/SelectableModuleRow";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
-import { AppButton } from "@/src/components/ui/Button";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { TagChip } from "@/src/components/ui/TagChip";
-import { AppToast } from "@/src/components/ui/Toast";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { TagChip } from "@/src/components/ui/display/TagChip";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_MINT_LIGHT, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import {
   LIQUID_GLASS_DARK_BG,
@@ -32,6 +32,7 @@ import { AlertTriangle, Captions, Plus, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, View } from "react-native";
 import { Spinner, Text, XStack, YStack } from "tamagui";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
 
 type ModuleItem = {
   id: string;
@@ -336,6 +337,7 @@ export default function AddModules() {
         )}
       </YStack>
 
+      <KeyboardBar />
       <StatusBarScrim />
 
       <LinearGradient

@@ -1,10 +1,10 @@
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { screenGutter } from "@/tamagui.config";
 import { router } from "expo-router";

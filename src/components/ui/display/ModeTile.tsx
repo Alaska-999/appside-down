@@ -1,4 +1,4 @@
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
+import { GlowSurface } from "@/src/components/ui/surface/GlowSurface";
 import {
   ICON_ACCENT,
   ICON_MINT_LIGHT,

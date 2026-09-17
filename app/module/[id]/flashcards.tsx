@@ -3,10 +3,10 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { SyncingPill } from "@/src/components/ui/SyncingPill";
-import { AppToast } from "@/src/components/ui/Toast";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SyncingPill } from "@/src/components/ui/feedback/SyncingPill";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useOptimisticPatch } from "@/src/hooks/useOptimisticPatch";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";

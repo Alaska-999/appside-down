@@ -1,5 +1,5 @@
-import { AppCard } from "@/src/components/ui/Card";
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
 import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
@@ -23,7 +23,7 @@ import { Check, ChevronRight, X } from "lucide-react-native";
 import { ReactNode, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
-import { IconButton } from "../ui/IconButton";
+import { IconButton } from "../ui/controls/IconButton";
 
 interface ModuleCardProps {
   module: {

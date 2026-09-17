@@ -1,6 +1,6 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { StarToggle } from "@/src/components/ui/StarToggle";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
+import { StarToggle } from "@/src/components/ui/controls/StarToggle";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import {
   ICON_ACCENT,

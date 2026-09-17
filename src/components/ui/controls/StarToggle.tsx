@@ -1,4 +1,4 @@
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
 import { ICON_LIME_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";

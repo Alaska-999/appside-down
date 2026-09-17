@@ -1,4 +1,4 @@
-import { StarToggle } from "@/src/components/ui/StarToggle";
+import { StarToggle } from "@/src/components/ui/controls/StarToggle";
 import { ICON_MINT_LIGHT } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ArrowDownUp } from "lucide-react-native";

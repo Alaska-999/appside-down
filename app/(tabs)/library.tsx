@@ -7,15 +7,15 @@ import {
 import { ModuleCard } from "@/src/components/cards/ModuleCard";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { FadeTabPanes, useFadeTabs } from "@/src/components/ui/FadeTabPanes";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
-import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { AppToast } from "@/src/components/ui/Toast";
+import { FadeTabPanes, useFadeTabs } from "@/src/components/ui/motion/FadeTabPanes";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { ScreenBackground } from "@/src/components/ui/background/ScreenBackground";
+import { ScrollToTopButton } from "@/src/components/ui/controls/ScrollToTopButton";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/overlays/Sheet";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_ON_GLASS, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
@@ -51,6 +51,7 @@ import {
 } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
 
 type SortOption = "date" | "az" | "favs";
 
@@ -653,6 +654,8 @@ export default function Library() {
         message={toast ?? ""}
         onDismiss={() => setToast(null)}
       />
+
+      <KeyboardBar />
     </ScreenBackground>
   );
 }

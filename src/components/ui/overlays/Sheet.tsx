@@ -1,5 +1,5 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   ICON_ACCENT,
   ICON_DANGER,
@@ -44,7 +44,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Sheet, Text, useTheme, XStack, YStack } from "tamagui";
-import { Lamp } from "./GlowSurface";
+import { Lamp } from "../surface/GlowSurface";
 
 const SHEET_SKIRT_HEIGHT = 600;
 

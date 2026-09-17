@@ -1,7 +1,7 @@
 import { CreateActionSheet } from "@/src/components/CreateActionSheet";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
-import { TabBarIcon } from "@/src/components/ui/TabBarIcon";
-import { TabBarLight } from "@/src/components/ui/TabBarLight";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
+import { TabBarIcon } from "@/src/components/ui/navigation/TabBarIcon";
+import { TabBarLight } from "@/src/components/ui/navigation/TabBarLight";
 import { ICON_PURE_BLACK } from "@/src/constants/iconColors";
 import { TAB_SWITCH_MS } from "@/src/constants/motion";
 import { Tabs } from "expo-router";

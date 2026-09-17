@@ -2,10 +2,10 @@ import {
   InputShell,
   InputShellSize,
   InputShellVariant,
-} from "@/src/components/ui/InputShell";
+} from "@/src/components/ui/fields/InputShell";
 import { ICON_DANGER, ICON_SUBTLE, ICON_WARNING } from "@/src/constants/iconColors";
 import { AlertCircle, Eye, EyeOff } from "lucide-react-native";
-import { RowsFocusContext } from "@/src/components/ui/Rows";
+import { RowsFocusContext } from "@/src/components/ui/display/Rows";
 import { ReactNode, Ref, forwardRef, useContext, useState } from "react";
 import {
   Control,

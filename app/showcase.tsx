@@ -1,38 +1,38 @@
 import { FormInput } from "@/src/components/common/FormInput";
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { AnimatedNumber } from "@/src/components/ui/AnimatedNumber";
+import { AnimatedNumber } from "@/src/components/ui/display/AnimatedNumber";
 import {
   AVATAR_PLACEHOLDER_VARIANTS,
   AvatarPlaceholder,
-} from "@/src/components/ui/AvatarPlaceholder";
-import { AvatarRing } from "@/src/components/ui/AvatarRing";
-import { AppButton } from "@/src/components/ui/Button";
-import { AppCard } from "@/src/components/ui/Card";
-import { Checkbox, OptionRow, Radio } from "@/src/components/ui/Checkbox";
-import { CodeInput } from "@/src/components/ui/CodeInput";
-import { FilterChip } from "@/src/components/ui/FilterChip";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { AppFab, IconButton } from "@/src/components/ui/IconButton";
-import { ProgressRing } from "@/src/components/ui/ProgressRing";
-import { ProgressSplitBar } from "@/src/components/ui/ProgressSplitBar";
-import { ProgressUnderline } from "@/src/components/ui/ProgressUnderline";
+} from "@/src/components/ui/avatar/AvatarPlaceholder";
+import { AvatarRing } from "@/src/components/ui/avatar/AvatarRing";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { Checkbox, OptionRow, Radio } from "@/src/components/ui/controls/Checkbox";
+import { CodeInput } from "@/src/components/ui/fields/CodeInput";
+import { FilterChip } from "@/src/components/ui/display/FilterChip";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { AppFab, IconButton } from "@/src/components/ui/controls/IconButton";
+import { ProgressRing } from "@/src/components/ui/feedback/ProgressRing";
+import { ProgressSplitBar } from "@/src/components/ui/feedback/ProgressSplitBar";
+import { ProgressUnderline } from "@/src/components/ui/feedback/ProgressUnderline";
 import {
   BackgroundMesh,
   BackgroundPreset,
   BgDebugMode,
-} from "@/src/components/ui/ScreenBackground";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { SelectField } from "@/src/components/ui/SelectField";
+} from "@/src/components/ui/background/ScreenBackground";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { SelectField } from "@/src/components/ui/fields/SelectField";
 import {
   AppSheet,
   SheetCrossfade,
   SheetRow,
   SheetRows,
-} from "@/src/components/ui/Sheet";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { AppToast } from "@/src/components/ui/Toast";
-import { Toggle } from "@/src/components/ui/Toggle";
+} from "@/src/components/ui/overlays/Sheet";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
 import {
   ICON_BASE,
   ICON_LIME_LIGHT,

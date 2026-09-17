@@ -3,7 +3,7 @@ import { Text } from "tamagui";
 import {
   AVATAR_VARIANTS,
   AvatarPlaceholderVariant,
-} from "@/src/components/ui/avatarVariants";
+} from "@/src/components/ui/avatar/avatarVariants";
 
 export type { AvatarPlaceholderVariant };
 

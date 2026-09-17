@@ -1,10 +1,10 @@
-import { useFocusProgress } from "@/src/components/ui/FocusRing";
+import { useFocusProgress } from "@/src/components/ui/fields/FocusRing";
 import {
   SURFACE_VARIANTS,
   SurfaceLayers,
   SurfaceState,
   SurfaceVariant,
-} from "@/src/components/ui/Surfaces";
+} from "@/src/components/ui/surface/Surfaces";
 import { ICON_MUTED_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";

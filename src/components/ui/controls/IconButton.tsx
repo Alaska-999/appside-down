@@ -1,5 +1,5 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   GRADIENT_ACCENT_LIME,
   GRADIENT_PRIMARY,

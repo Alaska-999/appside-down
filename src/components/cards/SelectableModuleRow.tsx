@@ -1,6 +1,6 @@
-import { AppCard } from "@/src/components/ui/Card";
-import { Checkbox } from "@/src/components/ui/Checkbox";
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { Checkbox } from "@/src/components/ui/controls/Checkbox";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";

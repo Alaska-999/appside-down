@@ -1,4 +1,4 @@
-import { KEYBOARD_BAR_HEIGHT } from "@/src/components/ui/KeyboardBar";
+import { KEYBOARD_BAR_HEIGHT } from "@/src/components/ui/overlays/KeyboardBar";
 import { useRef } from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import {

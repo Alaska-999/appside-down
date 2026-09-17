@@ -5,9 +5,9 @@ import {
   InnerBloom,
   LAMP_ROW,
   LightLevel,
-} from "@/src/components/ui/GlowSurface";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+} from "@/src/components/ui/surface/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import { EDGE_MINT_FAINT, RING_GLOW_BORDER } from "@/src/constants/focus";
 import { GRADIENT_ACCENT_LIME } from "@/src/constants/gradients";
 import {

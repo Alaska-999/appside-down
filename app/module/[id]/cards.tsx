@@ -1,15 +1,15 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
-import { AddPill } from "@/src/components/ui/AddPill";
+import { AddPill } from "@/src/components/ui/controls/AddPill";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Flashcard } from "@/src/types";

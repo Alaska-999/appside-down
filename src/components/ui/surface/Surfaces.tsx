@@ -1,13 +1,13 @@
-import { FocusRing } from "@/src/components/ui/FocusRing";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { FocusRing } from "@/src/components/ui/fields/FocusRing";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   WELL_BORDERS,
   WELL_FILL,
   WELL_FILL_FOCUS,
   WellInsetShadow,
   WellState,
-} from "@/src/components/ui/Well";
+} from "@/src/components/ui/surface/Well";
 import { INPUT_GLASS_TINT } from "@/src/constants/rawColors";
 import {
   SURFACE_BORDER,

@@ -3,19 +3,19 @@ import { FormInput } from "@/src/components/common/FormInput";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { CardEditor } from "@/src/components/flashcards/CardEditor";
 import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
-import { AddPill } from "@/src/components/ui/AddPill";
-import { AppButton } from "@/src/components/ui/Button";
+import { AddPill } from "@/src/components/ui/controls/AddPill";
+import { AppButton } from "@/src/components/ui/controls/Button";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { PickRow } from "@/src/components/ui/PickRow";
-import { Rows } from "@/src/components/ui/Rows";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet } from "@/src/components/ui/Sheet";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
-import { Toggle } from "@/src/components/ui/Toggle";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { PickRow } from "@/src/components/ui/display/PickRow";
+import { Rows } from "@/src/components/ui/display/Rows";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { AppSheet } from "@/src/components/ui/overlays/Sheet";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
 import { ICON_ACCENT, ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
 import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";

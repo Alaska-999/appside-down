@@ -1,5 +1,5 @@
-import { InputShell, InputShellSize } from "@/src/components/ui/InputShell";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { InputShell, InputShellSize } from "@/src/components/ui/fields/InputShell";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   ICON_LIME,
   ICON_LIME_LIGHT,

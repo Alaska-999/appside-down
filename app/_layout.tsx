@@ -4,8 +4,8 @@ import {
   SvitlyMark,
 } from "@/src/components/brand/SvitlyMark";
 import { fetchCurrentUserProfile } from "@/src/api/profile";
-import { GradientText } from "@/src/components/ui/GradientText";
-import { MeshGradientBackground } from "@/src/components/ui/MeshGradientBackground";
+import { GradientText } from "@/src/components/ui/display/GradientText";
+import { MeshGradientBackground } from "@/src/components/ui/background/MeshGradientBackground";
 import { GRADIENT_SOFT } from "@/src/constants/gradients";
 import {
   ICON_BASE,

@@ -3,7 +3,7 @@ import {
   reportIconFrame,
   TAB_LIGHT_RADIUS,
   TAB_LIGHT_SIZE,
-} from "@/src/components/ui/tabLight";
+} from "@/src/components/ui/navigation/tabLight";
 import { ICON_MUTED, ICON_NEAR_BLACK } from "@/src/constants/iconColors";
 import {
   EASE_STANDARD,

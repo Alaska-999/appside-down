@@ -1,5 +1,5 @@
-import { IconButton } from "@/src/components/ui/IconButton";
-import { SavePill } from "@/src/components/ui/SavePill";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { SavePill } from "@/src/components/ui/controls/SavePill";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { X } from "lucide-react-native";
 import { Text, XStack } from "tamagui";

@@ -1,4 +1,4 @@
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { screenGutter } from "@/tamagui.config";
 import { ArrowUp } from "lucide-react-native";

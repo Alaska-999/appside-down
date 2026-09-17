@@ -7,18 +7,18 @@ import {
 import { FolderFormFields } from "@/src/components/common/FolderFormFields";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
-import { AppButton } from "@/src/components/ui/Button";
-import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { FieldLabel } from "@/src/components/ui/fields/FieldLabel";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { Rows } from "@/src/components/ui/Rows";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { Rows } from "@/src/components/ui/display/Rows";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/overlays/Sheet";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_DANGER } from "@/src/constants/iconColors";
 import { useResourceOnFocus } from "@/src/hooks/useResourceOnFocus";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";

@@ -1,5 +1,5 @@
-import { Lamp } from "@/src/components/ui/GlowSurface";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { Lamp } from "@/src/components/ui/surface/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import { ICON_MINT, ICON_MINT_LIGHT } from "@/src/constants/iconColors";
 import { EASE_STANDARD } from "@/src/constants/motion";

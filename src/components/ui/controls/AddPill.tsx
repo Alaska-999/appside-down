@@ -1,4 +1,4 @@
-import { GlassPill } from "@/src/components/ui/GlassPill";
+import { GlassPill } from "@/src/components/ui/display/GlassPill";
 import { Plus } from "lucide-react-native";
 
 export function AddPill({

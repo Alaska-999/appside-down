@@ -1,6 +1,6 @@
-import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/fields/FocusRing";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import {
   ICON_MINT,

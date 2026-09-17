@@ -1,13 +1,13 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { SheetRow } from "@/src/components/ui/Sheet";
-import { Skeleton } from "@/src/components/ui/Skeleton";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { ScrollToTopButton } from "@/src/components/ui/controls/ScrollToTopButton";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { SheetRow } from "@/src/components/ui/overlays/Sheet";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
@@ -26,6 +26,7 @@ import {
 } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { Spinner, Text, XStack, YStack } from "tamagui";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
 
 type FolderOption = { id: string; name: string };
 
@@ -223,6 +224,7 @@ export default function FolderPick() {
         )}
       </YStack>
 
+      <KeyboardBar />
       <StatusBarScrim />
     </YStack>
   );

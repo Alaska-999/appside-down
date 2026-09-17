@@ -2,7 +2,7 @@ import {
   InputShell,
   InputShellSize,
   InputShellVariant,
-} from "@/src/components/ui/InputShell";
+} from "@/src/components/ui/fields/InputShell";
 import { ICON_MUTED, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { ChevronRight } from "lucide-react-native";

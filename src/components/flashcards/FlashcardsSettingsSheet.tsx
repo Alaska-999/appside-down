@@ -1,13 +1,13 @@
 import { SegmentedControl } from "@/src/components/common/SegmentedControl";
-import { AppButton } from "@/src/components/ui/Button";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
-import { Toggle } from "@/src/components/ui/Toggle";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/overlays/Sheet";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
 import { ICON_DANGER } from "@/src/constants/iconColors";
 import { BLACK_SCRIM_FAINT } from "@/src/constants/rawColors";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Layers, RotateCcw, Shuffle, Volume2 } from "lucide-react-native";
 import { Text, View, YStack } from "tamagui";
-import { SoonBadge } from "@/src/components/ui/SoonBadge";
+import { SoonBadge } from "@/src/components/ui/display/SoonBadge";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;

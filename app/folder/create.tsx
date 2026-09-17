@@ -2,15 +2,15 @@ import { API_BASE_URL } from "@/src/api/config";
 import { FolderFormFields } from "@/src/components/common/FolderFormFields";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
-import { AppButton } from "@/src/components/ui/Button";
+import { AppButton } from "@/src/components/ui/controls/Button";
 import {
   KEYBOARD_BAR_HEIGHT,
   KeyboardBar,
-} from "@/src/components/ui/KeyboardBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
-import { AppSheet } from "@/src/components/ui/Sheet";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { AppSheet } from "@/src/components/ui/overlays/Sheet";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { FolderForm, folderSchema } from "@/src/validation/entities";

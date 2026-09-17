@@ -3,22 +3,22 @@ import { CardRow } from "@/src/components/flashcards/CardRow";
 import { CardsHeader } from "@/src/components/flashcards/CardsHeader";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
 import { ModuleSkeleton } from "@/src/components/flashcards/ModuleSkeleton";
-import { AppButton } from "@/src/components/ui/Button";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { ModeTile } from "@/src/components/ui/ModeTile";
-import { ProgressSplitBar } from "@/src/components/ui/ProgressSplitBar";
-import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { ModeTile } from "@/src/components/ui/display/ModeTile";
+import { ProgressSplitBar } from "@/src/components/ui/feedback/ProgressSplitBar";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
 import {
   AppSheet,
   SheetRow,
   SheetRows,
-} from "@/src/components/ui/Sheet";
-import { StarGlyph } from "@/src/components/ui/StarGlyph";
-import { StateCard } from "@/src/components/ui/StateCard";
-import { StatTile } from "@/src/components/ui/StatTile";
-import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/Toast";
-import { Toggle } from "@/src/components/ui/Toggle";
+} from "@/src/components/ui/overlays/Sheet";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatTile } from "@/src/components/ui/display/StatTile";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
 import {
   ICON_MINT_TINT_DARK,
   ICON_MUTED,
@@ -55,7 +55,7 @@ import {
 import { ComponentType, useCallback, useMemo, useState } from "react";
 import { FlatList, InteractionManager } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
-import { ConfirmMenuSheet } from "@/src/components/ui/ConfirmMenuSheet";
+import { ConfirmMenuSheet } from "@/src/components/ui/overlays/ConfirmMenuSheet";
 
 type SortOrder = "original" | "alphabetical";
 

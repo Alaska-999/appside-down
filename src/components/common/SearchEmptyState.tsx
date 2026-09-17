@@ -1,4 +1,4 @@
-import { StateCard } from "@/src/components/ui/StateCard";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { Search } from "lucide-react-native";
 import { Text, YStackProps } from "tamagui";

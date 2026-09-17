@@ -1,4 +1,4 @@
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import {
   ICON_INDIGO,
   ICON_INDIGO_LIGHT,

@@ -1,5 +1,5 @@
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useRouter } from "expo-router";

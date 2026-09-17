@@ -1,6 +1,6 @@
-import { GradientIcon } from "@/src/components/ui/GradientIcon";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
+import { GradientIcon } from "@/src/components/ui/display/GradientIcon";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/overlays/Sheet";
 import { FOCUS_HIGHLIGHT } from "@/src/constants/focus";
 import {
   ICON_BASE,
@@ -37,7 +37,7 @@ import { Camera, ImagePlus, Pencil, Trash2 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Image, Linking, Pressable, View } from "react-native";
 import { Text, YStack } from "tamagui";
-import { GradientBorder } from "../ui/GradientBorder";
+import { GradientBorder } from "../ui/surface/GradientBorder";
 
 const COVER_BOX = 112;
 const COVER_RADIUS = 30;

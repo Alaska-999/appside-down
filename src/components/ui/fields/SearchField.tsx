@@ -1,4 +1,4 @@
-import { InputShell } from "@/src/components/ui/InputShell";
+import { InputShell } from "@/src/components/ui/fields/InputShell";
 import { ICON_MUTED, ICON_MUTED_DARK } from "@/src/constants/iconColors";
 import { Search, X } from "@tamagui/lucide-icons";
 import { useState } from "react";

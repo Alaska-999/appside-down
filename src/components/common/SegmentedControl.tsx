@@ -1,5 +1,5 @@
-import { FocusRing, useFocusProgress } from "@/src/components/ui/FocusRing";
-import { LiquidGlass } from "@/src/components/ui/LiquidGlass";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/fields/FocusRing";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import { ICON_MINT } from "@/src/constants/iconColors";
 import { BLACK_SCRIM_LIGHT, FOREST_SHADE, FOREST_SHADE_TRANSPARENT } from "@/src/constants/rawColors";

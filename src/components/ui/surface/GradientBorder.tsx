@@ -21,7 +21,7 @@ import {
 import {
   GRADIENT_BORDER_PRESETS,
   GradientBorderPreset,
-} from "@/src/components/ui/gradientBorderPresets";
+} from "@/src/components/ui/surface/gradientBorderPresets";
 import { useMeasure } from "@/src/hooks/useMeasure";
 
 export type { GradientBorderPreset };

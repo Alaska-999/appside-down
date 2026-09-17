@@ -1,9 +1,9 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { AuthScreenShell } from "@/src/components/common/AuthScreenShell";
 import { FormInput } from "@/src/components/common/FormInput";
-import { AuthHeading } from "@/src/components/ui/AuthHeading";
-import { AppButton } from "@/src/components/ui/Button";
-import { CodeInput } from "@/src/components/ui/CodeInput";
+import { AuthHeading } from "@/src/components/common/AuthHeading";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { CodeInput } from "@/src/components/ui/fields/CodeInput";
 import { ICON_SUBTLE, ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
 import {

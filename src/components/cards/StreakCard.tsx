@@ -1,4 +1,4 @@
-import { GradientBorder } from "@/src/components/ui/GradientBorder";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
 import { ICON_MINT, ICON_MINT_LIGHT, ICON_MINT_TINT_DARK } from "@/src/constants/iconColors";
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
 import { SURFACE_MINT_GLASS_BG } from "@/src/constants/surfaceAlpha";
