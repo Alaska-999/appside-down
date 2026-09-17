@@ -17,4 +17,8 @@ export async function readJsonBody(response: Response) {
 export const AUTH_ERROR_MESSAGES = {
   connectionProblem: "Connection problem. Please try again",
   incompleteSession: "Server returned an incomplete session. Please try again",
+  rateLimited: "Too many requests. Please wait a moment and try again",
 };
+
+export const CONNECTION_HICCUP_MESSAGE =
+  "Looks like a connection hiccup. Your data is safe — try again.";

@@ -47,7 +47,11 @@ export default function ForgotPassword() {
 
       if (!response.ok) {
         const data = await readJsonBody(response);
-        setServerError(getErrorMessage(data, "Failed to send code"));
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to send code";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 

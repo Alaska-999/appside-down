@@ -11,6 +11,7 @@ import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { useServerError } from "@/src/hooks/useServerError";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { AUTH_ERROR_MESSAGES, getErrorMessage, readJsonBody } from "@/src/utils/apiError";
 import { LoginForm, loginSchema } from "@/src/validation/auth";
@@ -46,6 +47,7 @@ export default function Login() {
     setError,
     formState: { isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
   const passwordRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -53,6 +55,8 @@ export default function Login() {
   }, [sessionExpired]);
 
   const onSubmit = async ({ email, password }: LoginForm) => {
+    setServerError(null);
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -63,8 +67,14 @@ export default function Login() {
       if (!response.ok) {
         const errorBody = await readJsonBody(response);
         if (response.status >= 500) {
-          setToastMessage(
+          setServerError(
             getErrorMessage(errorBody, "Server problem. Try again later"),
+          );
+          return;
+        }
+        if (response.status === 429) {
+          setServerError(
+            getErrorMessage(errorBody, AUTH_ERROR_MESSAGES.rateLimited),
           );
           return;
         }
@@ -77,9 +87,7 @@ export default function Login() {
       const data = await readJsonBody(response);
 
       if (!data?.user || !data?.access_token || !data?.refresh_token) {
-        setError("password", {
-          message: AUTH_ERROR_MESSAGES.incompleteSession,
-        });
+        setServerError(AUTH_ERROR_MESSAGES.incompleteSession);
         return;
       }
 
@@ -91,7 +99,7 @@ export default function Login() {
       router.replace("/");
     } catch (error) {
       console.error("Network error:", error);
-      setToastMessage(AUTH_ERROR_MESSAGES.connectionProblem);
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 
@@ -156,6 +164,12 @@ export default function Login() {
               </Pressable>
             </YStack>
           </YStack>
+
+          {serverError && (
+            <Text color="$roseSoft" fontSize={12.5} textAlign="center" mt={10}>
+              {serverError}
+            </Text>
+          )}
 
           <YStack width="100%" mt={20}>
             <AppButton

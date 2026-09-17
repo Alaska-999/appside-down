@@ -5,6 +5,11 @@ import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AppButton } from "@/src/components/ui/Button";
 import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useServerError } from "@/src/hooks/useServerError";
+import {
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
   ChangePasswordForm,
@@ -48,6 +53,11 @@ export default function ChangePasswordScreen() {
 
       if (response.status === 403) {
         setServerError("Current password is incorrect");
+        return;
+      }
+      if (response.status === 429) {
+        const body = await readJsonBody(response);
+        setServerError(getErrorMessage(body, AUTH_ERROR_MESSAGES.rateLimited));
         return;
       }
       if (!response.ok) {

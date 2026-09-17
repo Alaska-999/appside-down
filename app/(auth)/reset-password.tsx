@@ -69,7 +69,11 @@ export default function ResetPassword() {
 
       if (!response.ok) {
         const data = await readJsonBody(response);
-        setServerError(getErrorMessage(data, "Failed to send code"));
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to send code";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 
@@ -94,7 +98,11 @@ export default function ResetPassword() {
 
       if (!response.ok) {
         const data = await readJsonBody(response);
-        setServerError(getErrorMessage(data, "Failed to reset password"));
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to reset password";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 

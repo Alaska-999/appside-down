@@ -52,14 +52,13 @@ export default function Signup() {
 
       if (!response.ok) {
         const errorBody = await readJsonBody(response);
-        setServerError(
-          getErrorMessage(
-            errorBody,
-            response.status >= 500
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : response.status >= 500
               ? "Server problem. Try again later"
-              : "Signup failed",
-          ),
-        );
+              : "Signup failed";
+        setServerError(getErrorMessage(errorBody, fallback));
         return;
       }
 

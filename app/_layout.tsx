@@ -14,6 +14,7 @@ import {
 } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
+import { CONNECTION_HICCUP_MESSAGE } from "@/src/utils/apiError";
 import config, { controlHeight } from "@/tamagui.config";
 import {
   Sora_400Regular,
@@ -192,9 +193,7 @@ export function ErrorBoundary({
   return (
     <View style={styles.errorRoot}>
       <Text style={styles.errorTitle}>Something went wrong</Text>
-      <Text style={styles.errorSubtitle}>
-        Looks like a connection hiccup. Your data is safe — try again.
-      </Text>
+      <Text style={styles.errorSubtitle}>{CONNECTION_HICCUP_MESSAGE}</Text>
       <Pressable onPress={retry}>
         <LinearGradient
           colors={GRADIENT_SOFT}
