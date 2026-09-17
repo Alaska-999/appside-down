@@ -28,3 +28,5 @@ export const SURFACE_WELL_FOCUS = "rgba(4,8,10,0.65)";
 export const SURFACE_WELL_SOFT = SURFACE_CARD;
 export const SURFACE_WELL_SOFT_FOCUS = "rgba(9,15,18,0.7)";
 
+export const SURFACE_MINT_LINE = "rgba(220,255,245,0.34)";
+export const SURFACE_MINT_LINE_FADE = "rgba(220,255,245,0)";

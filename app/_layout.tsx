@@ -30,7 +30,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -57,8 +56,8 @@ const WORDMARK_DELAY = 1500;
 const WORDMARK_MS = 600;
 const TAGLINE_DELAY = 1900;
 const TAGLINE_MS = 500;
-const TAGLINE_TRACKING_FROM = 4.59;
-const TAGLINE_TRACKING_TO = 2.7;
+const TAGLINE_TRACKING = 2.7;
+const TAGLINE_SETTLE_FROM = 1.03;
 const GRADIENT_TEXT_RIGHT_PAD = 6;
 const MARK_SCALE = MARK_SIZE / MARK_VIEWBOX;
 const MARK_INK_WIDTH = MARK_INK.width * MARK_SCALE;
@@ -76,7 +75,6 @@ interface AppSplashProps {
 
 export function AppSplash({ ready, onExited }: AppSplashProps) {
   const still = useReducedMotion();
-  const [wordmarkWidth, setWordmarkWidth] = useState(0);
   const mountedAt = useRef(0);
 
   const reveal = useSharedValue(still ? 1 : 0);
@@ -130,24 +128,13 @@ export function AppSplash({ ready, onExited }: AppSplashProps) {
     transform: [{ translateY: (1 - reveal.value) * 14 }],
   }));
 
-  const wordmarkClipStyle = useAnimatedStyle(() => ({
-    width: wordmarkWidth === 0 ? undefined : wordmarkWidth * reveal.value,
+  const taglineStyle = useAnimatedStyle(() => ({
+    opacity: tagline.value,
+    transform: [
+      { translateX: TAGLINE_TRACKING / 2 },
+      { scale: TAGLINE_SETTLE_FROM + (1 - TAGLINE_SETTLE_FROM) * tagline.value },
+    ],
   }));
-
-  const taglineStyle = useAnimatedStyle(() => {
-    const tracking =
-      TAGLINE_TRACKING_FROM +
-      (TAGLINE_TRACKING_TO - TAGLINE_TRACKING_FROM) * tagline.value;
-    return {
-      opacity: tagline.value,
-      letterSpacing: tracking,
-      transform: [{ translateX: tracking / 2 }],
-    };
-  });
-
-  const measureWordmark = (event: LayoutChangeEvent) => {
-    setWordmarkWidth(event.nativeEvent.layout.width);
-  };
 
   return (
     <Animated.View style={[styles.splashRoot, rootStyle]}>
@@ -159,18 +146,12 @@ export function AppSplash({ ready, onExited }: AppSplashProps) {
         </View>
 
         <View style={styles.splashWords}>
-          <Animated.View
-            style={[
-              styles.wordmarkOuter,
-              wordmarkStyle,
-              wordmarkWidth > 0 && { width: wordmarkWidth },
-            ]}
-          >
-            <Animated.View style={[styles.wordmarkClip, wordmarkClipStyle]}>
-              <View onLayout={measureWordmark} style={styles.wordmarkInner}>
-                <GradientText fontSize={WORDMARK_SIZE}>Svitly</GradientText>
-              </View>
-            </Animated.View>
+          <Animated.View style={[styles.wordmarkOuter, wordmarkStyle]}>
+            <View style={styles.wordmarkInner}>
+              <GradientText fontSize={WORDMARK_SIZE} reveal={reveal}>
+                Svitly
+              </GradientText>
+            </View>
           </Animated.View>
           <Animated.Text style={[styles.tagline, taglineStyle]}>
             Illuminate your learning
@@ -339,16 +320,13 @@ const styles = StyleSheet.create({
   wordmarkOuter: {
     alignItems: "flex-start",
   },
-  wordmarkClip: {
-    overflow: "hidden",
-    alignItems: "flex-start",
-  },
   wordmarkInner: {
     flexShrink: 0,
     transform: [{ translateX: GRADIENT_TEXT_RIGHT_PAD / 2 }],
   },
   tagline: {
     marginTop: 10,
+    letterSpacing: TAGLINE_TRACKING,
     fontSize: 13.5,
     fontFamily: "Sora_500Medium",
     color: ICON_MUTED,

@@ -68,7 +68,7 @@ export function ScreenHeader({
       />
 
       {title && (
-        <Text color="$color" fontSize={19} fontWeight="800" ml={5}>
+        <Text color="$color" fontSize={22} fontWeight="800" ml={5}>
           {title}
         </Text>
       )}

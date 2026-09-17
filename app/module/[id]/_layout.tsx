@@ -24,6 +24,13 @@ export default function ModuleLayout() {
           presentation: "fullScreenModal",
         }}
       />
+      <Stack.Screen
+        name="match"
+        options={{
+          gestureEnabled: false,
+          presentation: "fullScreenModal",
+        }}
+      />
     </Stack>
   );
 }

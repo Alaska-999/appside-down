@@ -23,6 +23,7 @@ export function AnimatedNumber({
   delay = 0,
   prefix = "",
   suffix = "",
+  pad = 0,
   style,
   progress,
   gradientColors,
@@ -35,6 +36,7 @@ export function AnimatedNumber({
   delay?: number;
   prefix?: string;
   suffix?: string;
+  pad?: number;
   style?: TextStyle | TextStyle[];
   progress?: SharedValue<number>;
   gradientColors?: [string, string, ...string[]];
@@ -53,8 +55,10 @@ export function AnimatedNumber({
   }, [to, from, duration, delay, value, progress]);
 
   const animatedProps = useAnimatedProps(() => {
-    const current = progress ? from + progress.value * (to - from) : value.value;
-    const text = `${prefix}${Math.round(current)}${suffix}`;
+    const current = progress
+      ? from + progress.value * (to - from)
+      : value.value;
+    const text = `${prefix}${String(Math.round(current)).padStart(pad, "0")}${suffix}`;
     return { text, defaultValue: text };
   });
 
@@ -63,7 +67,10 @@ export function AnimatedNumber({
       editable={false}
       underlineColorAndroid="transparent"
       animatedProps={animatedProps}
-      style={[{ padding: 0, color: gradientColors ? ICON_PURE_BLACK : ICON_TEXT }, style]}
+      style={[
+        { padding: 0, color: gradientColors ? ICON_PURE_BLACK : ICON_TEXT },
+        style,
+      ]}
     />
   );
 

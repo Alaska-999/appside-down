@@ -7,21 +7,19 @@ import { ScreenHeader } from "@/src/components/common/ScreenHeader";
 import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
 import { ScreenBackground } from "@/src/components/ui/background/ScreenBackground";
 import { AppButton } from "@/src/components/ui/controls/Button";
-import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { ScrollToTopButton } from "@/src/components/ui/controls/ScrollToTopButton";
-import { FilterChip } from "@/src/components/ui/display/FilterChip";
 import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
 import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { SoonRow } from "@/src/components/ui/display/SoonRow";
 import { SearchField } from "@/src/components/ui/fields/SearchField";
 import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
-import { ICON_SUBTLE } from "@/src/constants/iconColors";
 import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { screenGutter } from "@/tamagui.config";
 import { router } from "expo-router";
-import { AlertTriangle, ArrowDownUp, Compass } from "lucide-react-native";
+import { AlertTriangle, Compass } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   FlatList,
@@ -30,7 +28,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
-import { useTheme, XStack, YStack } from "tamagui";
+import { Text, useTheme, YStack } from "tamagui";
 
 const SIZE_FILTERS = ["Short", "Medium", "Large"] as const;
 
@@ -113,14 +111,16 @@ export default function DiscoverScreen() {
       <YStack f={1}>
         <ScreenHeader title="Discover" />
 
-        <YStack px="$screenX" gap={14}>
+        <YStack px="$screenX" gap={10} mb={10}>
           <SearchField
             value={search}
             onChangeText={setSearch}
             placeholder="Search public modules"
           />
 
-          <XStack ai="center" jc="space-between" gap={8} pt={8} pb={8}>
+          <SoonRow label="Filters and sorting" />
+
+          {/* <XStack ai="center" jc="space-between" gap={8} pt={8} pb={8}>
             <XStack ai="center" gap={8} flexWrap="wrap" f={1}>
               {SIZE_FILTERS.map((label) => (
                 <FilterChip key={label} label={label} disabled />
@@ -134,7 +134,7 @@ export default function DiscoverScreen() {
               }
               accessibilityLabel="Sort discover, coming soon"
             />
-          </XStack>
+          </XStack> */}
         </YStack>
 
         <YStack f={1} pos="relative">

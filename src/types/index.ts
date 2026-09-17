@@ -170,6 +170,7 @@ export interface MatchGameState {
     combo: number;
     startedAt: number | null;
     finishedAt: number | null;
+    coldFinish: boolean;
     bestTimes: Record<string, number>;
 
     initMatch: (module: Module, cards: Flashcard[]) => void;

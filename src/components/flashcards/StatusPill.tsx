@@ -5,6 +5,8 @@ import {
   ICON_INDIGO_PALE,
   ICON_LIME,
   ICON_LIME_LIGHT,
+  ICON_MINT_LIGHT,
+  ICON_STATUS_DANGER,
 } from "@/src/constants/iconColors";
 import {
   TEXT_INDIGO_LIGHT,
@@ -22,15 +24,25 @@ import Animated, {
 } from "react-native-reanimated";
 import { Text, XStack } from "tamagui";
 
-type StatusPillTone = "known" | "learning";
+type StatusPillTone = "known" | "learning" | "mistakes" | "pairs";
+type StatusPillGameTone = Extract<StatusPillTone, "known" | "learning">;
+
+function isGameTone(tone: StatusPillTone): tone is StatusPillGameTone {
+  return tone === "known" || tone === "learning";
+}
 
 const DOT_STYLES: Record<StatusPillTone, { color: string; glow: string }> = {
   known: { color: "$lime", glow: withAlpha(ICON_LIME, 0.85) },
   learning: { color: "$indigoLight", glow: withAlpha(ICON_INDIGO_LIGHT, 0.75) },
+  mistakes: {
+    color: "$roseSoft",
+    glow: withAlpha(ICON_STATUS_DANGER, 0.6),
+  },
+  pairs: { color: "$mintLight", glow: withAlpha(ICON_MINT_LIGHT, 0.7) },
 };
 
 const GAME_STYLES: Record<
-  StatusPillTone,
+  StatusPillGameTone,
   {
     text: string;
     textLit: string;
@@ -94,7 +106,7 @@ export function StatusPill({
     opacity: opacity.value,
   }));
 
-  if (kind === "game") {
+  if (kind === "game" && isGameTone(tone)) {
     const styles = GAME_STYLES[tone];
     const Icon = tone === "known" ? Check : RotateCcw;
 
@@ -154,7 +166,12 @@ export function StatusPill({
         shadowRadius={9}
         shadowOffset={{ width: 0, height: 0 }}
       />
-      <Text fontSize={14} fontWeight="700" color="$color">
+      <Text
+        fontSize={14}
+        fontWeight="700"
+        fontVariant={["tabular-nums"]}
+        color="$color"
+      >
         {count}
       </Text>
       <Text fontSize={11} color="$colorMuted">
