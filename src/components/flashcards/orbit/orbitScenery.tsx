@@ -1,12 +1,13 @@
-import { CENTER } from "@/src/components/flashcards/OrbitProgress";
+import { CENTER } from "@/src/components/flashcards/orbit/orbitLayout";
 import {
   ellipseTable,
   pointAt,
-} from "@/src/components/flashcards/orbitGeometry";
+} from "@/src/components/flashcards/orbit/orbitGeometry";
+import { TWO_PI } from "@/src/components/flashcards/orbit/orbitMath";
 import {
   ORBIT_STATE_STYLES,
   OrbitState,
-} from "@/src/components/flashcards/orbitState";
+} from "@/src/components/flashcards/orbit/orbitState";
 import {
   ICON_HERO_LIME,
   ICON_LIME,
@@ -31,8 +32,6 @@ import {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-
-const TWO_PI = Math.PI * 2;
 
 const NEBULA_R = 148;
 const NEBULA_BLUR = 34;

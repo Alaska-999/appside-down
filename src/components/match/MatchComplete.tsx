@@ -1,4 +1,4 @@
-import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
+import { OrbitSparks } from "@/src/components/flashcards/orbit/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import { BeamCraft } from "@/src/components/match/BeamCraft";
 import { formatElapsed } from "@/src/components/match/MatchTimer";

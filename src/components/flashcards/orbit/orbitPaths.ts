@@ -1,4 +1,4 @@
-import { CENTER } from "@/src/components/flashcards/OrbitProgress";
+import { CENTER } from "@/src/components/flashcards/orbit/orbitLayout";
 import { Skia } from "@shopify/react-native-skia";
 
 export function halfPath(rx: number, ry: number, startDeg: number) {
@@ -9,9 +9,4 @@ export function halfPath(rx: number, ry: number, startDeg: number) {
     180,
   );
   return path;
-}
-
-export function toRad(deg: number) {
-  "worklet";
-  return (deg * Math.PI) / 180;
 }

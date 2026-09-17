@@ -1,7 +1,13 @@
 import {
+  CENTER,
+  ORB_SIZE,
+  PLANET_SIZE,
+  RADIUS,
+} from "@/src/components/flashcards/orbit/orbitLayout";
+import {
   ORBIT_STATE_STYLES,
   OrbitState,
-} from "@/src/components/flashcards/orbitState";
+} from "@/src/components/flashcards/orbit/orbitState";
 import {
   ICON_ACCENT,
   ICON_LIME,
@@ -62,11 +68,6 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 
-export const ORB_SIZE = 262;
-export const CENTER = 131;
-export const RADIUS = 116;
-const PLANET_SIZE = 140;
-export const PLANET_R = PLANET_SIZE / 2;
 const PLANET_OFFSET = (ORB_SIZE - PLANET_SIZE) / 2;
 
 export type OrbitTone = "default" | "cold" | "warm";

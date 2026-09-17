@@ -1,9 +1,10 @@
-import { CENTER, PLANET_R } from "@/src/components/flashcards/OrbitProgress";
+import { CENTER, PLANET_R } from "@/src/components/flashcards/orbit/orbitLayout";
 import {
   ellipseTable,
   pointAt,
-} from "@/src/components/flashcards/orbitGeometry";
-import { OrbitState } from "@/src/components/flashcards/orbitState";
+} from "@/src/components/flashcards/orbit/orbitGeometry";
+import { TWO_PI, clamp01 } from "@/src/components/flashcards/orbit/orbitMath";
+import { OrbitState } from "@/src/components/flashcards/orbit/orbitState";
 import {
   ICON_ACCENT,
   ICON_CYAN_TEAL,
@@ -38,7 +39,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-const TWO_PI = Math.PI * 2;
 const CLOSURE_AT = 0.999;
 const CLOSURE_MS = 1100;
 const CLOSURE_ATTACK = 0.18;
@@ -101,7 +101,7 @@ function envelope(t: number) {
   "worklet";
   const attack = t < CLOSURE_ATTACK ? t / CLOSURE_ATTACK : 1;
   const tail = (t - CLOSURE_ATTACK) / (1 - CLOSURE_ATTACK);
-  const settle = tail < 0 ? 0 : tail > 1 ? 1 : tail;
+  const settle = clamp01(tail);
   return { attack, settle };
 }
 
@@ -366,7 +366,7 @@ function useCometPoint(
     const dist = Math.sqrt(dx * dx + dy * dy);
     if (at.value >= 0.5) return alpha;
     const room = (dist - PLANET_R) / COMET_HIDE_FADE;
-    return alpha * (room < 0 ? 0 : room > 1 ? 1 : room);
+    return alpha * clamp01(room);
   });
   return { cx, cy, opacity };
 }

@@ -1,9 +1,9 @@
 import {
   OrbitProgress,
   OrbitTone,
-} from "@/src/components/flashcards/OrbitProgress";
-import { OrbitRingHero } from "@/src/components/flashcards/OrbitRingHero";
-import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
+} from "@/src/components/flashcards/orbit/OrbitProgress";
+import { OrbitRingHero } from "@/src/components/flashcards/orbit/OrbitRingHero";
+import { OrbitSparks } from "@/src/components/flashcards/orbit/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import {
   BackgroundMesh,

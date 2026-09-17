@@ -1,4 +1,4 @@
-import { OrbitState } from "@/src/components/flashcards/orbitState";
+import { OrbitState } from "@/src/components/flashcards/orbit/orbitState";
 import {
   ICON_CYAN_LIGHT,
   ICON_HERO_LIME,

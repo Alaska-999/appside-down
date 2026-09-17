@@ -2,21 +2,26 @@ import {
   CENTER,
   ORB_SIZE,
   PLANET_R,
-  Planet,
-} from "@/src/components/flashcards/OrbitProgress";
+} from "@/src/components/flashcards/orbit/orbitLayout";
+import { Planet } from "@/src/components/flashcards/orbit/OrbitProgress";
 import {
   ClosureFlash,
   DriftMotes,
   OrbitComet,
   PlanetGlow,
   useRingClosure,
-} from "@/src/components/flashcards/orbitAmbient";
+} from "@/src/components/flashcards/orbit/orbitAmbient";
 import {
   ellipseTable,
   pointAt,
-} from "@/src/components/flashcards/orbitGeometry";
-import { halfPath, toRad } from "@/src/components/flashcards/orbitPaths";
-import { orbitStateFor } from "@/src/components/flashcards/orbitState";
+} from "@/src/components/flashcards/orbit/orbitGeometry";
+import {
+  clamp01,
+  clampTo,
+  toRad,
+} from "@/src/components/flashcards/orbit/orbitMath";
+import { halfPath } from "@/src/components/flashcards/orbit/orbitPaths";
+import { orbitStateFor } from "@/src/components/flashcards/orbit/orbitState";
 import {
   ICON_CYAN_TEAL,
   ICON_HERO_LIME,
@@ -108,16 +113,6 @@ const FADE_STEPS = [
   { from: 0.125, to: 0, blur: 2.6, body: 0.07, glow: 0.12 },
 ];
 const SHADOW_H = 18;
-
-function clamp01(value: number) {
-  "worklet";
-  return value < 0 ? 0 : value > 1 ? 1 : value;
-}
-
-function clampTo(value: number, lo: number, hi: number) {
-  "worklet";
-  return value < lo ? lo : value > hi ? hi : value;
-}
 
 const BOB_PX = 2;
 const BOB_PERIOD = 1.8;

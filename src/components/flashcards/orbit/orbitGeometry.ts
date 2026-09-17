@@ -1,3 +1,5 @@
+import { clamp01 } from "@/src/components/flashcards/orbit/orbitMath";
+
 export interface OrbitTable {
   xs: number[];
   ys: number[];
@@ -61,7 +63,7 @@ export function pointAt(
   t: number,
 ): { x: number; y: number } {
   "worklet";
-  const clamped = t < 0 ? 0 : t > 1 ? 1 : t;
+  const clamped = clamp01(t);
   const pos = clamped * (table.xs.length - 1);
   const i = Math.floor(pos);
   const j = i >= table.xs.length - 1 ? i : i + 1;

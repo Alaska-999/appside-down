@@ -1,12 +1,15 @@
-import { CENTER, RADIUS } from "@/src/components/flashcards/OrbitProgress";
-import { toRad } from "@/src/components/flashcards/orbitPaths";
+import { CENTER, RADIUS } from "@/src/components/flashcards/orbit/orbitLayout";
+import {
+  TWO_PI,
+  toRad,
+} from "@/src/components/flashcards/orbit/orbitMath";
 import {
   MOON_DIM_GLOW,
   MOON_DIM_RIM,
   MOON_DIM_STOPS,
   ORBIT_STATE_STYLES,
   OrbitState,
-} from "@/src/components/flashcards/orbitState";
+} from "@/src/components/flashcards/orbit/orbitState";
 import { EASE_STANDARD } from "@/src/constants/motion";
 import {
   Blur,
@@ -26,7 +29,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-const TWO_PI = Math.PI * 2;
 const SPIN_MS = 44000;
 const MOON_ANGLES = [-90, -18, 54, 126, 198];
 const MOON_COUNT = MOON_ANGLES.length;
