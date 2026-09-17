@@ -11,17 +11,6 @@ export function halfPath(rx: number, ry: number, startDeg: number) {
   return path;
 }
 
-export function fullPath(rx: number, ry: number) {
-  const path = Skia.Path.Make();
-  path.addOval({
-    x: CENTER - rx,
-    y: CENTER - ry,
-    width: rx * 2,
-    height: ry * 2,
-  });
-  return path;
-}
-
 export function toRad(deg: number) {
   "worklet";
   return (deg * Math.PI) / 180;

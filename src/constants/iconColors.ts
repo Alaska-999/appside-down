@@ -30,4 +30,3 @@ export const ICON_MUTED_DARK = "#6E8496";
 export const ICON_SLATE_DIM = "#3E4C57";
 export const ICON_INDIGO_PALE = "#A5B4FC";
 
-export const ICON_SUCCESS = "#10B981";

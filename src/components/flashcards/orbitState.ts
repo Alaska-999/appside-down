@@ -23,7 +23,7 @@ import { withAlpha } from "@/src/utils/withAlpha";
 
 export type OrbitState = "cool" | "green";
 
-export const ORBIT_GREEN_AT = 0.8;
+const ORBIT_GREEN_AT = 0.8;
 
 export function orbitStateFor(fraction: number): OrbitState {
   return fraction >= ORBIT_GREEN_AT ? "green" : "cool";

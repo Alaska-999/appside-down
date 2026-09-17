@@ -356,10 +356,11 @@ function useCometPoint(
     const t = clock.value - back;
     return t < 0 ? t + 1 : t;
   });
-  const cx = useDerivedValue(() => pointAt(table, at.value).x);
-  const cy = useDerivedValue(() => pointAt(table, at.value).y);
+  const point = useDerivedValue(() => pointAt(table, at.value));
+  const cx = useDerivedValue(() => point.value.x);
+  const cy = useDerivedValue(() => point.value.y);
   const opacity = useDerivedValue(() => {
-    const p = pointAt(table, at.value);
+    const p = point.value;
     const dx = p.x - CENTER;
     const dy = p.y - CENTER;
     const dist = Math.sqrt(dx * dx + dy * dy);

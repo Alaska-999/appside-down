@@ -304,9 +304,6 @@ export default function FlashcardsGame() {
               total={activeCards.length}
               known={knownPiles.length}
               stillLearning={stillLearningPiles.length}
-              heroVariant="ring"
-              // heroVariant="duo"
-              // heroVariant="orbit"
             />
           </Animated.View>
         )}

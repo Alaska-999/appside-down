@@ -1,4 +1,3 @@
-import { OrbitDuoHero } from "@/src/components/flashcards/OrbitDuoHero";
 import {
   OrbitProgress,
   OrbitTone,
@@ -81,9 +80,6 @@ function Hero({
 }) {
   if (variant === "ring") {
     return <OrbitRingHero progress={progress} fraction={fraction} hot={hot} />;
-  }
-  if (variant === "duo") {
-    return <OrbitDuoHero progress={progress} fraction={fraction} hot={hot} />;
   }
   return (
     <OrbitProgress

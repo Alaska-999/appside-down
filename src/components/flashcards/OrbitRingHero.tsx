@@ -649,8 +649,9 @@ export function OrbitRingHero({
 
   const closure = useRingClosure(travelled, hot, reducedMotion);
 
-  const beadX = useDerivedValue(() => pointAt(table, travelled.value).x);
-  const beadY = useDerivedValue(() => pointAt(table, travelled.value).y);
+  const beadPoint = useDerivedValue(() => pointAt(table, travelled.value));
+  const beadX = useDerivedValue(() => beadPoint.value.x);
+  const beadY = useDerivedValue(() => beadPoint.value.y);
   const beadOpacity = useDerivedValue<number>(() => {
     const onBack = travelled.value < 0.25 || travelled.value >= 0.75;
     if (!onBack) return 1;

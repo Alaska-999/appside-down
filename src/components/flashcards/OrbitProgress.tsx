@@ -140,7 +140,7 @@ const COMET_TONES: Record<
   },
 };
 
-export type PlanetHalo = "shadow" | "canvas";
+type PlanetHalo = "shadow" | "canvas";
 
 export function Planet({
   hot,
