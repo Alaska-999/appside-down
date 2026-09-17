@@ -9,6 +9,10 @@ import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
 import { FieldLabel } from "@/src/components/ui/FieldLabel";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
@@ -304,7 +308,7 @@ export default function FolderEditScreen() {
 
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        bottomOffset={40}
+        bottomOffset={40 + KEYBOARD_BAR_HEIGHT}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -411,6 +415,8 @@ export default function FolderEditScreen() {
       </KeyboardAwareScrollView>
 
       <StatusBarScrim />
+
+      <KeyboardBar />
 
       <AppSheet
         open={!!tagsModule}

@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "appside-down",
-    "slug": "appside-down",
+    "name": "Svitly",
+    "slug": "svitly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "appsidedown",
+    "scheme": "svitly",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.svitly.app"
     },
     "android": {
+      "package": "com.svitly.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

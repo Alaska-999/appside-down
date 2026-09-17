@@ -3,6 +3,10 @@ import { FolderFormFields } from "@/src/components/common/FolderFormFields";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
 import { TagEditor } from "@/src/components/common/TagEditor";
 import { AppButton } from "@/src/components/ui/Button";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { AppSheet } from "@/src/components/ui/Sheet";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -98,7 +102,7 @@ export default function FolderCreate() {
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
-          bottomOffset={70}
+          bottomOffset={70 + KEYBOARD_BAR_HEIGHT}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -143,6 +147,7 @@ export default function FolderCreate() {
           </YStack>
         </KeyboardAwareScrollView>
         <StatusBarScrim />
+        <KeyboardBar />
         <AppToast
           placement="top"
           open={!!(serverError ?? formError)}

@@ -3,6 +3,10 @@ import { FormInput } from "@/src/components/common/FormInput";
 import { AuthHeading } from "@/src/components/ui/AuthHeading";
 import { AuthSwitchLink } from "@/src/components/ui/AuthSwitchLink";
 import { AppButton } from "@/src/components/ui/Button";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { AppToast } from "@/src/components/ui/Toast";
@@ -97,7 +101,7 @@ export default function Login() {
         <BackgroundMesh preset="auth" animated />
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
-          bottomOffset={40}
+          bottomOffset={40 + KEYBOARD_BAR_HEIGHT}
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -170,6 +174,8 @@ export default function Login() {
         </KeyboardAwareScrollView>
 
         <StatusBarScrim />
+
+        <KeyboardBar />
 
         <AppToast
           open={!!toastMessage}

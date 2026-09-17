@@ -2,8 +2,8 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: config.name ?? "appside-down",
-  slug: config.slug ?? "appside-down",
+  name: config.name ?? "Svitly",
+  slug: config.slug ?? "svitly",
   extra: {
     ...config.extra,
     apiUrl: process.env.EXPO_PUBLIC_API_URL,

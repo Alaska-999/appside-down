@@ -39,7 +39,11 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async (opts) => {
         const { useStudyQueueStore } = await import("./useStudyQueueStore");
-        await useStudyQueueStore.getState().flushBeforeLogout(opts);
+        try {
+          await useStudyQueueStore.getState().flushBeforeLogout(opts);
+        } finally {
+          useStudyQueueStore.getState().clear();
+        }
         set({ user: null, token: null, sessionExpired: opts?.expired ?? false });
         await Promise.all([
           SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),

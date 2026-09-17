@@ -1,4 +1,8 @@
 import { IconButton } from "@/src/components/ui/IconButton";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
 import { ICON_ON_GLASS } from "@/src/constants/iconColors";
@@ -35,7 +39,7 @@ export function AuthScreenShell({
       )}
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        bottomOffset={40}
+        bottomOffset={40 + KEYBOARD_BAR_HEIGHT}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -49,6 +53,8 @@ export function AuthScreenShell({
       </KeyboardAwareScrollView>
 
       <StatusBarScrim />
+
+      <KeyboardBar />
     </YStack>
   );
 }

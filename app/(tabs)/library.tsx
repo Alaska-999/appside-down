@@ -10,6 +10,7 @@ import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import { FadeTabPanes, useFadeTabs } from "@/src/components/ui/FadeTabPanes";
 import { IconButton } from "@/src/components/ui/IconButton";
 import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
+import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
 import { SearchField } from "@/src/components/ui/SearchField";
 import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/Sheet";
 import { Skeleton } from "@/src/components/ui/Skeleton";
@@ -48,6 +49,7 @@ import {
   NativeSyntheticEvent,
   RefreshControl,
 } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
 
 type SortOption = "date" | "az" | "favs";
@@ -117,6 +119,21 @@ function useScrollOffsetKeeper(scrollOffsetRef: ScrollOffsetRef) {
   return { initialOffset, onScrollSettled };
 }
 
+function useScrollToTop(scrollOffsetRef: ScrollOffsetRef) {
+  const scrollY = useSharedValue(scrollOffsetRef.current);
+  const listRef = useRef<FlatList<any>>(null);
+  const onScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollY.value = event.nativeEvent.contentOffset.y;
+    },
+    [scrollY],
+  );
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
+  return { scrollY, listRef, onScroll, scrollToTop };
+}
+
 const FoldersPane = memo(function FoldersPane({
   items,
   loading,
@@ -151,6 +168,8 @@ const FoldersPane = memo(function FoldersPane({
   const theme = useTheme();
   const { initialOffset, onScrollSettled } =
     useScrollOffsetKeeper(scrollOffsetRef);
+  const { scrollY, listRef, onScroll, scrollToTop } =
+    useScrollToTop(scrollOffsetRef);
   const contentContainerStyle = useMemo(
     () => ({
       paddingHorizontal: screenGutter,
@@ -193,59 +212,69 @@ const FoldersPane = memo(function FoldersPane({
   );
 
   return (
-    <FlatList
-      data={items}
-      style={LIST_STYLE}
-      keyExtractor={keyById}
-      showsVerticalScrollIndicator={false}
-      contentOffset={{ x: 0, y: initialOffset }}
-      onMomentumScrollEnd={onScrollSettled}
-      onScrollEndDrag={onScrollSettled}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.4}
-      initialNumToRender={5}
-      contentContainerStyle={contentContainerStyle}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={refresh}
-          tintColor={theme.accentGradientStart.get()}
-        />
-      }
-      ListEmptyComponent={
-        initialLoading ? (
-          <LibrarySkeletonList height={92} />
-        ) : error ? (
-          <StateCard
-            tone="error"
-            icon={AlertTriangle}
-            title="Couldn't load folders"
-            subtitle="Looks like a connection hiccup. Your data is safe — try again."
-            buttonLabel="Try again"
-            onButtonPress={retry}
+    <YStack f={1} pos="relative">
+      <FlatList
+        ref={listRef}
+        data={items}
+        style={LIST_STYLE}
+        keyExtractor={keyById}
+        showsVerticalScrollIndicator={false}
+        contentOffset={{ x: 0, y: initialOffset }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onScrollSettled}
+        onScrollEndDrag={onScrollSettled}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={5}
+        contentContainerStyle={contentContainerStyle}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme.accentGradientStart.get()}
           />
-        ) : search ? (
-          <SearchEmptyState
-            query={search}
-            noun="folders"
-            onCreate={() => router.push("/folder/create")}
-          />
-        ) : (
-          <StateCard
-            tone="empty"
-            icon={FolderPlus}
-            title="No folders yet"
-            subtitle="Group your modules by topic, course or exam."
-            buttonLabel="Create a folder"
-            onButtonPress={() => router.push("/folder/create")}
-          />
-        )
-      }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
-      renderItem={renderFolder}
-    />
+        }
+        ListEmptyComponent={
+          initialLoading ? (
+            <LibrarySkeletonList height={92} />
+          ) : error ? (
+            <StateCard
+              tone="error"
+              icon={AlertTriangle}
+              title="Couldn't load folders"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Try again"
+              onButtonPress={retry}
+            />
+          ) : search ? (
+            <SearchEmptyState
+              query={search}
+              noun="folders"
+              onCreate={() => router.push("/folder/create")}
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={FolderPlus}
+              title="No folders yet"
+              subtitle="Group your modules by topic, course or exam."
+              buttonLabel="Create a folder"
+              onButtonPress={() => router.push("/folder/create")}
+            />
+          )
+        }
+        ListFooterComponent={
+          <LoadMoreFooter visible={loading && !initialLoading} />
+        }
+        renderItem={renderFolder}
+      />
+      <ScrollToTopButton
+        scrollY={scrollY}
+        bottomOffset={bottomPadding}
+        onPress={scrollToTop}
+      />
+    </YStack>
   );
 });
 
@@ -279,6 +308,8 @@ const ModulesPane = memo(function ModulesPane({
   const theme = useTheme();
   const { initialOffset, onScrollSettled } =
     useScrollOffsetKeeper(scrollOffsetRef);
+  const { scrollY, listRef, onScroll, scrollToTop } =
+    useScrollToTop(scrollOffsetRef);
   const contentContainerStyle = useMemo(
     () => ({
       paddingHorizontal: screenGutter,
@@ -300,66 +331,76 @@ const ModulesPane = memo(function ModulesPane({
   );
 
   return (
-    <FlatList
-      data={items}
-      style={LIST_STYLE}
-      keyExtractor={keyById}
-      showsVerticalScrollIndicator={false}
-      contentOffset={{ x: 0, y: initialOffset }}
-      onMomentumScrollEnd={onScrollSettled}
-      onScrollEndDrag={onScrollSettled}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.4}
-      initialNumToRender={6}
-      contentContainerStyle={contentContainerStyle}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={refresh}
-          tintColor={theme.accentGradientStart.get()}
-        />
-      }
-      ListEmptyComponent={
-        initialLoading ? (
-          <LibrarySkeletonList height={74} />
-        ) : error ? (
-          <StateCard
-            tone="error"
-            icon={AlertTriangle}
-            title="Couldn't load modules"
-            subtitle="Looks like a connection hiccup. Your data is safe — try again."
-            buttonLabel="Try again"
-            onButtonPress={retry}
+    <YStack f={1} pos="relative">
+      <FlatList
+        ref={listRef}
+        data={items}
+        style={LIST_STYLE}
+        keyExtractor={keyById}
+        showsVerticalScrollIndicator={false}
+        contentOffset={{ x: 0, y: initialOffset }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onScrollSettled}
+        onScrollEndDrag={onScrollSettled}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={6}
+        contentContainerStyle={contentContainerStyle}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme.accentGradientStart.get()}
           />
-        ) : search ? (
-          <SearchEmptyState
-            query={search}
-            noun="modules"
-            onCreate={() => router.push("/module/create")}
-          />
-        ) : sortOrder === "favs" ? (
-          <StateCard
-            tone="empty"
-            icon={Star}
-            title="No favorites yet"
-            subtitle="Star a module and it will show up here."
-          />
-        ) : (
-          <StateCard
-            tone="empty"
-            icon={Captions}
-            title="No modules yet"
-            subtitle="Your first deck is one tap away."
-            buttonLabel="Create a module"
-            onButtonPress={() => router.push("/module/create")}
-          />
-        )
-      }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
-      renderItem={renderModule}
-    />
+        }
+        ListEmptyComponent={
+          initialLoading ? (
+            <LibrarySkeletonList height={74} />
+          ) : error ? (
+            <StateCard
+              tone="error"
+              icon={AlertTriangle}
+              title="Couldn't load modules"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Try again"
+              onButtonPress={retry}
+            />
+          ) : search ? (
+            <SearchEmptyState
+              query={search}
+              noun="modules"
+              onCreate={() => router.push("/module/create")}
+            />
+          ) : sortOrder === "favs" ? (
+            <StateCard
+              tone="empty"
+              icon={Star}
+              title="No favorites yet"
+              subtitle="Star a module and it will show up here."
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={Captions}
+              title="No modules yet"
+              subtitle="Your first deck is one tap away."
+              buttonLabel="Create a module"
+              onButtonPress={() => router.push("/module/create")}
+            />
+          )
+        }
+        ListFooterComponent={
+          <LoadMoreFooter visible={loading && !initialLoading} />
+        }
+        renderItem={renderModule}
+      />
+      <ScrollToTopButton
+        scrollY={scrollY}
+        bottomOffset={bottomPadding}
+        onPress={scrollToTop}
+      />
+    </YStack>
   );
 });
 

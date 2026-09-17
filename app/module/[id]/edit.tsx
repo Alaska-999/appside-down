@@ -1,6 +1,10 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { FormInput } from "@/src/components/common/FormInput";
 import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/KeyboardBar";
 import { PickRow } from "@/src/components/ui/PickRow";
 import { Rows } from "@/src/components/ui/Rows";
 import { BackgroundMesh } from "@/src/components/ui/ScreenBackground";
@@ -124,6 +128,7 @@ export default function ModuleEditScreen() {
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
+          bottomOffset={KEYBOARD_BAR_HEIGHT}
           keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
           keyboardShouldPersistTaps="always"
           contentContainerStyle={{
@@ -187,6 +192,8 @@ export default function ModuleEditScreen() {
         </KeyboardAwareScrollView>
 
         <StatusBarScrim />
+
+        <KeyboardBar />
 
         <AppToast
           placement="top"

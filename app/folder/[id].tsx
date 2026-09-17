@@ -10,6 +10,7 @@ import {
   SheetRow,
   SheetRows,
 } from "@/src/components/ui/Sheet";
+import { ScrollToTopButton } from "@/src/components/ui/ScrollToTopButton";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { StateCard } from "@/src/components/ui/StateCard";
 import { StatusBarScrim } from "@/src/components/ui/StatusBarScrim";
@@ -26,6 +27,7 @@ import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { computeTagCounts } from "@/src/utils/tagCounts";
+import { screenGutter } from "@/tamagui.config";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
@@ -36,6 +38,7 @@ import {
   Trash2,
 } from "lucide-react-native";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { FlatList } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
@@ -60,6 +63,8 @@ type FolderDetail = {
   icon: string;
   tags: FolderTag[];
   modules: FolderModule[];
+  totalModules: number;
+  modulesTruncated: boolean;
 };
 
 function mapModule(raw: any): FolderModule {
@@ -91,6 +96,7 @@ export default function FolderScreen() {
   const [menuView, setMenuView] = useState<"menu" | "confirm">("menu");
   const [deleting, setDeleting] = useState(false);
   const hasLoadedRef = useRef(false);
+  const listRef = useRef<FlatList<FolderModule>>(null);
 
   const scrollY = useSharedValue(0);
   const listTop = useSharedValue(0);
@@ -131,6 +137,8 @@ export default function FolderScreen() {
           name: t.name,
         })),
         modules: (raw.modules ?? []).map(mapModule),
+        totalModules: raw._count?.modules ?? (raw.modules ?? []).length,
+        modulesTruncated: !!raw.modulesTruncated,
       });
       hasLoadedRef.current = true;
     } catch (err) {
@@ -169,7 +177,8 @@ export default function FolderScreen() {
     }
   };
 
-  const moduleCount = folder?.modules.length ?? 0;
+  const moduleCount = folder?.totalModules ?? 0;
+  const loadedCount = folder?.modules.length ?? 0;
 
   const visibleModules = useMemo(() => {
     const all = folder?.modules ?? [];
@@ -295,139 +304,161 @@ export default function FolderScreen() {
       <BackgroundMesh preset="twilightDuoLime" /> */}
       <BackgroundMesh preset="twilightDuo" />
 
-      <Animated.ScrollView
+      <Animated.FlatList
+        ref={listRef}
+        data={visibleModules}
+        keyExtractor={(mod) => mod.id}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-      >
-        <YStack px="$screenX" pb={screen.bottom} pt={screen.top}>
-          <XStack jc="space-between" ai="center" mb={20}>
-            <IconButton
-              variant="liquidGlass"
-              icon={
-                <ChevronLeft
-                  size={22}
-                  color={ICON_ON_GLASS}
-                  strokeWidth={1.9}
-                />
-              }
-              onPress={() => router.back()}
-              accessibilityLabel="Back"
-            />
-            <IconButton
-              variant="liquidGlass"
-              icon={
-                <MoreHorizontal
-                  size={22}
-                  color={ICON_ON_GLASS}
-                  strokeWidth={1.9}
-                />
-              }
-              onPress={() => setMenuSheetOpen(true)}
-              accessibilityLabel="Folder menu"
-            />
-          </XStack>
-          <XStack ai="center" gap={15} mb={20}>
-            <FolderIcon
-              icon={heroIcon}
-              name={folder.name}
-              size={64}
-              radius={20}
-              gradient={HERO_GRADIENT}
-            />
-            <YStack f={1} minWidth={0}>
-              <Text
-                fontSize={27}
-                fontWeight="800"
-                letterSpacing={-0.54}
-                lineHeight={31}
-                color="$color"
-                numberOfLines={1}
-              >
-                {folder.name}
-              </Text>
-              <Text fontSize={13} color="$textMuted" mt={5}>
-                {pluralize(folder.modules.length, "module")}
-              </Text>
-            </YStack>
-          </XStack>
+        contentContainerStyle={{
+          paddingHorizontal: screenGutter,
+          paddingBottom: screen.bottom,
+        }}
+        ListHeaderComponent={
+          <YStack
+            pt={screen.top}
+            onLayout={(e) => {
+              listTop.value = e.nativeEvent.layout.height;
+            }}
+          >
+            <XStack jc="space-between" ai="center" mb={20}>
+              <IconButton
+                variant="liquidGlass"
+                icon={
+                  <ChevronLeft
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
+                }
+                onPress={() => router.back()}
+                accessibilityLabel="Back"
+              />
+              <IconButton
+                variant="liquidGlass"
+                icon={
+                  <MoreHorizontal
+                    size={22}
+                    color={ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
+                }
+                onPress={() => setMenuSheetOpen(true)}
+                accessibilityLabel="Folder menu"
+              />
+            </XStack>
+            <XStack ai="center" gap={15} mb={20}>
+              <FolderIcon
+                icon={heroIcon}
+                name={folder.name}
+                size={64}
+                radius={20}
+                gradient={HERO_GRADIENT}
+              />
+              <YStack f={1} minWidth={0}>
+                <Text
+                  fontSize={27}
+                  fontWeight="800"
+                  letterSpacing={-0.54}
+                  lineHeight={31}
+                  color="$color"
+                  numberOfLines={1}
+                >
+                  {folder.name}
+                </Text>
+                <Text fontSize={13} color="$textMuted" mt={5}>
+                  {pluralize(folder.modules.length, "module")}
+                </Text>
+              </YStack>
+            </XStack>
 
-          <XStack gap={10} flexWrap="wrap" mb={22}>
-            <TagChip
-              label="All"
-              count={folder.modules.length}
-              variant={selectedTag === "all" ? "on" : "default"}
-              onPress={() => {
-                hapticTap();
-                setSelectedTag("all");
-              }}
-            />
-            {folder.tags.map((tag) => (
+            <XStack gap={10} flexWrap="wrap" mb={22}>
               <TagChip
-                key={tag.id}
-                label={tag.name}
-                count={tagCounts.get(tag.id) ?? 0}
-                variant={selectedTag === tag.id ? "on" : "default"}
+                label="All"
+                count={folder.modules.length}
+                variant={selectedTag === "all" ? "on" : "default"}
                 onPress={() => {
                   hapticTap();
-                  setSelectedTag(selectedTag === tag.id ? "all" : tag.id);
+                  setSelectedTag("all");
                 }}
               />
-            ))}
-            <TagChip label="" variant="add" onPress={openEditScreen} />
-          </XStack>
-
-          <XStack jc="space-between" ai="baseline" mb={11}>
-            <Text fontSize={17} fontWeight="700" color="$color">
-              Modules
-            </Text>
-            <Text fontSize={13} color="$textMuted">
-              {visibleModules.length}
-            </Text>
-          </XStack>
-
-          {visibleModules.length === 0 ? (
-            <StateCard
-              tone="empty"
-              icon={BookOpen}
-              title="This folder is empty"
-              subtitle="Add your first module to get going"
-              buttonLabel="Add study materials"
-              onButtonPress={() =>
-                router.push({
-                  pathname: "/folder/add-modules",
-                  params: { folderId: id, folderName: folder.name },
-                })
-              }
-            />
-          ) : (
-            <YStack
-              onLayout={(e) => {
-                listTop.value = e.nativeEvent.layout.y;
-              }}
-            >
-              {visibleModules.map((mod, index) => (
-                <FolderModuleRow
-                  key={mod.id}
-                  index={index}
-                  name={mod.name}
-                  itemsCount={mod.itemsCount}
-                  tags={mod.tags.map((t) => t.name)}
-                  progress={mod.progress}
-                  scrollY={scrollY}
-                  listTop={listTop}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/module/[id]",
-                      params: { id: mod.id },
-                    })
-                  }
+              {folder.tags.map((tag) => (
+                <TagChip
+                  key={tag.id}
+                  label={tag.name}
+                  count={tagCounts.get(tag.id) ?? 0}
+                  variant={selectedTag === tag.id ? "on" : "default"}
+                  onPress={() => {
+                    hapticTap();
+                    setSelectedTag(selectedTag === tag.id ? "all" : tag.id);
+                  }}
                 />
               ))}
-            </YStack>
-          )}
-        </YStack>
-      </Animated.ScrollView>
+              <TagChip label="" variant="add" onPress={openEditScreen} />
+            </XStack>
+
+            <XStack jc="space-between" ai="baseline" mb={11}>
+              <Text fontSize={17} fontWeight="700" color="$color">
+                Modules
+              </Text>
+              <Text fontSize={13} color="$textMuted">
+                {visibleModules.length}
+              </Text>
+            </XStack>
+          </YStack>
+        }
+        ListFooterComponent={
+          folder.modulesTruncated ? (
+            <Text
+              fontSize={12.5}
+              color="$colorMuted"
+              textAlign="center"
+              mt={14}
+            >
+              Showing {loadedCount} of {moduleCount} modules
+            </Text>
+          ) : null
+        }
+        ListEmptyComponent={
+          <StateCard
+            tone="empty"
+            icon={BookOpen}
+            title="This folder is empty"
+            subtitle="Add your first module to get going"
+            buttonLabel="Add study materials"
+            onButtonPress={() =>
+              router.push({
+                pathname: "/folder/add-modules",
+                params: { folderId: id, folderName: folder.name },
+              })
+            }
+          />
+        }
+        renderItem={({ item: mod, index }) => (
+          <FolderModuleRow
+            index={index}
+            name={mod.name}
+            itemsCount={mod.itemsCount}
+            tags={mod.tags.map((t) => t.name)}
+            progress={mod.progress}
+            scrollY={scrollY}
+            listTop={listTop}
+            onPress={() =>
+              router.push({
+                pathname: "/module/[id]",
+                params: { id: mod.id },
+              })
+            }
+          />
+        )}
+      />
+
+      <ScrollToTopButton
+        scrollY={scrollY}
+        bottomOffset={screen.bottom}
+        onPress={() => listRef.current?.scrollToOffset({ offset: 0, animated: true })}
+      />
 
       <StatusBarScrim />
 
