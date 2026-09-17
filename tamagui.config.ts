@@ -1,6 +1,7 @@
 import { createAnimations } from '@tamagui/animations-react-native'
-import { config } from '@tamagui/config/v3'
 import { createGenericFont } from '@tamagui/config'
+import { config } from '@tamagui/config/v3'
+import { Easing } from 'react-native-reanimated'
 import { createTamagui, createTokens } from 'tamagui'
 
 
@@ -9,52 +10,38 @@ const tokens = createTokens({
     color: {
         white: '#FFFFFF',
         pureBlack: '#000000',
-        slate1: '#F8FAFC',
-        slate2: '#F1F5F9',
-        slate3: '#E2E8F0',
-        slate4: '#94A3B8',
-        slate5: '#475569',
-        slate6: '#1A1A1B',
-        slate7: '#A9A9A9',
-        slate8: '#9DADC4',
-
-        cardSurface: '#FFFFFF',
-        cardBack: '#F5F3FF',
-
-        green: '#059669',
-        red: '#DC2626',
-        amber: '#F59E0B',
-        blue: '#0284C7',
 
         mint: '#2DD4BF',
-        lime: '#A3E635',
         mintLight: '#5EEAD4',
+        roseSoft: '#FCA5A5',
+        teal: '#0D9488',
+        lime: '#A3E635',
         limeLight: '#BEF264',
-        auroraBg: '#16192B',
-        auroraSurfaceStrong: '#1E2A3D',
-        auroraSurfaceSoft: '#243347',
-        auroraSurfaceHover: '#33465C',
-
-        heroIndigo: '#4338CA',
-        heroTeal: '#0D9488',
         heroLime: '#65A30D',
-
-        auroraText: '#EFFDF8',
-        auroraMuted: '#8FA8B8',
-        auroraMutedDim: '#64798A',
-
-        nearBlack: '#0D1117',
-
-        // Found hardcoded across screens (progress bars, disabled/link text) — centralized here instead
+        indigo: '#4338CA',
         indigoAccent: '#6366F1',
+        text: '#e9f5f0',
+        textMuted: '#8FA8B8',
+        nearBlack: '#0D1117',
+        base: '#08090C',
+        baseTop: '#0D1117',
+
+        amber: '#F59E0B',
+        blue: '#0284C7',
         linkBlueDark: '#38BDF8',
-        disabledLight: '#B8C2CE',
         disabledDark: '#3F4E5C',
         onAccentTextMuted: '#3A3A3A',
+
+        mutedDim: '#5A6B7A',
+        iconOnGlass: '#EAF7FF',
+        backgroundDeep: '#0D1117',
+        mintTintDark: '#06231F',
+        indigoLight: '#818CF8',
+        mutedLight: '#B7CEDA',
     },
     space: {
         ...config.tokens.space,
-        screenX: 19,
+        screenX: 16,
         section: 22,
         cardPad: 19,
     },
@@ -66,19 +53,15 @@ const tokens = createTokens({
     },
 })
 
-// Shared elevation presets (shadowRadius/shadowOpacity) — use instead of inline shadow values per component
-export const elevation = {
-    sm: { shadowRadius: 12, shadowOpacity: 0.06 },
-    md: { shadowRadius: 20, shadowOpacity: 0.1 },
-    lg: { shadowRadius: 32, shadowOpacity: 0.16 },
+export const controlHeight = {
+    sm: 42,
+    md: 52,
+    lg: 60,
 }
 
-// Shared opacity multipliers for interactive states — use instead of inline opacity values per component
-export const stateOpacity = {
-    disabled: 0.5,
-    pressed: 0.7,
-    hover: 0.85,
-}
+export const screenGutter = 16
+
+export const topPaddingBoost = 18
 
 const soraFace = {
     normal: { normal: 'Sora_400Regular' },
@@ -126,144 +109,83 @@ const appConfig = createTamagui({
             stiffness: 50,
         },
         quick: {
-            damping: 20,
-            mass: 1.2,
-            stiffness: 250,
+            type: 'spring',
+            damping: 100,
+            mass: 1,
+            stiffness: 500,
         },
+        fade: {
+            type: 'timing',
+            duration: 40,
+        },
+        press: {
+            type: 'timing',
+            duration: 170,
+            easing: Easing.bezier(0.2, 0.8, 0.3, 1).factory(),
+        },
+        simple: {
+            stiffness: 20,
+        }
     }),
     themes: {
-        light: {
-            // Surfaces — screen bg through raised/hover states
-            background: tokens.color.white,
-            backgroundStrong: tokens.color.white,
-            backgroundSoft: tokens.color.slate1,
-            backgroundHover: tokens.color.slate2,
-
-            // Text — color: primary/heading, colorSecondary: still meant to be read, colorMuted: hints/timestamps/least important
-            color: tokens.color.slate6,
-            colorHeading: tokens.color.slate6,
-            colorSecondary: tokens.color.slate5,
-            colorMuted: tokens.color.slate4,
-            colorDisabled: tokens.color.disabledLight,
-            colorLink: tokens.color.blue,
-
-            // Borders & placeholders
-            borderColor: tokens.color.slate3,
-            placeholderColor: tokens.color.slate4,
-
-            // Gradients — brand accent, gradient text fill, decorative hero
-            accentGradientStart: tokens.color.mint,
-            accentGradientEnd: tokens.color.lime,
-            gradientTextStart: tokens.color.mintLight,
-            gradientTextEnd: tokens.color.limeLight,
-            gradientHeroStart: tokens.color.heroIndigo,
-            gradientHeroMid: tokens.color.heroTeal,
-            gradientHeroEnd: tokens.color.heroLime,
-            progressAccent: tokens.color.indigoAccent,
-
-            // Glass/blur surfaces, glows, sheets, and text-on-accent
-            tabBarBg: 'rgba(255,255,255,0.92)',
-            glassBg: 'rgba(255,255,255,0.6)',
-            glassBgSubtle: 'rgba(15,23,42,0.03)',
-            glassBgStrong: 'rgba(15,23,42,0.06)',
-            glassBorder: 'rgba(15,23,42,0.08)',
-            glassBorderSubtle: 'rgba(15,23,42,0.05)',
-            accentBorderSoft: 'rgba(101,163,13,0.3)',
-            glowColor: 'rgba(45,212,191,0.35)',
-            glowSoft: 'rgba(45,212,191,0.15)',
-            glowHero: 'rgba(13,148,136,0.25)',
-            mintGlassBg: 'rgba(45,212,191,0.14)',
-            mintGlassBorder: 'rgba(45,212,191,0.28)',
-            sheetBg: 'rgba(248,250,252,0.96)',
-            onAccentText: tokens.color.nearBlack,
-            onAccentTextMuted: tokens.color.onAccentTextMuted,
-
-            // Legacy pre-Aurora buttons — pending consolidation into AppButton
-            buttonBg: tokens.color.slate6,
-            buttonText: tokens.color.white,
-
-            buttonSecondaryBg: tokens.color.slate2,
-            buttonSecondaryText: tokens.color.slate6,
-
-            // Status colors — success/danger/warning/info states
-            statusSuccess: tokens.color.green,
-            statusDanger: tokens.color.red,
-            statusWarning: tokens.color.amber,
-            statusInfo: tokens.color.blue,
-
-            // Legacy pre-Aurora cards — pending consolidation into AppCard
-            backgroundCard: tokens.color.slate3,
-            darkGrey: tokens.color.slate7,
-            gameCard: tokens.color.slate8,
-            cardSurface: tokens.color.cardSurface,
-            cardBack: tokens.color.cardBack,
-        },
         dark: {
-            // Surfaces — screen bg through raised/hover states
-            background: tokens.color.auroraBg,
-            backgroundStrong: tokens.color.auroraSurfaceStrong,
-            backgroundSoft: tokens.color.auroraSurfaceSoft,
-            backgroundHover: tokens.color.auroraSurfaceHover,
+            background: tokens.color.base,
+            backgroundTop: tokens.color.baseTop,
+            backgroundStrong: tokens.color.nearBlack,
 
-            // Text — color: primary/heading, colorSecondary: still meant to be read, colorMuted: hints/timestamps/least important
-            color: tokens.color.auroraText,
-            colorHeading: tokens.color.auroraText,
-            colorSecondary: tokens.color.auroraMuted,
-            colorMuted: tokens.color.auroraMutedDim,
+            color: tokens.color.text,
+            colorHeading: tokens.color.text,
+            colorSecondary: tokens.color.textMuted,
+            colorMuted: tokens.color.textMuted,
             colorDisabled: tokens.color.disabledDark,
             colorLink: tokens.color.linkBlueDark,
+            iconMuted: '#6E8496',
+            iconOnGlass: tokens.color.iconOnGlass,
 
-            // Borders & placeholders
-            borderColor: '#334155',
-            placeholderColor: tokens.color.auroraMuted,
 
-            // Gradients — brand accent, gradient text fill, decorative hero
+
+            placeholderColor: tokens.color.textMuted,
+
             accentGradientStart: tokens.color.mint,
             accentGradientEnd: tokens.color.lime,
             gradientTextStart: tokens.color.mintLight,
             gradientTextEnd: tokens.color.limeLight,
-            gradientHeroStart: tokens.color.heroIndigo,
-            gradientHeroMid: tokens.color.heroTeal,
+            gradientHeroStart: tokens.color.indigo,
+            gradientHeroMid: tokens.color.teal,
             gradientHeroEnd: tokens.color.heroLime,
             progressAccent: tokens.color.indigoAccent,
 
-            // Glass/blur surfaces, glows, sheets, and text-on-accent
-            tabBarBg: 'rgba(26,40,52,0.92)',
-            glassBg: 'rgba(220,255,245,0.06)',
-            glassBgSubtle: 'rgba(220,255,245,0.04)',
-            glassBgStrong: 'rgba(220,255,245,0.08)',
-            glassBorder: 'rgba(220,255,245,0.14)',
-            glassBorderSubtle: 'rgba(220,255,245,0.08)',
+            borderColor: 'rgba(220,255,245,0.13)',
             accentBorderSoft: 'rgba(163,230,53,0.4)',
+            mintGlassBorder: 'rgba(45,212,191,0.28)',
+
+
+            surfaceCard: 'rgba(20,28,34,0.55)',
+            surfaceWell: 'rgba(4,7,10,0.52)',
+
+            surfaceGlassFaint: 'rgba(220,255,245,0.03)',
+            tabBarBg: 'rgba(14,26,28,0.62)',
+            sheetBg: 'rgba(20,27,34,0.38)',
+            mintGlassBg: 'rgba(45,212,191,0.14)',
+
+
+            glassBg: 'rgba(220,255,245,0.06)',
+            glassBgSubtle: 'rgba(220,255,245,0.03)',
+            glassBgStrong: 'rgba(220,255,245,0.08)',
+            glassBorderFaint: 'rgba(220,255,245,0.07)',
+
             glowColor: 'rgba(45,212,191,0.5)',
             glowSoft: 'rgba(45,212,191,0.1)',
             glowHero: 'rgba(13,148,136,0.3)',
-            mintGlassBg: 'rgba(45,212,191,0.14)',
-            mintGlassBorder: 'rgba(45,212,191,0.28)',
-            sheetBg: 'rgba(26,40,52,0.96)',
+
             onAccentText: tokens.color.nearBlack,
             onAccentTextMuted: tokens.color.onAccentTextMuted,
 
-            // Legacy pre-Aurora buttons — pending consolidation into AppButton
-            buttonBg: tokens.color.white,
-            buttonText: tokens.color.pureBlack,
-
-            buttonSecondaryBg: '#2A2A2B',
-            buttonSecondaryText: tokens.color.white,
-
-            // Status colors — success/danger/warning/info states
             statusSuccess: '#10B981',
             statusDanger: '#EF4444',
+            dangerText: tokens.color.roseSoft,
             statusWarning: tokens.color.amber,
             statusInfo: tokens.color.blue,
-
-            // Legacy pre-Aurora cards — pending consolidation into AppCard
-            backgroundCard: tokens.color.blue,
-            darkGrey: tokens.color.slate7,
-            gameCard: tokens.color.slate8,
-            cardSurface: '#1E293B',
-            cardBack: '#1A1A2E',
-
         },
     },
 })

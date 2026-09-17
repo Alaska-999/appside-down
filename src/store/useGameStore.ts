@@ -81,9 +81,9 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
 
     restart: (onlyStillLearning = false) => {
         const { activeCards, stillLearningPiles } = get();
-        const nextCards = onlyStillLearning ? [...stillLearningPiles] : [...activeCards];
+        const useStillLearning = onlyStillLearning && stillLearningPiles.length > 0;
+        const nextCards = useStillLearning ? [...stillLearningPiles] : [...activeCards];
 
-        // Скидаємо прогрес і встановлюємо нову чергу
         set({
             activeCards: get().settings.shuffle ? shuffle(nextCards) : nextCards,
             currentIndex: 0,

@@ -32,8 +32,8 @@ export interface StreakData {
 }
 
 export interface UserProfile extends User {
-    settings: UserSettings;
-    streak: StreakData;
+    settings?: UserSettings;
+    streak?: StreakData;
 }
 
 /**
@@ -43,6 +43,7 @@ export interface Tag {
     id: string;
     folderId: string;
     name: string;
+    moduleCount?: number;
 }
 
 export interface Folder {
@@ -56,6 +57,13 @@ export interface Folder {
     moduleIds?: string[];
 }
 
+export interface ModuleProgress {
+    known: number;
+    learning: number;
+    unstudied: number;
+    total: number;
+}
+
 export interface Module {
     id: string;
     userId: string;
@@ -64,10 +72,13 @@ export interface Module {
     isPublic: boolean
     itemsCount: number;
     description?: string | null;
-    tags?: string[];
     createdAt: string;
     updatedAt: string;
     folderIds?: string[];
+    savedCopyId?: string | null;
+    known?: number;
+    total?: number;
+    progress?: ModuleProgress;
     flashcards?: Flashcard[];
     user?: {
         id: string;

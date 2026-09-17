@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Easing,
   interpolate,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 
 interface UseFlipCardOptions {
   direction?: "horizontal" | "vertical";
-  duration?: number;
   resetKey?: string | number;
 }
 
@@ -20,11 +21,16 @@ interface UseFlipCardResult {
   backAnimatedStyle: object;
 }
 
+const FLIP_TIMING = {
+  duration: 550,
+  easing: Easing.bezier(0.2, 0.6, 0.4, 1),
+};
+
 export function useFlipCard({
   direction = "horizontal",
-  duration = 400,
   resetKey,
 }: UseFlipCardOptions = {}): UseFlipCardResult {
+  const reducedMotion = useReducedMotion();
   const flipRotation = useSharedValue(0);
   const isFrontRef = useRef(true);
   const [isFront, setIsFront] = useState(true);
@@ -33,12 +39,16 @@ export function useFlipCard({
     isFrontRef.current = true;
     flipRotation.value = 0;
     setIsFront(true);
-  }, []);
+  }, [flipRotation]);
 
   const flip = () => {
     const next = !isFrontRef.current;
     isFrontRef.current = next;
-    flipRotation.value = withTiming(next ? 0 : 180, { duration });
+    flipRotation.value = reducedMotion
+      ? next
+        ? 0
+        : 180
+      : withTiming(next ? 0 : 180, FLIP_TIMING);
     setIsFront(next);
   };
 

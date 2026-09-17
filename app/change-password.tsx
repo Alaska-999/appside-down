@@ -1,6 +1,15 @@
 import { API_BASE_URL } from "@/src/api/config";
+import { AuthScreenShell } from "@/src/components/common/AuthScreenShell";
 import { FormInput } from "@/src/components/common/FormInput";
-import { ScreenHeader } from "@/src/components/common/ScreenHeader";
+import { AuthHeading } from "@/src/components/common/AuthHeading";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { useServerError } from "@/src/hooks/useServerError";
+import {
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import {
   ChangePasswordForm,
@@ -8,15 +17,13 @@ import {
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { Lock } from "lucide-react-native";
+import { useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Alert, Keyboard } from "react-native";
 import type { TextInput } from "react-native";
-import { Button, Text, YStack } from "tamagui";
+import { Text, YStack } from "tamagui";
 
 export default function ChangePasswordScreen() {
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const form = useForm<ChangePasswordForm>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: { oldPassword: "", newPassword: "", confirmPassword: "" },
@@ -30,12 +37,7 @@ export default function ChangePasswordScreen() {
   } = form;
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
-
-  // серверна помилка зникає, щойно юзер щось міняє у формі
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
+  const [serverError, setServerError] = useServerError(form);
 
   const onSubmit = async ({ oldPassword, newPassword }: ChangePasswordForm) => {
     setServerError(null);
@@ -53,11 +55,15 @@ export default function ChangePasswordScreen() {
         setServerError("Current password is incorrect");
         return;
       }
+      if (response.status === 429) {
+        const body = await readJsonBody(response);
+        setServerError(getErrorMessage(body, AUTH_ERROR_MESSAGES.rateLimited));
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
 
-      Alert.alert("Password updated");
       router.back();
     } catch (err) {
       console.error("[ChangePasswordScreen] update error:", err);
@@ -67,14 +73,21 @@ export default function ChangePasswordScreen() {
 
   return (
     <FormProvider {...form}>
-      <YStack f={1} bg="$background">
-        <ScreenHeader title="Change password" />
-        <YStack f={1} px="$4" gap="$3" pt="$4" onPress={Keyboard.dismiss}>
+      <AuthScreenShell>
+        <AuthHeading
+          title="Change"
+          titleHighlight="password"
+          subtitle="Enter your current password and choose a new one"
+        />
+
+        <YStack width="100%" gap={14}>
           <FormInput
             control={control}
             name="oldPassword"
+            label="Current password"
             placeholder="Current password"
-            secureTextEntry
+            leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            secureToggle
             textContentType="password"
             returnKeyType="next"
             blurOnSubmit={false}
@@ -84,8 +97,10 @@ export default function ChangePasswordScreen() {
             ref={newPasswordRef}
             control={control}
             name="newPassword"
+            label="New password"
             placeholder="New password"
-            secureTextEntry
+            leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            secureToggle
             textContentType="newPassword"
             returnKeyType="next"
             blurOnSubmit={false}
@@ -95,32 +110,33 @@ export default function ChangePasswordScreen() {
             ref={confirmPasswordRef}
             control={control}
             name="confirmPassword"
-            placeholder="Confirm new password"
-            secureTextEntry
+            label="Confirm new password"
+            placeholder="Repeat it"
+            leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            secureToggle
             textContentType="newPassword"
             returnKeyType="done"
             onSubmitEditing={() => handleSubmit(onSubmit)()}
           />
-
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3">
-              {serverError}
-            </Text>
-          )}
-
-          <Button
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText" fontWeight="600">
-              {isSubmitting ? "Saving..." : "Save"}
-            </Text>
-          </Button>
         </YStack>
-      </YStack>
+
+        {serverError && (
+          <Text color="$roseSoft" fontSize={12.5} textAlign="center" mt={10}>
+            {serverError}
+          </Text>
+        )}
+
+        <YStack width="100%" mt={20}>
+          <AppButton
+            variant="primary"
+            size="lg"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+          >
+            {isSubmitting ? "Saving" : "Save"}
+          </AppButton>
+        </YStack>
+      </AuthScreenShell>
     </FormProvider>
   );
 }

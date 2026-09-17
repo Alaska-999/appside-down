@@ -1,4 +1,4 @@
-# appside-down
+# Svitly
 
 A mobile flashcards learning app built with Expo / React Native.
 

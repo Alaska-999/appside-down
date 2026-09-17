@@ -1,11 +1,16 @@
+import {
+  AvatarPlaceholder,
+  AvatarPlaceholderVariant,
+} from "@/src/components/ui/avatar/AvatarPlaceholder";
 import { getInitials } from "@/src/utils/getInitials";
 import { Pressable } from "react-native";
-import { Avatar, Text, YStack } from "tamagui";
+import { Avatar } from "tamagui";
 
 interface UserAvatarProps {
   avatarUrl?: string | null;
   username?: string | null;
   size: number;
+  variant?: AvatarPlaceholderVariant;
   onPress?: () => void;
 }
 
@@ -14,24 +19,27 @@ export function UserAvatar({
   username,
   size,
   onPress,
+  variant,
 }: UserAvatarProps) {
-  const fontSize = Math.round(size / 2.2);
+  const fontSize = Math.round(size * 0.43);
+  const label = getInitials(username);
 
   if (!avatarUrl) {
     return (
       <Pressable onPress={onPress} disabled={!onPress}>
-        <YStack
-          width={size}
-          height={size}
-          br={size / 2}
-          bg="$backgroundStrong"
-          ai="center"
-          jc="center"
-        >
-          <Text color="$colorSecondary" fontSize={fontSize} fontWeight="800">
-            {getInitials(username)}
-          </Text>
-        </YStack>
+        <AvatarPlaceholder
+          label={label}
+          size={size}
+          fontSize={fontSize}
+          variant={variant ? variant : "frostMuted"}
+
+          // variant="frostLight"
+          // variant="frostVeilMint"
+          // variant="frostVeilSoft"
+          // variant="limeGlassLit"
+          // variant="mintGlassLit"
+          // variant="tealDeep"
+        />
       </Pressable>
     );
   }
@@ -39,10 +47,8 @@ export function UserAvatar({
   return (
     <Avatar size={size} circular onPress={onPress}>
       <Avatar.Image src={avatarUrl} accessibilityLabel="User avatar" />
-      <Avatar.Fallback bg="$backgroundStrong" jc="center" ai="center">
-        <Text color="$colorSecondary" fontSize={fontSize} fontWeight="800">
-          {getInitials(username)}
-        </Text>
+      <Avatar.Fallback>
+        <AvatarPlaceholder label={label} size={size} fontSize={fontSize} />
       </Avatar.Fallback>
     </Avatar>
   );

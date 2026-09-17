@@ -1,10 +1,29 @@
-import { AppCard } from "@/src/components/ui/Card";
-import { TEXT } from "@/src/constants/typography";
-import { Star, X } from "@tamagui/lucide-icons";
-import { ReactNode } from "react";
-import { Pressable } from "react-native";
-import { Text, View, XStack, YStack } from "tamagui";
-import { IconButton } from "../ui/IconButton";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { MODULE_PROGRESS_UNDERLINE } from "@/src/constants/featureFlags";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import {
+  ICON_LIME,
+  ICON_LIME_LIGHT,
+  ICON_MINT_LIGHT,
+  ICON_MUTED,
+  ICON_SUBTLE,
+} from "@/src/constants/iconColors";
+import { TEXT_LIME_PALEST } from "@/src/constants/rawColors";
+import {
+  SURFACE_BORDER,
+  SURFACE_GLASS_BORDER_FAINT,
+} from "@/src/constants/surfaceAlpha";
+import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
+import { ratio } from "@/src/utils/progress";
+import { withAlpha } from "@/src/utils/withAlpha";
+import { LinearGradient } from "expo-linear-gradient";
+import { Check, ChevronRight, X } from "lucide-react-native";
+import { ReactNode, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
+import { IconButton } from "../ui/controls/IconButton";
 
 interface ModuleCardProps {
   module: {
@@ -13,8 +32,8 @@ interface ModuleCardProps {
     itemsCount: number;
     isPublic?: boolean;
     isFavorite?: boolean;
-    author?: { username: string } | null;
-    authorUsername?: string | null;
+    known?: number;
+    total?: number;
   };
   removeButton?: boolean;
   onRemoveButtonPress?: () => void;
@@ -23,9 +42,68 @@ interface ModuleCardProps {
   onPress: () => void;
 }
 
-function Dot() {
+const ROW_HEIGHT = 74;
+const ROW_RADIUS = 23;
+
+function MasteredTick() {
   return (
-    <View width={3} height={3} borderRadius={2} backgroundColor="$colorMuted" />
+    <YStack
+      w={20}
+      h={20}
+      br={10}
+      ai="center"
+      jc="center"
+      bg={withAlpha(ICON_LIME, 0.16)}
+      shadowColor={ICON_LIME_LIGHT}
+      shadowOffset={{ width: 0, height: 0 }}
+      shadowRadius={6}
+      shadowOpacity={0.6}
+      accessibilityLabel="Mastered"
+    >
+      <Check size={11} color={ICON_LIME_LIGHT} strokeWidth={3} />
+    </YStack>
+  );
+}
+
+function ProgressUnderline({ ratio, dim }: { ratio: number; dim: boolean }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 2,
+        zIndex: 4,
+        backgroundColor: SURFACE_GLASS_BORDER_FAINT,
+      }}
+    >
+      <View
+        style={{
+          height: "100%",
+          width: `${Math.max(0, Math.min(1, ratio)) * 100}%`,
+          overflow: "hidden",
+          ...(dim
+            ? { backgroundColor: SURFACE_BORDER }
+            : {
+                shadowColor: ICON_MINT_LIGHT,
+                shadowOffset: { width: 0, height: 0 },
+                shadowRadius: 3.5,
+                shadowOpacity: 0.6,
+              }),
+        }}
+      >
+        {!dim && (
+          <LinearGradient
+            colors={GRADIENT_PRIMARY}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
+      </View>
+    </View>
   );
 }
 
@@ -37,59 +115,79 @@ export function ModuleCard({
   trailing,
   dimmed,
 }: ModuleCardProps) {
+  const [pressed, setPressed] = useState(false);
+  const total = module.total ?? 0;
+  const known = module.known ?? 0;
+  const hasProgress = MODULE_PROGRESS_UNDERLINE && total > 0;
+  const mastered = hasProgress && known >= total;
+
   return (
-    <Pressable onPress={onPress}>
-      <AppCard
-        variant="soft"
-        size="md"
-        fd="row"
-        ai="center"
-        gap={16}
-        accentBorder={module.isPublic}
-        height={83}
-      >
-        <YStack f={1} gap="$1" opacity={dimmed ? 0.55 : 1}>
-          <XStack
-            ai="center"
-            jc={removeButton && onRemoveButtonPress ? "unset" : "space-between"}
-            gap={removeButton && onRemoveButtonPress ? "$2" : "0"}
-          >
-            <Text fontSize={TEXT.cardTitle} fontWeight="700" color="$color">
-              {module.name}
-            </Text>
-            {module.isFavorite && (
-              <Star size={16} color="#A3E635" fill="#A3E635" />
-            )}
-          </XStack>
-          <XStack ai="center" gap="$1.5" flexWrap="wrap">
-            <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
-              {module.itemsCount} card{module.itemsCount !== 1 ? "s" : ""}
-            </Text>
-            <Dot />
-            <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
-              {module.isPublic ? "Public" : "Private"}
-            </Text>
-            {module.isPublic && (module.author?.username || module.authorUsername) && (
-              <>
-                <Dot />
-                <Text fontSize={TEXT.cardMeta} color="$auroraMuted">
-                  {module.author?.username ?? module.authorUsername}
+    <Pressable
+      onPress={() => {
+        hapticTap();
+        onPress();
+      }}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={{ transform: [{ scale: pressed ? 0.978 : 1 }] }}
+    >
+      <YStack pos="relative" br={ROW_RADIUS} overflow="hidden">
+        <AppCard
+          variant={mastered ? "rowGold" : "row"}
+          tone={mastered ? "lime" : "mint"}
+          // glow={2}
+          size="lg"
+          pressed={pressed}
+          height={ROW_HEIGHT}
+          px={18}
+          py={0}
+          jc="center"
+          opacity={dimmed ? 0.45 : 1}
+        >
+          <XStack ai="center" gap={12}>
+            <YStack f={1} minWidth={0}>
+              <XStack ai="center" gap={8}>
+                <Text
+                  fontSize={16}
+                  fontWeight="700"
+                  letterSpacing={-0.16}
+                  color={mastered ? TEXT_LIME_PALEST : "$color"}
+                  numberOfLines={1}
+                  flexShrink={1}
+                >
+                  {module.name}
                 </Text>
-              </>
+                {mastered && <MasteredTick />}
+              </XStack>
+              <Text fontSize={12.5} color="$textMuted" mt={3}>
+                {pluralize(module.itemsCount, "card")}
+              </Text>
+            </YStack>
+
+            {module.isFavorite && !mastered && <StarGlyph />}
+
+            {trailing}
+
+            {!trailing && removeButton && onRemoveButtonPress && (
+              <IconButton
+                size={36}
+                icon={<X size={18} color={ICON_MUTED} />}
+                onPress={onRemoveButtonPress}
+              />
+            )}
+
+            {!trailing && !removeButton && (
+              <ChevronRight size={15} color={ICON_SUBTLE} strokeWidth={2} />
             )}
           </XStack>
-        </YStack>
-
-        {trailing}
-
-        {!trailing && removeButton && onRemoveButtonPress && (
-          <IconButton
-            size="$2"
-            icon={<X size="$1" color="$colorlfd" />}
-            onPress={onRemoveButtonPress}
+        </AppCard>
+        {hasProgress && (
+          <ProgressUnderline
+            ratio={ratio(known, total)}
+            dim={ratio(known, total) < 0.25}
           />
         )}
-      </AppCard>
+      </YStack>
     </Pressable>
   );
 }

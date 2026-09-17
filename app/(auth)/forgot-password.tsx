@@ -1,21 +1,27 @@
 import { API_BASE_URL } from "@/src/api/config";
+import { AuthScreenShell } from "@/src/components/common/AuthScreenShell";
 import { FormInput } from "@/src/components/common/FormInput";
+import { AuthHeading } from "@/src/components/common/AuthHeading";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { useServerError } from "@/src/hooks/useServerError";
+import {
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
 import {
   ForgotPasswordForm,
   forgotPasswordSchema,
 } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router } from "expo-router";
+import { Mail } from "lucide-react-native";
 import { FormProvider, useForm } from "react-hook-form";
-import { Keyboard } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
+import { Pressable } from "react-native";
+import { Text, YStack } from "tamagui";
 
 export default function ForgotPassword() {
-  const insets = useSafeAreaInsets();
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const form = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
@@ -27,97 +33,87 @@ export default function ForgotPassword() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
-
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
+  const [serverError, setServerError] = useServerError(form);
 
   const onSubmit = async ({ email }: ForgotPasswordForm) => {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
-        const data = await response.json();
-        setServerError(data.message || "Failed to send code");
+        const data = await readJsonBody(response);
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to send code";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 
       router.push({ pathname: "/reset-password", params: { email } });
     } catch (error) {
       console.error("[ForgotPassword] request error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 
   return (
     <FormProvider {...form}>
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        p="$4"
-        pt={insets.top + 16}
-        pb={insets.bottom + 16}
-        bg="$background"
-        gap="$4"
-        onPress={Keyboard.dismiss}
-      >
-        <YStack ai="center" gap="$2">
-          <Text fontSize="$8" fontWeight="bold">
-            Forgot password?
-          </Text>
-          <Text color="$colorSecondary" fontSize="$3" textAlign="center">
-            Enter your email and we will send you a reset code
-          </Text>
-        </YStack>
+      <AuthScreenShell>
+        <AuthHeading
+          title="Forgot"
+          titleHighlight="password?"
+          subtitle="Enter your email and we'll send you a 6-digit code"
+        />
 
-        <YStack width="100%" gap="$2">
+        <YStack width="100%" gap={14}>
           <FormInput
             control={control}
             name="email"
+            label="Email"
             placeholder="Email"
+            leftElement={<Mail size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
             textContentType="emailAddress"
             autoCapitalize="none"
             keyboardType="email-address"
             returnKeyType="done"
             onSubmitEditing={() => handleSubmit(onSubmit)()}
           />
-
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3" textAlign="center">
-              {serverError}
-            </Text>
-          )}
-
-          <Button
-            size="$4"
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText">
-              {isSubmitting ? "Sending..." : "Send code"}
-            </Text>
-          </Button>
-          <Link href="/login" asChild>
-            <Button size="$4" bg="$buttonSecondaryBg" mt="$2" width="100%">
-              <Text color="$buttonSecondaryText">Back to login</Text>
-            </Button>
-          </Link>
         </YStack>
-      </YStack>
+
+        {serverError && (
+          <Text color="$roseSoft" fontSize={12.5} textAlign="center" mt={10}>
+            {serverError}
+          </Text>
+        )}
+
+        <YStack width="100%" mt={20}>
+          <AppButton
+            variant="primary"
+            size="lg"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+          >
+            {isSubmitting ? "Sending" : "Send code"}
+          </AppButton>
+        </YStack>
+
+        <YStack f={1} minHeight={22} />
+
+        <Pressable
+          onPress={() => router.push("/login")}
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+        >
+          <Text fontSize={13.5} color="$mintLight" fontWeight="700" textAlign="center">
+            Back to log in
+          </Text>
+        </Pressable>
+      </AuthScreenShell>
     </FormProvider>
   );
 }

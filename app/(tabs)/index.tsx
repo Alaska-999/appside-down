@@ -1,30 +1,68 @@
+import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { API_BASE_URL } from "@/src/api/config";
+import {
+  PublicModuleResult,
+  PublicModuleRow,
+} from "@/src/components/cards/PublicModuleRow";
 import { StreakCard } from "@/src/components/cards/StreakCard";
-import { AvatarRing } from "@/src/components/ui/AvatarRing";
-import { AppCard } from "@/src/components/ui/Card";
-import { Chip } from "@/src/components/ui/Chip";
-import { GradientText } from "@/src/components/ui/GradientText";
-import { ProgressRing } from "@/src/components/ui/ProgressRing";
-import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
-import { SearchField } from "@/src/components/ui/SearchField";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
+import { UserAvatar } from "@/src/components/common/UserAvatar";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { AppCard } from "@/src/components/ui/surface/Card";
+import {
+  CoverGlow,
+  GlowTone,
+  LightLevel,
+} from "@/src/components/ui/surface/GlowSurface";
+import { GradientText } from "@/src/components/ui/display/GradientText";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
+import { ProgressRing } from "@/src/components/ui/feedback/ProgressRing";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import {
+  ICON_ACCENT,
+  ICON_CYAN_LIGHT,
+  ICON_CYAN_TEAL,
+  ICON_HERO_LIME,
+  ICON_MINT,
+  ICON_MINT_LIGHT,
+  ICON_MINT_TINT_DARK,
+  ICON_TEAL,
+} from "@/src/constants/iconColors";
+import {
+  BLACK_SCRIM_SOFT,
+  GLASS_BORDER_TOP,
+  SCRIM_BASE_30,
+  SCRIM_BASE_MAX,
+  SCRIM_BASE_SOFT,
+  SCRIM_BASE_STRONG,
+  SCRIM_BASE_TRANSPARENT,
+} from "@/src/constants/rawColors";
+import {
+  SURFACE_GLOW_COLOR,
+  SURFACE_WHITE_BORDER,
+  SURFACE_WHITE_STRONG,
+  TEXT_MINT_STRONG,
+} from "@/src/constants/surfaceAlpha";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
 import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { LearningStatus } from "@/src/types";
+import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
 import { protectedFetch } from "@/src/utils/protectedFetch";
+import { ratio } from "@/src/utils/progress";
+import { screenGutter } from "@/tamagui.config";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { FlatList, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScrollView, Text, XStack, YStack } from "tamagui";
-
-type PublicModuleResult = {
-  id: string;
-  name: string;
-  user?: { id: string; username: string; avatarUrl?: string | null };
-  author?: { id: string; username: string; avatarUrl?: string | null } | null;
-  authorUsername?: string | null;
-  _count?: { flashcards: number };
-};
+import { AlertTriangle, Layers, Sparkles } from "lucide-react-native";
+import { useCallback, useState } from "react";
+import { FlatList, Pressable, RefreshControl } from "react-native";
+import { ScrollView, Text, useTheme, XStack, YStack } from "tamagui";
 
 type HomeModule = {
   id: string;
@@ -48,56 +86,90 @@ type Stats = {
   continueLearning: ContinueLearningEntry[];
 };
 
-const CHIP_GRADIENTS: [string, string][] = [
-  ["#2dd4bf", "#a3e635"],
-  ["#4338ca", "#65a30d"],
+const RECENT_LIGHT: { tone: GlowTone; glow: LightLevel }[] = [
+  { tone: "neutral", glow: 2 },
+  { tone: "teal", glow: 4 },
+  { tone: "neutral", glow: 1 },
+  { tone: "teal", glow: 3 },
+  { tone: "neutral", glow: 4 },
+  { tone: "teal", glow: 1 },
+  { tone: "neutral", glow: 3 },
 ];
+const MODULE_MONOGRAM_GRADIENTS: [string, string][] = [
+  [ICON_ACCENT, ICON_MINT],
+  [ICON_MINT, ICON_TEAL],
+  [ICON_ACCENT, ICON_TEAL],
+];
+const DISCOVER_POOL_LIMIT = 20;
+const DISCOVER_COUNT = 5;
 
-function PublicModuleRow({ module }: { module: PublicModuleResult }) {
-  const count = module._count?.flashcards ?? 0;
-  return (
-    <Pressable
-      onPress={() =>
-        router.push({ pathname: "/module/[id]", params: { id: module.id } })
-      }
-    >
-      <AppCard variant="soft" size="md" gap="$0.5">
-        <Text fontSize={17} fontWeight="700" color="$color">
-          {module.name}
-        </Text>
-        <Text fontSize={14} color="$colorMuted">
-          {module.author?.username ?? module.authorUsername ?? "Unknown"} ·{" "}
-          {count} term
-          {count !== 1 ? "s" : ""}
-        </Text>
-      </AppCard>
-    </Pressable>
-  );
+let discoverSeed = (Math.random() * 0xffffffff) >>> 0;
+
+function reseedDiscover() {
+  discoverSeed = (Math.random() * 0xffffffff) >>> 0;
 }
 
-export function SectionTitle({
-  children,
-  tone = "muted",
+function seededRank(id: string) {
+  let hash = 2166136261 ^ discoverSeed;
+  for (let i = 0; i < id.length; i += 1) {
+    hash ^= id.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 2246822507);
+  hash ^= hash >>> 13;
+  return hash >>> 0;
+}
+
+function pickDiscover(modules: PublicModuleResult[]) {
+  return modules
+    .filter((m) => !m.savedCopyId)
+    .sort((a, b) => seededRank(a.id) - seededRank(b.id))
+    .slice(0, DISCOVER_COUNT);
+}
+
+const DISCOVER_COVERS: [string, string][] = [
+  [ICON_MINT_LIGHT, ICON_HERO_LIME],
+
+  [ICON_CYAN_LIGHT, ICON_MINT_TINT_DARK],
+  [ICON_ACCENT, ICON_CYAN_TEAL],
+  [ICON_MINT, ICON_CYAN_TEAL],
+];
+
+function SectionHeader({
+  title,
+  onSeeAll,
+  px,
 }: {
-  children: string;
-  tone?: "muted" | "onGlass";
+  title: string;
+  onSeeAll?: () => void;
+  px?: number;
 }) {
   return (
-    <Text
-      fontSize={tone === "onGlass" ? 13 : 15}
-      fontWeight={tone === "onGlass" ? "600" : "700"}
-      color={tone === "onGlass" ? "$colorSecondary" : "$colorMuted"}
-      textTransform="uppercase"
-      letterSpacing={tone === "onGlass" ? 0.77 : 1.04}
-      mt={tone === "onGlass" ? 3 : 0}
-    >
-      {children}
-    </Text>
+    <XStack ai="baseline" jc="space-between" px={px}>
+      <Text fontSize={17} fontWeight="700" letterSpacing={-0.17} color="$color">
+        {title}
+      </Text>
+      {onSeeAll && (
+        <Pressable
+          onPress={onSeeAll}
+          hitSlop={{ top: 14, bottom: 14, left: 12, right: 12 }}
+        >
+          <Text fontSize={14.5} fontWeight="600" color="$mintLight">
+            See all →
+          </Text>
+        </Pressable>
+      )}
+    </XStack>
   );
 }
 
 export default function Home() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
+  const theme = useTheme();
+  const mint = theme.accentGradientStart.get();
+  const tabBarClearance =
+    TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
@@ -105,7 +177,11 @@ export default function Home() {
   const [discoverModules, setDiscoverModules] = useState<PublicModuleResult[]>(
     [],
   );
-  const { user, isHydrated } = useAuthStore();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const isHydrated = useAuthStore((state) => state.isHydrated);
   const isLoggedIn = !!user;
 
   const searching = search.trim().length >= 2;
@@ -118,16 +194,18 @@ export default function Home() {
     }, [isHydrated, isLoggedIn]),
   );
 
-  const fetchData = async () => {
-    // stats - gives total statistics: totalModules, cardsLearned, continueLearning.
-    // recentModules - gives last 6 your modules for the horizontal row "Recent" on Home. Without infinite scroll, fixed 6 items.
-    // discoverModules - gives 6 foreign public modules for the "Discover" section, excluding your own (excludeOwn=true).
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) {
+      reseedDiscover();
+      setRefreshing(true);
+    } else setLoading(true);
+    setError(false);
     try {
       const [statsRes, recentRes, discoverRes] = await Promise.all([
         protectedFetch(`${API_BASE_URL}/modules/stats`),
         protectedFetch(`${API_BASE_URL}/modules?limit=6`),
         protectedFetch(
-          `${API_BASE_URL}/modules/public?limit=6&excludeOwn=true`,
+          `${API_BASE_URL}/modules/public?limit=${DISCOVER_POOL_LIMIT}&excludeOwn=true`,
         ),
       ]);
       if (!statsRes.ok) throw new Error(`Stats error: ${statsRes.status}`);
@@ -148,21 +226,22 @@ export default function Home() {
       ]);
       setStats(statsData);
       setRecentModules(recentData.data);
-      setDiscoverModules(discoverData.data);
+      setDiscoverModules(pickDiscover(discoverData.data));
     } catch (err) {
       console.error("[Home] fetch error:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
-    return () => clearTimeout(timer);
-  }, [search]);
+  const debouncedSearch = useDebouncedValue(search.trim());
+  const searchPending = search.trim() !== debouncedSearch;
 
   const fetchSearchPage = useCallback(
     async (cursor: string | null) => {
+      if (debouncedSearch.length < 2) return { data: [], nextCursor: null };
       const params = new URLSearchParams({
         search: debouncedSearch,
         limit: "20",
@@ -187,9 +266,7 @@ export default function Home() {
     ? {
         known: featuredModule.known,
         total: featuredModule.total,
-        progress: featuredModule.total
-          ? featuredModule.known / featuredModule.total
-          : 0,
+        progress: ratio(featuredModule.known, featuredModule.total),
       }
     : null;
 
@@ -207,42 +284,52 @@ export default function Home() {
   };
 
   return (
-    <ScreenBackground>
-      <YStack f={1} gap="$section" pt={insets.top}>
+    <YStack f={1} bg="$background">
+      {/* <BackgroundMesh preset="homeLampWhite" /> */}
+      {/* <BackgroundMesh preset="finish" /> */}
+      <BackgroundMesh preset="homeLampWhite" />
+      <YStack f={1} pt={screen.top} gap="$section">
         <YStack px="$screenX" gap="$section">
           <XStack jc="space-between" gap="$3" ai="flex-start">
             <YStack f={1}>
               <Text
-                fontSize={35}
-                fontWeight="800"
-                color="$color"
-                lineHeight={39}
+                fontSize={14}
+                color="$mutedLight"
+                onLongPress={() => router.push("/showcase")}
               >
-                Hi,
+                Welcome back,
               </Text>
               <XStack ai="center" flexWrap="wrap">
-                <GradientText fontSize={35} fontWeight="800" lineHeight={39}>
+                <GradientText fontSize={31}>
                   {user?.username ?? "there"}
                 </GradientText>
-                <Text fontSize={35} fontWeight="800" lineHeight={39}>
+                <Text fontSize={31} fontWeight="800" lineHeight={35}>
                   {" "}
                   👋
                 </Text>
               </XStack>
             </YStack>
-            <AvatarRing
+
+            {/* | "tealDeep"
+  | "limeGlassLit"
+  | "frostGlass"
+  | "frostVeil"
+  */}
+
+            <UserAvatar
               avatarUrl={user?.avatarUrl}
               username={user?.username}
               onPress={navigateToProfile}
+              size={55}
+              variant="limeGlassLit"
             />
           </XStack>
           <SearchField
             value={search}
             onChangeText={setSearch}
-            placeholder="Search public modules..."
+            placeholder="Search public modules"
           />
         </YStack>
-
         {searching ? (
           <FlatList
             data={debouncedSearch.length >= 2 ? searchList.items : []}
@@ -250,121 +337,350 @@ export default function Home() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={{
-              paddingHorizontal: 19,
+              paddingHorizontal: screenGutter,
               gap: 8,
-              paddingBottom: 16,
+              paddingBottom: tabBarClearance,
             }}
             onEndReached={searchList.loadMore}
             onEndReachedThreshold={0.4}
-            renderItem={({ item }) => <PublicModuleRow module={item} />}
+            renderItem={({ item }) => (
+              <PublicModuleRow module={item} onPress={() => openModule(item.id)} />
+            )}
+            refreshControl={
+              <RefreshControl
+                refreshing={searchList.refreshing}
+                onRefresh={searchList.refresh}
+                tintColor={mint}
+              />
+            }
             ListEmptyComponent={
-              !searchList.initialLoading ? (
-                <Text color="$colorMuted">No public modules found</Text>
-              ) : null
+              searchPending || searchList.initialLoading ? null : searchList.error ? (
+                <StateCard
+                  tone="error"
+                  icon={AlertTriangle}
+                  title="Couldn't load results"
+                  subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                  buttonLabel="Try again"
+                  onButtonPress={searchList.retry}
+                />
+              ) : (
+                <SearchEmptyState
+                  query={debouncedSearch}
+                  noun="modules"
+                  onCreate={() => router.push("/module/create")}
+                />
+              )
             }
           />
         ) : (
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchData(true)}
+                tintColor={mint}
+              />
+            }
           >
-            <YStack px="$screenX" gap="$section" pb={130}>
-              <YStack gap={12}>
+            <YStack px="$screenX" gap="$section" pb={tabBarClearance}>
+              <YStack gap={14}>
+                {loading && !stats ? (
+                  <Skeleton height={186} borderRadius="$card" />
+                ) : error && !stats ? (
+                  <StateCard
+                    tone="error"
+                    icon={AlertTriangle}
+                    title="Couldn't load your stats"
+                    subtitle="Looks like a connection hiccup. Your data is safe — try again."
+                    buttonLabel="Try again"
+                    onButtonPress={() => fetchData()}
+                  />
+                ) : featuredModule && featuredStats ? (
+                  <AppCard variant="glow" size="lg" minHeight={186} tone="teal">
+                    <Text
+                      fontSize={11}
+                      fontWeight="700"
+                      letterSpacing={1.1}
+                      textTransform="uppercase"
+                      color="$limeLight"
+                      mb={7}
+                    >
+                      Continue
+                    </Text>
+                    <Text
+                      fontSize={22}
+                      fontWeight="800"
+                      letterSpacing={-0.22}
+                      lineHeight={25.5}
+                      color="$color"
+                      numberOfLines={2}
+                    >
+                      {featuredModule.name}
+                    </Text>
+                    <Text fontSize={13} color={TEXT_MINT_STRONG} mt={5}>
+                      {featuredStats.known} of {featuredStats.total} cards
+                      learned
+                    </Text>
+                    <XStack ai="flex-end" jc="space-between" gap={12} mt="auto">
+                      <YStack f={1}>
+                        <AppButton
+                          variant="primary"
+                          size="md"
+                          sheen
+                          onPress={() => openModule(featuredModule.id)}
+                        >
+                          Continue
+                        </AppButton>
+                      </YStack>
+                      <ProgressRing
+                        progress={featuredStats.progress}
+                        label={`${Math.round(featuredStats.progress * 100)}%`}
+                        animated
+                      />
+                    </XStack>
+                  </AppCard>
+                ) : null}
+
                 <StreakCard
                   currentStreak={user?.streak?.currentStreak ?? 0}
                   todayIndex={todayIndex}
                 />
 
-                <XStack gap={12}>
-                  {featuredModule && featuredStats ? (
-                    <Pressable
-                      style={{ flex: 1 }}
-                      onPress={() => openModule(featuredModule.id)}
-                    >
-                      <AppCard
-                        variant="glass"
-                        size="lg"
-                        f={1}
-                        gap={9}
-                        ai="flex-start"
-                      >
-                        <ProgressRing
-                          progress={featuredStats.progress}
-                          label={`${Math.round(featuredStats.progress * 100)}%`}
-                        />
-                        <Text
-                          fontSize={16}
-                          fontWeight="700"
-                          color="$color"
-                          numberOfLines={1}
-                          mt="$3"
-                        >
-                          Continue: {featuredModule.name}
-                        </Text>
-                        <Text fontSize={14} color="$colorSecondary">
-                          {featuredStats.known}/{featuredStats.total} terms
-                        </Text>
-                      </AppCard>
-                    </Pressable>
-                  ) : null}
-
+                <XStack gap={10}>
                   <AppCard
-                    variant="glass"
-                    size="lg"
+                    variant="glow"
+                    tone="teal"
                     f={1}
-                    gap="$1"
-                    ai="flex-start"
+                    minHeight={104}
+                    px={16}
+                    py={16}
+                    jc="flex-end"
+                    pos="relative"
                   >
-                    <Text fontSize={31} fontWeight="900" color="$color">
+                    <YStack pos="absolute" t={14} r={14}>
+                      <Layers
+                        size={15}
+                        color={GLASS_BORDER_TOP}
+                        strokeWidth={1.9}
+                      />
+                    </YStack>
+                    <Text
+                      fontSize={28}
+                      fontWeight="900"
+                      letterSpacing={-0.56}
+                      color="$color"
+                    >
                       {stats?.totalModules ?? 0}
                     </Text>
-                    <SectionTitle tone="onGlass">Total modules</SectionTitle>
                     <Text
-                      fontSize={31}
+                      fontSize={11.5}
+                      color="$colorMuted"
+                      fontWeight="500"
+                      mt={5}
+                    >
+                      modules
+                    </Text>
+                  </AppCard>
+                  <AppCard
+                    variant="glow"
+                    tone="neutral"
+                    glow={1}
+                    f={1}
+                    minHeight={104}
+                    px={16}
+                    py={16}
+                    jc="flex-end"
+                    pos="relative"
+                  >
+                    <YStack pos="absolute" t={14} r={14}>
+                      <Sparkles
+                        size={15}
+                        color={GLASS_BORDER_TOP}
+                        strokeWidth={1.9}
+                      />
+                    </YStack>
+                    <Text
+                      fontSize={28}
                       fontWeight="900"
-                      color="$accentGradientStart"
-                      mt={12}
+                      letterSpacing={-0.56}
+                      color="$color"
                     >
                       {stats?.cardsLearned ?? 0}
                     </Text>
-                    <SectionTitle tone="onGlass">Cards learned</SectionTitle>
+                    <Text
+                      fontSize={11.5}
+                      color="$colorMuted"
+                      fontWeight="500"
+                      mt={5}
+                    >
+                      cards learned
+                    </Text>
                   </AppCard>
                 </XStack>
               </YStack>
 
               {recentModules.length > 0 && (
-                <YStack gap={14}>
-                  <SectionTitle>Recent</SectionTitle>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <XStack gap={11}>
-                      {recentModules.map((m, i) => {
-                        const count = m._count?.flashcards ?? 0;
-                        return (
-                          <Chip
-                            key={m.id}
-                            size="lg"
-                            monogram={m.name.slice(0, 1).toUpperCase()}
-                            title={m.name}
-                            meta={`${count} card${count !== 1 ? "s" : ""}`}
-                            gradientColors={
-                              CHIP_GRADIENTS[i % CHIP_GRADIENTS.length]
+                <YStack gap={14} mx={-screenGutter}>
+                  <SectionHeader
+                    title="Recent"
+                    onSeeAll={() => router.push("/library")}
+                    px={screenGutter}
+                  />
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: screenGutter,
+                      gap: 11,
+                    }}
+                  >
+                    {recentModules.map((m, i) => {
+                      const count = m._count?.flashcards ?? 0;
+                      return (
+                        <AppCard
+                          key={m.id}
+                          variant="glow"
+                          tone={RECENT_LIGHT[i % RECENT_LIGHT.length].tone}
+                          glow={RECENT_LIGHT[i % RECENT_LIGHT.length].glow}
+                          width={142}
+                          height={132}
+                          px={15}
+                          py={15}
+                          jc="space-between"
+                          onPress={() => {
+                            hapticTap();
+                            openModule(m.id);
+                          }}
+                        >
+                          <LinearGradient
+                            colors={
+                              MODULE_MONOGRAM_GRADIENTS[
+                                i % MODULE_MONOGRAM_GRADIENTS.length
+                              ]
                             }
-                            onPress={() => openModule(m.id)}
-                          />
-                        );
-                      })}
-                    </XStack>
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: 12,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              fontSize={15}
+                              fontWeight="800"
+                              color={ICON_MINT_TINT_DARK}
+                            >
+                              {m.name.slice(0, 1).toUpperCase()}
+                            </Text>
+                          </LinearGradient>
+                          <YStack>
+                            <Text
+                              fontSize={14}
+                              fontWeight="700"
+                              lineHeight={17.5}
+                              color="$color"
+                              numberOfLines={2}
+                            >
+                              {m.name}
+                            </Text>
+                            <Text fontSize={11} color="$colorMuted" mt={4}>
+                              {pluralize(count, "card")}
+                            </Text>
+                          </YStack>
+                        </AppCard>
+                      );
+                    })}
                   </ScrollView>
                 </YStack>
               )}
 
               {discoverModules.length > 0 && (
                 <YStack gap={14}>
-                  <SectionTitle>Discover</SectionTitle>
-                  <YStack gap={14}>
-                    {discoverModules.map((m) => (
-                      <PublicModuleRow key={m.id} module={m} />
-                    ))}
+                  <SectionHeader
+                    title="Discover"
+                    onSeeAll={() => router.push("/discover")}
+                  />
+                  <YStack gap={11}>
+                    {discoverModules.map((m, i) => {
+                      const count = m._count?.flashcards ?? 0;
+                      const author = m.author?.username ?? m.authorUsername;
+                      return (
+                        <YStack
+                          key={m.id}
+                          pos="relative"
+                          pressStyle={{ scale: 0.982, opacity: 0.9 }}
+                          transition="press"
+                          onPress={() => {
+                            hapticTap();
+                            openModule(m.id);
+                          }}
+                        >
+                          <AppCard
+                            variant="media"
+                            minHeight={122}
+                            cover={
+                              <CoverGlow
+                                coverColors={
+                                  DISCOVER_COVERS[i % DISCOVER_COVERS.length]
+                                }
+                                tintColor={SCRIM_BASE_30}
+                                scrimColors={[
+                                  SCRIM_BASE_TRANSPARENT,
+                                  SCRIM_BASE_STRONG,
+                                  SCRIM_BASE_MAX,
+                                ]}
+                                scrimPositions={[0.24, 0.62, 1]}
+                                lampColor={SURFACE_GLOW_COLOR}
+                                blikColor={SURFACE_WHITE_STRONG}
+                                shadowColor={BLACK_SCRIM_SOFT}
+                                radius={20}
+                              />
+                            }
+                          >
+                            <Text
+                              fontSize={16}
+                              fontWeight="700"
+                              letterSpacing={-0.16}
+                              color="$color"
+                            >
+                              {m.name}
+                            </Text>
+                            {author && (
+                              <Text
+                                fontSize={11.5}
+                                color={TEXT_MINT_STRONG}
+                                mt={3}
+                              >
+                                @{author}
+                              </Text>
+                            )}
+                          </AppCard>
+                          <YStack pos="absolute" t={13} r={13}>
+                            <XStack
+                              bg={SCRIM_BASE_SOFT}
+                              borderWidth={1}
+                              borderColor={SURFACE_WHITE_BORDER}
+                              br={999}
+                              px={9}
+                              py={3}
+                            >
+                              <Text
+                                fontSize={10.5}
+                                color="$text"
+                                fontWeight="600"
+                              >
+                                {count} cards
+                              </Text>
+                            </XStack>
+                          </YStack>
+                        </YStack>
+                      );
+                    })}
                   </YStack>
                 </YStack>
               )}
@@ -372,6 +688,8 @@ export default function Home() {
           </ScrollView>
         )}
       </YStack>
-    </ScreenBackground>
+      <StatusBarScrim />
+      <KeyboardBar />
+    </YStack>
   );
 }

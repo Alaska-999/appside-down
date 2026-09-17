@@ -1,4 +1,3 @@
-//helps to read array of errors from ValidationPipe
 
 export function getErrorMessage(data: unknown, fallback: string): string {
   const message = (data as { message?: unknown } | null)?.message;
@@ -6,3 +5,20 @@ export function getErrorMessage(data: unknown, fallback: string): string {
   if (typeof message === "string") return message;
   return fallback;
 }
+
+export async function readJsonBody(response: Response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+export const AUTH_ERROR_MESSAGES = {
+  connectionProblem: "Connection problem. Please try again",
+  incompleteSession: "Server returned an incomplete session. Please try again",
+  rateLimited: "Too many requests. Please wait a moment and try again",
+};
+
+export const CONNECTION_HICCUP_MESSAGE =
+  "Looks like a connection hiccup. Your data is safe — try again.";

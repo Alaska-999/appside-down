@@ -1,0 +1,96 @@
+import { AppCard } from "@/src/components/ui/surface/Card";
+import { Checkbox } from "@/src/components/ui/controls/Checkbox";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { ICON_SUBTLE } from "@/src/constants/iconColors";
+import { hapticTap } from "@/src/utils/haptics";
+import { pluralize } from "@/src/utils/plural";
+import { Lock } from "lucide-react-native";
+import { useState } from "react";
+import { Pressable } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
+
+const ROW_HEIGHT = 74;
+const ROW_RADIUS = 23;
+const HIT = 44;
+
+export function SelectableModuleRow({
+  name,
+  itemsCount,
+  starred,
+  locked,
+  selected,
+  onToggle,
+}: {
+  name: string;
+  itemsCount: number;
+  starred?: boolean;
+  locked?: boolean;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <Pressable
+      disabled={locked}
+      onPress={() => {
+        hapticTap();
+        onToggle();
+      }}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      style={{
+        transform: [{ scale: pressed ? 0.978 : 1 }],
+        opacity: locked ? 0.42 : 1,
+      }}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected, disabled: locked }}
+      accessibilityLabel={locked ? `${name}, already in this folder` : name}
+    >
+      <AppCard
+        variant="glow"
+        tone="teal"
+        glow={2}
+        size="lg"
+        pressed={pressed}
+        height={ROW_HEIGHT}
+        px={18}
+        py={0}
+        jc="center"
+        br={ROW_RADIUS}
+      >
+        <XStack ai="center" gap={12}>
+          <XStack w={HIT} h={HIT} ml={-10} ai="center" jc="center">
+            {locked ? (
+              <Lock size={20} color={ICON_SUBTLE} strokeWidth={1.9} />
+            ) : (
+              <Checkbox size="md" checked={selected} onToggle={onToggle} />
+            )}
+          </XStack>
+          <YStack f={1} minWidth={0}>
+            <Text
+              fontSize={16}
+              fontWeight="700"
+              letterSpacing={-0.16}
+              color="$color"
+              numberOfLines={1}
+            >
+              {name}
+            </Text>
+            <XStack ai="center" gap={6} mt={3}>
+              <Text fontSize={12.5} color="$textMuted">
+                {pluralize(itemsCount, "card")}
+              </Text>
+              {starred && !locked && <StarGlyph />}
+              {locked && (
+                <Text fontSize={11} color="$mutedDim">
+                  · Already here
+                </Text>
+              )}
+            </XStack>
+          </YStack>
+        </XStack>
+      </AppCard>
+    </Pressable>
+  );
+}

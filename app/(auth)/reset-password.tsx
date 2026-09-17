@@ -1,27 +1,36 @@
 import { API_BASE_URL } from "@/src/api/config";
+import { AuthScreenShell } from "@/src/components/common/AuthScreenShell";
 import { FormInput } from "@/src/components/common/FormInput";
+import { AuthHeading } from "@/src/components/common/AuthHeading";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { CodeInput } from "@/src/components/ui/fields/CodeInput";
+import { ICON_SUBTLE, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { useServerError } from "@/src/hooks/useServerError";
 import {
-  ResetPasswordForm,
-  resetPasswordSchema,
-} from "@/src/validation/auth";
+  AUTH_ERROR_MESSAGES,
+  getErrorMessage,
+  readJsonBody,
+} from "@/src/utils/apiError";
+import { ResetPasswordForm, resetPasswordSchema } from "@/src/validation/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "@tamagui/lucide-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { Lock } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Alert, Keyboard } from "react-native";
 import type { TextInput } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button, Text, YStack } from "tamagui";
+import { Pressable } from "react-native";
+import { Text, YStack } from "tamagui";
+
+function formatCooldown(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
 
 export default function ResetPassword() {
-  const insets = useSafeAreaInsets();
   const { email } = useLocalSearchParams<{ email: string }>();
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(60);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
@@ -34,17 +43,16 @@ export default function ResetPassword() {
     handleSubmit,
     formState: { isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  useEffect(() => {
     if (resendCooldown === 0) return;
-    const timeout = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    const timeout = setTimeout(
+      () => setResendCooldown(resendCooldown - 1),
+      1000,
+    );
     return () => clearTimeout(timeout);
   }, [resendCooldown]);
 
@@ -53,25 +61,26 @@ export default function ResetPassword() {
     setIsResending(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/forgot-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
-        const data = await response.json();
-        setServerError(data.message || "Failed to send code");
+        const data = await readJsonBody(response);
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to send code";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 
       setResendCooldown(60);
     } catch (error) {
       console.error("[ResetPassword] resend error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     } finally {
       setIsResending(false);
     }
@@ -81,153 +90,130 @@ export default function ResetPassword() {
     setServerError(null);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/reset-password`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, code, newPassword }),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, newPassword }),
+      });
 
       if (!response.ok) {
-        const data = await response.json();
-        setServerError(data.message || "Failed to reset password");
+        const data = await readJsonBody(response);
+        const fallback =
+          response.status === 429
+            ? AUTH_ERROR_MESSAGES.rateLimited
+            : "Failed to reset password";
+        setServerError(getErrorMessage(data, fallback));
         return;
       }
 
-      Alert.alert("Password updated", "You can now log in with a new password");
       router.replace("/login");
     } catch (error) {
       console.error("[ResetPassword] request error:", error);
-      setServerError("Connection problem. Please try again");
+      setServerError(AUTH_ERROR_MESSAGES.connectionProblem);
     }
   };
 
   return (
     <FormProvider {...form}>
-      <YStack
-        f={1}
-        jc="center"
-        ai="center"
-        p="$4"
-        pt={insets.top + 16}
-        pb={insets.bottom + 16}
-        bg="$background"
-        gap="$4"
-        onPress={Keyboard.dismiss}
-      >
-        <YStack ai="center" gap="$2">
-          <Text fontSize="$8" fontWeight="bold">
-            Reset password
-          </Text>
-          <Text color="$colorSecondary" fontSize="$3" textAlign="center">
-            Enter the code we sent to {email} and choose a new password
-          </Text>
-        </YStack>
+      <AuthScreenShell>
+        <AuthHeading
+          title="Reset"
+          titleHighlight="password"
+          subtitle={
+            <>
+              Code sent to{" "}
+              <Text color={ICON_ON_GLASS} fontWeight="600">
+                {email}
+              </Text>
+            </>
+          }
+        />
 
-        <YStack width="100%" gap="$2">
-          <FormInput
+        <YStack width="100%" gap={14}>
+          <CodeInput
             control={control}
             name="code"
-            placeholder="6-digit code"
-            keyboardType="number-pad"
-            textContentType="oneTimeCode"
-            returnKeyType="next"
-            blurOnSubmit={false}
-            onSubmitEditing={() => newPasswordRef.current?.focus()}
+            size="lg"
+            autoFocus
+            onComplete={() => newPasswordRef.current?.focus()}
           />
+
+          <Pressable
+            onPress={resendCode}
+            disabled={resendCooldown > 0 || isResending}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text fontSize={12.5} color="$mutedDim" textAlign="center">
+              {isResending ? (
+                "Sending..."
+              ) : resendCooldown > 0 ? (
+                <>
+                  Resend in{" "}
+                  <Text fontSize={12.5} color="$textMuted" fontWeight="600">
+                    {formatCooldown(resendCooldown)}
+                  </Text>
+                </>
+              ) : (
+                "Resend code"
+              )}
+            </Text>
+          </Pressable>
+
           <FormInput
             ref={newPasswordRef}
             control={control}
             name="newPassword"
+            label="New password"
             placeholder="New password"
-            secureTextEntry={!showNewPassword}
+            leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            secureToggle
             textContentType="newPassword"
             returnKeyType="next"
             blurOnSubmit={false}
             onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-            rightElement={
-              <Button
-                pos="absolute"
-                right="$2"
-                size="$3"
-                chromeless
-                circular
-                onPress={() => setShowNewPassword(!showNewPassword)}
-                icon={
-                  showNewPassword ? (
-                    <EyeOff size="$1" color="$colorSecondary" />
-                  ) : (
-                    <Eye size="$1" color="$colorSecondary" />
-                  )
-                }
-              />
-            }
           />
           <FormInput
             ref={confirmPasswordRef}
             control={control}
             name="confirmPassword"
-            placeholder="Confirm new password"
-            secureTextEntry={!showConfirmPassword}
+            label="Confirm new password"
+            placeholder="Repeat it"
+            leftElement={<Lock size={19} color={ICON_SUBTLE} strokeWidth={1.9} />}
+            secureToggle
             textContentType="newPassword"
             returnKeyType="done"
             onSubmitEditing={() => handleSubmit(onSubmit)()}
-            rightElement={
-              <Button
-                pos="absolute"
-                right="$2"
-                size="$3"
-                chromeless
-                circular
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                icon={
-                  showConfirmPassword ? (
-                    <EyeOff size="$1" color="$colorSecondary" />
-                  ) : (
-                    <Eye size="$1" color="$colorSecondary" />
-                  )
-                }
-              />
-            }
           />
-
-          {serverError && (
-            <Text color="$statusDanger" fontSize="$3" textAlign="center">
-              {serverError}
-            </Text>
-          )}
-
-          <Button
-            size="$4"
-            bg="$buttonBg"
-            onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            opacity={isSubmitting ? 0.6 : 1}
-            mt="$2"
-          >
-            <Text color="$buttonText">
-              {isSubmitting ? "Resetting..." : "Reset password"}
-            </Text>
-          </Button>
-          <Button
-            size="$4"
-            chromeless
-            onPress={resendCode}
-            disabled={resendCooldown > 0 || isResending}
-            opacity={resendCooldown > 0 || isResending ? 0.5 : 1}
-          >
-            <Text color="$colorSecondary">
-              {isResending
-                ? "Sending..."
-                : resendCooldown > 0
-                  ? `Resend code in ${resendCooldown}s`
-                  : "Resend code"}
-            </Text>
-          </Button>
         </YStack>
-      </YStack>
+
+        {serverError && (
+          <Text color="$roseSoft" fontSize={12.5} textAlign="center" mt={10}>
+            {serverError}
+          </Text>
+        )}
+
+        <YStack width="100%" mt={20}>
+          <AppButton
+            variant="primary"
+            size="lg"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+          >
+            {isSubmitting ? "Resetting" : "Reset password"}
+          </AppButton>
+        </YStack>
+
+        <YStack f={1} minHeight={22} />
+
+        <Pressable
+          onPress={() => router.push("/login")}
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+        >
+          <Text fontSize={13.5} color="$mintLight" fontWeight="700" textAlign="center">
+            Back to log in
+          </Text>
+        </Pressable>
+      </AuthScreenShell>
     </FormProvider>
   );
 }

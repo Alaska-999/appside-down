@@ -1,0 +1,25 @@
+import { GradientText } from "@/src/components/ui/display/GradientText";
+import type { ReactNode } from "react";
+import { Text, YStack } from "tamagui";
+
+interface AuthHeadingProps {
+  title: string;
+  titleHighlight: string;
+  subtitle: ReactNode;
+}
+
+export function AuthHeading({ title, titleHighlight, subtitle }: AuthHeadingProps) {
+  return (
+    <YStack width="100%">
+      <YStack mb={10}>
+        <Text color="$color" fontSize={44} fontWeight="800" letterSpacing={-1.32} lineHeight={46.6}>
+          {title}
+        </Text>
+        <GradientText fontSize={44}>{titleHighlight}</GradientText>
+      </YStack>
+      <Text fontSize={13.5} color="$textMuted" lineHeight={20.9} mb={26}>
+        {subtitle}
+      </Text>
+    </YStack>
+  );
+}

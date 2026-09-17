@@ -1,46 +1,51 @@
-import { TEXT } from "@/src/constants/typography";
+import { FocusRing, useFocusProgress } from "@/src/components/ui/fields/FocusRing";
+import { LiquidGlass } from "@/src/components/ui/surface/LiquidGlass";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { ICON_MINT } from "@/src/constants/iconColors";
+import { BLACK_SCRIM_LIGHT, FOREST_SHADE, FOREST_SHADE_TRANSPARENT } from "@/src/constants/rawColors";
+import { SURFACE_GLASS_BG_FAINT, SURFACE_WELL } from "@/src/constants/surfaceAlpha";
+import { hapticTap } from "@/src/utils/haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
-import { Pressable } from "react-native";
+import { ReactNode, useEffect, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { Text, useTheme, XStack } from "tamagui";
+import { Text, XStack } from "tamagui";
+
+type SegmentedTone = "gradient" | "glass";
 
 interface SegmentedControlProps {
   options: string[];
   selected: number;
   onChange: (index: number) => void;
-  size?: "small" | "medium";
+  renderIcon?: (index: number, active: boolean) => ReactNode;
+  tone?: SegmentedTone;
 }
+
+const TONE_STYLES: Record<
+  SegmentedTone,
+  { glass: boolean; activeText: string }
+> = {
+  gradient: { glass: false, activeText: "$nearBlack" },
+  glass: { glass: true, activeText: "$mint" },
+};
+
+const PADDING = 3;
+const GAP = 3;
 
 export function SegmentedControl({
   options,
   selected,
   onChange,
-  size = "medium",
+  renderIcon,
+  tone = "gradient",
 }: SegmentedControlProps) {
-  const theme = useTheme();
-  const [internalSelected, setInternalSelected] = useState(selected);
-
-  useEffect(() => {
-    setInternalSelected(selected);
-  }, [selected]);
-  const gradientColors = [
-    theme.accentGradientStart.get(),
-    theme.accentGradientEnd.get(),
-  ] as const;
-  const pillGlow = "rgba(45,212,191,0.5)";
+  const t = TONE_STYLES[tone];
+  const glowProgress = useFocusProgress(t.glass);
   const [containerWidth, setContainerWidth] = useState(0);
-
-  const isSmall = size === "small";
-  const PADDING = isSmall ? 2 : 3;
-  const GAP = isSmall ? 2 : 3;
-  const py = isSmall ? "$1.5" : "$2";
-  const containerBr = isSmall ? 10 : 14;
-  const pillBr = isSmall ? 8 : 11;
 
   const tabWidth =
     containerWidth > 0
@@ -52,11 +57,11 @@ export function SegmentedControl({
 
   useEffect(() => {
     if (tabWidth > 0) {
-      translateX.value = withTiming(internalSelected * (tabWidth + GAP), {
+      translateX.value = withTiming(selected * (tabWidth + GAP), {
         duration: 200,
       });
     }
-  }, [internalSelected, tabWidth]);
+  }, [selected, tabWidth, translateX]);
 
   const pillStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -64,16 +69,27 @@ export function SegmentedControl({
 
   return (
     <XStack
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br={containerBr}
+      br={16}
       p={PADDING}
       gap={GAP}
-      mb="$3"
       position="relative"
+      overflow={t.glass ? "visible" : "hidden"}
+      bg={SURFACE_WELL}
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 8,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          backgroundColor: BLACK_SCRIM_LIGHT,
+        }}
+      />
       {containerWidth > 0 && (
         <Animated.View
           style={[
@@ -83,45 +99,68 @@ export function SegmentedControl({
               left: PADDING,
               width: tabWidth,
               bottom: PADDING,
-              borderRadius: pillBr,
-              overflow: "hidden",
-              shadowColor: pillGlow,
-              shadowOpacity: 0.5,
-              shadowRadius: 6,
-              elevation: 3,
+              borderRadius: 13,
+              overflow: t.glass ? "visible" : "hidden",
+              shadowColor: ICON_MINT,
+              shadowOffset: { width: 0, height: 0 },
+              shadowRadius: t.glass ? 6 : 4,
+              shadowOpacity: t.glass ? 0 : 0.45,
             },
             pillStyle,
           ]}
         >
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1 }}
-          />
+          {t.glass ? (
+            <>
+              <LiquidGlass
+                intensity={25}
+                borderRadius={13}
+                backgroundColor={SURFACE_GLASS_BG_FAINT}
+              />
+              <FocusRing radius={13} progress={glowProgress} />
+            </>
+          ) : (
+            <>
+              <LinearGradient
+                colors={GRADIENT_PRIMARY}
+                start={{ x: 0, y: 0.4 }}
+                end={{ x: 1, y: 0.6 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <LinearGradient
+                colors={[FOREST_SHADE_TRANSPARENT, FOREST_SHADE]}
+                start={{ x: 0.5, y: 0.35 }}
+                end={{ x: 0.5, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </>
+          )}
         </Animated.View>
       )}
 
-      {options.map((option, i) => (
-        <Pressable
-          key={option}
-          onPress={() => {
-            setInternalSelected(i);
-            onChange(i);
-          }}
-          style={{ flex: 1 }}
-        >
-          <XStack py={py} jc="center" ai="center">
-            <Text
-              fontSize={TEXT.cardMeta}
-              fontWeight="700"
-              color={internalSelected === i ? "$onAccentText" : "$colorMuted"}
-            >
-              {option}
-            </Text>
-          </XStack>
-        </Pressable>
-      ))}
+      {options.map((option, i) => {
+        const active = selected === i;
+        return (
+          <Pressable
+            key={option}
+            onPress={() => {
+              hapticTap();
+              onChange(i);
+            }}
+            style={{ flex: 1 }}
+          >
+            <XStack py={10} px={8} jc="center" ai="center" gap={7}>
+              {renderIcon?.(i, active)}
+              <Text
+                fontSize={13.5}
+                fontWeight="600"
+                color={active ? t.activeText : "$textMuted"}
+              >
+                {option}
+              </Text>
+            </XStack>
+          </Pressable>
+        );
+      })}
     </XStack>
   );
 }

@@ -12,6 +12,8 @@ export const moduleSchema = z
       .min(1, "Name is required")
       .max(60, "Max 60 characters"),
     description: z.string().trim().max(300, "Max 300 characters"),
+    folderId: z.string().optional(),
+    isPublic: z.boolean(),
     flashcards: z.array(
       z.object({
         term: z.string().trim().max(200, "Max 200 characters"),
@@ -37,14 +39,8 @@ export const folderSchema = z.object({
     .max(40, "Max 40 characters"),
 });
 
-export const editModuleSchema = z
+export const editCardsSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(1, "Name is required")
-      .max(60, "Max 60 characters"),
-    description: z.string().trim().max(300, "Max 300 characters"),
     flashcards: z.array(
       z.object({
         id: z.string(),
@@ -66,4 +62,16 @@ export const editModuleSchema = z
 
 export type ModuleForm = z.infer<typeof moduleSchema>;
 export type FolderForm = z.infer<typeof folderSchema>;
-export type EditModuleForm = z.infer<typeof editModuleSchema>;
+export type EditCardsForm = z.infer<typeof editCardsSchema>;
+
+export const moduleDetailsSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .max(60, "Max 60 characters"),
+  description: z.string().trim().max(300, "Max 300 characters"),
+  folderId: z.string().optional(),
+});
+
+export type ModuleDetailsForm = z.infer<typeof moduleDetailsSchema>;

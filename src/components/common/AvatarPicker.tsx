@@ -1,47 +1,61 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { UserAvatar } from "@/src/components/common/UserAvatar";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { ICON_ON_GLASS } from "@/src/constants/iconColors";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { Ban, Camera } from "@tamagui/lucide-icons";
 import * as ImagePicker from "expo-image-picker";
+import { Ban, Camera } from "lucide-react-native";
 import { useState } from "react";
-import { Alert } from "react-native";
-import { Button, Spinner, YStack } from "tamagui";
+import { Alert, Linking } from "react-native";
+import { Spinner, YStack } from "tamagui";
 
 interface AvatarPickerProps {
   size?: number;
+  onError?: (message: string) => void;
 }
 
-export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
-  const { user } = useAuthStore();
+const CAMERA_BADGE = 30;
+const REMOVE_BADGE = 26;
+const BADGE_OFFSET_X = -12;
+const BADGE_OFFSET_Y = -4;
+
+const uriToBlob = (uri: string): Promise<Blob> =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => resolve(xhr.response as Blob);
+    xhr.onerror = () => reject(new Error("Couldn't read the selected file"));
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
+
+export function AvatarPicker({ size = 66, onError }: AvatarPickerProps) {
+  const user = useAuthStore((state) => state.user);
   const [uploading, setUploading] = useState(false);
-  const isDefaultSize = size === 120;
-  const scale = size / 120;
-  const badgeSize = Math.round(36 * scale);
-  const badgeIconSize = Math.round(16 * scale);
-  const badgeOffset = Math.round(-6 * scale);
 
   const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
     setUploading(true);
     try {
+      const blob = await uriToBlob(asset.uri);
       const formData = new FormData();
-      formData.append("avatar", {
-        uri: asset.uri,
-        name: asset.fileName ?? `avatar-${Date.now()}.jpg`,
-        type: asset.mimeType ?? "image/jpeg",
-      } as unknown as Blob);
-
-      const res = await protectedFetch(
-        `${API_BASE_URL}/users/me/avatar`,
-        { method: "PATCH", body: formData },
+      formData.append(
+        "avatar",
+        blob,
+        asset.fileName ?? `avatar-${Date.now()}.jpg`,
       );
+
+      const res = await protectedFetch(`${API_BASE_URL}/users/me/avatar`, {
+        method: "PATCH",
+        body: formData,
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
 
       const data = await res.json();
       useAuthStore.getState().updateAvatar(data.avatarUrl);
     } catch (err) {
       console.error("[AvatarPicker] upload error:", err);
-      Alert.alert("Error", "Failed to upload photo. Please try again");
+      onError?.("Couldn't upload photo. Try again");
     } finally {
       setUploading(false);
     }
@@ -52,13 +66,17 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
     if (status !== "granted") {
       Alert.alert(
         "Permission needed",
-        "Please grant access to your photos in settings to upload a picture.",
+        "Grant access to your photos in Settings to upload a picture.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: () => Linking.openSettings() },
+        ],
       );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -72,22 +90,21 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
   const removeAvatar = async () => {
     setUploading(true);
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/users/me/avatar`,
-        { method: "DELETE" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/users/me/avatar`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error(`Error: ${res.status}`);
       useAuthStore.getState().updateAvatar(null);
     } catch (err) {
       console.error("[AvatarPicker] remove error:", err);
-      Alert.alert("Error", "Failed to remove photo. Please try again");
+      onError?.("Couldn't remove photo. Try again");
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <YStack ai="center" gap="$2" py={isDefaultSize ? "$4" : 0}>
+    <YStack ai="center">
       <YStack width={size} height={size} pos="relative">
         <UserAvatar
           avatarUrl={user?.avatarUrl}
@@ -112,47 +129,29 @@ export function AvatarPicker({ size = 120 }: AvatarPickerProps) {
           </YStack>
         )}
 
-        <Button
+        <IconButton
+          variant="badge"
+          size={CAMERA_BADGE}
           pos="absolute"
-          right={isDefaultSize ? "$-2" : badgeOffset}
-          bottom={isDefaultSize ? "$4" : badgeOffset}
-          circular
-          size={isDefaultSize ? "$3" : badgeSize}
-          bg="$background"
-          bw={2}
-          borderColor="$borderColor"
-          elevation="$2"
-          icon={
-            <Camera
-              size={isDefaultSize ? "$1" : badgeIconSize}
-              color="$colorSecondary"
-            />
-          }
+          right={BADGE_OFFSET_X}
+          bottom={BADGE_OFFSET_Y}
+          icon={<Camera size={15} color={ICON_ON_GLASS} strokeWidth={2} />}
           onPress={pickImage}
           disabled={uploading}
-          pressStyle={{ scale: 0.9 }}
+          accessibilityLabel="Change photo"
         />
 
         {user?.avatarUrl && (
-          <Button
+          <IconButton
+            variant="danger"
+            size={REMOVE_BADGE}
             pos="absolute"
-            right={isDefaultSize ? "$-2" : badgeOffset}
-            top={isDefaultSize ? "$4" : badgeOffset}
-            circular
-            size={isDefaultSize ? "$3" : badgeSize}
-            bg="$background"
-            bw={2}
-            borderColor="$borderColor"
-            elevation="$2"
-            icon={
-              <Ban
-                size={isDefaultSize ? "$1" : badgeIconSize}
-                color="$statusDanger"
-              />
-            }
+            right={BADGE_OFFSET_X}
+            top={BADGE_OFFSET_Y}
+            icon={<Ban size={13} color={ICON_ON_GLASS} strokeWidth={2.2} />}
             onPress={removeAvatar}
             disabled={uploading}
-            pressStyle={{ scale: 0.9 }}
+            accessibilityLabel="Remove photo"
           />
         )}
       </YStack>

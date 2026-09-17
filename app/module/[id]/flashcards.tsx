@@ -3,23 +3,38 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
-import { StatusPill } from "@/src/components/flashcards/StatusPill";
-import { AuroraGlow } from "@/src/components/ui/AuroraGlow";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { SyncingPill } from "@/src/components/ui/feedback/SyncingPill";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
+import { useOptimisticPatch } from "@/src/hooks/useOptimisticPatch";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { SwipeDecision } from "@/src/hooks/useSwipeCard";
+import {
+  EASE_STANDARD,
+  FINISH_INTRO_MS,
+  FINISH_OUTRO_MS,
+} from "@/src/constants/motion";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
-import { protectedFetch } from "@/src/utils/protectedFetch";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
+import { protectedFetch } from "@/src/utils/protectedFetch";
 import { soundComplete } from "@/src/utils/sounds";
-import { Check, RotateCcw, Settings2, X } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
+import { RotateCcw, Settings2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
-import { AppState } from "react-native";
-import { PortalProvider, Text, XStack, YStack } from "tamagui";
-
-const MOCKUP_SCALE = 390 / 290;
+import { AppState, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { PortalProvider, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
+  const currentModule = useGameStore((state) => state.currentModule);
   const activeCards = useGameStore((state) => state.activeCards);
   const currentIndex = useGameStore((state) => state.currentIndex);
   const knownPiles = useGameStore((state) => state.knownPiles);
@@ -34,12 +49,42 @@ export default function FlashcardsGame() {
   const toggleStar = useGameStore((state) => state.toggleStar);
   const addEvent = useStudyQueueStore((state) => state.addEvent);
   const flush = useStudyQueueStore((state) => state.flush);
+  const flushing = useStudyQueueStore((state) => state.flushing);
   const router = useRouter();
+  const screen = useScreenInsets();
 
   const [revertCount, setRevertCount] = useState(0);
   const [lastSwipeDirection, setLastSwipeDirection] = useState<
     "left" | "right"
   >("right");
+  const [decision, setDecision] = useState<SwipeDecision>("idle");
+  const [toast, setToast] = useState<string | null>(null);
+  const [outroDone, setOutroDone] = useState(false);
+
+  const patch = useOptimisticPatch(setToast);
+
+  const reducedMotion = useReducedMotion();
+  const gameFade = useSharedValue(1);
+  const finishFade = useSharedValue(0);
+
+  const gameLayerStyle = useAnimatedStyle(() => ({
+    opacity: gameFade.value,
+    transform: [
+      { scale: 0.98 + gameFade.value * 0.02 },
+      { translateY: (1 - gameFade.value) * 8 },
+    ],
+  }));
+
+  const finishLayerStyle = useAnimatedStyle(() => ({
+    opacity: finishFade.value,
+  }));
+
+  const litSide =
+    decision === "know" || decision === "dragRight"
+      ? "known"
+      : decision === "learning" || decision === "dragLeft"
+        ? "learning"
+        : null;
 
   const handleSwipeRight = useCallback(() => {
     setLastSwipeDirection("right");
@@ -82,20 +127,32 @@ export default function FlashcardsGame() {
     const card = activeCards[currentIndex];
     if (!card) return;
     const newValue = !card.isStarred;
-    toggleStar(card.id);
-    try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/flashcards/${card.id}`,
-        { method: "PATCH", body: JSON.stringify({ isStarred: newValue }) },
-      );
-      if (!res.ok) throw new Error(`Error: ${res.status}`);
-    } catch (err) {
-      console.error("[FlashcardsGame] star error:", err);
-      toggleStar(card.id);
-    }
-  }, [activeCards, currentIndex, toggleStar]);
+    await patch({
+      onLog: "FlashcardsGame",
+      errorMessage: "Couldn't update star. Try again",
+      apply: () => toggleStar(card.id),
+      revert: () => toggleStar(card.id),
+      request: () =>
+        protectedFetch(`${API_BASE_URL}/flashcards/${card.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ isStarred: newValue }),
+        }),
+    });
+  }, [activeCards, currentIndex, toggleStar, patch]);
 
   const isComplete = currentIndex >= activeCards.length;
+
+  const [wasComplete, setWasComplete] = useState(isComplete);
+  if (wasComplete !== isComplete) {
+    setWasComplete(isComplete);
+    if (!isComplete) setOutroDone(false);
+  }
+
+  const phase = !isComplete
+    ? "game"
+    : outroDone || reducedMotion
+      ? "finish"
+      : "outro";
 
   useEffect(() => {
     if (isComplete && activeCards.length > 0) {
@@ -104,6 +161,32 @@ export default function FlashcardsGame() {
       flush();
     }
   }, [isComplete, activeCards.length, flush]);
+
+  useEffect(() => {
+    if (!isComplete || activeCards.length === 0) {
+      gameFade.value = 1;
+      finishFade.value = 0;
+      return;
+    }
+
+    if (reducedMotion) {
+      gameFade.value = 0;
+      finishFade.value = 1;
+      return;
+    }
+
+    gameFade.value = withTiming(0, {
+      duration: FINISH_OUTRO_MS,
+      easing: EASE_STANDARD,
+    });
+    finishFade.value = withTiming(1, {
+      duration: FINISH_OUTRO_MS + FINISH_INTRO_MS,
+      easing: EASE_STANDARD,
+    });
+
+    const timer = setTimeout(() => setOutroDone(true), FINISH_OUTRO_MS);
+    return () => clearTimeout(timer);
+  }, [isComplete, activeCards.length, reducedMotion, gameFade, finishFade]);
 
   useEffect(() => {
     const timer = setInterval(() => flush(), 10000);
@@ -120,85 +203,116 @@ export default function FlashcardsGame() {
   return (
     <PortalProvider>
       <YStack f={1} bg="$background">
-        <AuroraGlow mintOpacity={0.11} limeOpacity={0.09} />
-        <ScreenHeaderFlashcards
-          rightAction={
-            <IconButton
-              icon={<Settings2 size="$1.5" color="$color" />}
-              variant="liquidGlass"
-              onPress={() => {
-                setSettingsSheetOpen(true);
-              }}
+        {phase !== "finish" && (
+          <Animated.View style={[styles.layer, gameLayerStyle]}>
+            <BackgroundMesh preset="auth" animated />
+
+            <ScreenHeaderFlashcards
+              title={currentModule?.name ?? ""}
+              known={knownPiles.length}
+              learning={stillLearningPiles.length}
+              litSide={litSide}
+              showPiles={settings.sortByPiles}
+              rightAction={
+                <IconButton
+                  icon={
+                    <Settings2
+                      size={22}
+                      color={ICON_ON_GLASS}
+                      strokeWidth={1.9}
+                    />
+                  }
+                  variant="liquidGlass"
+                  onPress={() => setSettingsSheetOpen(true)}
+                />
+              }
             />
-          }
-          total={activeCards.length.toString()}
-          progress={currentIndex.toString()}
-          onClose={
-            isComplete
-              ? () => {
-                  restart(true);
-                  router.back();
+
+            {flushing && !isComplete && (
+              <SyncingPill
+                pos="absolute"
+                top={screen.top + 84}
+                right={19}
+                zIndex={10}
+              />
+            )}
+
+            <YStack f={1} px={18} pt={20} pb={20} ai="center" jc="center">
+              {!isComplete && (
+                <YStack width="100%" f={1} maxHeight={730}>
+                  <FlashcardLg
+                    card={activeCards[currentIndex]}
+                    revertDirection={lastSwipeDirection}
+                    showDefinitionFirst={
+                      settings.cardOrientation === "definition_first"
+                    }
+                    onStar={handleToggleStar}
+                    onSwipeLeft={handleSwipeLeft}
+                    onSwipeRight={handleSwipeRight}
+                    onDecisionChange={setDecision}
+                    revertKey={revertCount}
+                    showStamps={settings.sortByPiles}
+                  />
+                </YStack>
+              )}
+            </YStack>
+
+            <YStack
+              alignItems="center"
+              pt={8}
+              pb={screen.insets.bottom + 16}
+              zIndex={3}
+            >
+              <IconButton
+                icon={
+                  <RotateCcw
+                    size={22}
+                    color={currentIndex === 0 ? ICON_MUTED : ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                    opacity={currentIndex === 0 ? 0.45 : 0.85}
+                  />
                 }
-              : undefined
-          }
-        />
+                variant="liquidGlass"
+                size={55}
+                disabled={currentIndex === 0}
+                onPress={handleRevert}
+              />
+            </YStack>
+          </Animated.View>
+        )}
+
+        {phase !== "game" && (
+          <Animated.View
+            style={[StyleSheet.absoluteFill, finishLayerStyle]}
+            pointerEvents={phase === "finish" ? "auto" : "none"}
+          >
+            <FlashcardsComplete
+              onClose={() => {
+                restart(true);
+                router.back();
+              }}
+              total={activeCards.length}
+              known={knownPiles.length}
+              stillLearning={stillLearningPiles.length}
+            />
+          </Animated.View>
+        )}
 
         <FlashcardsSettingsSheet
           open={settingsSheetOpen}
           onOpenChange={setSettingsSheetOpen}
         />
 
-        {isComplete ? (
-          <FlashcardsComplete
-            total={activeCards.length}
-            known={knownPiles.length}
-            stillLearning={stillLearningPiles.length}
-          />
-        ) : (
-          <YStack f={1} mt={12 * MOCKUP_SCALE} overflow="hidden">
-            {settings.sortByPiles && (
-              <XStack justifyContent="space-between" px="$5" mt="$3">
-                <StatusPill
-                  icon={<X size={13 * MOCKUP_SCALE} color="#EF4444" />}
-                  text={stillLearningPiles.length.toString()}
-                  variant="danger"
-                />
-                <StatusPill
-                  icon={<Check size={13 * MOCKUP_SCALE} color="#10B981" />}
-                  text={knownPiles.length.toString()}
-                  variant="success"
-                />
-              </XStack>
-            )}
-
-            <FlashcardLg
-              card={activeCards[currentIndex]}
-              revertDirection={lastSwipeDirection}
-              showDefinitionFirst={
-                settings.cardOrientation === "definition_first"
-              }
-              onStar={handleToggleStar}
-              onSwipeLeft={handleSwipeLeft}
-              onSwipeRight={handleSwipeRight}
-              revertKey={revertCount}
-            />
-
-            <YStack alignItems="center" mb="$5" gap={8 * MOCKUP_SCALE}>
-              <Text fontSize={10 * MOCKUP_SCALE} color="$colorMuted" textAlign="center">
-                ← still learning · know it →
-              </Text>
-              <IconButton
-                icon={<RotateCcw size="$1.5" color="$colorSecondary" />}
-                variant="glass"
-                size={40 * MOCKUP_SCALE}
-                disabled={currentIndex === 0}
-                opacity={currentIndex === 0 ? 0.3 : 1}
-                onPress={handleRevert}
-              />
-            </YStack>
-          </YStack>
-        )}
+        <AppToast
+          open={!!toast}
+          message={toast ?? ""}
+          onDismiss={() => setToast(null)}
+        />
       </YStack>
     </PortalProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  layer: { flex: 1 },
+});

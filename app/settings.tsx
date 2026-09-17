@@ -1,120 +1,60 @@
 import { API_BASE_URL } from "@/src/api/config";
 import { AvatarPicker } from "@/src/components/common/AvatarPicker";
 import { ScreenHeader } from "@/src/components/common/ScreenHeader";
-import { Toggle } from "@/src/components/common/Toggle";
-import { AppButton } from "@/src/components/ui/Button";
-import { GlassSheet } from "@/src/components/ui/GlassSheet";
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
-import { usePreferencesStore } from "@/src/store/usePreferencesStore";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { Row, Rows } from "@/src/components/ui/display/Rows";
+import { ScreenBackground } from "@/src/components/ui/background/ScreenBackground";
+import { SectionTitle } from "@/src/components/ui/display/SectionTitle";
+import { AppSheet } from "@/src/components/ui/overlays/Sheet";
+import { Surface } from "@/src/components/ui/surface/Surfaces";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
+import { ICON_ROSE_SOFT } from "@/src/constants/iconColors";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { usePreferencesStore } from "@/src/store/usePreferencesStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { ChevronRight, LogOut } from "@tamagui/lucide-icons";
+import { controlHeight } from "@/tamagui.config";
+import { LogOut } from "@tamagui/lucide-icons";
 import Constants from "expo-constants";
 import { router } from "expo-router";
-import { ReactNode, useState } from "react";
-import { Alert, Pressable } from "react-native";
+import { useState } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
-function GlassCard({ children }: { children: ReactNode }) {
-  return (
-    <YStack
-      bg="$glassBg"
-      borderWidth={1}
-      borderColor="$glassBorder"
-      br="$cardSoft"
-      overflow="hidden"
-    >
-      {children}
-    </YStack>
-  );
-}
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return (
-    <Text
-      fontSize="$3"
-      color="$auroraMuted"
-      fontWeight="600"
-      tt="uppercase"
-      px="$1"
-    >
-      {children}
-    </Text>
-  );
-}
-
-function SettingsRow({
-  label,
-  value,
-  onPress,
-  disabled,
-  isLast,
-  right,
-}: {
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  disabled?: boolean;
-  isLast?: boolean;
-  right?: ReactNode;
-}) {
-  const content = (
-    <XStack
-      ai="center"
-      jc="space-between"
-      px={18}
-      py={14}
-      opacity={disabled ? 0.45 : 1}
-      borderBottomWidth={isLast ? 0 : 1}
-      borderColor="$glassBorderSubtle"
-    >
-      <YStack f={1} gap="$1">
-        <Text fontSize={16} fontWeight="600" color="$color">
-          {label}
-        </Text>
-        {value && (
-          <Text fontSize={14} color="$colorMuted" mt={1}>
-            {value}
-          </Text>
-        )}
-      </YStack>
-      {right ??
-        (onPress && !disabled && (
-          <ChevronRight size={16} color="$colorMuted" />
-        ))}
-    </XStack>
-  );
-
-  if (!onPress || disabled) {
-    return content;
-  }
-
-  return <Pressable onPress={onPress}>{content}</Pressable>;
-}
-
 export default function SettingsScreen() {
-  const { user } = useAuthStore();
-  const {
-    soundEffectsEnabled,
-    hapticFeedbackEnabled,
-    pushNotificationsEnabled,
-    toggleSoundEffects,
-    toggleHapticFeedback,
-    togglePushNotifications,
-  } = usePreferencesStore();
+  const screen = useScreenInsets();
+  const user = useAuthStore((state) => state.user);
+  const soundEffectsEnabled = usePreferencesStore(
+    (state) => state.soundEffectsEnabled,
+  );
+  const hapticFeedbackEnabled = usePreferencesStore(
+    (state) => state.hapticFeedbackEnabled,
+  );
+  const pushNotificationsEnabled = usePreferencesStore(
+    (state) => state.pushNotificationsEnabled,
+  );
+  const toggleSoundEffects = usePreferencesStore(
+    (state) => state.toggleSoundEffects,
+  );
+  const toggleHapticFeedback = usePreferencesStore(
+    (state) => state.toggleHapticFeedback,
+  );
+  const togglePushNotifications = usePreferencesStore(
+    (state) => state.togglePushNotifications,
+  );
 
   const [deleteSheetOpen, setDeleteSheetOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const logout = async () => {
     try {
-      const res = await protectedFetch(
-        `${API_BASE_URL}/auth/logout`,
-        { method: "POST" },
-      );
+      const res = await protectedFetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+      });
       if (!res.ok) {
         console.error("Logout request failed");
       }
@@ -135,13 +75,10 @@ export default function SettingsScreen() {
     setDeleteError(null);
     setIsDeleting(true);
     try {
-      const response = await protectedFetch(
-        `${API_BASE_URL}/auth/account`,
-        {
-          method: "DELETE",
-          body: JSON.stringify({ password: deletePassword }),
-        },
-      );
+      const response = await protectedFetch(`${API_BASE_URL}/auth/account`, {
+        method: "DELETE",
+        body: JSON.stringify({ password: deletePassword }),
+      });
 
       if (response.status === 403) {
         setDeleteError("Incorrect password");
@@ -156,115 +93,115 @@ export default function SettingsScreen() {
       router.replace("/login");
     } catch (err) {
       console.error("[SettingsScreen] delete account error:", err);
-      Alert.alert("Error", "Failed to delete account");
+      setToast("Couldn't delete the account. Try again");
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <YStack f={1} bg="$background">
+    // <ScreenBackground preset="twilightDuo">
+    // <ScreenBackground preset="finish">
+
+    // <ScreenBackground preset="twilightDuoLime">
+    // <ScreenBackground preset="homeLampWhite">
+    <ScreenBackground preset="finish2">
       <ScreenHeader title="Settings" />
-
       <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <YStack px="$4" gap="$5" pt="$2" pb="$8">
-          <GlowSurface
-            glow
-            glowOpacity={0.1}
-            bg="$glassBg"
-            borderWidth={1}
-            borderColor="$glassBorder"
-            br="$cardSoft"
-            px={18}
-            py={18}
-            fd="row"
-            ai="center"
-            gap={16}
-          >
-            <AvatarPicker size={76} />
-            <YStack f={1}>
-              <Text fontSize={19} fontWeight="800" color="$color">
-                {user?.username ?? "Unknown"}
-              </Text>
-              <Text fontSize={14} color="$colorMuted" mt={3}>
-                {user?.email ?? ""}
-              </Text>
-            </YStack>
-          </GlowSurface>
+        <YStack px="$screenX" gap={18} pt="$2" pb={screen.bottom}>
+          <Surface variant="glass" p={16}>
+            <XStack ai="center" gap={20}>
+              <AvatarPicker size={72} onError={setToast} />
+              <YStack f={1}>
+                <Text fontSize={18} fontWeight="800" color="$color">
+                  {user?.username ?? "Unknown"}
+                </Text>
+                <Text fontSize={14} color="$colorMuted" mt={2}>
+                  {user?.email ?? ""}
+                </Text>
+              </YStack>
+            </XStack>
+          </Surface>
 
-          <GlassCard>
-            <SettingsRow
+          <Rows variant="glass" divider="inset">
+            <Row
               label="Create password"
-              isLast
               onPress={() => router.push("/change-password")}
             />
-          </GlassCard>
+          </Rows>
 
           <YStack gap="$2">
-            <SectionTitle>Preferences</SectionTitle>
-            <GlassCard>
-              <SettingsRow
+            <SectionTitle tone="eyebrow" px={4}>
+              Preferences
+            </SectionTitle>
+            <Rows variant="glass" divider="inset">
+              <Row
                 label="Push notifications"
                 right={
                   <Toggle
+                    size="lg"
                     value={pushNotificationsEnabled}
                     onToggle={togglePushNotifications}
                   />
                 }
               />
-              <SettingsRow
+              <Row
                 label="Sound effects"
                 right={
                   <Toggle
+                    size="lg"
                     value={soundEffectsEnabled}
                     onToggle={toggleSoundEffects}
                   />
                 }
               />
-              <SettingsRow
+              <Row
                 label="Haptic feedback"
-                isLast
                 right={
                   <Toggle
+                    size="lg"
                     value={hapticFeedbackEnabled}
                     onToggle={toggleHapticFeedback}
                   />
                 }
               />
-            </GlassCard>
+            </Rows>
           </YStack>
 
           <YStack gap="$2">
-            <SectionTitle>About</SectionTitle>
-            <GlassCard>
-              <SettingsRow label="Privacy policy" disabled />
-              <SettingsRow label="Terms of service" disabled />
-              <SettingsRow
+            <SectionTitle tone="eyebrow" px={4}>
+              About
+            </SectionTitle>
+            <Rows variant="glass" divider="inset">
+              <Row label="Privacy policy" disabled />
+              <Row label="Terms of service" disabled />
+              <Row
                 label="Version"
                 value={Constants.expoConfig?.version ?? "unknown"}
-                isLast
               />
-            </GlassCard>
+            </Rows>
           </YStack>
 
-          <YStack gap="$3">
+          <YStack gap={9}>
             <AppButton
               variant="secondary"
-              icon={<LogOut size={18} color="$statusDanger" />}
+              icon={<LogOut size={18} color={ICON_ROSE_SOFT} />}
               onPress={logout}
             >
-              <Text color="$statusDanger" fontWeight="600">
+              <Text color="$roseSoft" fontWeight="600">
                 Log Out
               </Text>
             </AppButton>
-            <AppButton variant="danger" onPress={() => setDeleteSheetOpen(true)}>
+            <AppButton
+              variant="danger"
+              onPress={() => setDeleteSheetOpen(true)}
+            >
               Delete account
             </AppButton>
           </YStack>
         </YStack>
       </ScrollView>
-
-      <GlassSheet
+      <AppSheet
         open={deleteSheetOpen}
         onOpenChange={(open: boolean) => {
           setDeleteSheetOpen(open);
@@ -290,12 +227,12 @@ export default function SettingsScreen() {
             </Text>
             <Input
               placeholder="Password"
-              height={49}
+              height={controlHeight.md}
               px={16}
-              br={16}
+              br="$control"
               bg="$glassBg"
               borderWidth={1}
-              borderColor="$glassBorder"
+              borderColor="$borderColor"
               placeholderTextColor="$colorSecondary"
               color="$color"
               secureTextEntry
@@ -321,15 +258,20 @@ export default function SettingsScreen() {
                 <AppButton
                   variant="danger"
                   onPress={handleDeleteAccount}
-                  disabled={isDeleting}
+                  loading={isDeleting}
                 >
-                  {isDeleting ? "Deleting..." : "Delete"}
+                  Delete
                 </AppButton>
               </YStack>
             </XStack>
           </YStack>
         </KeyboardAwareScrollView>
-      </GlassSheet>
-    </YStack>
+      </AppSheet>
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
+    </ScreenBackground>
   );
 }

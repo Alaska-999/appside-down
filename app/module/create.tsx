@@ -1,32 +1,93 @@
 import { API_BASE_URL } from "@/src/api/config";
-import { SectionTitle } from "@/app/(tabs)/index";
 import { FormInput } from "@/src/components/common/FormInput";
-import { FlashcardEditItem } from "@/src/components/flashcards/FlashcardEditItem";
-import { AppButton } from "@/src/components/ui/Button";
-import { ScreenHeader } from "@/src/components/ui/ScreenHeader";
+import { ModalFormHeader } from "@/src/components/common/ModalFormHeader";
+import { CardEditor } from "@/src/components/flashcards/CardEditor";
+import { SortableCardList } from "@/src/components/flashcards/SortableCardList";
+import { AddPill } from "@/src/components/ui/controls/AddPill";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import {
+  KEYBOARD_BAR_HEIGHT,
+  KeyboardBar,
+} from "@/src/components/ui/overlays/KeyboardBar";
+import { PickRow } from "@/src/components/ui/display/PickRow";
+import { Rows } from "@/src/components/ui/display/Rows";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { AppSheet } from "@/src/components/ui/overlays/Sheet";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
+import { ICON_ACCENT, ICON_MUTED_LIGHT } from "@/src/constants/iconColors";
+import { useKeyboardCardLift } from "@/src/hooks/useKeyboardCardLift";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { useServerError } from "@/src/hooks/useServerError";
+import { useFolderSelectionStore } from "@/src/store/useFolderSelectionStore";
 import { protectedFetch } from "@/src/utils/protectedFetch";
 import { ModuleForm, moduleSchema } from "@/src/validation/entities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { FormProvider, useFieldArray, useForm } from "react-hook-form";
-import type { TextInput } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, YStack } from "tamagui";
+import {
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+} from "expo-router";
+import { Folder, Globe } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useWatch,
+} from "react-hook-form";
+import { Platform, TextInput, View } from "react-native";
+import {
+  KeyboardAwareScrollView,
+  useReanimatedKeyboardAnimation,
+} from "react-native-keyboard-controller";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import { Text, XStack, YStack } from "tamagui";
+
+const STICKY_ADD_HEIGHT = 46;
+const STICKY_ADD_KEYBOARD_GAP = 10;
+const STICKY_ADD_CLEARANCE = STICKY_ADD_HEIGHT + 20;
 
 export default function ModuleCreate() {
-  const insets = useSafeAreaInsets();
-  const [serverError, setServerError] = useState<string | null>(null);
-  const { returnFolderId } = useLocalSearchParams<{
+  const screen = useScreenInsets();
+  const { height: keyboardOffset, progress: keyboardProgress } =
+    useReanimatedKeyboardAnimation();
+  const stickyAddStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY:
+          keyboardOffset.value -
+          keyboardProgress.value *
+            (KEYBOARD_BAR_HEIGHT + STICKY_ADD_KEYBOARD_GAP - screen.bottom),
+      },
+    ],
+  }));
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const [discardCardCount, setDiscardCardCount] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const stickyAdd =
+    screen.top + contentHeight + STICKY_ADD_CLEARANCE > viewportHeight;
+  const navigation = useNavigation();
+  const allowLeaveRef = useRef(false);
+  const pendingLeaveActionRef = useRef<Readonly<{ type: string }> | null>(null);
+  const { returnFolderId, returnFolderName } = useLocalSearchParams<{
     returnFolderId?: string;
+    returnFolderName?: string;
   }>();
+  const [folderName, setFolderName] = useState<string | undefined>(
+    returnFolderName,
+  );
 
   const form = useForm<ModuleForm>({
     resolver: zodResolver(moduleSchema),
     defaultValues: {
       name: "",
       description: "",
+      folderId: returnFolderId,
+      isPublic: false,
       flashcards: [
         { term: "", definition: "" },
         { term: "", definition: "" },
@@ -34,24 +95,38 @@ export default function ModuleCreate() {
     },
     mode: "onSubmit",
     reValidateMode: "onSubmit",
+    shouldFocusError: false,
   });
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    setValue,
+    formState: { isSubmitting },
   } = form;
+  const [serverError, setServerError] = useServerError(form);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const flashcardsError =
-    errors.flashcards?.root?.message ??
-    (errors.flashcards as { message?: string } | undefined)?.message;
+  const folderId = useWatch({ control, name: "folderId" });
+  const isPublic = useWatch({ control, name: "isPublic" });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: "flashcards",
   });
 
-  const termRefs = useRef<Array<TextInput | null>>([]);
-  const definitionRefs = useRef<Array<TextInput | null>>([]);
+  const {
+    scrollRef,
+    scrollInnerRef,
+    onViewportLayout,
+    spacerStyle,
+    liftCard,
+    releaseCard,
+  } = useKeyboardCardLift({
+    bottomInset: STICKY_ADD_HEIGHT + STICKY_ADD_KEYBOARD_GAP,
+  });
+
+  const termRefs = useRef<(TextInput | null)[]>([]);
+  const definitionRefs = useRef<(TextInput | null)[]>([]);
   const prevFieldsLength = useRef(fields.length);
 
   useEffect(() => {
@@ -61,53 +136,73 @@ export default function ModuleCreate() {
     prevFieldsLength.current = fields.length;
   }, [fields.length]);
 
+  useFocusEffect(
+    useCallback(() => {
+      const result = useFolderSelectionStore.getState().consumeResult();
+      if (!result) return;
+      setValue("folderId", result.folderId);
+      setFolderName(result.folderName);
+    }, [setValue]),
+  );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (allowLeaveRef.current) return;
+      const data = form.getValues();
+      const filledCards = data.flashcards.filter(
+        (card) => card.term.trim() || card.definition.trim(),
+      ).length;
+      const hasChanges =
+        !!data.name?.trim() || !!data.description?.trim() || filledCards > 0;
+      if (!hasChanges) return;
+
+      e.preventDefault();
+      setDiscardCardCount(filledCards);
+      pendingLeaveActionRef.current = e.data.action;
+      setDiscardOpen(true);
+    });
+    return unsubscribe;
+  }, [navigation, form]);
+
+  const confirmDiscard = () => {
+    allowLeaveRef.current = true;
+    setDiscardOpen(false);
+    if (pendingLeaveActionRef.current) {
+      navigation.dispatch(pendingLeaveActionRef.current);
+    } else {
+      router.back();
+    }
+  };
+
   const focusTerm = (index: number) => termRefs.current[index]?.focus();
   const focusDefinition = (index: number) =>
     definitionRefs.current[index]?.focus();
 
-  useEffect(() => {
-    const subscription = form.watch(() => setServerError(null));
-    return () => subscription.unsubscribe();
-  }, [form]);
-
   const onSubmit = async (data: ModuleForm) => {
     setServerError(null);
-
-    const module = {
-      name: data.name,
-      description: data.description,
-      flashcards: data.flashcards.filter(
-        (card) => card.term || card.definition,
-      ),
-    };
-
     try {
-      const response = await protectedFetch(
-        `${API_BASE_URL}/modules`,
-        {
-          method: "POST",
-          body: JSON.stringify(module),
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to create module");
-      }
+      const response = await protectedFetch(`${API_BASE_URL}/modules`, {
+        method: "POST",
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          isPublic: data.isPublic,
+          folderId: data.folderId,
+          flashcards: data.flashcards.filter(
+            (card) => card.term || card.definition,
+          ),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create module");
       const newModule = await response.json();
-      if (returnFolderId) {
-        await protectedFetch(
-          `${API_BASE_URL}/folders/${returnFolderId}/modules`,
-          {
-            method: "POST",
-            body: JSON.stringify({ moduleId: newModule.id }),
-          },
-        );
-        router.back();
-      } else {
+
+      allowLeaveRef.current = true;
+      if (returnFolderId) router.back();
+      else
         router.replace({
           pathname: "/module/[id]",
           params: { id: newModule.id },
         });
-      }
     } catch (error) {
       console.error(error);
       setServerError("Failed to create module. Please try again");
@@ -117,115 +212,229 @@ export default function ModuleCreate() {
   return (
     <FormProvider {...form}>
       <YStack f={1} bg="$background">
-        <YStack pos="absolute" top={0} left={0} right={0} zi={100}>
-          <ScreenHeader
-            variant="create"
-            onCreate={() => {
-              if (!isSubmitting) handleSubmit(onSubmit)();
-            }}
-          />
-        </YStack>
+        {/* <BackgroundMesh preset="auroraDrift" /> */}
+        {/* <BackgroundMesh preset="crossBeamsMint" /> */}
+        {/* <BackgroundMesh preset="crossBeamsTeal" /> */}
 
-        <KeyboardAwareScrollView
+        {/* <BackgroundMesh preset="crossBeams" /> */}
+        <BackgroundMesh preset="auroraTeal" />
+
+        <View
           style={{ flex: 1 }}
-          bottomOffset={40}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingTop: 100,
-            paddingBottom: insets.bottom + 40,
-            paddingHorizontal: 0,
+          onLayout={(e) => {
+            setViewportHeight(e.nativeEvent.layout.height);
+            onViewportLayout(e);
           }}
         >
-          <YStack width="100%" px="$screenX">
-            <Text
-              color="$color"
-              fontSize={26}
-              fontWeight="800"
-              textAlign="center"
-              mb={24}
+          <KeyboardAwareScrollView
+            ref={scrollRef}
+            innerViewRef={scrollInnerRef}
+            enabled={false}
+            style={{ flex: 1 }}
+            keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              paddingTop: screen.top,
+              paddingBottom:
+                screen.bottom + (stickyAdd ? STICKY_ADD_CLEARANCE : 24),
+            }}
+          >
+            <YStack
+              px="$screenX"
+              onLayout={(e) => setContentHeight(e.nativeEvent.layout.height)}
             >
-              New Module
-            </Text>
-
-            <YStack mb={14}>
-              <FormInput
-                control={control}
-                name="name"
-                placeholder="Untitled Module"
-                variant="glass"
-                inputSize="md"
+              <ModalFormHeader
+                title="New module"
+                saveVariant="primary"
+                onClose={() => router.back()}
+                saveEnabled
+                saveLoading={isSubmitting}
+                onSave={() =>
+                  handleSubmit(onSubmit, (errors) =>
+                    setFormError(
+                      errors.name?.message ??
+                        errors.flashcards?.root?.message ??
+                        (errors.flashcards as { message?: string } | undefined)
+                          ?.message ??
+                        null,
+                    ),
+                  )()
+                }
               />
-            </YStack>
 
-            <YStack mb={24}>
-              <FormInput
-                control={control}
-                name="description"
-                placeholder="Description (optional)"
-                variant="glass"
-                inputSize="md"
-              />
-            </YStack>
+              <YStack mb={14}>
+                <Rows variant="well">
+                  <FormInput
+                    control={control}
+                    name="name"
+                    variant="plain"
+                    placeholder="Module name"
+                    onFocus={releaseCard}
+                    maxLength={60}
+                    showCounter
+                    hideError
+                  />
+                  <FormInput
+                    control={control}
+                    name="description"
+                    variant="plain"
+                    placeholder="Description (optional)"
+                    onFocus={releaseCard}
+                    maxLength={300}
+                    multiline
+                    hideError
+                  />
+                </Rows>
+              </YStack>
 
-            <SectionTitle>FLASHCARDS</SectionTitle>
-
-            <YStack gap={16} mt={11}>
-              {fields.map((field, index) => (
-                <FlashcardEditItem
-                  key={field.id}
-                  control={control}
-                  termName={`flashcards.${index}.term`}
-                  definitionName={`flashcards.${index}.definition`}
-                  index={index}
-                  onRemove={remove}
-                  showRemove={fields.length > 1}
-                  termRef={(node) => {
-                    termRefs.current[index] = node;
-                  }}
-                  definitionRef={(node) => {
-                    definitionRefs.current[index] = node;
-                  }}
-                  onSubmitTerm={() => focusDefinition(index)}
-                  onSubmitDefinition={() => {
-                    if (index + 1 < fields.length) {
-                      focusTerm(index + 1);
-                    } else {
-                      append({ term: "", definition: "" });
-                    }
-                  }}
+              <YStack mb={50} gap={16}>
+                <PickRow
+                  icon={Folder}
+                  value={folderName}
+                  placeholder="Folder"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/folder/pick",
+                      params: folderId ? { currentFolderId: folderId } : {},
+                    })
+                  }
                 />
-              ))}
+                <XStack ai="center" gap={12} px={4}>
+                  <Globe size={18} color={ICON_MUTED_LIGHT} strokeWidth={1.9} />
+                  <Text
+                    f={1}
+                    fontSize={14.5}
+                    fontWeight="500"
+                    color={ICON_ACCENT}
+                  >
+                    Public module
+                  </Text>
+                  <Toggle
+                    value={!!isPublic}
+                    onToggle={() => setValue("isPublic", !isPublic)}
+                    size="md"
+                    accessibilityLabel="Public module"
+                  />
+                </XStack>
+              </YStack>
+
+              <XStack ai="center" jc="space-between" mb={10} pr={10} pl={6}>
+                <Text fontSize={16} fontWeight="600" color="$color">
+                  Cards
+                </Text>
+                <Text fontSize={14.5} color="$textMuted">
+                  {fields.length}
+                </Text>
+              </XStack>
+
+              {/* FIXME: порядок карток не зберігається. У схемі Flashcard немає
+                  поля позиції, а GET /flashcards/module/:id віддає без orderBy,
+                  тож після перезавантаження порядок визначає база. Щоб полагодити:
+                  поле position у Flashcard + міграція, orderBy при вибірці,
+                  індекс у тілі PATCH /modules/:id. Поки не зроблено — цей жест
+                  перетягування нічого не зберігає. */}
+              <SortableCardList
+                ids={fields.map((field) => field.id)}
+                onMove={move}
+                renderItem={({ index, dragGesture, dragging }) => (
+                  <CardEditor
+                    control={control}
+                    termName={`flashcards.${index}.term`}
+                    definitionName={`flashcards.${index}.definition`}
+                    index={index}
+                    onRemove={remove}
+                    canRemove={fields.length > 2}
+                    dragGesture={dragGesture}
+                    dragging={dragging}
+                    onFieldFocus={liftCard}
+                    termRef={(node) => {
+                      termRefs.current[index] = node;
+                    }}
+                    definitionRef={(node) => {
+                      definitionRefs.current[index] = node;
+                    }}
+                    onSubmitTerm={() => focusDefinition(index)}
+                    onSubmitDefinition={() => {
+                      if (index + 1 < fields.length) focusTerm(index + 1);
+                      else append({ term: "", definition: "" });
+                    }}
+                  />
+                )}
+              />
             </YStack>
-
-            {flashcardsError && (
-              <Text color="$statusDanger" fontSize="$2" mt="$2">
-                {flashcardsError}
-              </Text>
+            {!stickyAdd && (
+              <YStack ai="center" mt={18}>
+                <AddPill
+                  label="Add card"
+                  onPress={() => append({ term: "", definition: "" })}
+                />
+              </YStack>
             )}
+            <Animated.View style={spacerStyle} />
+          </KeyboardAwareScrollView>
+        </View>
 
-            {serverError && (
-              <Text
-                color="$statusDanger"
-                fontSize="$3"
-                textAlign="center"
-                mt="$2"
-              >
-                {serverError}
-              </Text>
-            )}
+        <StatusBarScrim />
 
-            <YStack mt={22}>
-              <AppButton
-                variant="outline"
-                size="lg"
-                onPress={() => append({ term: "", definition: "" })}
-              >
-                + Add Card
-              </AppButton>
-            </YStack>
+        {stickyAdd && (
+          <Animated.View
+            pointerEvents="box-none"
+            style={[
+              {
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: screen.bottom,
+                alignItems: "center",
+              },
+              stickyAddStyle,
+            ]}
+          >
+            <AddPill
+              label="Add card"
+              onPress={() => append({ term: "", definition: "" })}
+            />
+          </Animated.View>
+        )}
+
+        <KeyboardBar />
+
+        <AppToast
+          placement="top"
+          open={!!(serverError ?? formError)}
+          message={serverError ?? formError ?? ""}
+          onDismiss={() => {
+            setServerError(null);
+            setFormError(null);
+          }}
+          size="lg"
+        />
+
+        <AppSheet
+          open={discardOpen}
+          onOpenChange={(open) => {
+            if (!open) setDiscardOpen(false);
+          }}
+          title={
+            discardCardCount > 0
+              ? `Discard ${discardCardCount} card${discardCardCount !== 1 ? "s" : ""}?`
+              : "Discard this module?"
+          }
+          subtitle="This can't be undone."
+          blur="strong"
+        >
+          <YStack gap={10}>
+            <AppButton variant="danger" onPress={confirmDiscard}>
+              Discard
+            </AppButton>
+            <AppButton
+              variant="secondary"
+              onPress={() => setDiscardOpen(false)}
+            >
+              Keep editing
+            </AppButton>
           </YStack>
-        </KeyboardAwareScrollView>
+        </AppSheet>
       </YStack>
     </FormProvider>
   );

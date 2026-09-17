@@ -1,116 +1,281 @@
+import { TAB_BAR_CLEARANCE_GAP, TAB_BAR_HEIGHT } from "@/app/(tabs)/_layout";
 import { API_BASE_URL } from "@/src/api/config";
-import { FolderCard } from "@/src/components/cards/FolderCard";
-import { ModuleCard } from "@/src/components/cards/ModuleCard";
-import { SegmentedControl } from "@/src/components/common/SegmentedControl";
 import {
-  FadeTabPanes,
-  useFadeTabs,
-} from "@/src/components/ui/FadeTabPanes";
-import { ScreenBackground } from "@/src/components/ui/ScreenBackground";
-import { SearchField } from "@/src/components/ui/SearchField";
-import { AppSheet } from "@/src/components/ui/Sheet";
-import { TEXT } from "@/src/constants/typography";
+  FolderCard,
+  FolderCardModule,
+} from "@/src/components/cards/FolderCard";
+import { ModuleCard } from "@/src/components/cards/ModuleCard";
+import { SearchEmptyState } from "@/src/components/common/SearchEmptyState";
+import { SegmentedControl } from "@/src/components/common/SegmentedControl";
+import { FadeTabPanes, useFadeTabs } from "@/src/components/ui/motion/FadeTabPanes";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { ScreenBackground } from "@/src/components/ui/background/ScreenBackground";
+import { ScrollToTopButton } from "@/src/components/ui/controls/ScrollToTopButton";
+import { SearchField } from "@/src/components/ui/fields/SearchField";
+import { AppSheet, SheetRow, SheetRows } from "@/src/components/ui/overlays/Sheet";
+import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { ICON_ON_GLASS, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
+import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { Folder, Module } from "@/src/types";
 import { protectedFetch } from "@/src/utils/protectedFetch";
-import { usePaginatedCursorList } from "@/src/hooks/usePaginatedCursorList";
-import { AlignJustify, Check } from "@tamagui/lucide-icons";
+import { screenGutter } from "@/tamagui.config";
 import { router, useFocusEffect } from "expo-router";
-import { memo, useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Text, XStack, YStack } from "tamagui";
+import {
+  AlertTriangle,
+  ArrowDownAZ,
+  ArrowDownUp,
+  Captions,
+  Clock,
+  FolderPlus,
+  Search,
+  Star,
+} from "lucide-react-native";
+import {
+  ComponentType,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  RefreshControl,
+} from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+import { Spinner, Text, useTheme, XStack, YStack } from "tamagui";
+import { KeyboardBar } from "@/src/components/ui/overlays/KeyboardBar";
 
 type SortOption = "date" | "az" | "favs";
 
-const SORT_OPTIONS: { key: SortOption; label: string }[] = [
-  { key: "date", label: "Date added" },
-  { key: "az", label: "A–Z" },
-  { key: "favs", label: "Favorites" },
+const SORT_OPTIONS: {
+  key: SortOption;
+  label: string;
+  icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
+}[] = [
+  { key: "date", label: "Date added", icon: Clock },
+  { key: "az", label: "A–Z", icon: ArrowDownAZ },
+  { key: "favs", label: "Favorites", icon: Star },
 ];
+
+type FolderModulesState = {
+  items: FolderCardModule[];
+  loading: boolean;
+};
 
 function LoadMoreFooter({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
     <YStack py="$3" ai="center">
-      <ActivityIndicator />
+      <Spinner size="small" color="$mint" />
     </YStack>
   );
 }
 
-const MemoFolderCard = memo(
-  FolderCard,
-  (prev, next) => prev.folder === next.folder && prev.index === next.index,
-);
+function LibrarySkeletonList({ height }: { height: number }) {
+  return (
+    <YStack pt={4} gap={11}>
+      <Skeleton height={height} borderRadius="$card" />
+      <Skeleton height={height} borderRadius="$card" />
+      <Skeleton height={height} borderRadius="$card" />
+    </YStack>
+  );
+}
+
 const MemoModuleCard = memo(
   ModuleCard,
   (prev, next) => prev.module === next.module,
 );
 
+const MemoFolderCard = memo(
+  FolderCard,
+  (prev, next) =>
+    prev.folder === next.folder &&
+    prev.expanded === next.expanded &&
+    prev.modules === next.modules &&
+    prev.modulesLoading === next.modulesLoading,
+);
+
 const LIST_STYLE = { flex: 1 } as const;
 
-const LIST_CONTENT_STYLE = {
-  paddingHorizontal: 19,
-  gap: 10,
-  paddingBottom: 32,
-} as const;
-
-const getRowLayout = (_: unknown, index: number) => ({
-  length: 83,
-  offset: 93 * index,
-  index,
-});
-
 const keyById = (item: { id: string }) => item.id;
+
+type ScrollOffsetRef = { current: number };
+
+function useScrollOffsetKeeper(scrollOffsetRef: ScrollOffsetRef) {
+  const [initialOffset] = useState(() => scrollOffsetRef.current);
+  const onScrollSettled = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+    },
+    [scrollOffsetRef],
+  );
+  return { initialOffset, onScrollSettled };
+}
+
+function useScrollToTop(scrollOffsetRef: ScrollOffsetRef) {
+  const scrollY = useSharedValue(scrollOffsetRef.current);
+  const listRef = useRef<FlatList<any>>(null);
+  const onScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollY.value = event.nativeEvent.contentOffset.y;
+    },
+    [scrollY],
+  );
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
+  return { scrollY, listRef, onScroll, scrollToTop };
+}
 
 const FoldersPane = memo(function FoldersPane({
   items,
   loading,
   initialLoading,
+  refreshing,
+  error,
   loadMore,
+  refresh,
+  retry,
   search,
+  bottomPadding,
+  expandedId,
+  folderModules,
+  onToggle,
+  scrollOffsetRef,
 }: {
   items: Folder[];
   loading: boolean;
   initialLoading: boolean;
+  refreshing: boolean;
+  error: boolean;
   loadMore: () => void;
+  refresh: () => void;
+  retry: () => void;
   search: string;
+  bottomPadding: number;
+  expandedId: string | null;
+  folderModules: Record<string, FolderModulesState>;
+  onToggle: (folder: Folder) => void;
+  scrollOffsetRef: ScrollOffsetRef;
 }) {
+  const theme = useTheme();
+  const { initialOffset, onScrollSettled } =
+    useScrollOffsetKeeper(scrollOffsetRef);
+  const { scrollY, listRef, onScroll, scrollToTop } =
+    useScrollToTop(scrollOffsetRef);
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingHorizontal: screenGutter,
+      gap: 13,
+      paddingBottom: bottomPadding,
+    }),
+    [bottomPadding],
+  );
+
   const renderFolder = useCallback(
-    ({ item, index }: { item: Folder; index: number }) => (
-      <MemoFolderCard
-        folder={item}
-        index={index}
-        onPress={() =>
-          router.push({ pathname: "/folder/[id]", params: { id: item.id } })
-        }
-      />
-    ),
-    [],
+    ({ item, index }: { item: Folder; index: number }) => {
+      const state = folderModules[item.id];
+      return (
+        <MemoFolderCard
+          folder={item}
+          index={index}
+          expanded={expandedId === item.id}
+          modules={state?.items}
+          modulesLoading={state?.loading}
+          onToggle={() => onToggle(item)}
+          onPress={() =>
+            router.push({ pathname: "/folder/[id]", params: { id: item.id } })
+          }
+          onModulePress={(moduleId) =>
+            router.push({ pathname: "/module/[id]", params: { id: moduleId } })
+          }
+          onAddModule={() =>
+            router.push({
+              pathname: "/folder/add-modules",
+              params: { folderId: item.id },
+            })
+          }
+          onSettings={() =>
+            router.push({ pathname: "/folder/[id]", params: { id: item.id } })
+          }
+        />
+      );
+    },
+    [expandedId, folderModules, onToggle],
   );
 
   return (
-    <FlatList
-      data={items}
-      style={LIST_STYLE}
-      keyExtractor={keyById}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.4}
-      initialNumToRender={4}
-      getItemLayout={getRowLayout}
-      contentContainerStyle={LIST_CONTENT_STYLE}
-      ListEmptyComponent={
-        !initialLoading ? (
-          <Text color="$colorMuted">
-            {search ? "No folders match your search" : "No folders yet"}
-          </Text>
-        ) : null
-      }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
-      renderItem={renderFolder}
-    />
+    <YStack f={1} pos="relative">
+      <FlatList
+        ref={listRef}
+        data={items}
+        style={LIST_STYLE}
+        keyExtractor={keyById}
+        showsVerticalScrollIndicator={false}
+        contentOffset={{ x: 0, y: initialOffset }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onScrollSettled}
+        onScrollEndDrag={onScrollSettled}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={5}
+        contentContainerStyle={contentContainerStyle}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme.accentGradientStart.get()}
+          />
+        }
+        ListEmptyComponent={
+          initialLoading ? (
+            <LibrarySkeletonList height={92} />
+          ) : error ? (
+            <StateCard
+              tone="error"
+              icon={AlertTriangle}
+              title="Couldn't load folders"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Try again"
+              onButtonPress={retry}
+            />
+          ) : search ? (
+            <SearchEmptyState
+              query={search}
+              noun="folders"
+              onCreate={() => router.push("/folder/create")}
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={FolderPlus}
+              title="No folders yet"
+              subtitle="Group your modules by topic, course or exam."
+              buttonLabel="Create a folder"
+              onButtonPress={() => router.push("/folder/create")}
+            />
+          )
+        }
+        ListFooterComponent={
+          <LoadMoreFooter visible={loading && !initialLoading} />
+        }
+        renderItem={renderFolder}
+      />
+      <ScrollToTopButton
+        scrollY={scrollY}
+        bottomOffset={bottomPadding}
+        onPress={scrollToTop}
+      />
+    </YStack>
   );
 });
 
@@ -118,17 +283,42 @@ const ModulesPane = memo(function ModulesPane({
   items,
   loading,
   initialLoading,
+  refreshing,
+  error,
   loadMore,
+  refresh,
+  retry,
   search,
   sortOrder,
+  bottomPadding,
+  scrollOffsetRef,
 }: {
   items: Module[];
   loading: boolean;
   initialLoading: boolean;
+  refreshing: boolean;
+  error: boolean;
   loadMore: () => void;
+  refresh: () => void;
+  retry: () => void;
   search: string;
   sortOrder: SortOption;
+  bottomPadding: number;
+  scrollOffsetRef: ScrollOffsetRef;
 }) {
+  const theme = useTheme();
+  const { initialOffset, onScrollSettled } =
+    useScrollOffsetKeeper(scrollOffsetRef);
+  const { scrollY, listRef, onScroll, scrollToTop } =
+    useScrollToTop(scrollOffsetRef);
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingHorizontal: screenGutter,
+      gap: 11,
+      paddingBottom: bottomPadding,
+    }),
+    [bottomPadding],
+  );
   const renderModule = useCallback(
     ({ item }: { item: Module }) => (
       <MemoModuleCard
@@ -142,45 +332,103 @@ const ModulesPane = memo(function ModulesPane({
   );
 
   return (
-    <FlatList
-      data={items}
-      style={LIST_STYLE}
-      keyExtractor={keyById}
-      showsVerticalScrollIndicator={false}
-      onEndReached={loadMore}
-      onEndReachedThreshold={0.4}
-      initialNumToRender={4}
-      getItemLayout={getRowLayout}
-      contentContainerStyle={LIST_CONTENT_STYLE}
-      ListEmptyComponent={
-        !initialLoading ? (
-          <Text color="$colorMuted">
-            {search
-              ? "No modules match your search"
-              : sortOrder === "favs"
-                ? "No favorite modules yet"
-                : "No modules yet"}
-          </Text>
-        ) : null
-      }
-      ListFooterComponent={
-        <LoadMoreFooter visible={loading && !initialLoading} />
-      }
-      renderItem={renderModule}
-    />
+    <YStack f={1} pos="relative">
+      <FlatList
+        ref={listRef}
+        data={items}
+        style={LIST_STYLE}
+        keyExtractor={keyById}
+        showsVerticalScrollIndicator={false}
+        contentOffset={{ x: 0, y: initialOffset }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onScrollSettled}
+        onScrollEndDrag={onScrollSettled}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        initialNumToRender={6}
+        contentContainerStyle={contentContainerStyle}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme.accentGradientStart.get()}
+          />
+        }
+        ListEmptyComponent={
+          initialLoading ? (
+            <LibrarySkeletonList height={74} />
+          ) : error ? (
+            <StateCard
+              tone="error"
+              icon={AlertTriangle}
+              title="Couldn't load modules"
+              subtitle="Looks like a connection hiccup. Your data is safe — try again."
+              buttonLabel="Try again"
+              onButtonPress={retry}
+            />
+          ) : search ? (
+            <SearchEmptyState
+              query={search}
+              noun="modules"
+              onCreate={() => router.push("/module/create")}
+            />
+          ) : sortOrder === "favs" ? (
+            <StateCard
+              tone="empty"
+              icon={Star}
+              title="No favorites yet"
+              subtitle="Star a module and it will show up here."
+            />
+          ) : (
+            <StateCard
+              tone="empty"
+              icon={Captions}
+              title="No modules yet"
+              subtitle="Your first deck is one tap away."
+              buttonLabel="Create a module"
+              onButtonPress={() => router.push("/module/create")}
+            />
+          )
+        }
+        ListFooterComponent={
+          <LoadMoreFooter visible={loading && !initialLoading} />
+        }
+        renderItem={renderModule}
+      />
+      <ScrollToTopButton
+        scrollY={scrollY}
+        bottomOffset={bottomPadding}
+        onPress={scrollToTop}
+      />
+    </YStack>
   );
 });
 
 export default function Library() {
-  const insets = useSafeAreaInsets();
+  const screen = useScreenInsets();
   const tabs = useFadeTabs(0);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search.trim());
+  const [searchOpen, setSearchOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOption>("date");
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const foldersTabActive = tabs.index === 0;
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [folderModules, setFolderModules] = useState<
+    Record<string, FolderModulesState>
+  >({});
+  const [toast, setToast] = useState<string | null>(null);
+  const foldersScrollOffsetRef = useRef(0);
+  const modulesScrollOffsetRef = useRef(0);
+  const expandedIdRef = useRef<string | null>(null);
+  const hasFocusedRef = useRef(false);
+  const tabBarClearance =
+    TAB_BAR_HEIGHT + screen.insets.bottom + TAB_BAR_CLEARANCE_GAP;
 
   const fetchModulesPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20", sort: sortOrder });
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
       `${API_BASE_URL}/modules?${params.toString()}`,
@@ -191,7 +439,9 @@ export default function Library() {
       data: page.data.map((m: any) => ({
         ...m,
         itemsCount: m._count?.flashcards ?? 0,
-        folderIds: m.folderId ? [m.folderId] : [],
+        known: m.progress?.known ?? 0,
+        total: m.progress?.total ?? 0,
+        folderIds: (m.folders ?? []).map((f: { id: string }) => f.id),
       })),
       nextCursor: page.nextCursor,
     };
@@ -199,12 +449,12 @@ export default function Library() {
 
   const modulesList = usePaginatedCursorList<Module>(
     fetchModulesPage,
-    `${search}|${sortOrder}`,
+    `${debouncedSearch}|${sortOrder}`,
   );
 
   const fetchFoldersPage = async (cursor: string | null) => {
     const params = new URLSearchParams({ limit: "20" });
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
     if (cursor) params.set("cursor", cursor);
     const res = await protectedFetch(
       `${API_BASE_URL}/folders?${params.toString()}`,
@@ -213,53 +463,133 @@ export default function Library() {
     return res.json();
   };
 
-  const foldersList = usePaginatedCursorList<Folder>(fetchFoldersPage, search);
+  const foldersList = usePaginatedCursorList<Folder>(
+    fetchFoldersPage,
+    debouncedSearch,
+  );
+
+  const loadFolderModules = useCallback(async (folderId: string) => {
+    setFolderModules((prev) => ({
+      ...prev,
+      [folderId]: { items: prev[folderId]?.items ?? [], loading: true },
+    }));
+    try {
+      const res = await protectedFetch(`${API_BASE_URL}/folders/${folderId}`);
+      if (!res.ok) throw new Error(`Folder error: ${res.status}`);
+      const data = await res.json();
+      const items: FolderCardModule[] = (data.modules ?? []).map((m: any) => ({
+        id: m.id,
+        name: m.name,
+        itemsCount: m._count?.flashcards ?? 0,
+        isFavorite: m.isFavorite,
+      }));
+      setFolderModules((prev) => ({
+        ...prev,
+        [folderId]: { items, loading: false },
+      }));
+    } catch (err) {
+      console.error("[Library] folder modules error:", err);
+      setFolderModules((prev) => ({
+        ...prev,
+        [folderId]: { items: prev[folderId]?.items ?? [], loading: false },
+      }));
+      setToast("Couldn't load modules. Try again");
+    }
+  }, []);
+
+  useEffect(() => {
+    expandedIdRef.current = expandedId;
+  }, [expandedId]);
 
   useFocusEffect(
     useCallback(() => {
-      modulesList.refresh();
-      foldersList.refresh();
-    }, [modulesList.refresh, foldersList.refresh]),
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        return;
+      }
+      modulesList.reload();
+      foldersList.reload();
+      setFolderModules({});
+      if (expandedIdRef.current) {
+        loadFolderModules(expandedIdRef.current);
+      }
+    }, [modulesList.reload, foldersList.reload, loadFolderModules]),
   );
 
-  const currentSortLabel =
-    SORT_OPTIONS.find((o) => o.key === sortOrder)?.label ?? "Sort";
+  const toggleFolder = useCallback(
+    (folder: Folder) => {
+      setExpandedId((current) => (current === folder.id ? null : folder.id));
+      if (expandedId !== folder.id && !folderModules[folder.id]?.items.length) {
+        loadFolderModules(folder.id);
+      }
+    },
+    [expandedId, folderModules, loadFolderModules],
+  );
+
+  const toggleSearch = () => {
+    setSearchOpen((open) => {
+      if (open) setSearch("");
+      return !open;
+    });
+  };
 
   return (
-    <ScreenBackground>
-      <YStack f={1} gap="$3" pt={insets.top}>
-        <YStack px="$screenX" gap="$3">
-          <Text fontSize={TEXT.pageTitle} fontWeight="800" color="$color">
-            Library
-          </Text>
-
-          <SegmentedControl
-            options={["Folders", "Modules"]}
-            selected={tabs.index}
-            onChange={tabs.onChange}
-          />
-
-          <XStack gap="$2" ai="center">
-            <SearchField value={search} onChangeText={setSearch} f={1} />
-
-            <Pressable onPress={() => setSortSheetOpen(true)}>
-              <XStack
-                bg="$glassBg"
-                br={999}
-                px={14}
-                py={14}
-                ai="center"
-                gap={7}
-                borderWidth={1}
-                borderColor="$glassBorder"
-              >
-                <AlignJustify size={16} color="$color" />
-                <Text fontSize={TEXT.pill} fontWeight="600" color="$color">
-                  {currentSortLabel}
-                </Text>
-              </XStack>
-            </Pressable>
+    <ScreenBackground preset="finish">
+      <YStack f={1} pt={screen.top}>
+        <YStack px="$screenX">
+          <XStack ai="center" jc="space-between" gap={12}>
+            <Text
+              fontSize={31}
+              fontWeight="800"
+              letterSpacing={-0.62}
+              color="$color"
+            >
+              Library
+            </Text>
+            <XStack gap={8}>
+              <IconButton
+                variant="liquidGlass"
+                icon={
+                  <Search size={22} color={ICON_ON_GLASS} strokeWidth={1.9} />
+                }
+                onPress={toggleSearch}
+                accessibilityLabel="Search library"
+              />
+              <IconButton
+                variant="liquidGlass"
+                disabled={foldersTabActive}
+                icon={
+                  <ArrowDownUp
+                    size={22}
+                    color={foldersTabActive ? ICON_SUBTLE : ICON_ON_GLASS}
+                    strokeWidth={1.9}
+                  />
+                }
+                onPress={() => setSortSheetOpen(true)}
+                accessibilityLabel="Sort library"
+              />
+            </XStack>
           </XStack>
+
+          {searchOpen && (
+            <YStack pt={14}>
+              <SearchField
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search your library"
+                autoFocus
+              />
+            </YStack>
+          )}
+
+          <YStack pt={14}>
+            <SegmentedControl
+              options={["Folders", "Modules"]}
+              selected={tabs.index}
+              onChange={tabs.onChange}
+            />
+          </YStack>
+          <YStack h={22} />
         </YStack>
 
         <FadeTabPanes controller={tabs}>
@@ -267,16 +597,31 @@ export default function Library() {
             items={foldersList.items}
             loading={foldersList.loading}
             initialLoading={foldersList.initialLoading}
+            refreshing={foldersList.refreshing}
+            error={foldersList.error}
             loadMore={foldersList.loadMore}
-            search={search}
+            refresh={foldersList.refresh}
+            retry={foldersList.retry}
+            search={debouncedSearch}
+            bottomPadding={tabBarClearance}
+            expandedId={expandedId}
+            folderModules={folderModules}
+            onToggle={toggleFolder}
+            scrollOffsetRef={foldersScrollOffsetRef}
           />
           <ModulesPane
             items={modulesList.items}
             loading={modulesList.loading}
             initialLoading={modulesList.initialLoading}
+            refreshing={modulesList.refreshing}
+            error={modulesList.error}
             loadMore={modulesList.loadMore}
-            search={search}
+            refresh={modulesList.refresh}
+            retry={modulesList.retry}
+            search={debouncedSearch}
             sortOrder={sortOrder}
+            bottomPadding={tabBarClearance}
+            scrollOffsetRef={modulesScrollOffsetRef}
           />
         </FadeTabPanes>
       </YStack>
@@ -285,41 +630,32 @@ export default function Library() {
         open={sortSheetOpen}
         onOpenChange={setSortSheetOpen}
         title="Sort by"
-        snapPoints={[30]}
-        plain
       >
-        <YStack gap="$2" p="$4">
+        <SheetRows>
           {SORT_OPTIONS.map((option) =>
             tabs.index === 0 && option.key === "favs" ? null : (
-              <Pressable
+              <SheetRow
                 key={option.key}
+                icon={option.icon}
+                label={option.label}
+                selected={sortOrder === option.key}
                 onPress={() => {
                   setSortOrder(option.key);
                   setSortSheetOpen(false);
                 }}
-              >
-                <XStack
-                  bg={
-                    sortOrder === option.key ? "$glassBgStrong" : "transparent"
-                  }
-                  br={19}
-                  px={19}
-                  py={16}
-                  ai="center"
-                  jc="space-between"
-                >
-                  <Text fontSize="$5" fontWeight="600" color="$color">
-                    {option.label}
-                  </Text>
-                  {sortOrder === option.key && (
-                    <Check size={18} color="$accentGradientStart" />
-                  )}
-                </XStack>
-              </Pressable>
+              />
             ),
           )}
-        </YStack>
+        </SheetRows>
       </AppSheet>
+
+      <AppToast
+        open={!!toast}
+        message={toast ?? ""}
+        onDismiss={() => setToast(null)}
+      />
+
+      <KeyboardBar />
     </ScreenBackground>
   );
 }

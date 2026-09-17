@@ -1,9 +1,14 @@
-import { GlowSurface } from "@/src/components/ui/GlowSurface";
+import { GradientBorder } from "@/src/components/ui/surface/GradientBorder";
+import { ICON_MINT, ICON_MINT_LIGHT, ICON_MINT_TINT_DARK } from "@/src/constants/iconColors";
+import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
+import { SURFACE_MINT_GLASS_BG } from "@/src/constants/surfaceAlpha";
+import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
-import { View } from "react-native";
-import { Text, useTheme, XStack, YStack } from "tamagui";
+import { Check } from "lucide-react-native";
+import { StyleSheet } from "react-native";
+import { Text, XStack, YStack } from "tamagui";
 
-const DEFAULT_DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const DEFAULT_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 interface StreakCardProps {
   currentStreak: number;
@@ -16,64 +21,65 @@ export function StreakCard({
   todayIndex,
   dayLabels = DEFAULT_DAY_LABELS,
 }: StreakCardProps) {
-  const theme = useTheme();
-  const gradientColors = [
-    theme.gradientHeroStart.get(),
-    theme.gradientHeroMid.get(),
-    theme.gradientHeroEnd.get(),
-  ] as const;
-  const inactiveDotColor = "rgba(255,255,255,0.3)";
+  const days = (
+    <XStack jc="space-between">
+      {dayLabels.map((label, i) => {
+        const isNow = i === todayIndex;
+        const isOn = i < todayIndex && i >= todayIndex - currentStreak;
+
+        return (
+          <YStack key={`${label}-${i}`} ai="center" gap={6}>
+            <YStack
+              width={28}
+              height={28}
+              br={10}
+              ai="center"
+              jc="center"
+              overflow="hidden"
+              pos="relative"
+              bg={isOn ? undefined : isNow ? SURFACE_MINT_GLASS_BG : "$glassBg"}
+              borderWidth={isNow ? 1.5 : isOn ? 0 : 1}
+              borderColor={isNow ? withAlpha(ICON_MINT_LIGHT, 0.9) : "$glassBgStrong"}
+              shadowColor={ICON_MINT}
+              shadowOffset={{ width: 0, height: 0 }}
+              shadowRadius={isOn ? 7 : isNow ? 8 : 0}
+              shadowOpacity={isOn ? 0.8 : isNow ? 0.7 : 0}
+            >
+              {isOn && (
+                <>
+                  <LinearGradient
+                    colors={GRADIENT_PRIMARY}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <Check size={14} color={ICON_MINT_TINT_DARK} strokeWidth={2.8} />
+                </>
+              )}
+            </YStack>
+            <Text fontSize={10.5} fontWeight="600" color={isNow ? "$mintLight" : "$colorMuted"}>
+              {label}
+            </Text>
+          </YStack>
+        );
+      })}
+    </XStack>
+  );
 
   return (
-    <GlowSurface
-      glow
-      br="$card"
-      glowColor="$glowHero"
-      glowRadius={40}
-      glowOffset={{ width: 0, height: 19 }}
-      elevation={10}
-      overflow="hidden"
-      pos="relative"
-    >
-      <LinearGradient
-        colors={gradientColors}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0.35 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <LinearGradient
-        colors={["rgba(255,255,255,0.13)", "rgba(255,255,255,0)"]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0.55, y: 0.75 }}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <YStack p="$cardPad" gap="$1.5">
-        <XStack ai="center" gap="$2.5">
-          <Text fontSize={36}>🔥</Text>
-          <Text fontSize={36} fontWeight="900" color="white">
-            {currentStreak}
-          </Text>
-        </XStack>
-        <Text fontSize={15} fontWeight="600" color="rgba(255,255,255,0.85)">
-          day streak{currentStreak === 0 ? " · keep going" : ""}
+    <YStack br="$card" overflow="hidden" pos="relative" bg="$surfaceCard" p={16} px={17}>
+      <GradientBorder radius={23} preset="surf" />
+
+      <XStack ai="baseline" gap={6} mb={15}>
+        <Text fontSize={26} fontWeight="900" letterSpacing={-0.5} color="$color">
+          {currentStreak}
         </Text>
-        <XStack gap={5} mt={9}>
-          {dayLabels.map((label, i) => (
-            <View
-              key={`${label}-${i}`}
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: 4,
-                backgroundColor: i < todayIndex ? "white" : inactiveDotColor,
-                borderWidth: i === todayIndex ? 1.5 : 0,
-                borderColor: "white",
-              }}
-            />
-          ))}
-        </XStack>
-      </YStack>
-    </GlowSurface>
+        <Text fontSize={12.5} fontWeight="600" color="$colorMuted">
+          day streak
+        </Text>
+      </XStack>
+
+      {days}
+    </YStack>
   );
 }
