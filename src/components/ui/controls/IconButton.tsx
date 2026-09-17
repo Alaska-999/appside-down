@@ -92,7 +92,10 @@ export function IconButton({
 }: IconButtonProps) {
   const press = usePressScale(0.92);
 
+  const disabled = Boolean(rest.disabled);
+
   const handlePress = () => {
+    if (disabled) return;
     hapticTap();
     onPress?.();
   };
@@ -184,9 +187,10 @@ export function IconButton({
     const radius = resolvedSize / 2;
     return (
       <Pressable
+        disabled={disabled}
         onPress={handlePress}
-        onPressIn={press.onPressIn}
-        onPressOut={press.onPressOut}
+        onPressIn={disabled ? undefined : press.onPressIn}
+        onPressOut={disabled ? undefined : press.onPressOut}
         hitSlop={Math.max(0, (44 - resolvedSize) / 2)}
       >
         {({ pressed }) => (

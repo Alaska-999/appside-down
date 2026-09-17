@@ -1,5 +1,5 @@
 import { GRADIENT_PRIMARY } from "@/src/constants/gradients";
-import { ICON_MINT } from "@/src/constants/iconColors";
+import { ICON_MINT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { SURFACE_MINT_GLASS_BG } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
@@ -37,13 +37,16 @@ export function FilterChip({
   variant = "default",
   icon,
   onPress,
+  disabled,
 }: {
   label: string;
   variant?: FilterChipVariant;
   icon?: ReactNode;
   onPress?: () => void;
+  disabled?: boolean;
 }) {
   const s = CHIP_STYLES[variant];
+  const active = onPress && !disabled;
 
   return (
     <XStack
@@ -54,21 +57,21 @@ export function FilterChip({
       gap={6}
       overflow="hidden"
       bg={s.bg}
+      opacity={disabled ? 0.5 : 1}
       borderWidth={variant === "solid" ? 0 : 1}
       borderColor={s.borderColor}
       hitSlop={4}
+      disabled={disabled}
       onPress={
-        onPress
+        active
           ? () => {
               hapticTap();
-              onPress();
+              onPress?.();
             }
           : undefined
       }
-      {...(onPress
-        ? { pressStyle: { scale: 0.97 }, transition: "press" }
-        : null)}
-      {...(variant !== "default"
+      {...(active ? { pressStyle: { scale: 0.97 }, transition: "press" } : null)}
+      {...(variant !== "default" && !disabled
         ? {
             shadowColor: ICON_MINT,
             shadowOffset: { width: 0, height: 0 },
@@ -86,7 +89,11 @@ export function FilterChip({
         />
       )}
       {icon}
-      <Text fontSize={13} fontWeight={s.fontWeight} color={s.textColor}>
+      <Text
+        fontSize={13}
+        fontWeight={s.fontWeight}
+        color={disabled ? ICON_SUBTLE : s.textColor}
+      >
         {label}
       </Text>
     </XStack>

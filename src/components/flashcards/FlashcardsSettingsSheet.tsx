@@ -6,33 +6,12 @@ import { ICON_DANGER } from "@/src/constants/iconColors";
 import { BLACK_SCRIM_FAINT } from "@/src/constants/rawColors";
 import { useGameStore } from "@/src/store/useGameStore";
 import { Layers, RotateCcw, Shuffle, Volume2 } from "lucide-react-native";
-import { Text, View, XStack, YStack } from "tamagui";
+import { Text, View, YStack } from "tamagui";
+import { SoonBadge } from "@/src/components/ui/SoonBadge";
 
 interface FlashcardsSettingsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-function SoonBadge() {
-  return (
-    <XStack
-      br={999}
-      px={8}
-      py={3}
-      borderWidth={1}
-      borderColor="$borderColor"
-    >
-      <Text
-        fontSize={9.5}
-        fontWeight="800"
-        letterSpacing={0.76}
-        tt="uppercase"
-        color="$colorMuted"
-      >
-        soon
-      </Text>
-    </XStack>
-  );
 }
 
 export function FlashcardsSettingsSheet({
