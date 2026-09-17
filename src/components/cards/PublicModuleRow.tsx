@@ -1,5 +1,5 @@
 import { AppCard } from "@/src/components/ui/surface/Card";
-import { ICON_MINT_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
+import { ICON_LIME_LIGHT, ICON_SUBTLE } from "@/src/constants/iconColors";
 import { hapticTap } from "@/src/utils/haptics";
 import { pluralize } from "@/src/utils/plural";
 import { BookmarkCheck, ChevronRight } from "lucide-react-native";
@@ -43,14 +43,15 @@ export function PublicModuleRow({ module, onPress }: PublicModuleRowProps) {
     >
       <YStack pos="relative" br={ROW_RADIUS} overflow="hidden">
         <AppCard
-          variant="row"
-          tone="mint"
+          variant="glow"
+          tone="neutral"
           size="lg"
           pressed={pressed}
           height={ROW_HEIGHT}
           px={18}
           py={0}
           jc="center"
+          glow={1}
         >
           <XStack ai="center" gap={12}>
             <YStack f={1} minWidth={0}>
@@ -63,12 +64,7 @@ export function PublicModuleRow({ module, onPress }: PublicModuleRowProps) {
               >
                 {module.name}
               </Text>
-              <Text
-                fontSize={12.5}
-                color="$textMuted"
-                mt={3}
-                numberOfLines={1}
-              >
+              <Text fontSize={12.5} color="$textMuted" mt={3} numberOfLines={1}>
                 {author} · {pluralize(count, "term")}
                 {saves > 0 ? ` · ${pluralize(saves, "save")}` : ""}
               </Text>
@@ -77,7 +73,7 @@ export function PublicModuleRow({ module, onPress }: PublicModuleRowProps) {
             {module.savedCopyId && (
               <BookmarkCheck
                 size={18}
-                color={ICON_MINT_LIGHT}
+                color={ICON_LIME_LIGHT}
                 strokeWidth={2}
               />
             )}

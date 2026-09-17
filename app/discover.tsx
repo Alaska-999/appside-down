@@ -58,12 +58,7 @@ function LoadMoreFooter({
   if (!visible) return null;
   return (
     <YStack py="$3" ai="center">
-      <AppButton
-        variant="secondary"
-        size="sm"
-        loading={loading}
-        onPress={onPress}
-      >
+      <AppButton variant="glass" size="sm" loading={loading} onPress={onPress}>
         Show more
       </AppButton>
     </YStack>
@@ -114,7 +109,7 @@ export default function DiscoverScreen() {
   };
 
   return (
-    <ScreenBackground preset="finish">
+    <ScreenBackground preset="twilightDuoLime">
       <YStack f={1}>
         <ScreenHeader title="Discover" />
 
