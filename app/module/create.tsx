@@ -331,6 +331,12 @@ export default function ModuleCreate() {
                 </Text>
               </XStack>
 
+              {/* FIXME: порядок карток не зберігається. У схемі Flashcard немає
+                  поля позиції, а GET /flashcards/module/:id віддає без orderBy,
+                  тож після перезавантаження порядок визначає база. Щоб полагодити:
+                  поле position у Flashcard + міграція, orderBy при вибірці,
+                  індекс у тілі PATCH /modules/:id. Поки не зроблено — цей жест
+                  перетягування нічого не зберігає. */}
               <SortableCardList
                 ids={fields.map((field) => field.id)}
                 onMove={move}
