@@ -418,6 +418,7 @@ export default function ModuleCreate() {
           open={folderSheetOpen}
           onOpenChange={setFolderSheetOpen}
           title="Folder"
+          scrollable
         >
           <SheetRows tone="surface">
             <SheetRow

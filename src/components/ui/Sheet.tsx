@@ -58,6 +58,8 @@ const SHEET_BLUR: Record<SheetBlur, number> = {
   strong: 56,
 };
 
+const SCROLLABLE_SHEET_SNAP_POINTS = [92];
+
 interface AppSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -65,6 +67,7 @@ interface AppSheetProps {
   subtitle?: string;
   blur?: SheetBlur;
   snapPoints?: number[];
+  scrollable?: boolean;
   keepKeyboard?: boolean;
   growWithKeyboard?: boolean;
   leftAction?: ReactNode;
@@ -79,6 +82,7 @@ export function AppSheet({
   subtitle,
   blur = "default",
   snapPoints,
+  scrollable = false,
   keepKeyboard = false,
   growWithKeyboard = false,
   leftAction,
@@ -91,8 +95,10 @@ export function AppSheet({
   const hasHeaderActions = Boolean(leftAction || rightAction);
   const keyboardVisible = useKeyboardState((state) => state.isVisible);
   const grown = growWithKeyboard && keyboardVisible;
-  const fitContent = !snapPoints;
-  const activeSnapPoints = grown ? [100] : snapPoints;
+  const boundedSnapPoints =
+    snapPoints ?? (scrollable ? SCROLLABLE_SHEET_SNAP_POINTS : undefined);
+  const fitContent = !boundedSnapPoints;
+  const activeSnapPoints = grown ? [100] : boundedSnapPoints;
 
   return (
     <Sheet
@@ -233,14 +239,25 @@ export function AppSheet({
           </Text>
         )}
 
-        <YStack
-          f={1}
-          pos="relative"
-          zIndex={1}
-          onPress={keepKeyboard ? undefined : Keyboard.dismiss}
-        >
-          {children}
-        </YStack>
+        {scrollable ? (
+          <Sheet.ScrollView
+            f={1}
+            pos="relative"
+            zIndex={1}
+            showsVerticalScrollIndicator={false}
+          >
+            {children}
+          </Sheet.ScrollView>
+        ) : (
+          <YStack
+            f={1}
+            pos="relative"
+            zIndex={1}
+            onPress={keepKeyboard ? undefined : Keyboard.dismiss}
+          >
+            {children}
+          </YStack>
+        )}
       </Sheet.Frame>
     </Sheet>
   );

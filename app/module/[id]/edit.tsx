@@ -207,6 +207,7 @@ export default function ModuleEditScreen() {
           open={folderSheetOpen}
           onOpenChange={setFolderSheetOpen}
           title="Folder"
+          scrollable
         >
           <SheetRows tone="surface">
             <SheetRow
