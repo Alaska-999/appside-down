@@ -16,6 +16,7 @@ interface AuthState {
   setToken: (token: string) => void;
   logout: (opts?: { expired?: boolean }) => Promise<void>;
   updateAvatar: (avatarUrl: string | null) => void;
+  updateProfile: (patch: Partial<UserProfile>) => void;
   _setHydrated: (val: boolean) => void;
 }
 
@@ -54,6 +55,11 @@ export const useAuthStore = create<AuthState>()(
       updateAvatar: (avatarUrl) =>
         set((state) => ({
           user: state.user ? { ...state.user, avatarUrl } : null,
+        })),
+
+      updateProfile: (patch) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...patch } : state.user,
         })),
 
       _setHydrated: (val) => set({ isHydrated: val }),

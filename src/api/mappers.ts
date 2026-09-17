@@ -1,9 +1,10 @@
-import { CardOrientation, ThemeMode, UserProfile } from "@/src/types";
+import { UserProfile } from "@/src/types";
 
 type RawAuthUser = {
   id: string;
   username: string;
   email: string;
+  avatarUrl?: string | null;
   createdAt?: string;
 };
 
@@ -12,18 +13,7 @@ export function mapAuthUser(rawUser: RawAuthUser): UserProfile {
     id: rawUser.id,
     username: rawUser.username,
     email: rawUser.email,
+    avatarUrl: rawUser.avatarUrl ?? null,
     createdAt: rawUser.createdAt || new Date().toISOString(),
-    settings: {
-      userId: rawUser.id,
-      theme: "light" as ThemeMode,
-      defaultCardOrientation: "term_first" as CardOrientation,
-      isTtsEnabled: false,
-      dailyStreakGoal: 10,
-    },
-    streak: {
-      userId: rawUser.id,
-      currentStreak: 0,
-      lastActiveDate: new Date().toISOString(),
-    },
   };
 }

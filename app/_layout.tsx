@@ -3,6 +3,7 @@ import {
   MARK_VIEWBOX,
   SvitlyMark,
 } from "@/src/components/brand/SvitlyMark";
+import { fetchCurrentUserProfile } from "@/src/api/profile";
 import { GradientText } from "@/src/components/ui/GradientText";
 import { MeshGradientBackground } from "@/src/components/ui/MeshGradientBackground";
 import { GRADIENT_SOFT } from "@/src/constants/gradients";
@@ -253,6 +254,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (isHydrated && token) {
       useStudyQueueStore.getState().flush();
+      fetchCurrentUserProfile().then((profile) => {
+        if (profile) useAuthStore.getState().updateProfile(profile);
+      });
     }
   }, [isHydrated, token]);
 

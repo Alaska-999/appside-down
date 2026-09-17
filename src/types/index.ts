@@ -32,8 +32,8 @@ export interface StreakData {
 }
 
 export interface UserProfile extends User {
-    settings: UserSettings;
-    streak: StreakData;
+    settings?: UserSettings;
+    streak?: StreakData;
 }
 
 /**
