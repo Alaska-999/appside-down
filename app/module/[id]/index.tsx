@@ -23,7 +23,7 @@ import {
   SheetRows,
 } from "@/src/components/ui/overlays/Sheet";
 import {
-  ICON_DANGER,
+  ICON_LIME_LIGHT,
   ICON_MINT_TINT_DARK,
   ICON_ON_GLASS,
 } from "@/src/constants/iconColors";
@@ -169,6 +169,11 @@ export default function ModuleScreen() {
   );
 
   const hasStats = statTiles.some((tile) => tile.value > 0);
+
+  const allSolid =
+    !progress.nextAction &&
+    progress.total > 0 &&
+    progress.mastered >= progress.total;
 
   const starredCount = flashcards.filter((c) => c.isStarred).length;
 
@@ -481,27 +486,46 @@ export default function ModuleScreen() {
                       learning={progress.learning}
                       total={progress.total}
                     />
-                    <NextActionRow
-                      action={progress.nextAction}
-                      mastered={progress.mastered}
-                      total={progress.total}
-                      onPress={nextActionPress}
-                    />
-                    {hasStats && (
+                    {allSolid ? (
                       <XStack gap={9}>
-                        {statTiles.map((tile) =>
-                          tile.value > 0 ? (
-                            <StatTile
-                              key={tile.key}
-                              tone={tile.key}
-                              value={tile.value}
-                              label={tile.label}
-                            />
-                          ) : (
-                            <YStack key={tile.key} />
-                          ),
-                        )}
+                        <StatTile
+                          tone="mastered"
+                          value={progress.mastered}
+                          label="Mastered"
+                        />
+                        <NextActionRow
+                          action={progress.nextAction}
+                          mastered={progress.mastered}
+                          total={progress.total}
+                          layout="compact"
+                          onPress={nextActionPress}
+                        />
                       </XStack>
+                    ) : (
+                      <>
+                        <NextActionRow
+                          action={progress.nextAction}
+                          mastered={progress.mastered}
+                          total={progress.total}
+                          onPress={nextActionPress}
+                        />
+                        {hasStats && (
+                          <XStack gap={9}>
+                            {statTiles.map((tile) =>
+                              tile.value > 0 ? (
+                                <StatTile
+                                  key={tile.key}
+                                  tone={tile.key}
+                                  value={tile.value}
+                                  label={tile.label}
+                                />
+                              ) : (
+                                <YStack key={tile.key} />
+                              ),
+                            )}
+                          </XStack>
+                        )}
+                      </>
                     )}
                   </YStack>
 
@@ -644,8 +668,10 @@ export default function ModuleScreen() {
       >
         <YStack gap={10}>
           <AppButton
-            variant="danger"
-            icon={<RotateCcw size={19} color={ICON_DANGER} strokeWidth={1.9} />}
+            variant="outline"
+            icon={
+              <RotateCcw size={19} color={ICON_LIME_LIGHT} strokeWidth={1.9} />
+            }
             loading={resetting}
             onPress={handleResetProgress}
           >

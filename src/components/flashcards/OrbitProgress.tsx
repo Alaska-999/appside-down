@@ -1,4 +1,8 @@
 import {
+  ORBIT_STATE_STYLES,
+  OrbitState,
+} from "@/src/components/flashcards/orbitState";
+import {
   ICON_ACCENT,
   ICON_LIME,
   ICON_LIME_LIGHT,
@@ -10,8 +14,8 @@ import {
   COMET_CORE_WARM,
   MINT_FADE_MID,
   PLANET_LIME_BRIGHT,
-  PLANET_LIME_DEEP,
   PLANET_LIME_DARKEST,
+  PLANET_LIME_DEEP,
   PLANET_LIME_MID,
   PLANET_MINT_BRIGHT,
   PLANET_MINT_DARKEST,
@@ -28,9 +32,9 @@ import {
   Circle,
   DashPathEffect,
   Group,
+  Skia,
   LinearGradient as SkiaLinearGradient,
   Path as SkiaPath,
-  Skia,
   vec,
 } from "@shopify/react-native-skia";
 import { useEffect, useMemo } from "react";
@@ -44,7 +48,6 @@ import Animated, {
   useSharedValue,
   withDelay,
   withRepeat,
-  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import Svg, {
@@ -59,10 +62,11 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 
-const ORB_SIZE = 262;
-const CENTER = 131;
-const RADIUS = 116;
-const PLANET_SIZE = 130;
+export const ORB_SIZE = 262;
+export const CENTER = 131;
+export const RADIUS = 116;
+const PLANET_SIZE = 140;
+export const PLANET_R = PLANET_SIZE / 2;
 const PLANET_OFFSET = (ORB_SIZE - PLANET_SIZE) / 2;
 
 export type OrbitTone = "default" | "cold" | "warm";
@@ -136,62 +140,45 @@ const COMET_TONES: Record<
   },
 };
 
-function Planet({
+export type PlanetHalo = "shadow" | "canvas";
+
+export function Planet({
   hot,
-  tone,
-  reducedMotion,
+  tone = "default",
+  state,
+  halo = "shadow",
 }: {
   hot: boolean;
-  tone: OrbitTone;
-  reducedMotion: boolean;
+  tone?: OrbitTone;
+  state?: OrbitState;
+  halo?: PlanetHalo;
 }) {
   const box = PLANET_SIZE;
   const highlightW = box * 0.3;
   const highlightH = box * 0.16;
   const highlightCx = box * 0.15 + highlightW / 2;
   const highlightCy = box * 0.11 + highlightH / 2;
-  const { stops, glowColor } = PLANET_TONES[tone];
-
-  const breathe = useSharedValue(1);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    breathe.value = withRepeat(
-      withSequence(
-        withTiming(1.028, {
-          duration: 3250,
-          easing: Easing.inOut(Easing.ease),
-        }),
-        withTiming(1, { duration: 3250, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      false,
-    );
-  }, [reducedMotion, breathe]);
-
-  const breatheStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: breathe.value }],
-  }));
+  const toneStyle = PLANET_TONES[tone];
+  const stateStyle = state ? ORBIT_STATE_STYLES[state] : null;
+  const stops = stateStyle ? stateStyle.planetStops : toneStyle.stops;
+  const glowColor = stateStyle ? stateStyle.planetGlow : toneStyle.glowColor;
 
   return (
-    <Animated.View
+    <View
       pointerEvents="none"
-      style={[
-        {
-          position: "absolute",
-          top: PLANET_OFFSET,
-          left: PLANET_OFFSET,
-          width: box,
-          height: box,
-          borderRadius: box / 2,
-          overflow: "hidden",
-          shadowColor: hot ? withAlpha(ICON_LIME_LIGHT, 0.45) : glowColor,
-          shadowOpacity: 1,
-          shadowRadius: hot ? 74 : 44,
-          shadowOffset: { width: 0, height: 0 },
-        },
-        breatheStyle,
-      ]}
+      style={{
+        position: "absolute",
+        top: PLANET_OFFSET,
+        left: PLANET_OFFSET,
+        width: box,
+        height: box,
+        borderRadius: box / 2,
+        overflow: "hidden",
+        shadowColor: glowColor,
+        shadowOpacity: halo === "canvas" ? 0 : 1,
+        shadowRadius: halo === "canvas" ? 0 : hot ? 74 : 44,
+        shadowOffset: { width: 0, height: 0 },
+      }}
     >
       <Svg width="100%" height="100%" viewBox={`0 0 ${box} ${box}`}>
         <Defs>
@@ -226,7 +213,7 @@ function Planet({
         />
         <Rect x={0} y={0} width={box} height={box} fill="url(#finishTerm)" />
       </Svg>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -637,7 +624,7 @@ export function OrbitProgress({
     <View style={{ width: ORB_SIZE, height: ORB_SIZE }}>
       <Arc progress={progress} fraction={fraction} />
       <Shells reducedMotion={reducedMotion} />
-      <Planet hot={hot} tone={tone} reducedMotion={reducedMotion} />
+      <Planet hot={hot} tone={tone} />
       <SaturnRing />
       {hot && <Flares reducedMotion={reducedMotion} />}
       <Comet

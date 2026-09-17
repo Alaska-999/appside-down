@@ -3,20 +3,20 @@ import { ScreenHeaderFlashcards } from "@/src/components/common/ScreenHeaderFlas
 import { FlashcardLg } from "@/src/components/flashcards/Flashcard-lg";
 import { FlashcardsComplete } from "@/src/components/flashcards/FlashcardsComplete";
 import { FlashcardsSettingsSheet } from "@/src/components/flashcards/FlashcardsSettingsSheet";
-import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { SyncingPill } from "@/src/components/ui/feedback/SyncingPill";
 import { AppToast } from "@/src/components/ui/feedback/Toast";
 import { ICON_MUTED, ICON_ON_GLASS } from "@/src/constants/iconColors";
-import { useOptimisticPatch } from "@/src/hooks/useOptimisticPatch";
-import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import {
   EASE_STANDARD,
   FINISH_HOLD_MS,
   FINISH_INTRO_MS,
   FINISH_OUTRO_MS,
 } from "@/src/constants/motion";
+import { useOptimisticPatch } from "@/src/hooks/useOptimisticPatch";
+import { useScreenInsets } from "@/src/hooks/useScreenInsets";
+import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import { useGameStore } from "@/src/store/useGameStore";
 import { useStudyQueueStore } from "@/src/store/useStudyQueueStore";
 import { hapticComplete, hapticSwipe } from "@/src/utils/haptics";
@@ -304,6 +304,9 @@ export default function FlashcardsGame() {
               total={activeCards.length}
               known={knownPiles.length}
               stillLearning={stillLearningPiles.length}
+              heroVariant="ring"
+              // heroVariant="duo"
+              // heroVariant="orbit"
             />
           </Animated.View>
         )}

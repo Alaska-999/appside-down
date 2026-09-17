@@ -1,4 +1,9 @@
-import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
+import { OrbitDuoHero } from "@/src/components/flashcards/OrbitDuoHero";
+import {
+  OrbitProgress,
+  OrbitTone,
+} from "@/src/components/flashcards/OrbitProgress";
+import { OrbitRingHero } from "@/src/components/flashcards/OrbitRingHero";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
 import {
@@ -9,6 +14,7 @@ import { AppButton } from "@/src/components/ui/controls/Button";
 import { IconButton } from "@/src/components/ui/controls/IconButton";
 import { AnimatedNumber } from "@/src/components/ui/display/AnimatedNumber";
 import { StaggerIn } from "@/src/components/ui/motion/StaggerIn";
+import { FINISH_HERO, FinishHeroVariant } from "@/src/constants/finishHero";
 import {
   ICON_ACCENT,
   ICON_LIME_LIGHT,
@@ -28,6 +34,7 @@ import { X } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import {
+  SharedValue,
   useReducedMotion,
   useSharedValue,
   withDelay,
@@ -40,24 +47,52 @@ interface FlashcardsCompleteProps {
   known: number;
   stillLearning: number;
   onClose?: () => void;
+  heroVariant?: FinishHeroVariant;
 }
 
 export function finishToneForHour(hour: number): {
   preset: BackgroundPreset;
-  tone: "default" | "cold" | "warm";
+  tone: "default" | "warm";
 } {
   if (hour >= 6 && hour < 12) return { preset: "finishWarm", tone: "warm" };
-  if (hour >= 12 && hour < 20) return { preset: "finish", tone: "default" };
-  return { preset: "finishCold", tone: "cold" };
+  return { preset: "finish", tone: "default" };
 }
 
 export function finishToneForHourBright(hour: number): {
   preset: BackgroundPreset;
-  tone: "default" | "cold" | "warm";
+  tone: "default" | "warm";
 } {
   if (hour >= 6 && hour < 12) return { preset: "finishWarm2", tone: "warm" };
-  if (hour >= 12 && hour < 20) return { preset: "finish2", tone: "default" };
-  return { preset: "finishCold2", tone: "cold" };
+  return { preset: "finish2", tone: "default" };
+}
+
+function Hero({
+  variant,
+  progress,
+  fraction,
+  hot,
+  tone,
+}: {
+  variant: FinishHeroVariant;
+  progress: SharedValue<number>;
+  fraction: number;
+  hot: boolean;
+  tone: OrbitTone;
+}) {
+  if (variant === "ring") {
+    return <OrbitRingHero progress={progress} fraction={fraction} hot={hot} />;
+  }
+  if (variant === "duo") {
+    return <OrbitDuoHero progress={progress} fraction={fraction} hot={hot} />;
+  }
+  return (
+    <OrbitProgress
+      progress={progress}
+      fraction={fraction}
+      hot={hot}
+      tone={tone}
+    />
+  );
 }
 
 export function FlashcardsComplete({
@@ -65,6 +100,7 @@ export function FlashcardsComplete({
   known,
   stillLearning,
   onClose,
+  heroVariant = FINISH_HERO,
 }: FlashcardsCompleteProps) {
   const restart = useGameStore((state) => state.restart);
   const router = useRouter();
@@ -120,7 +156,8 @@ export function FlashcardsComplete({
           style={{ flex: 1 }}
         >
           <YStack f={1} ai="center" jc="center">
-            <OrbitProgress
+            <Hero
+              variant={heroVariant}
               progress={progress}
               fraction={fraction}
               hot={isFull}

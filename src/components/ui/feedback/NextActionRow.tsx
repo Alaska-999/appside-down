@@ -30,6 +30,7 @@ import { View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
 type RowVariant = "action" | "quiet" | "invite";
+type RowLayout = "full" | "compact";
 type DotTone = "lime" | "mint";
 
 const VARIANT_STYLES: Record<
@@ -98,7 +99,10 @@ const DOT_COLORS: Record<DotTone, string> = {
   mint: ICON_MINT_LIGHT,
 };
 
-const PILL_HEIGHT = 36;
+const PILL_SIZES = {
+  md: { height: 36, px: 15, fontSize: 12.5 },
+  sm: { height: 32, px: 12, fontSize: 12 },
+} as const;
 const INVITE_LAMP = { rx: 1.18, ry: 1.5, cx: 0.08, cy: -0.3 };
 const MODE_LABEL: Record<string, string | undefined> = {
   FLASHCARDS: "Flashcards",
@@ -139,12 +143,19 @@ function Dot({ tone }: { tone: DotTone }) {
   );
 }
 
-function MiniPill({ label }: { label: string }) {
+function MiniPill({
+  label,
+  size = "md",
+}: {
+  label: string;
+  size?: keyof typeof PILL_SIZES;
+}) {
+  const pill = PILL_SIZES[size];
   return (
     <XStack
-      h={PILL_HEIGHT}
-      px={15}
-      br={PILL_HEIGHT / 2}
+      h={pill.height}
+      px={pill.px}
+      br={pill.height / 2}
       ai="center"
       jc="center"
       gap={7}
@@ -155,12 +166,17 @@ function MiniPill({ label }: { label: string }) {
       importantForAccessibility="no-hide-descendants"
     >
       <GradientBorder
-        radius={PILL_HEIGHT / 2}
+        radius={pill.height / 2}
         angle={150}
         colors={[withAlpha(ICON_LIME, 0.6), withAlpha(ICON_LIME, 0.18)]}
         positions={[0, 1]}
       />
-      <Text fontSize={12.5} fontWeight="700" color="$limeLight" zIndex={2}>
+      <Text
+        fontSize={pill.fontSize}
+        fontWeight="700"
+        color="$limeLight"
+        zIndex={2}
+      >
         {label}
       </Text>
     </XStack>
@@ -193,11 +209,13 @@ export function NextActionRow({
   action,
   mastered,
   total,
+  layout = "full",
   onPress,
 }: {
   action: NextAction | null;
   mastered: number;
   total: number;
+  layout?: RowLayout;
   onPress?: () => void;
 }) {
   const allSolid = !action && total > 0 && mastered >= total;
@@ -207,8 +225,17 @@ export function NextActionRow({
 
   const variant: RowVariant = allSolid ? "invite" : onPress ? "action" : "quiet";
   const style = VARIANT_STYLES[variant];
-  const title = copy ? copy.title : `All ${pluralize(total, "card")} are solid`;
-  const sub = copy ? copy.sub : "A short practice keeps them that way";
+  const compact = allSolid && layout === "compact";
+  const title = copy
+    ? copy.title
+    : compact
+      ? "All solid"
+      : `All ${pluralize(total, "card")} are solid`;
+  const sub = copy
+    ? copy.sub
+    : compact
+      ? "Keep it that way"
+      : "A short practice keeps them that way";
   const spoken = sub ? `${title}. ${sub}` : title;
 
   const pressProps = onPress
@@ -226,11 +253,12 @@ export function NextActionRow({
 
   return (
     <GlowSurface
+      f={compact ? 2 : undefined}
       radius={style.radius}
       fd="row"
       ai="center"
-      gap={allSolid ? 12 : 11}
-      px={allSolid ? 13 : 14}
+      gap={compact ? 10 : allSolid ? 12 : 11}
+      px={compact ? 12 : allSolid ? 13 : 14}
       py={allSolid ? 13 : 12}
       minHeight={allSolid ? 62 : 48}
       tone="mint"
@@ -267,7 +295,7 @@ export function NextActionRow({
       </YStack>
       {allSolid ? (
         onPress ? (
-          <MiniPill label="Practise" />
+          <MiniPill label="Practise" size={compact ? "sm" : "md"} />
         ) : null
       ) : onPress ? (
         <XStack w={22} h={22} ai="center" jc="center">
