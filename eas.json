@@ -11,6 +11,12 @@
         "EXPO_PUBLIC_API_URL": "https://api.brnrv.org"
       }
     },
+    "simulator": {
+      "extends": "development",
+      "ios": {
+        "simulator": true
+      }
+    },
     "preview": {
       "distribution": "internal",
       "ios": {
