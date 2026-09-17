@@ -57,11 +57,18 @@ export interface Folder {
     moduleIds?: string[];
 }
 
+export type NextAction =
+    | { kind: 'learn_new'; count: number; mode: 'FLASHCARDS' }
+    | { kind: 'prove'; count: number; mode: 'LEARN' };
+
 export interface ModuleProgress {
-    known: number;
+    new: number;
     learning: number;
-    unstudied: number;
+    mastered: number;
     total: number;
+    known: number;
+    unstudied: number;
+    nextAction: NextAction | null;
 }
 
 export interface Module {
@@ -115,6 +122,7 @@ export interface AuthResponse {
 
 export interface FlashcardsGameState {
     currentModule: Module | null;
+    moduleCards: Flashcard[];
     activeCards: Flashcard[];
     currentIndex: number;
 
@@ -138,4 +146,36 @@ export interface FlashcardsGameState {
     restart: (onlyStillLearning?: boolean) => void;
     toggleStar: (cardId: string) => void;
     updateSettings: (newSettings: Partial<FlashcardsGameState['settings']>) => void;
+}
+
+export type MatchTileState = 'idle' | 'selected' | 'wrong' | 'matched';
+
+export interface MatchTileModel {
+    tileId: string;
+    cardId: string;
+    side: 'term' | 'definition';
+    text: string;
+    state: MatchTileState;
+}
+
+export interface MatchGameState {
+    currentModule: Module | null;
+    roundPool: Flashcard[];
+    tiles: MatchTileModel[];
+    totalPairs: number;
+    selectedTileId: string | null;
+    locked: boolean;
+    matchedPairs: number;
+    mistakes: number;
+    combo: number;
+    startedAt: number | null;
+    finishedAt: number | null;
+    bestTimes: Record<string, number>;
+
+    initMatch: (module: Module, cards: Flashcard[]) => void;
+    startTimer: () => void;
+    selectTile: (tileId: string) => void;
+    resolveWrong: () => void;
+    finish: (elapsedMs: number) => boolean;
+    restart: () => void;
 }

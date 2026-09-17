@@ -10,7 +10,10 @@ export interface StudyEventInput {
   id: string;
   flashcardId: string;
   moduleId: string;
-  status: "KNOWN" | "STILL_LEARNING";
+  mode: "FLASHCARDS" | "MATCH";
+  correct: boolean;
+  firstTry?: boolean;
+  responseMs?: number;
   answeredAt: string;
 }
 

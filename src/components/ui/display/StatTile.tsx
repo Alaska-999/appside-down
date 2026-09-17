@@ -26,13 +26,13 @@ function TopHighlight() {
   );
 }
 
-export type StatTone = "known" | "learning" | "new";
+export type StatTone = "mastered" | "learning" | "new";
 
 const TONE_STYLES: Record<
   StatTone,
   { tone: "lime" | "mint" | "neutral"; lampAlpha: number; fill: string; color: string }
 > = {
-  known: {
+  mastered: {
     tone: "lime",
     lampAlpha: 0.3,
     fill: SURFACE_GLASS_BG_FAINT,

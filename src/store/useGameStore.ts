@@ -12,6 +12,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 export const useGameStore = create<FlashcardsGameState>((set, get) => ({
     currentModule: null,
+    moduleCards: [],
     activeCards: [],
     currentIndex: 0,
     knownPiles: [],
@@ -20,17 +21,18 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
     settings: {
         shuffle: false,
         ttsEnabled: false,
-        sortByPiles: false,
+        sortByPiles: true,
         cardOrientation: 'term_first',
     },
 
     initGame: (module: Module, cards: Flashcard[]) => {
         const { settings } = get();
-        const stillLearning = cards.filter(c => c.status === 'STILL_LEARNING');
-        const base = stillLearning.length > 0 && settings.sortByPiles ? stillLearning : cards;
+        const live = cards.filter(c => c.status !== 'KNOWN');
+        const base = settings.sortByPiles && live.length > 0 ? live : cards;
         const activeCards = settings.shuffle ? shuffle(base) : base;
         set({
             currentModule: module,
+            moduleCards: cards,
             activeCards,
             currentIndex: 0,
             knownPiles: [],
@@ -80,9 +82,10 @@ export const useGameStore = create<FlashcardsGameState>((set, get) => ({
     },
 
     restart: (onlyStillLearning = false) => {
-        const { activeCards, stillLearningPiles } = get();
+        const { moduleCards, activeCards, stillLearningPiles } = get();
         const useStillLearning = onlyStillLearning && stillLearningPiles.length > 0;
-        const nextCards = useStillLearning ? [...stillLearningPiles] : [...activeCards];
+        const fullRound = moduleCards.length > 0 ? moduleCards : activeCards;
+        const nextCards = useStillLearning ? [...stillLearningPiles] : [...fullRound];
 
         set({
             activeCards: get().settings.shuffle ? shuffle(nextCards) : nextCards,

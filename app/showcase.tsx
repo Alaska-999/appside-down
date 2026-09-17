@@ -918,7 +918,7 @@ export default function Showcase() {
         <YStack gap={10}>
           <Label>Прогреси · bar 8 · ring 62 · underline 2 · число</Label>
           <AppCard size="lg" variant="surface" gap={14}>
-            <ProgressSplitBar known={58} learning={84} total={200} />
+            <ProgressSplitBar mastered={58} learning={84} total={200} />
             <XStack ai="center" gap={16}>
               <ProgressRing progress={0.64} label="64%" animated />
               <YStack f={1} gap={4}>

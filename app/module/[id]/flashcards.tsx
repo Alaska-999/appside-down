@@ -13,6 +13,7 @@ import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { SwipeDecision } from "@/src/hooks/useSwipeCard";
 import {
   EASE_STANDARD,
+  FINISH_HOLD_MS,
   FINISH_INTRO_MS,
   FINISH_OUTRO_MS,
 } from "@/src/constants/motion";
@@ -29,12 +30,12 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { PortalProvider, YStack } from "tamagui";
 
 export default function FlashcardsGame() {
-  const currentModule = useGameStore((state) => state.currentModule);
   const activeCards = useGameStore((state) => state.activeCards);
   const currentIndex = useGameStore((state) => state.currentIndex);
   const knownPiles = useGameStore((state) => state.knownPiles);
@@ -94,7 +95,8 @@ export default function FlashcardsGame() {
       addEvent({
         flashcardId: card.id,
         moduleId: card.moduleId,
-        status: "KNOWN",
+        mode: "FLASHCARDS",
+        correct: true,
         answeredAt: new Date().toISOString(),
       });
     }
@@ -109,7 +111,8 @@ export default function FlashcardsGame() {
       addEvent({
         flashcardId: card.id,
         moduleId: card.moduleId,
-        status: "STILL_LEARNING",
+        mode: "FLASHCARDS",
+        correct: false,
         answeredAt: new Date().toISOString(),
       });
     }
@@ -175,16 +178,22 @@ export default function FlashcardsGame() {
       return;
     }
 
-    gameFade.value = withTiming(0, {
-      duration: FINISH_OUTRO_MS,
-      easing: EASE_STANDARD,
-    });
-    finishFade.value = withTiming(1, {
-      duration: FINISH_OUTRO_MS + FINISH_INTRO_MS,
-      easing: EASE_STANDARD,
-    });
+    gameFade.value = withDelay(
+      FINISH_HOLD_MS,
+      withTiming(0, { duration: FINISH_OUTRO_MS, easing: EASE_STANDARD }),
+    );
+    finishFade.value = withDelay(
+      FINISH_HOLD_MS,
+      withTiming(1, {
+        duration: FINISH_OUTRO_MS + FINISH_INTRO_MS,
+        easing: EASE_STANDARD,
+      }),
+    );
 
-    const timer = setTimeout(() => setOutroDone(true), FINISH_OUTRO_MS);
+    const timer = setTimeout(
+      () => setOutroDone(true),
+      FINISH_HOLD_MS + FINISH_OUTRO_MS,
+    );
     return () => clearTimeout(timer);
   }, [isComplete, activeCards.length, reducedMotion, gameFade, finishFade]);
 
@@ -208,11 +217,12 @@ export default function FlashcardsGame() {
             <BackgroundMesh preset="auth" animated />
 
             <ScreenHeaderFlashcards
-              title={currentModule?.name ?? ""}
               known={knownPiles.length}
               learning={stillLearningPiles.length}
               litSide={litSide}
               showPiles={settings.sortByPiles}
+              position={Math.min(currentIndex + 1, activeCards.length)}
+              deckSize={activeCards.length}
               rightAction={
                 <IconButton
                   icon={
@@ -246,12 +256,12 @@ export default function FlashcardsGame() {
                     showDefinitionFirst={
                       settings.cardOrientation === "definition_first"
                     }
+                    showStamps={settings.sortByPiles}
                     onStar={handleToggleStar}
                     onSwipeLeft={handleSwipeLeft}
                     onSwipeRight={handleSwipeRight}
                     onDecisionChange={setDecision}
                     revertKey={revertCount}
-                    showStamps={settings.sortByPiles}
                   />
                 </YStack>
               )}

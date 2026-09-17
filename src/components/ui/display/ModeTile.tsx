@@ -20,6 +20,8 @@ import { ComponentType } from "react";
 import { View } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 
+export type ModeTileState = "live" | "soon" | "locked";
+
 const TILE_RADIUS = 20;
 
 const TILE_BORDER = {
@@ -82,15 +84,16 @@ export function ModeTile({
   icon: Icon,
   label,
   hint,
-  live,
+  state,
   onPress,
 }: {
   icon: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   label: string;
   hint: string;
-  live?: boolean;
+  state: ModeTileState;
   onPress?: () => void;
 }) {
+  const live = state === "live";
   const pressable = live && !!onPress;
 
   const tile = (
@@ -132,12 +135,21 @@ export function ModeTile({
           </Text>
         </YStack>
       </GlowSurface>
-      {!live && <SoonPill />}
+      {state === "soon" && <SoonPill />}
     </View>
   );
 
   return (
-    <YStack f={1} accessibilityLabel={!live ? `${label} — coming soon` : undefined}>
+    <YStack
+      f={1}
+      accessibilityLabel={
+        state === "soon"
+          ? `${label} — coming soon`
+          : state === "locked"
+            ? `${label} — ${hint}`
+            : undefined
+      }
+    >
       {tile}
     </YStack>
   );

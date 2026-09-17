@@ -15,6 +15,7 @@ export function useModule(id: string | undefined) {
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const loadedRef = useRef(false);
 
@@ -156,6 +157,45 @@ export function useModule(id: string | undefined) {
     }
   }, [id, saving]);
 
+  const resetProgress = useCallback(async () => {
+    setResetting(true);
+    try {
+      await useStudyQueueStore.getState().flush();
+      const res = await protectedFetch(
+        `${API_BASE_URL}/modules/${id}/reset-progress`,
+        { method: "POST" },
+      );
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      setFlashcards((cards) =>
+        cards.map((card) => ({ ...card, status: "UNSTUDIED" as const })),
+      );
+      setModuleData((module) =>
+        module
+          ? {
+              ...module,
+              known: 0,
+              progress: module.progress
+                ? {
+                    ...module.progress,
+                    known: 0,
+                    learning: 0,
+                    unstudied: module.progress.total,
+                  }
+                : module.progress,
+            }
+          : module,
+      );
+      setToast("Progress reset");
+      return true;
+    } catch (err) {
+      console.error("[useModule] reset progress error:", err);
+      setToast("Couldn't reset progress. Try again");
+      return false;
+    } finally {
+      setResetting(false);
+    }
+  }, [id]);
+
   const deleteModule = useCallback(async () => {
     setDeleting(true);
     try {
@@ -183,12 +223,14 @@ export function useModule(id: string | undefined) {
     setToast,
     saving,
     deleting,
+    resetting,
     loadedRef,
     fetchData,
     toggleCardStar,
     toggleFavorite,
     togglePublic,
     saveToLibrary,
+    resetProgress,
     deleteModule,
   };
 }

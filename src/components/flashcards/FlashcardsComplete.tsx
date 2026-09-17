@@ -1,14 +1,14 @@
 import { OrbitProgress } from "@/src/components/flashcards/OrbitProgress";
 import { OrbitSparks } from "@/src/components/flashcards/OrbitSparks";
 import { StatusPill } from "@/src/components/flashcards/StatusPill";
-import { AnimatedNumber } from "@/src/components/ui/display/AnimatedNumber";
-import { AppButton } from "@/src/components/ui/controls/Button";
-import { StaggerIn } from "@/src/components/ui/motion/StaggerIn";
-import { IconButton } from "@/src/components/ui/controls/IconButton";
 import {
   BackgroundMesh,
   BackgroundPreset,
 } from "@/src/components/ui/background/ScreenBackground";
+import { AppButton } from "@/src/components/ui/controls/Button";
+import { IconButton } from "@/src/components/ui/controls/IconButton";
+import { AnimatedNumber } from "@/src/components/ui/display/AnimatedNumber";
+import { StaggerIn } from "@/src/components/ui/motion/StaggerIn";
 import {
   ICON_ACCENT,
   ICON_LIME_LIGHT,
@@ -21,8 +21,8 @@ import {
 } from "@/src/constants/motion";
 import { TEXT_MINT_MED } from "@/src/constants/surfaceAlpha";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
-import { ratio } from "@/src/utils/progress";
 import { useGameStore } from "@/src/store/useGameStore";
+import { ratio } from "@/src/utils/progress";
 import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
@@ -51,6 +51,15 @@ export function finishToneForHour(hour: number): {
   return { preset: "finishCold", tone: "cold" };
 }
 
+export function finishToneForHourBright(hour: number): {
+  preset: BackgroundPreset;
+  tone: "default" | "cold" | "warm";
+} {
+  if (hour >= 6 && hour < 12) return { preset: "finishWarm2", tone: "warm" };
+  if (hour >= 12 && hour < 20) return { preset: "finish2", tone: "default" };
+  return { preset: "finishCold2", tone: "cold" };
+}
+
 export function FlashcardsComplete({
   total,
   known,
@@ -64,6 +73,7 @@ export function FlashcardsComplete({
 
   const fraction = ratio(known, total);
   const isFull = fraction >= 1;
+  const hasStillLearning = stillLearning > 0;
   const targetPct = Math.round(fraction * 100);
   const duration = isFull ? 2400 : 1700;
 
@@ -165,24 +175,7 @@ export function FlashcardsComplete({
 
         <StaggerIn delay={FINISH_STAGGER_MS * 4}>
           <YStack px={22} gap={10} pt={20}>
-            {isFull ? (
-              <>
-                <AppButton
-                  variant="primary"
-                  size="lg"
-                  onPress={() => restart()}
-                >
-                  Practise all again
-                </AppButton>
-                <AppButton
-                  variant="ghost"
-                  size="sm"
-                  onPress={() => router.back()}
-                >
-                  Back to module
-                </AppButton>
-              </>
-            ) : (
+            {hasStillLearning ? (
               <>
                 <AppButton
                   variant="primary"
@@ -196,14 +189,31 @@ export function FlashcardsComplete({
                   size="md"
                   onPress={() => restart()}
                 >
-                  Restart game
+                  Practise all again
                 </AppButton>
                 <AppButton
                   variant="ghost"
                   size="md"
-                  onPress={() => router.back()}
+                  onPress={onClose ?? (() => router.back())}
                 >
                   Back to module
+                </AppButton>
+              </>
+            ) : (
+              <>
+                <AppButton
+                  variant="primary"
+                  size="md"
+                  onPress={onClose ?? (() => router.back())}
+                >
+                  Back to module
+                </AppButton>
+                <AppButton
+                  variant="secondary"
+                  size="md"
+                  onPress={() => restart()}
+                >
+                  Practise all again
                 </AppButton>
               </>
             )}

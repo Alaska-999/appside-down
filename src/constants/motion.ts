@@ -6,6 +6,8 @@ export const TAB_SWITCH_MS = 190;
 
 export const FINISH_OUTRO_MS = 300;
 
+export const FINISH_HOLD_MS = 240;
+
 export const FINISH_INTRO_MS = 320;
 
 export const FINISH_STAGGER_MS = 80;

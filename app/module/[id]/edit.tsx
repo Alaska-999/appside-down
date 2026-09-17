@@ -175,6 +175,7 @@ export default function ModuleEditScreen() {
                     })
                   }
                 />
+
               </>
             )}
           </YStack>
@@ -183,6 +184,7 @@ export default function ModuleEditScreen() {
         <StatusBarScrim />
 
         <KeyboardBar />
+
 
         <AppToast
           placement="top"

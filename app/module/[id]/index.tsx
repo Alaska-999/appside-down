@@ -3,23 +3,26 @@ import { CardRow } from "@/src/components/flashcards/CardRow";
 import { CardsHeader } from "@/src/components/flashcards/CardsHeader";
 import { ModuleDeck } from "@/src/components/flashcards/ModuleDeck";
 import { ModuleSkeleton } from "@/src/components/flashcards/ModuleSkeleton";
+import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
 import { AppButton } from "@/src/components/ui/controls/Button";
 import { IconButton } from "@/src/components/ui/controls/IconButton";
-import { ModeTile } from "@/src/components/ui/display/ModeTile";
+import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
+import { Toggle } from "@/src/components/ui/controls/Toggle";
+import { ModeTile, ModeTileState } from "@/src/components/ui/display/ModeTile";
+import { StatTile } from "@/src/components/ui/display/StatTile";
+import { NextActionRow } from "@/src/components/ui/feedback/NextActionRow";
 import { ProgressSplitBar } from "@/src/components/ui/feedback/ProgressSplitBar";
-import { BackgroundMesh } from "@/src/components/ui/background/ScreenBackground";
+import { StateCard } from "@/src/components/ui/feedback/StateCard";
+import { AppToast } from "@/src/components/ui/feedback/Toast";
+import { ConfirmMenuSheet } from "@/src/components/ui/overlays/ConfirmMenuSheet";
 import {
   AppSheet,
   SheetRow,
   SheetRows,
 } from "@/src/components/ui/overlays/Sheet";
-import { StarGlyph } from "@/src/components/ui/controls/StarGlyph";
-import { StateCard } from "@/src/components/ui/feedback/StateCard";
-import { StatTile } from "@/src/components/ui/display/StatTile";
-import { StatusBarScrim } from "@/src/components/ui/background/StatusBarScrim";
-import { AppToast } from "@/src/components/ui/feedback/Toast";
-import { Toggle } from "@/src/components/ui/controls/Toggle";
 import {
+  ICON_DANGER,
   ICON_MINT_TINT_DARK,
   ICON_MUTED,
   ICON_ON_GLASS,
@@ -32,8 +35,11 @@ import { useModule } from "@/src/hooks/useModule";
 import { useScreenInsets } from "@/src/hooks/useScreenInsets";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useGameStore } from "@/src/store/useGameStore";
+import { useMatchStore } from "@/src/store/useMatchStore";
 import { cardSideText } from "@/src/utils/cardText";
+import { eligibleCards, MATCH_MIN_CARDS } from "@/src/utils/match";
 import { pluralize } from "@/src/utils/plural";
+import { normalizeProgress } from "@/src/utils/progress";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
@@ -50,12 +56,12 @@ import {
   Lock,
   MoreHorizontal,
   Pencil,
+  RotateCcw,
   Sparkles,
 } from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useState } from "react";
 import { FlatList, InteractionManager } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
-import { ConfirmMenuSheet } from "@/src/components/ui/overlays/ConfirmMenuSheet";
 
 type SortOrder = "original" | "alphabetical";
 
@@ -74,30 +80,28 @@ const MODE_TILES = [
     label: "Flashcards",
     hint: "Flip and recall",
     icon: Captions,
-    live: true,
   },
   {
     key: "test",
     label: "Test",
     hint: "Quiz yourself",
     icon: FileText,
-    live: false,
   },
   {
     key: "match",
     label: "Match",
     hint: "Pair up",
     icon: Columns2,
-    live: false,
   },
   {
     key: "learn",
     label: "Learn",
     hint: "Spaced repetition",
     icon: GraduationCap,
-    live: false,
   },
 ];
+
+const MATCH_TOO_FEW_HINT = `Add ${MATCH_MIN_CARDS}+ cards to play`;
 
 function CardSeparator() {
   return <YStack h={9} />;
@@ -121,6 +125,8 @@ export default function ModuleScreen() {
     toggleFavorite,
     togglePublic,
     saveToLibrary,
+    resetProgress,
+    resetting,
     deleteModule,
   } = useModule(id);
   const [sortOrder, setSortOrder] = useState<SortOrder>("original");
@@ -128,8 +134,10 @@ export default function ModuleScreen() {
   const [fullListHeight, setFullListHeight] = useState(0);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [menuSheetOpen, setMenuSheetOpen] = useState(false);
+  const [resetSheetOpen, setResetSheetOpen] = useState(false);
 
   const initGame = useGameStore((state) => state.initGame);
+  const initMatch = useMatchStore((state) => state.initMatch);
 
   const user = useAuthStore((state) => state.user);
   const isOwner = moduleData?.user?.id === user?.id;
@@ -146,19 +154,22 @@ export default function ModuleScreen() {
     }, [id, fetchData, loadedRef]),
   );
 
-  const progress = useMemo(() => {
-    if (moduleData?.progress) return moduleData.progress;
-    const known = flashcards.filter((c) => c.status === "KNOWN").length;
-    const learning = flashcards.filter(
-      (c) => c.status === "STILL_LEARNING",
-    ).length;
-    return {
-      known,
-      learning,
-      unstudied: flashcards.length - known - learning,
-      total: flashcards.length,
-    };
-  }, [moduleData?.progress, flashcards]);
+  const progress = useMemo(
+    () => normalizeProgress(moduleData?.progress, flashcards),
+    [moduleData?.progress, flashcards],
+  );
+
+  const statTiles = useMemo(
+    () =>
+      [
+        { key: "mastered", value: progress.mastered, label: "Mastered" },
+        { key: "learning", value: progress.learning, label: "Learning" },
+        { key: "new", value: progress.new, label: "New" },
+      ] as const,
+    [progress],
+  );
+
+  const hasStats = statTiles.some((tile) => tile.value > 0);
 
   const starredCount = flashcards.filter((c) => c.isStarred).length;
 
@@ -177,6 +188,11 @@ export default function ModuleScreen() {
   const listData = cardsReady ? visibleCards : [];
   const showStarredEmpty = cardsReady && starredOnly;
 
+  const matchLive = useMemo(
+    () => eligibleCards(flashcards).length >= MATCH_MIN_CARDS,
+    [flashcards],
+  );
+
   const deckCards = useMemo(
     () =>
       flashcards.map((c) => ({
@@ -190,6 +206,16 @@ export default function ModuleScreen() {
   const openEditSheet = () => {
     setMenuSheetOpen(false);
     router.push({ pathname: "/module/[id]/cards", params: { id } });
+  };
+
+  const openResetProgress = () => {
+    setMenuSheetOpen(false);
+    setResetSheetOpen(true);
+  };
+
+  const handleResetProgress = async () => {
+    const ok = await resetProgress();
+    if (ok) setResetSheetOpen(false);
   };
 
   const openEditModule = () => {
@@ -220,6 +246,39 @@ export default function ModuleScreen() {
       game.currentIndex >= game.activeCards.length;
     if (isStale || isFinished) initGame(moduleData, flashcards);
     router.push({ pathname: "/module/[id]/flashcards", params: { id } });
+  };
+
+  const startMatch = () => {
+    if (!moduleData || !matchLive) return;
+    initMatch(moduleData, flashcards);
+    router.push({ pathname: "/module/[id]/match", params: { id } });
+  };
+
+  const nextAction = progress.nextAction;
+  const canStudy = deckCards.length > 0;
+  const nextActionPress =
+    canStudy && (!nextAction || nextAction.mode === "FLASHCARDS")
+      ? startFlashcards
+      : undefined;
+
+  const modeTileProps = (
+    tile: (typeof MODE_TILES)[number],
+  ): { state: ModeTileState; hint: string; onPress?: () => void } => {
+    if (tile.key === "flashcards") {
+      const live = deckCards.length > 0;
+      return {
+        state: live ? "live" : "locked",
+        hint: tile.hint,
+        onPress: live ? startFlashcards : undefined,
+      };
+    }
+    if (tile.key === "match") {
+      if (matchLive) {
+        return { state: "live", hint: tile.hint, onPress: startMatch };
+      }
+      return { state: "locked", hint: MATCH_TOO_FEW_HINT };
+    }
+    return { state: "soon", hint: tile.hint };
   };
 
   return (
@@ -417,29 +476,34 @@ export default function ModuleScreen() {
                     )}
                   </XStack>
 
-                  <YStack mt={22}>
+                  <YStack mt={22} gap={12}>
                     <ProgressSplitBar
-                      known={progress.known}
+                      mastered={progress.mastered}
                       learning={progress.learning}
                       total={progress.total}
                     />
-                    <XStack gap={9} mt={12}>
-                      <StatTile
-                        tone="known"
-                        value={progress.known}
-                        label="Known"
-                      />
-                      <StatTile
-                        tone="learning"
-                        value={progress.learning}
-                        label="Learning"
-                      />
-                      <StatTile
-                        tone="new"
-                        value={progress.unstudied}
-                        label="New"
-                      />
-                    </XStack>
+                    <NextActionRow
+                      action={progress.nextAction}
+                      mastered={progress.mastered}
+                      total={progress.total}
+                      onPress={nextActionPress}
+                    />
+                    {hasStats && (
+                      <XStack gap={9}>
+                        {statTiles.map((tile) =>
+                          tile.value > 0 ? (
+                            <StatTile
+                              key={tile.key}
+                              tone={tile.key}
+                              value={tile.value}
+                              label={tile.label}
+                            />
+                          ) : (
+                            <YStack key={tile.key} />
+                          ),
+                        )}
+                      </XStack>
+                    )}
                   </YStack>
 
                   <YStack mt={22} gap={10}>
@@ -449,9 +513,7 @@ export default function ModuleScreen() {
                           key={tile.key}
                           icon={tile.icon}
                           label={tile.label}
-                          hint={tile.hint}
-                          live={tile.live && deckCards.length > 0}
-                          onPress={tile.live ? startFlashcards : undefined}
+                          {...modeTileProps(tile)}
                         />
                       ))}
                     </XStack>
@@ -461,7 +523,7 @@ export default function ModuleScreen() {
                           key={tile.key}
                           icon={tile.icon}
                           label={tile.label}
-                          hint={tile.hint}
+                          {...modeTileProps(tile)}
                         />
                       ))}
                     </XStack>
@@ -483,7 +545,7 @@ export default function ModuleScreen() {
                           fontWeight="600"
                           color="$mutedLight"
                         >
-                          Test, Match, Learn
+                          {"Test, Learn"}
                         </Text>{" "}
                         — coming soon
                       </Text>
@@ -577,6 +639,11 @@ export default function ModuleScreen() {
           onPress={openEditSheet}
         />
         <SheetRow
+          icon={RotateCcw}
+          label="Reset progress"
+          onPress={openResetProgress}
+        />
+        <SheetRow
           icon={Globe}
           label="Public"
           right={
@@ -589,6 +656,32 @@ export default function ModuleScreen() {
           onPress={togglePublic}
         />
       </ConfirmMenuSheet>
+
+      <AppSheet
+        open={resetSheetOpen}
+        onOpenChange={setResetSheetOpen}
+        title="Reset progress?"
+        subtitle={
+          "All cards in this module go back to new.\nThe cards themselves stay."
+        }
+      >
+        <YStack gap={10}>
+          <AppButton
+            variant="danger"
+            icon={<RotateCcw size={19} color={ICON_DANGER} strokeWidth={1.9} />}
+            loading={resetting}
+            onPress={handleResetProgress}
+          >
+            Reset progress
+          </AppButton>
+          <AppButton
+            variant="secondary"
+            onPress={() => setResetSheetOpen(false)}
+          >
+            Cancel
+          </AppButton>
+        </YStack>
+      </AppSheet>
 
       <AppToast
         open={!!toast}

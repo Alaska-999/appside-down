@@ -97,7 +97,7 @@ export function FlashcardsSettingsSheet({
             icon={<RotateCcw size={20} color={ICON_DANGER} strokeWidth={2} />}
             onPress={handleRestart}
           >
-            Restart game
+            Restart flashcards
           </AppButton>
         </View>
       </YStack>
