@@ -1,11 +1,21 @@
+import {
+  DECK_CARD_RADIUS,
+  useDeckMetrics,
+} from "@/src/components/flashcards/ModuleDeck";
 import { Skeleton } from "@/src/components/ui/feedback/Skeleton";
 import { XStack, YStack } from "tamagui";
 
 export function ModuleSkeleton() {
+  const deck = useDeckMetrics();
+
   return (
     <YStack gap={22}>
       <YStack ai="center">
-        <Skeleton width={294} height={182} borderRadius={24} />
+        <Skeleton
+          width={deck.cardWidth}
+          height={deck.cardHeight}
+          borderRadius={DECK_CARD_RADIUS}
+        />
       </YStack>
       <YStack px="$screenX" gap={12}>
         <Skeleton height={31} width="72%" borderRadius={8} />

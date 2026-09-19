@@ -29,7 +29,7 @@ export function ModalFormHeader({
         onPress={onClose}
         accessibilityLabel="Close"
       />
-      <Text f={1} fontSize={20} fontWeight="800" color="$white">
+      <Text f={1} fontSize={22} fontWeight="800" color="$white">
         {title}
       </Text>
       <SavePill

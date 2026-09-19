@@ -44,19 +44,20 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import {
   AlertTriangle,
   ArrowDownUp,
+  Blocks,
   BookmarkCheck,
   BookmarkPlus,
   Captions,
   ChevronLeft,
   Clock,
-  Columns2,
-  FileText,
+  GalleryHorizontalEnd,
   Globe,
   GraduationCap,
   MoreHorizontal,
   Pencil,
   RotateCcw,
   Sparkles,
+  SquareCheckBig,
 } from "lucide-react-native";
 import { ComponentType, useCallback, useMemo, useState } from "react";
 import { FlatList, InteractionManager } from "react-native";
@@ -78,19 +79,19 @@ const MODE_TILES = [
     key: "flashcards",
     label: "Flashcards",
     hint: "Flip and recall",
-    icon: Captions,
-  },
-  {
-    key: "test",
-    label: "Test",
-    hint: "Quiz yourself",
-    icon: FileText,
+    icon: GalleryHorizontalEnd,
   },
   {
     key: "match",
     label: "Match",
     hint: "Pair up",
-    icon: Columns2,
+    icon: Blocks,
+  },
+  {
+    key: "test",
+    label: "Test",
+    hint: "Quiz yourself",
+    icon: SquareCheckBig,
   },
   {
     key: "learn",
@@ -419,12 +420,12 @@ export default function ModuleScreen() {
               <>
                 {deckCards.length > 0 && <ModuleDeck cards={deckCards} />}
 
-                <YStack px="$screenX" pt={26}>
+                <YStack px="$screenX" pt={30}>
                   <Text
-                    fontSize={27}
+                    fontSize={28}
                     fontWeight="800"
                     letterSpacing={-0.54}
-                    lineHeight={31}
+                    lineHeight={32}
                     color="$color"
                   >
                     {moduleData.name}
@@ -432,7 +433,7 @@ export default function ModuleScreen() {
 
                   {!!moduleData.description && (
                     <Text
-                      fontSize={13.5}
+                      fontSize={15.5}
                       lineHeight={20}
                       color="$textMuted"
                       mt={7}
@@ -480,7 +481,30 @@ export default function ModuleScreen() {
                     )}
                   </XStack>
 
-                  <YStack mt={22} gap={12}>
+                  <YStack mt={22} gap={10}>
+                    <XStack gap={9}>
+                      {MODE_TILES.slice(0, 3).map((tile) => (
+                        <ModeTile
+                          key={tile.key}
+                          icon={tile.icon}
+                          label={tile.label}
+                          variant="launcher"
+                          {...modeTileProps(tile)}
+                        />
+                      ))}
+                    </XStack>
+                    <SoonRow label="Learn" />
+                  </YStack>
+
+                  <YStack mt={50} gap={12}>
+                    <XStack ai="baseline" jc="space-between">
+                      <Text fontSize={22} fontWeight="700" color="$color">
+                        Your progress
+                      </Text>
+                      <Text fontSize={14} fontWeight="600" color="$textMuted">
+                        {progress.mastered} of {progress.total}
+                      </Text>
+                    </XStack>
                     <ProgressSplitBar
                       mastered={progress.mastered}
                       learning={progress.learning}
@@ -529,30 +553,6 @@ export default function ModuleScreen() {
                     )}
                   </YStack>
 
-                  <YStack mt={22} gap={10}>
-                    <XStack gap={10}>
-                      {MODE_TILES.slice(0, 2).map((tile) => (
-                        <ModeTile
-                          key={tile.key}
-                          icon={tile.icon}
-                          label={tile.label}
-                          {...modeTileProps(tile)}
-                        />
-                      ))}
-                    </XStack>
-                    <XStack gap={10}>
-                      {MODE_TILES.slice(2).map((tile) => (
-                        <ModeTile
-                          key={tile.key}
-                          icon={tile.icon}
-                          label={tile.label}
-                          {...modeTileProps(tile)}
-                        />
-                      ))}
-                    </XStack>
-                    <SoonRow label="Test, Learn" />
-                  </YStack>
-
                   {!isOwner && (
                     <YStack mt={22}>
                       {moduleData.savedCopyId ? (
@@ -594,7 +594,7 @@ export default function ModuleScreen() {
                     </YStack>
                   )}
 
-                  <YStack mt={26}>
+                  <YStack mt={50}>
                     {flashcards.length === 0 ? (
                       <StateCard
                         tone="empty"

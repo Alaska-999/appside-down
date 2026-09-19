@@ -1,4 +1,7 @@
-import { GlowSurface, LAMP_TILE } from "@/src/components/ui/surface/GlowSurface";
+import {
+  GlowSurface,
+  LAMP_TILE,
+} from "@/src/components/ui/surface/GlowSurface";
 import { ICON_ON_GLASS, ICON_PURE_BLACK } from "@/src/constants/iconColors";
 import {
   GLASS_BORDER_BOTTOM,
@@ -30,7 +33,12 @@ export type StatTone = "mastered" | "learning" | "new";
 
 const TONE_STYLES: Record<
   StatTone,
-  { tone: "lime" | "mint" | "neutral"; lampAlpha: number; fill: string; color: string }
+  {
+    tone: "lime" | "mint" | "neutral";
+    lampAlpha: number;
+    fill: string;
+    color: string;
+  }
 > = {
   mastered: {
     tone: "lime",

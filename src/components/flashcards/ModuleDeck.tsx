@@ -8,8 +8,8 @@ import { SURFACE_CARD_HARD } from "@/src/constants/surfaceAlpha";
 import { hapticTap } from "@/src/utils/haptics";
 import { withAlpha } from "@/src/utils/withAlpha";
 import { LinearGradient } from "expo-linear-gradient";
-import { ReactNode, useCallback, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
@@ -21,13 +21,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { Text, XStack, YStack } from "tamagui";
 
-const DECK_HEIGHT = 212;
 const CARD_TOP = 14;
-const CARD_WIDTH = 294;
-const CARD_HEIGHT = 182;
-const CARD_RADIUS = 24;
+export const DECK_CARD_RADIUS = 25;
+const CARD_RATIO = 309 / 191;
+const CARD_MAX_WIDTH = 346;
+const DECK_SIDE_MARGIN = 42;
+const DECK_BOTTOM_PAD = 17;
 const NEIGHBOUR_GAP = 18;
-const NEIGHBOUR_OFFSET = CARD_WIDTH + NEIGHBOUR_GAP;
 const NEIGHBOUR_OPACITY = 0.4;
 const SWIPE_THRESHOLD = 60;
 const SLIDE_DURATION = 420;
@@ -35,19 +35,42 @@ const FLIP_DURATION = 700;
 
 export type DeckCard = { id: string; term: string; definition: string };
 
-const FACE = {
-  position: "absolute" as const,
-  width: CARD_WIDTH,
-  height: CARD_HEIGHT,
-  backfaceVisibility: "hidden" as const,
+export type DeckMetrics = {
+  cardWidth: number;
+  cardHeight: number;
+  deckHeight: number;
+  neighbourOffset: number;
 };
 
-function CardSurface({ children }: { children: ReactNode }) {
+export function useDeckMetrics(): DeckMetrics {
+  const { width } = useWindowDimensions();
+  return useMemo(() => {
+    const cardWidth = Math.min(
+      CARD_MAX_WIDTH,
+      Math.round(width - DECK_SIDE_MARGIN * 2),
+    );
+    const cardHeight = Math.round(cardWidth / CARD_RATIO);
+    return {
+      cardWidth,
+      cardHeight,
+      deckHeight: CARD_TOP + cardHeight + DECK_BOTTOM_PAD,
+      neighbourOffset: cardWidth + NEIGHBOUR_GAP,
+    };
+  }, [width]);
+}
+
+function CardSurface({
+  children,
+  metrics,
+}: {
+  children: ReactNode;
+  metrics: DeckMetrics;
+}) {
   return (
     <YStack
-      w={CARD_WIDTH}
-      h={CARD_HEIGHT}
-      br={CARD_RADIUS}
+      w={metrics.cardWidth}
+      h={metrics.cardHeight}
+      br={DECK_CARD_RADIUS}
       pos="relative"
       overflow="hidden"
     >
@@ -58,14 +81,14 @@ function CardSurface({ children }: { children: ReactNode }) {
           { backgroundColor: SURFACE_CARD_HARD },
         ]}
       />
-      <Lamp color={withAlpha(ICON_MINT, 0.18)} />
+      <Lamp color={withAlpha(ICON_MINT, 0.2)} />
       <GradientBorder
-        radius={CARD_RADIUS}
+        radius={DECK_CARD_RADIUS}
         angle={160}
         colors={[
           MODULE_DECK_EDGE_LIME,
-          withAlpha(ICON_MINT_LIGHT, 0.4),
-          withAlpha(ICON_MINT_LIGHT, 0.08),
+          withAlpha(ICON_MINT_LIGHT, 0.6),
+          withAlpha(ICON_MINT_LIGHT, 0.1),
         ]}
         positions={[0, 0.2, 0.9]}
       />
@@ -95,9 +118,11 @@ function FaceText({ text }: { text: string }) {
 function DeckCardView({
   card,
   interactive,
+  metrics,
 }: {
   card: DeckCard;
   interactive: boolean;
+  metrics: DeckMetrics;
 }) {
   const spin = useSharedValue(0);
   const [hasBack, setHasBack] = useState(false);
@@ -134,20 +159,30 @@ function DeckCardView({
     transform: [{ perspective: 1000 }, { rotateX: `${spin.value + 180}deg` }],
   }));
 
+  const face = useMemo(
+    () => ({
+      position: "absolute" as const,
+      width: metrics.cardWidth,
+      height: metrics.cardHeight,
+      backfaceVisibility: "hidden" as const,
+    }),
+    [metrics.cardWidth, metrics.cardHeight],
+  );
+
   return (
     <GestureDetector gesture={tap}>
       <View
         collapsable={false}
-        style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
+        style={{ width: metrics.cardWidth, height: metrics.cardHeight }}
       >
-        <Animated.View style={[FACE, frontStyle]}>
-          <CardSurface>
+        <Animated.View style={[face, frontStyle]}>
+          <CardSurface metrics={metrics}>
             <FaceText text={card.term} />
           </CardSurface>
         </Animated.View>
         {hasBack && (
-          <Animated.View style={[FACE, backStyle]}>
-            <CardSurface>
+          <Animated.View style={[face, backStyle]}>
+            <CardSurface metrics={metrics}>
               <FaceText text={card.definition} />
             </CardSurface>
           </Animated.View>
@@ -160,20 +195,23 @@ function DeckCardView({
 function DeckSlot({
   cardIndex,
   progress,
+  metrics,
   children,
 }: {
   cardIndex: number;
   progress: SharedValue<number>;
+  metrics: DeckMetrics;
   children: ReactNode;
 }) {
+  const offset = metrics.neighbourOffset;
   const style = useAnimatedStyle(() => {
-    const x = (cardIndex - progress.value) * NEIGHBOUR_OFFSET;
-    const distance = Math.min(Math.abs(x) / NEIGHBOUR_OFFSET, 1);
+    const x = (cardIndex - progress.value) * offset;
+    const distance = Math.min(Math.abs(x) / offset, 1);
     return {
       transform: [{ translateX: x }],
       opacity: interpolate(distance, [0, 1], [1, NEIGHBOUR_OPACITY]),
     };
-  }, [cardIndex]);
+  }, [cardIndex, offset]);
 
   return (
     <Animated.View
@@ -182,9 +220,9 @@ function DeckSlot({
           position: "absolute",
           top: CARD_TOP,
           left: "50%",
-          marginLeft: -CARD_WIDTH / 2,
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
+          marginLeft: -metrics.cardWidth / 2,
+          width: metrics.cardWidth,
+          height: metrics.cardHeight,
         },
         style,
       ]}
@@ -202,17 +240,17 @@ function Dots({ count, index }: { count: number; index: number }) {
   );
 
   return (
-    <XStack gap={5} jc="center" mt={10}>
+    <XStack gap={6} jc="center" mt={5}>
       {Array.from({ length: visible }, (_, i) => {
         const actual = start + i;
         const on = actual === index;
         return (
           <YStack
             key={actual}
-            w={on ? 18 : 5}
-            h={5}
+            w={on ? 18 : 6}
+            h={6}
             br={on ? 3 : 999}
-            bg={on ? undefined : "$borderColor"}
+            bg={on ? undefined : "$mintGlassBorder"}
             overflow="hidden"
           >
             {on && (
@@ -235,6 +273,8 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
   const [dragging, setDragging] = useState(false);
   const progress = useSharedValue(0);
   const last = cards.length - 1;
+  const metrics = useDeckMetrics();
+  const offset = metrics.neighbourOffset;
 
   const gesture = Gesture.Pan()
     .activeOffsetX([-12, 12])
@@ -243,7 +283,7 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
       runOnJS(setDragging)(true);
     })
     .onUpdate((e) => {
-      const raw = index - e.translationX / NEIGHBOUR_OFFSET;
+      const raw = index - e.translationX / offset;
       if (raw < 0) progress.value = raw * 0.25;
       else if (raw > last) progress.value = last + (raw - last) * 0.25;
       else progress.value = raw;
@@ -275,10 +315,19 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
   return (
     <YStack>
       <GestureDetector gesture={gesture}>
-        <YStack h={DECK_HEIGHT} overflow="hidden" collapsable={false}>
+        <YStack h={metrics.deckHeight} overflow="hidden" collapsable={false}>
           {window.map((i) => (
-            <DeckSlot key={cards[i].id} cardIndex={i} progress={progress}>
-              <DeckCardView card={cards[i]} interactive={i === index} />
+            <DeckSlot
+              key={cards[i].id}
+              cardIndex={i}
+              progress={progress}
+              metrics={metrics}
+            >
+              <DeckCardView
+                card={cards[i]}
+                interactive={i === index}
+                metrics={metrics}
+              />
             </DeckSlot>
           ))}
         </YStack>
@@ -286,14 +335,14 @@ export function ModuleDeck({ cards }: { cards: DeckCard[] }) {
 
       <Dots count={cards.length} index={index} />
 
-      <XStack jc="center" mt={8} gap={3}>
-        <Text fontSize={11.5} fontWeight="700" color="$mutedDim">
+      {/* <XStack jc="center" mt={8} gap={3}>
+        <Text fontSize={11.5} fontWeight="700" color="$mutedLight">
           {index + 1}
         </Text>
-        <Text fontSize={11.5} color="$mutedDim">
+        <Text fontSize={11.5} color="$mutedLight">
           / {cards.length}
         </Text>
-      </XStack>
+      </XStack> */}
     </YStack>
   );
 }

@@ -21,19 +21,9 @@ export function CardsHeader({
   return (
     <XStack ai="center" jc="space-between" mb={11}>
       <XStack ai="baseline" gap={9}>
-        <Text fontSize={16} fontWeight="700" color="$color">
+        <Text fontSize={22} fontWeight="700" color="$color">
           Cards
         </Text>
-        {starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
-            {starredCount} starred
-          </Text>
-        )}
-        {!starredOnly && (
-          <Text fontSize={12.5} fontWeight="600" color="$textMuted">
-            {count}
-          </Text>
-        )}
       </XStack>
       <XStack ai="center" gap={12}>
         <StarToggle
@@ -53,7 +43,7 @@ export function CardsHeader({
         >
           <XStack ai="center" gap={6}>
             <ArrowDownUp size={16} color={ICON_MINT_LIGHT} strokeWidth={2} />
-            <Text fontSize={14.5} fontWeight="600" color="$mintLight">
+            <Text fontSize={15} fontWeight="600" color="$mintLight">
               Sort
             </Text>
           </XStack>
